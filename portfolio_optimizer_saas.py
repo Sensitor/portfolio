@@ -121,6 +121,83 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+TRANSLATIONS = {
+    "en": {
+        "app_title": "Portfolio Optimizer Pro",
+        "dashboard": "Dashboard",
+        "new_analysis": "New Analysis",
+        "learning_center": "Learning Center",
+        "settings": "Settings",
+        "upgrade": "Upgrade",
+        "upgrade_cta": "Upgrade Now",
+        "create_portfolio": "Create Portfolio",
+        "analyze": "Analyze Portfolio",
+        "health_score": "Portfolio Health Score",
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "needs_improvement": "Needs Improvement",
+        "recommendations": "AI-Powered Recommendations",
+        "what_if": "What-If Scenarios",
+        "quick_stats": "Quick Stats",
+        "total_value": "Total Value",
+        "total_return": "Total Return",
+        "sharpe_ratio": "Sharpe Ratio",
+        "volatility": "Volatility",
+        "max_drawdown": "Max Drawdown",
+        "performance": "Performance",
+        "optimization": "Portfolio Optimization",
+        "optimize": "Optimize Allocation",
+        "current_portfolio": "Current Portfolio",
+        "optimized_portfolio": "Optimized Portfolio",
+        "enter_tickers": "Enter tickers (comma-separated)",
+        "set_allocation": "Set Allocation",
+        "welcome_msg": "Welcome! Create your first portfolio analysis to get started.",
+        "language": "Language",
+    },
+    "fr": {
+        "app_title": "Optimiseur de Portefeuille Pro",
+        "dashboard": "Tableau de Bord",
+        "new_analysis": "Nouvelle Analyse",
+        "learning_center": "Centre d'Apprentissage",
+        "settings": "Paramètres",
+        "upgrade": "Passer Pro",
+        "upgrade_cta": "Passer Pro Maintenant",
+        "create_portfolio": "Créer un Portefeuille",
+        "analyze": "Analyser le Portefeuille",
+        "health_score": "Score de Santé du Portefeuille",
+        "excellent": "Excellent",
+        "good": "Bon",
+        "fair": "Moyen",
+        "needs_improvement": "À Améliorer",
+        "recommendations": "Recommandations IA",
+        "what_if": "Scénarios What-If",
+        "quick_stats": "Statistiques Rapides",
+        "total_value": "Valeur Totale",
+        "total_return": "Rendement Total",
+        "sharpe_ratio": "Ratio de Sharpe",
+        "volatility": "Volatilité",
+        "max_drawdown": "Perte Maximale",
+        "performance": "Performance",
+        "optimization": "Optimisation du Portefeuille",
+        "optimize": "Optimiser l'Allocation",
+        "current_portfolio": "Portefeuille Actuel",
+        "optimized_portfolio": "Portefeuille Optimisé",
+        "enter_tickers": "Entrez les tickers (séparés par des virgules)",
+        "set_allocation": "Définir l'Allocation",
+        "welcome_msg": "Bienvenue ! Créez votre première analyse de portefeuille pour commencer.",
+        "language": "Langue",
+    }
+}
+
+def t(key, lang="en"):
+    """Translation helper."""
+    return TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, key)
+
+# =============================================================================
 # SESSION STATE
 # =============================================================================
 
@@ -135,6 +212,12 @@ def init_session_state():
     
     if 'what_if_mode' not in st.session_state:
         st.session_state.what_if_mode = False
+    
+    if 'page' not in st.session_state:
+        st.session_state.page = "dashboard"
+    
+    if 'language' not in st.session_state:
+        st.session_state.language = "en"
 
 # =============================================================================
 # PORTFOLIO ANALYSIS ENGINE
@@ -277,7 +360,7 @@ class PortfolioAnalyzer:
             'correlation': int(corr_score)
         }
     
-    def generate_recommendations(self):
+    def generate_recommendations(self, lang="en"):
         """Generate AI-powered recommendations."""
         metrics = self.calculate_metrics()
         health = self.calculate_health_score()
@@ -288,36 +371,66 @@ class PortfolioAnalyzer:
         max_ticker = max(self.weights, key=self.weights.get)
         
         if max_weight > 0.35:
-            recommendations.append({
-                'type': 'warning',
-                'icon': '⚠️',
-                'title': 'High Concentration Risk',
-                'description': f'{max_ticker} represents {max_weight*100:.1f}% of your portfolio. Consider reducing to below 30%.',
-                'impact': '+5 points',
-                'priority': 'high'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '⚠️',
+                    'title': 'Risque de Concentration Élevé',
+                    'description': f'{max_ticker} représente {max_weight*100:.1f}% de votre portefeuille. Envisagez de réduire en dessous de 30%.',
+                    'impact': '+5 points',
+                    'priority': 'high'
+                })
+            else:
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '⚠️',
+                    'title': 'High Concentration Risk',
+                    'description': f'{max_ticker} represents {max_weight*100:.1f}% of your portfolio. Consider reducing to below 30%.',
+                    'impact': '+5 points',
+                    'priority': 'high'
+                })
         
         # Check Sharpe Ratio
         if metrics['sharpe'] < 1.0:
-            recommendations.append({
-                'type': 'warning',
-                'icon': '📉',
-                'title': 'Low Risk-Adjusted Returns',
-                'description': f'Sharpe Ratio of {metrics["sharpe"]:.2f} is below optimal. Consider rebalancing.',
-                'impact': '+8 points',
-                'priority': 'high'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '📉',
+                    'title': 'Rendements Ajustés au Risque Faibles',
+                    'description': f'Ratio de Sharpe de {metrics["sharpe"]:.2f} est en dessous de l\'optimal. Envisagez un rééquilibrage.',
+                    'impact': '+8 points',
+                    'priority': 'high'
+                })
+            else:
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '📉',
+                    'title': 'Low Risk-Adjusted Returns',
+                    'description': f'Sharpe Ratio of {metrics["sharpe"]:.2f} is below optimal. Consider rebalancing.',
+                    'impact': '+8 points',
+                    'priority': 'high'
+                })
         
         # Check diversification
         if len(self.tickers) < 5:
-            recommendations.append({
-                'type': 'warning',
-                'icon': '🎯',
-                'title': 'Improve Diversification',
-                'description': f'Only {len(self.tickers)} assets. Add 2-3 more for better diversification.',
-                'impact': '+10 points',
-                'priority': 'medium'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '🎯',
+                    'title': 'Améliorer la Diversification',
+                    'description': f'Seulement {len(self.tickers)} actifs. Ajoutez 2-3 actifs pour une meilleure diversification.',
+                    'impact': '+10 points',
+                    'priority': 'medium'
+                })
+            else:
+                recommendations.append({
+                    'type': 'warning',
+                    'icon': '🎯',
+                    'title': 'Improve Diversification',
+                    'description': f'Only {len(self.tickers)} assets. Add 2-3 more for better diversification.',
+                    'impact': '+10 points',
+                    'priority': 'medium'
+                })
         
         # Check correlation
         corr_matrix = self.returns.corr()
@@ -329,35 +442,65 @@ class PortfolioAnalyzer:
         
         if high_corr_pairs:
             pair = high_corr_pairs[0]
-            recommendations.append({
-                'type': 'info',
-                'icon': '🔗',
-                'title': 'High Correlation Detected',
-                'description': f'{pair[0]} and {pair[1]} move together ({pair[2]:.2f}). Consider replacing one.',
-                'impact': '+6 points',
-                'priority': 'medium'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'info',
+                    'icon': '🔗',
+                    'title': 'Corrélation Élevée Détectée',
+                    'description': f'{pair[0]} et {pair[1]} évoluent ensemble ({pair[2]:.2f}). Envisagez de remplacer l\'un des deux.',
+                    'impact': '+6 points',
+                    'priority': 'medium'
+                })
+            else:
+                recommendations.append({
+                    'type': 'info',
+                    'icon': '🔗',
+                    'title': 'High Correlation Detected',
+                    'description': f'{pair[0]} and {pair[1]} move together ({pair[2]:.2f}). Consider replacing one.',
+                    'impact': '+6 points',
+                    'priority': 'medium'
+                })
         
         # Positive feedback
         if metrics['sharpe'] > 1.5:
-            recommendations.append({
-                'type': 'success',
-                'icon': '✅',
-                'title': 'Excellent Risk-Adjusted Returns',
-                'description': f'Sharpe Ratio of {metrics["sharpe"]:.2f} is outstanding!',
-                'impact': 'Keep it up!',
-                'priority': 'low'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'success',
+                    'icon': '✅',
+                    'title': 'Excellents Rendements Ajustés au Risque',
+                    'description': f'Ratio de Sharpe de {metrics["sharpe"]:.2f} est excellent !',
+                    'impact': 'Continuez !',
+                    'priority': 'low'
+                })
+            else:
+                recommendations.append({
+                    'type': 'success',
+                    'icon': '✅',
+                    'title': 'Excellent Risk-Adjusted Returns',
+                    'description': f'Sharpe Ratio of {metrics["sharpe"]:.2f} is outstanding!',
+                    'impact': 'Keep it up!',
+                    'priority': 'low'
+                })
         
         if health['total'] > 80:
-            recommendations.append({
-                'type': 'success',
-                'icon': '🎉',
-                'title': 'Healthy Portfolio',
-                'description': f'Your portfolio scores {health["total"]}/100. Well diversified and balanced!',
-                'impact': 'Maintain',
-                'priority': 'low'
-            })
+            if lang == "fr":
+                recommendations.append({
+                    'type': 'success',
+                    'icon': '🎉',
+                    'title': 'Portefeuille en Bonne Santé',
+                    'description': f'Votre portefeuille score {health["total"]}/100. Bien diversifié et équilibré !',
+                    'impact': 'Maintenir',
+                    'priority': 'low'
+                })
+            else:
+                recommendations.append({
+                    'type': 'success',
+                    'icon': '🎉',
+                    'title': 'Healthy Portfolio',
+                    'description': f'Your portfolio scores {health["total"]}/100. Well diversified and balanced!',
+                    'impact': 'Maintain',
+                    'priority': 'low'
+                })
         
         return recommendations
     
@@ -562,37 +705,89 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.title("📊 Portfolio Optimizer Pro")
+        # Language selector at the top
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("🇬🇧 EN", use_container_width=True, 
+                        type="primary" if st.session_state.language == "en" else "secondary"):
+                st.session_state.language = "en"
+                st.rerun()
+        with col2:
+            if st.button("🇫🇷 FR", use_container_width=True,
+                        type="primary" if st.session_state.language == "fr" else "secondary"):
+                st.session_state.language = "fr"
+                st.rerun()
+        
+        st.markdown("---")
+        
+        lang = st.session_state.language
+        
+        st.title(t("app_title", lang))
         st.markdown(f"**{st.session_state.user_email}**")
         st.markdown(f"*{st.session_state.user_tier.title()} Plan*")
         
         st.markdown("---")
         
-        page = st.radio(
-            "Navigation",
-            ["🏠 Dashboard", "➕ New Analysis", "🎓 Learning Center", "⚙️ Settings"]
-        )
+        # Navigation avec callbacks
+        if st.button(f"🏠 {t('dashboard', lang)}", use_container_width=True, 
+                    type="primary" if st.session_state.page == "dashboard" else "secondary"):
+            st.session_state.page = "dashboard"
+            st.rerun()
+        
+        if st.button(f"➕ {t('new_analysis', lang)}", use_container_width=True,
+                    type="primary" if st.session_state.page == "new_analysis" else "secondary"):
+            st.session_state.page = "new_analysis"
+            st.rerun()
+        
+        if st.button(f"🎓 {t('learning_center', lang)}", use_container_width=True,
+                    type="primary" if st.session_state.page == "learning" else "secondary"):
+            st.session_state.page = "learning"
+            st.rerun()
+        
+        if st.button(f"⚙️ {t('settings', lang)}", use_container_width=True,
+                    type="primary" if st.session_state.page == "settings" else "secondary"):
+            st.session_state.page = "settings"
+            st.rerun()
         
         st.markdown("---")
         
-        st.markdown("### 🚀 Upgrade")
-        st.markdown("""
-        **Get Pro for $14.99/mo**
-        - Unlimited portfolios
-        - AI recommendations
-        - What-if scenarios
-        - PDF reports
-        """)
-        st.button("Upgrade Now", type="primary")
+        st.markdown(f"### 🚀 {t('upgrade', lang)}")
+        
+        if lang == "fr":
+            st.markdown("""
+            **Passez Pro pour 14,99€/mois**
+            - Portfolios illimités
+            - Recommandations IA
+            - Scénarios What-if
+            - Rapports PDF
+            """)
+        else:
+            st.markdown("""
+            **Get Pro for $14.99/mo**
+            - Unlimited portfolios
+            - AI recommendations
+            - What-if scenarios
+            - PDF reports
+            """)
+        
+        if st.button(t("upgrade_cta", lang), type="primary", use_container_width=True):
+            st.info("🔗 Redirection vers Stripe... (à configurer)")
     
-    # Main content
-    if page == "🏠 Dashboard":
-        st.title("🏠 Portfolio Dashboard")
+    # Main content based on page
+    page = st.session_state.page
+    lang = st.session_state.language
+    
+    if page == "dashboard":
+        st.title(f"🏠 {t('dashboard', lang)}")
         
         if st.session_state.current_portfolio is None:
-            st.info("👋 Welcome! Create your first portfolio analysis to get started.")
-            if st.button("➕ Create Portfolio", type="primary"):
-                st.session_state.page = "➕ New Analysis"
+            if lang == "fr":
+                st.info("👋 Bienvenue ! Créez votre première analyse de portefeuille pour commencer.")
+            else:
+                st.info("👋 Welcome! Create your first portfolio analysis to get started.")
+            
+            if st.button(f"➕ {t('create_portfolio', lang)}", type="primary", use_container_width=True):
+                st.session_state.page = "new_analysis"
                 st.rerun()
         else:
             analyzer = st.session_state.current_portfolio
@@ -620,7 +815,7 @@ def main():
             
             # Recommendations
             st.markdown("---")
-            recommendations = analyzer.generate_recommendations()
+            recommendations = analyzer.generate_recommendations(lang)
             render_recommendations(recommendations)
             
             # Performance Chart
@@ -644,11 +839,14 @@ def main():
             )
             st.plotly_chart(fig, use_container_width=True)
     
-    elif page == "➕ New Analysis":
-        st.title("➕ Create Portfolio Analysis")
+    elif page == "new_analysis":
+        st.title(f"➕ {t('new_analysis', lang)}")
         
         # Input form
-        st.markdown("### 1️⃣ Enter Your Holdings")
+        if lang == "fr":
+            st.markdown("### 1️⃣ Entrez vos positions")
+        else:
+            st.markdown("### 1️⃣ Enter Your Holdings")
         
         col1, col2 = st.columns([2, 1])
         
@@ -730,7 +928,7 @@ def main():
                             
                             # Recommendations
                             st.markdown("---")
-                            recommendations = analyzer.generate_recommendations()
+                            recommendations = analyzer.generate_recommendations(lang)
                             render_recommendations(recommendations)
                             
                             # What-if
@@ -776,9 +974,13 @@ def main():
                     except Exception as e:
                         st.error(f"❌ Error: {e}")
     
-    elif page == "🎓 Learning Center":
-        st.title("🎓 Learning Center")
-        st.markdown("*Master portfolio management with interactive lessons*")
+    elif page == "learning":
+        st.title(f"🎓 {t('learning_center', lang)}")
+        
+        if lang == "fr":
+            st.markdown("*Maîtrisez la gestion de portefeuille avec des leçons interactives*")
+        else:
+            st.markdown("*Master portfolio management with interactive lessons*")
         
         tab1, tab2, tab3 = st.tabs(["📚 Beginner", "📊 Intermediate", "🎯 Advanced"])
         
@@ -899,10 +1101,13 @@ def main():
                 Time rebalancing to minimize tax impact.
                 """)
     
-    elif page == "⚙️ Settings":
-        st.title("⚙️ Settings")
+    elif page == "settings":
+        st.title(f"⚙️ {t('settings', lang)}")
         
-        st.markdown("### 👤 Account")
+        if lang == "fr":
+            st.markdown("### 👤 Compte")
+        else:
+            st.markdown("### 👤 Account")
         st.text_input("Email", value=st.session_state.user_email, disabled=True)
         st.text_input("Plan", value=st.session_state.user_tier.title(), disabled=True)
         
