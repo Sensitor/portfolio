@@ -974,7 +974,7 @@ def render_improvement_suggestions(suggestions, lang="en"):
         st.success("✅ No major improvements needed!")
         return
     
-    st.markdown(f"### 💡 {'Improvement Suggestions' if lang == 'en' else 'Suggestions d\\'Amélioration'}")
+    st.markdown(f"### 💡 {'Improvement Suggestions' if lang == 'en' else 'Suggestions d'Amélioration\"}")
     
     priority_order = {'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'INFO': 3}
     suggestions.sort(key=lambda x: priority_order.get(x['priority'], 4))
