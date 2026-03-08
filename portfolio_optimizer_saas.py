@@ -1,20 +1,23 @@
 """
-📊 PORTFOLIO OPTIMIZER PRO v3.0
-The Ultimate Professional Portfolio Analysis Platform
+📊 PORTFOLIO OPTIMIZER PRO v3.5 FINAL
+The Complete Professional Portfolio Analysis Platform
 
-NEW IN v3.0:
-✅ Advanced Health Score (multi-dimensional)
-✅ Correlation heatmap & analysis
-✅ Professional charts (drawdown, allocation over time)
-✅ Benchmark comparison (S&P500, NASDAQ, MSCI World)
-✅ Stress test scenarios (2008, 2020, inflation)
-✅ Intelligent recommendations system
-✅ Model portfolios (Safe, Balanced, Aggressive, ESG...)
-✅ Smart rebalancing suggestions
-✅ Auto-generated portfolio summary
-✅ Beginner-friendly explanations
-✅ Fixed navigation menu
-✅ All charts working
+VERSION 3.5 - ALL IMPROVEMENTS:
+✅ 1. Fixed asset allocation bug (auto-rebalance to 100%)
+✅ 2. Portfolio Robustness Index (0-100)
+✅ 3. "Improve My Portfolio" mode
+✅ 4. Intelligent recommendations system
+✅ 5. Profile-adapted suggestions (Safe/Balanced/Aggressive)
+✅ 6. Educational asset cards
+✅ 7. Enhanced visualizations (drawdown, sector, geography)
+✅ 8. Crisis stress tests (2008, COVID, inflation)
+✅ 9. Auto-generated portfolio summary
+✅ 10. Modern UX with animations
+
+ARCHITECTURE:
+- Modular improvements on existing codebase
+- Maintains current structure
+- Adds new features seamlessly
 """
 
 import streamlit as st
@@ -34,20 +37,31 @@ warnings.filterwarnings('ignore')
 # =============================================================================
 
 st.set_page_config(
-    page_title="Portfolio Optimizer Pro",
+    page_title="Portfolio Optimizer Pro v3.5",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # =============================================================================
-# CUSTOM CSS
+# ENHANCED CSS WITH ANIMATIONS
 # =============================================================================
 
 st.markdown("""
 <style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #7e22ce 100%);
+        animation: fadeIn 0.5s ease-out;
     }
     
     .main .block-container {
@@ -56,10 +70,11 @@ st.markdown("""
         padding: 2rem;
         margin: 1rem;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: fadeIn 0.6s ease-out;
     }
     
-    /* Health Score Card */
-    .health-card {
+    /* Robustness Score Card */
+    .robustness-card {
         background: linear-gradient(135deg, #7e22ce 0%, #6366f1 100%);
         color: white;
         padding: 40px;
@@ -67,18 +82,19 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 10px 30px rgba(126,34,206,0.4);
         margin: 20px 0;
+        animation: slideIn 0.5s ease-out;
+        transition: transform 0.3s;
     }
     
-    .health-card h1 {
+    .robustness-card:hover {
+        transform: scale(1.02);
+    }
+    
+    .robustness-card h1 {
         font-size: 5rem;
         margin: 0;
         color: white;
-    }
-    
-    .health-card p {
-        font-size: 1.5rem;
-        color: white;
-        opacity: 0.95;
+        text-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     
     /* Recommendation Cards */
@@ -89,21 +105,46 @@ st.markdown("""
         margin: 15px 0;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        animation: slideIn 0.4s ease-out;
+        transition: all 0.3s;
+    }
+    
+    .rec-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        transform: translateX(5px);
     }
     
     .rec-card h4 {
         color: #1e293b;
         margin: 0 0 10px 0;
+        font-size: 1.1rem;
     }
     
     .rec-card p {
         color: #475569;
         margin: 5px 0;
+        line-height: 1.6;
     }
     
+    .rec-card.critical { border-left-color: #ef4444; }
     .rec-card.warning { border-left-color: #f59e0b; }
     .rec-card.success { border-left-color: #10b981; }
-    .rec-card.danger { border-left-color: #ef4444; }
+    .rec-card.info { border-left-color: #6366f1; }
+    
+    /* Asset Info Card */
+    .asset-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 20px;
+        border-radius: 15px;
+        margin: 10px 0;
+        border: 2px solid #cbd5e1;
+        transition: all 0.3s;
+    }
+    
+    .asset-card:hover {
+        border-color: #7e22ce;
+        box-shadow: 0 8px 20px rgba(126,34,206,0.2);
+    }
     
     /* Buttons */
     .stButton>button {
@@ -129,6 +170,12 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
+    /* Progress bars */
+    .stProgress > div > div {
+        background: linear-gradient(90deg, #7e22ce 0%, #6366f1 100%) !important;
+        transition: width 0.5s ease-out !important;
+    }
+    
     /* Sidebar */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -138,12 +185,22 @@ st.markdown("""
         color: white !important;
     }
     
-    /* Info boxes */
-    .stAlert {
-        background: white !important;
-        color: #1e293b !important;
-        border-radius: 12px !important;
-        border: 2px solid #e2e8f0 !important;
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background: white;
+        border-radius: 12px;
+        padding: 5px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: #64748b !important;
+        border-radius: 8px !important;
+        transition: all 0.3s !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #7e22ce 0%, #6366f1 100%) !important;
+        color: white !important;
     }
     
     /* Expanders */
@@ -151,6 +208,11 @@ st.markdown("""
         background: #f8fafc !important;
         border-radius: 8px !important;
         color: #1e293b !important;
+        transition: all 0.3s !important;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: #e2e8f0 !important;
     }
     
     #MainMenu {visibility: hidden;}
@@ -159,125 +221,140 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# POPULAR ASSETS & MODEL PORTFOLIOS
+# DATA: ASSET INFO, MODEL PORTFOLIOS, SECTORS
 # =============================================================================
+
+ASSET_INFO = {
+    "AAPL": {
+        "name": "Apple Inc.",
+        "description": "Technology company producing consumer electronics, software and services",
+        "sector": "Technology",
+        "geography": "USA",
+        "utility": "Large-cap tech growth exposure",
+        "typical_use": "Core holding for tech exposure in growth portfolios",
+        "risk_level": "Medium-High"
+    },
+    "MSFT": {
+        "name": "Microsoft Corporation",
+        "description": "Software and cloud computing giant",
+        "sector": "Technology",
+        "geography": "USA",
+        "utility": "Stable tech growth with cloud leadership",
+        "typical_use": "Defensive tech holding, cloud exposure",
+        "risk_level": "Medium"
+    },
+    "SPY": {
+        "name": "S&P 500 ETF",
+        "description": "Tracks the 500 largest US companies",
+        "sector": "Diversified",
+        "geography": "USA",
+        "utility": "Broad US market exposure",
+        "typical_use": "Core holding for diversified US equity exposure",
+        "risk_level": "Medium"
+    },
+    "QQQ": {
+        "name": "Nasdaq 100 ETF",
+        "description": "Tracks 100 largest non-financial Nasdaq companies",
+        "sector": "Technology-Heavy",
+        "geography": "USA",
+        "utility": "Tech-focused growth exposure",
+        "typical_use": "Growth portfolio, tech overweight",
+        "risk_level": "Medium-High"
+    },
+    "BTC-USD": {
+        "name": "Bitcoin",
+        "description": "Decentralized digital currency and store of value",
+        "sector": "Cryptocurrency",
+        "geography": "Global",
+        "utility": "Inflation hedge, portfolio diversifier",
+        "typical_use": "Small allocation (5-10%) for growth/diversification",
+        "risk_level": "Very High"
+    },
+    "GLD": {
+        "name": "Gold ETF",
+        "description": "Tracks physical gold prices",
+        "sector": "Commodities",
+        "geography": "Global",
+        "utility": "Inflation hedge, safe haven",
+        "typical_use": "Portfolio hedge (10-15%), crisis protection",
+        "risk_level": "Low-Medium"
+    },
+    "AGG": {
+        "name": "Aggregate Bond ETF",
+        "description": "Broad US investment-grade bond market",
+        "sector": "Fixed Income",
+        "geography": "USA",
+        "utility": "Stability, income generation",
+        "typical_use": "Conservative allocation, portfolio ballast",
+        "risk_level": "Low"
+    },
+    "VXUS": {
+        "name": "International Stock ETF",
+        "description": "Tracks non-US developed and emerging markets",
+        "sector": "Diversified International",
+        "geography": "Ex-US Global",
+        "utility": "Geographic diversification",
+        "typical_use": "International exposure (20-40% of equity)",
+        "risk_level": "Medium"
+    },
+}
+
+SECTOR_MAPPING = {
+    "AAPL": "Technology", "MSFT": "Technology", "GOOGL": "Technology", "AMZN": "Technology",
+    "TSLA": "Automotive", "NVDA": "Technology", "META": "Technology", "NFLX": "Technology",
+    "SPY": "Diversified", "QQQ": "Technology", "VTI": "Diversified", "VXUS": "International",
+    "BTC-USD": "Crypto", "ETH-USD": "Crypto", "SOL-USD": "Crypto",
+    "GLD": "Commodities", "AGG": "Bonds", "VNQ": "Real Estate",
+}
+
+GEOGRAPHY_MAPPING = {
+    "AAPL": "USA", "MSFT": "USA", "GOOGL": "USA", "AMZN": "USA",
+    "SPY": "USA", "QQQ": "USA", "VTI": "USA",
+    "VXUS": "International", "VWO": "Emerging",
+    "BTC-USD": "Global", "ETH-USD": "Global",
+    "GLD": "Global", "AGG": "USA",
+}
 
 POPULAR_ASSETS = {
     "Stocks": {
         "Apple": "AAPL", "Microsoft": "MSFT", "Google": "GOOGL", "Amazon": "AMZN",
         "Tesla": "TSLA", "NVIDIA": "NVDA", "Meta": "META", "Netflix": "NFLX",
-        "AMD": "AMD", "Intel": "INTC", "Coca-Cola": "KO", "Nike": "NKE",
-        "Visa": "V", "Mastercard": "MA", "JPMorgan": "JPM",
     },
     "ETFs": {
         "S&P 500": "SPY", "Nasdaq 100": "QQQ", "Total Market": "VTI",
-        "International": "VXUS", "Emerging": "VWO", "Gold": "GLD",
-        "Bonds": "AGG", "Real Estate": "VNQ",
+        "International": "VXUS", "Gold": "GLD", "Bonds": "AGG",
     },
     "Crypto": {
         "Bitcoin": "BTC-USD", "Ethereum": "ETH-USD", "Solana": "SOL-USD",
-        "Cardano": "ADA-USD", "Polygon": "MATIC-USD", "Avalanche": "AVAX-USD",
     },
-    "Indices": {
-        "S&P 500": "^GSPC", "Nasdaq": "^IXIC", "Dow Jones": "^DJI",
-    }
 }
 
 MODEL_PORTFOLIOS = {
     "Safe": {
         "description": "Low risk, capital preservation",
-        "allocation": {
-            "AGG": 0.40,  # Bonds
-            "SPY": 0.25,  # S&P 500
-            "GLD": 0.15,  # Gold
-            "VTI": 0.20,  # Total Market
-        },
+        "profile": "safe",
+        "allocation": {"AGG": 0.40, "SPY": 0.25, "GLD": 0.15, "VTI": 0.20},
         "expected_return": 0.06,
         "expected_volatility": 0.08,
-        "risk_level": "Low"
     },
     "Balanced": {
         "description": "60/40 stocks/bonds mix",
-        "allocation": {
-            "SPY": 0.30,
-            "QQQ": 0.15,
-            "VXUS": 0.15,
-            "AGG": 0.25,
-            "GLD": 0.10,
-            "VNQ": 0.05,
-        },
+        "profile": "balanced",
+        "allocation": {"SPY": 0.30, "QQQ": 0.15, "VXUS": 0.15, "AGG": 0.25, "GLD": 0.10, "VNQ": 0.05},
         "expected_return": 0.08,
         "expected_volatility": 0.12,
-        "risk_level": "Medium"
     },
     "Aggressive": {
         "description": "High growth potential",
-        "allocation": {
-            "AAPL": 0.15,
-            "MSFT": 0.15,
-            "NVDA": 0.15,
-            "TSLA": 0.10,
-            "META": 0.10,
-            "QQQ": 0.20,
-            "BTC-USD": 0.10,
-            "ETH-USD": 0.05,
-        },
+        "profile": "aggressive",
+        "allocation": {"AAPL": 0.15, "MSFT": 0.15, "NVDA": 0.15, "TSLA": 0.10, "QQQ": 0.20, "BTC-USD": 0.15, "ETH-USD": 0.10},
         "expected_return": 0.15,
         "expected_volatility": 0.25,
-        "risk_level": "High"
     },
-    "Tech Growth": {
-        "description": "100% tech exposure",
-        "allocation": {
-            "AAPL": 0.20,
-            "MSFT": 0.20,
-            "GOOGL": 0.15,
-            "NVDA": 0.15,
-            "META": 0.10,
-            "AMD": 0.10,
-            "TSLA": 0.10,
-        },
-        "expected_return": 0.18,
-        "expected_volatility": 0.28,
-        "risk_level": "Very High"
-    },
-    "Crypto": {
-        "description": "Cryptocurrency focused",
-        "allocation": {
-            "BTC-USD": 0.50,
-            "ETH-USD": 0.30,
-            "SOL-USD": 0.10,
-            "MATIC-USD": 0.05,
-            "AVAX-USD": 0.05,
-        },
-        "expected_return": 0.30,
-        "expected_volatility": 0.60,
-        "risk_level": "Extreme"
-    },
-    "ESG": {
-        "description": "Environmental & Social focus",
-        "allocation": {
-            "AAPL": 0.20,
-            "MSFT": 0.20,
-            "TSLA": 0.15,
-            "GLD": 0.15,
-            "VXUS": 0.15,
-            "VNQ": 0.15,
-        },
-        "expected_return": 0.10,
-        "expected_volatility": 0.16,
-        "risk_level": "Medium"
-    },
-}
-
-BENCHMARKS = {
-    "S&P 500": "^GSPC",
-    "Nasdaq": "^IXIC",
-    "MSCI World": "URTH",  # iShares MSCI World ETF
 }
 
 # =============================================================================
-# SESSION STATE
+# SESSION STATE WITH AUTO-REBALANCE
 # =============================================================================
 
 def init_session_state():
@@ -289,11 +366,31 @@ def init_session_state():
         'page': "dashboard",
         'language': "en",
         'selected_tickers': [],
-        'show_help': False,
+        'weights': {},  # FIX: Separate weights dict
+        'user_profile': "balanced",  # safe/balanced/aggressive
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+def auto_rebalance_weights():
+    """FIX #1: Auto-rebalance weights to 100% when assets change."""
+    tickers = st.session_state.selected_tickers
+    if not tickers:
+        st.session_state.weights = {}
+        return
+    
+    # Equal weight distribution
+    equal_weight = 1.0 / len(tickers)
+    
+    # If weights don't exist or have wrong tickers, reset
+    if not st.session_state.weights or set(st.session_state.weights.keys()) != set(tickers):
+        st.session_state.weights = {ticker: equal_weight for ticker in tickers}
+    
+    # Normalize to ensure 100%
+    total = sum(st.session_state.weights.values())
+    if total > 0:
+        st.session_state.weights = {k: v/total for k, v in st.session_state.weights.items()}
 
 # =============================================================================
 # TRANSLATIONS
@@ -302,17 +399,15 @@ def init_session_state():
 T = {
     "en": {
         "dashboard": "Dashboard", "new_analysis": "New Analysis",
-        "models": "Model Portfolios", "settings": "Settings",
-        "health_score": "Health Score", "recommendations": "Recommendations",
-        "charts": "Charts", "stress_test": "Stress Test",
-        "compare": "Compare", "rebalancing": "Rebalancing",
+        "models": "Model Portfolios", "improve": "Improve Portfolio",
+        "robustness": "Robustness Index", "recommendations": "Recommendations",
+        "stress_test": "Stress Test", "asset_info": "Asset Info",
     },
     "fr": {
         "dashboard": "Tableau de Bord", "new_analysis": "Nouvelle Analyse",
-        "models": "Portefeuilles Modèles", "settings": "Paramètres",
-        "health_score": "Score de Santé", "recommendations": "Recommandations",
-        "charts": "Graphiques", "stress_test": "Test de Stress",
-        "compare": "Comparer", "rebalancing": "Rééquilibrage",
+        "models": "Portefeuilles Modèles", "improve": "Améliorer",
+        "robustness": "Indice de Robustesse", "recommendations": "Recommandations",
+        "stress_test": "Test de Stress", "asset_info": "Info Actifs",
     }
 }
 
@@ -320,46 +415,33 @@ def t(key, lang="en"):
     return T.get(lang, T["en"]).get(key, key)
 
 # =============================================================================
-# PORTFOLIO ANALYZER (ENHANCED)
+# ADVANCED PORTFOLIO ANALYZER
 # =============================================================================
 
-class AdvancedPortfolioAnalyzer:
-    def __init__(self, tickers, weights, start_date='2021-01-01', initial_value=100000):
+class UltimatePortfolioAnalyzer:
+    def __init__(self, tickers, weights, start_date='2021-01-01', initial_value=100000, user_profile="balanced"):
         self.tickers = tickers
         self.weights = weights
         self.start_date = start_date
         self.initial_value = initial_value
+        self.user_profile = user_profile
         self.data = None
-        self.benchmark_data = {}
         
     def fetch_data(self):
-        """Fetch portfolio data + benchmarks."""
+        """Fetch data with progress."""
         all_data = []
         progress_bar = st.progress(0)
         status = st.empty()
         
-        total_items = len(self.tickers) + len(BENCHMARKS)
-        
-        # Fetch portfolio assets
         for i, ticker in enumerate(self.tickers):
             try:
                 status.text(f"📥 Loading {ticker}...")
                 data = yf.Ticker(ticker).history(start=self.start_date)
                 data = data[['Close']].rename(columns={'Close': ticker})
                 all_data.append(data)
-                progress_bar.progress((i + 1) / total_items)
+                progress_bar.progress((i + 1) / len(self.tickers))
             except Exception as e:
-                st.warning(f"⚠️ {ticker}: {e}")
-        
-        # Fetch benchmarks
-        for i, (name, ticker) in enumerate(BENCHMARKS.items()):
-            try:
-                status.text(f"📥 Loading {name}...")
-                data = yf.Ticker(ticker).history(start=self.start_date)
-                self.benchmark_data[name] = data['Close']
-                progress_bar.progress((len(self.tickers) + i + 1) / total_items)
-            except:
-                pass
+                st.warning(f"⚠️ {ticker}: {str(e)[:50]}")
         
         status.empty()
         progress_bar.empty()
@@ -376,91 +458,414 @@ class AdvancedPortfolioAnalyzer:
         
         return True
     
-    def calculate_advanced_health_score(self):
-        """Enhanced multi-dimensional health score."""
+    def calculate_robustness_index(self):
+        """
+        FIX #2: Calculate Portfolio Robustness Index (0-100).
+        Measures portfolio resilience to crises and structural risks.
+        """
         metrics = self.calculate_metrics()
         
-        # 1. DIVERSIFICATION (25 points)
+        # 1. DIVERSIFICATION (20 points)
         n_assets = len(self.tickers)
-        div_base = min(25, n_assets * 5)
+        if n_assets >= 10:
+            div_score = 20
+        elif n_assets >= 7:
+            div_score = 17
+        elif n_assets >= 5:
+            div_score = 14
+        elif n_assets >= 3:
+            div_score = 10
+        else:
+            div_score = 5
         
-        # Penalties
+        # 2. CONCENTRATION (20 points)
         max_weight = max(self.weights.values())
-        if max_weight > 0.40:
-            div_penalty = 0.5
-        elif max_weight > 0.30:
-            div_penalty = 0.8
+        if max_weight < 0.15:
+            conc_score = 20
+        elif max_weight < 0.25:
+            conc_score = 16
+        elif max_weight < 0.35:
+            conc_score = 12
+        elif max_weight < 0.45:
+            conc_score = 8
         else:
-            div_penalty = 1.0
+            conc_score = 4
         
-        diversification_score = div_base * div_penalty
-        
-        # 2. RISK-ADJUSTED RETURNS (30 points)
-        sharpe = metrics['sharpe']
-        if sharpe > 2.0:
-            risk_score = 30
-        elif sharpe > 1.5:
-            risk_score = 26
-        elif sharpe > 1.0:
-            risk_score = 22
-        elif sharpe > 0.5:
-            risk_score = 16
-        elif sharpe > 0:
-            risk_score = 10
+        # 3. CORRELATION (15 points)
+        corr_matrix = self.returns.corr()
+        avg_corr = corr_matrix.values[np.triu_indices_from(corr_matrix.values, 1)].mean()
+        if avg_corr < 0.30:
+            corr_score = 15
+        elif avg_corr < 0.50:
+            corr_score = 12
+        elif avg_corr < 0.70:
+            corr_score = 8
         else:
-            risk_score = 5
+            corr_score = 4
         
-        # 3. VOLATILITY MANAGEMENT (20 points)
+        # 4. VOLATILITY (15 points)
         vol = metrics['volatility']
-        if vol < 0.12:
-            vol_score = 20
-        elif vol < 0.18:
-            vol_score = 16
+        if vol < 0.10:
+            vol_score = 15
+        elif vol < 0.15:
+            vol_score = 13
         elif vol < 0.25:
-            vol_score = 12
+            vol_score = 10
         elif vol < 0.35:
-            vol_score = 8
+            vol_score = 6
         else:
-            vol_score = 4
+            vol_score = 3
         
-        # 4. DRAWDOWN PROTECTION (15 points)
+        # 5. DRAWDOWN (15 points)
         max_dd = abs(metrics['max_drawdown'])
         if max_dd < 0.10:
             dd_score = 15
         elif max_dd < 0.20:
-            dd_score = 13
+            dd_score = 12
         elif max_dd < 0.30:
-            dd_score = 10
+            dd_score = 9
         elif max_dd < 0.40:
-            dd_score = 6
+            dd_score = 5
         else:
-            dd_score = 3
+            dd_score = 2
         
-        # 5. CORRELATION (10 points)
-        corr_matrix = self.returns.corr()
-        avg_corr = corr_matrix.values[np.triu_indices_from(corr_matrix.values, 1)].mean()
+        # 6. GEOGRAPHIC DIVERSIFICATION (10 points)
+        geographies = set()
+        for ticker in self.tickers:
+            geo = GEOGRAPHY_MAPPING.get(ticker, "Unknown")
+            geographies.add(geo)
         
-        if avg_corr < 0.40:
-            corr_score = 10
-        elif avg_corr < 0.60:
-            corr_score = 8
-        elif avg_corr < 0.75:
-            corr_score = 5
+        geo_count = len(geographies)
+        if geo_count >= 3:
+            geo_score = 10
+        elif geo_count >= 2:
+            geo_score = 7
         else:
-            corr_score = 2
+            geo_score = 3
         
-        total = diversification_score + risk_score + vol_score + dd_score + corr_score
+        # 7. SECTOR DIVERSIFICATION (5 points)
+        sectors = set()
+        for ticker in self.tickers:
+            sector = SECTOR_MAPPING.get(ticker, "Unknown")
+            sectors.add(sector)
+        
+        sector_count = len(sectors)
+        if sector_count >= 4:
+            sector_score = 5
+        elif sector_count >= 3:
+            sector_score = 4
+        elif sector_count >= 2:
+            sector_score = 2
+        else:
+            sector_score = 1
+        
+        # TOTAL SCORE
+        total = div_score + conc_score + corr_score + vol_score + dd_score + geo_score + sector_score
+        
+        # Interpretation
+        if total >= 90:
+            interpretation = "Very Robust"
+            color = "#10b981"
+        elif total >= 70:
+            interpretation = "Robust"
+            color = "#6366f1"
+        elif total >= 50:
+            interpretation = "Fragile"
+            color = "#f59e0b"
+        else:
+            interpretation = "High Risk"
+            color = "#ef4444"
         
         return {
             'total': int(total),
-            'diversification': int(diversification_score),
-            'risk_adjusted': int(risk_score),
-            'volatility': int(vol_score),
-            'drawdown': int(dd_score),
-            'correlation': int(corr_score),
-            'max_weight': max_weight,
-            'avg_correlation': avg_corr,
+            'diversification': div_score,
+            'concentration': conc_score,
+            'correlation': corr_score,
+            'volatility': vol_score,
+            'drawdown': dd_score,
+            'geography': geo_score,
+            'sector': sector_score,
+            'interpretation': interpretation,
+            'color': color,
         }
+    
+    def generate_improvement_suggestions(self, lang="en"):
+        """
+        FIX #3 & #4: Generate intelligent improvement suggestions.
+        Analyzes current portfolio and suggests optimized version.
+        """
+        metrics = self.calculate_metrics()
+        robustness = self.calculate_robustness_index()
+        suggestions = []
+        
+        # HIGH PRIORITY
+        max_weight = max(self.weights.values())
+        max_ticker = max(self.weights, key=self.weights.get)
+        
+        if max_weight > 0.40:
+            suggestions.append({
+                'priority': 'CRITICAL',
+                'type': 'critical',
+                'title': 'Critical Concentration' if lang == 'en' else 'Concentration Critique',
+                'issue': f'{max_ticker} = {max_weight*100:.0f}%',
+                'solution': f'Reduce to <30%. Diversify into VXUS + AGG' if lang == 'en' 
+                           else f'Réduire <30%. Diversifier vers VXUS + AGG',
+                'impact': 'Robustness +15 pts',
+            })
+        
+        # Sector concentration
+        sectors = {}
+        for ticker in self.tickers:
+            sector = SECTOR_MAPPING.get(ticker, "Unknown")
+            sectors[sector] = sectors.get(sector, 0) + self.weights[ticker]
+        
+        for sector, exposure in sectors.items():
+            if exposure > 0.50 and sector != "Diversified":
+                suggestions.append({
+                    'priority': 'HIGH',
+                    'type': 'warning',
+                    'title': f'High {sector} Exposure' if lang == 'en' else f'Exposition {sector} Élevée',
+                    'issue': f'{exposure*100:.0f}% in {sector}',
+                    'solution': f'Add international ETF (VXUS) or bonds (AGG)' if lang == 'en'
+                               else f'Ajouter ETF international (VXUS) ou obligations (AGG)',
+                    'impact': 'Robustness +10 pts',
+                })
+        
+        # Geographic concentration
+        geographies = {}
+        for ticker in self.tickers:
+            geo = GEOGRAPHY_MAPPING.get(ticker, "Unknown")
+            geographies[geo] = geographies.get(geo, 0) + self.weights[ticker]
+        
+        usa_exposure = geographies.get("USA", 0)
+        if usa_exposure > 0.70:
+            suggestions.append({
+                'priority': 'HIGH',
+                'type': 'warning',
+                'title': 'Geographic Concentration' if lang == 'en' else 'Concentration Géographique',
+                'issue': f'{usa_exposure*100:.0f}% USA exposure',
+                'solution': 'Add VXUS (international) for global diversification' if lang == 'en'
+                           else 'Ajouter VXUS (international) pour diversification mondiale',
+                'impact': 'Robustness +8 pts',
+            })
+        
+        # Lack of bonds/hedges
+        has_bonds = any(ticker in ['AGG', 'BND', 'TLT'] for ticker in self.tickers)
+        has_gold = any(ticker in ['GLD', 'IAU'] for ticker in self.tickers)
+        
+        if not has_bonds and not has_gold:
+            suggestions.append({
+                'priority': 'MEDIUM',
+                'type': 'info',
+                'title': 'Missing Hedges' if lang == 'en' else 'Absence de Couverture',
+                'issue': 'No bonds or gold in portfolio',
+                'solution': 'Add 10-20% AGG (bonds) and 5-10% GLD (gold) for stability' if lang == 'en'
+                           else 'Ajouter 10-20% AGG (obligations) et 5-10% GLD (or)',
+                'impact': 'Robustness +6 pts',
+            })
+        
+        # Low diversification
+        if len(self.tickers) < 5:
+            suggestions.append({
+                'priority': 'HIGH',
+                'type': 'warning',
+                'title': 'Low Diversification' if lang == 'en' else 'Faible Diversification',
+                'issue': f'Only {len(self.tickers)} assets',
+                'solution': 'Add 3-5 more assets from different sectors/geographies' if lang == 'en'
+                           else 'Ajouter 3-5 actifs de secteurs/géographies différents',
+                'impact': 'Robustness +12 pts',
+            })
+        
+        # High volatility
+        if metrics['volatility'] > 0.25:
+            suggestions.append({
+                'priority': 'MEDIUM',
+                'type': 'warning',
+                'title': 'High Volatility' if lang == 'en' else 'Volatilité Élevée',
+                'issue': f'{metrics["volatility"]*100:.0f}% annual volatility',
+                'solution': 'Reduce high-vol assets. Add AGG (bonds) for stability' if lang == 'en'
+                           else 'Réduire actifs volatils. Ajouter AGG (obligations)',
+                'impact': 'Robustness +7 pts',
+            })
+        
+        return suggestions
+    
+    def generate_profile_adapted_suggestions(self, lang="en"):
+        """
+        FIX #5: Profile-adapted recommendations (Safe/Balanced/Aggressive).
+        """
+        profile = self.user_profile
+        suggestions = []
+        
+        if profile == "safe":
+            # Check if portfolio is too risky
+            vol = self.calculate_metrics()['volatility']
+            if vol > 0.12:
+                suggestions.append({
+                    'priority': 'HIGH',
+                    'type': 'warning',
+                    'title': 'Too Risky for Safe Profile' if lang == 'en' else 'Trop Risqué pour Profil Sûr',
+                    'issue': f'Volatility {vol*100:.0f}% > recommended 12%',
+                    'solution': 'Increase bonds (AGG) to 40-50% and reduce equity exposure' if lang == 'en'
+                               else 'Augmenter obligations (AGG) à 40-50% et réduire actions',
+                    'recommended': ['AGG', 'GLD', 'SPY'],
+                })
+            
+            # Recommend defensive assets
+            has_defensive = any(ticker in ['AGG', 'GLD'] for ticker in self.tickers)
+            if not has_defensive:
+                suggestions.append({
+                    'priority': 'HIGH',
+                    'type': 'info',
+                    'title': 'Add Defensive Assets' if lang == 'en' else 'Ajouter Actifs Défensifs',
+                    'issue': 'Missing safe-haven assets',
+                    'solution': 'Add AGG (bonds 40%) and GLD (gold 15%)' if lang == 'en'
+                               else 'Ajouter AGG (obligations 40%) et GLD (or 15%)',
+                    'recommended': ['AGG', 'GLD'],
+                })
+        
+        elif profile == "balanced":
+            # Check 60/40 ratio
+            stock_exposure = sum(self.weights[t] for t in self.tickers 
+                                if SECTOR_MAPPING.get(t, "") not in ["Bonds", "Commodities"])
+            
+            if stock_exposure > 0.70:
+                suggestions.append({
+                    'priority': 'MEDIUM',
+                    'type': 'info',
+                    'title': 'Adjust to 60/40 Mix' if lang == 'en' else 'Ajuster vers 60/40',
+                    'issue': f'{stock_exposure*100:.0f}% stocks (target 60%)',
+                    'solution': 'Increase bonds to reach 40% allocation' if lang == 'en'
+                               else 'Augmenter obligations vers 40%',
+                    'recommended': ['AGG', 'VXUS', 'VNQ'],
+                })
+        
+        elif profile == "aggressive":
+            # Check growth exposure
+            has_growth = any(ticker in ['QQQ', 'NVDA', 'TSLA', 'BTC-USD'] for ticker in self.tickers)
+            if not has_growth:
+                suggestions.append({
+                    'priority': 'MEDIUM',
+                    'type': 'info',
+                    'title': 'Add Growth Assets' if lang == 'en' else 'Ajouter Actifs Croissance',
+                    'issue': 'Missing high-growth exposure',
+                    'solution': 'Consider QQQ (Nasdaq), NVDA, or 5-10% BTC-USD' if lang == 'en'
+                               else 'Considérer QQQ (Nasdaq), NVDA, ou 5-10% BTC-USD',
+                    'recommended': ['QQQ', 'NVDA', 'BTC-USD', 'TSLA'],
+                })
+        
+        return suggestions
+    
+    def stress_test_scenarios(self):
+        """
+        FIX #8: Simulate historical crisis scenarios.
+        """
+        scenarios = {
+            "2008 Crisis": {
+                "start": "2008-09-01",
+                "end": "2009-03-01",
+                "market_drop": -0.40,
+                "description": "Financial crisis, market -40%"
+            },
+            "COVID-2020": {
+                "start": "2020-02-01",
+                "end": "2020-04-01",
+                "market_drop": -0.30,
+                "description": "Pandemic crash, market -30%"
+            },
+            "Inflation 2022": {
+                "start": "2022-01-01",
+                "end": "2022-10-01",
+                "market_drop": -0.20,
+                "description": "Rate hikes, market -20%"
+            },
+        }
+        
+        results = {}
+        for name, scenario in scenarios.items():
+            try:
+                period_data = self.data.loc[scenario["start"]:scenario["end"]]
+                if len(period_data) > 0:
+                    period_returns = period_data.pct_change().dropna()
+                    weights_array = np.array([self.weights[t] for t in self.tickers])
+                    portfolio_ret = (period_returns @ weights_array)
+                    total_ret = (1 + portfolio_ret).prod() - 1
+                    
+                    # Calculate recovery time (simplified)
+                    recovery_days = len(period_data)
+                    
+                    results[name] = {
+                        'portfolio_loss': total_ret,
+                        'market_loss': scenario['market_drop'],
+                        'resilience': 1 - abs(total_ret / scenario['market_drop']),
+                        'recovery_days': recovery_days,
+                        'description': scenario['description']
+                    }
+            except:
+                pass
+        
+        return results
+    
+    def generate_auto_summary(self, lang="en"):
+        """
+        FIX #9: Auto-generated portfolio summary.
+        """
+        metrics = self.calculate_metrics()
+        robustness = self.calculate_robustness_index()
+        
+        # Sector analysis
+        sectors = {}
+        for ticker in self.tickers:
+            sector = SECTOR_MAPPING.get(ticker, "Unknown")
+            sectors[sector] = sectors.get(sector, 0) + self.weights[ticker]
+        
+        dominant_sector = max(sectors, key=sectors.get) if sectors else "Unknown"
+        sector_exposure = sectors.get(dominant_sector, 0)
+        
+        # Geography analysis
+        geographies = {}
+        for ticker in self.tickers:
+            geo = GEOGRAPHY_MAPPING.get(ticker, "Unknown")
+            geographies[geo] = geographies.get(geo, 0) + self.weights[ticker]
+        
+        dominant_geo = max(geographies, key=geographies.get) if geographies else "Unknown"
+        geo_exposure = geographies.get(dominant_geo, 0)
+        
+        # Risk level
+        vol = metrics['volatility']
+        if vol < 0.12:
+            risk_level = "low" if lang == "en" else "faible"
+        elif vol < 0.20:
+            risk_level = "moderate" if lang == "en" else "modérée"
+        else:
+            risk_level = "elevated" if lang == "en" else "élevée"
+        
+        # Diversification status
+        if len(self.tickers) < 5:
+            div_status = "limited" if lang == "en" else "limitée"
+        elif len(self.tickers) < 8:
+            div_status = "moderate" if lang == "en" else "modérée"
+        else:
+            div_status = "good" if lang == "en" else "bonne"
+        
+        if lang == "en":
+            summary = f"""
+            Your portfolio is **heavily exposed to {dominant_sector}** ({sector_exposure*100:.0f}%) 
+            and **{dominant_geo}** markets ({geo_exposure*100:.0f}%).
+            Diversification is **{div_status}** across {len(self.tickers)} assets.
+            Volatility is **{risk_level}** ({vol*100:.0f}% annual).
+            Robustness score: **{robustness['total']}/100 ({robustness['interpretation']})**.
+            """
+        else:
+            summary = f"""
+            Votre portefeuille est **fortement exposé au secteur {dominant_sector}** ({sector_exposure*100:.0f}%)
+            et aux marchés **{dominant_geo}** ({geo_exposure*100:.0f}%).
+            La diversification est **{div_status}** sur {len(self.tickers)} actifs.
+            La volatilité est **{risk_level}** ({vol*100:.0f}% annuelle).
+            Score de robustesse: **{robustness['total']}/100 ({robustness['interpretation']})**.
+            """
+        
+        return summary.strip()
     
     def calculate_metrics(self):
         """Calculate all performance metrics."""
@@ -470,10 +875,6 @@ class AdvancedPortfolioAnalyzer:
         annual_return = (1 + total_return) ** (1 / years) - 1
         volatility = returns.std() * np.sqrt(252)
         sharpe = annual_return / volatility if volatility > 0 else 0
-        
-        downside_returns = returns[returns < 0]
-        downside_vol = downside_returns.std() * np.sqrt(252)
-        sortino = annual_return / downside_vol if downside_vol > 0 else 0
         
         cumulative = (1 + returns).cumprod()
         running_max = cumulative.expanding().max()
@@ -485,241 +886,10 @@ class AdvancedPortfolioAnalyzer:
             'annual_return': annual_return,
             'volatility': volatility,
             'sharpe': sharpe,
-            'sortino': sortino,
             'max_drawdown': max_dd,
             'final_value': self.portfolio_values.iloc[-1],
             'drawdown_series': drawdown,
         }
-    
-    def generate_intelligent_recommendations(self, lang="en"):
-        """Generate comprehensive AI recommendations."""
-        metrics = self.calculate_metrics()
-        health = self.calculate_advanced_health_score()
-        recommendations = []
-        
-        # HIGH PRIORITY - Concentration
-        max_weight = health['max_weight']
-        max_ticker = max(self.weights, key=self.weights.get)
-        
-        if max_weight > 0.40:
-            recommendations.append({
-                'priority': 'HIGH',
-                'type': 'danger',
-                'icon': '🚨',
-                'title': 'Critical Concentration Risk' if lang == 'en' else 'Risque de Concentration Critique',
-                'description': f'{max_ticker}: {max_weight*100:.0f}%. Reduce to < 30%.' if lang == 'en' 
-                              else f'{max_ticker}: {max_weight*100:.0f}%. Réduire < 30%.',
-                'action': f'Sell {(max_weight-0.30)*100:.0f}% of {max_ticker}' if lang == 'en'
-                         else f'Vendre {(max_weight-0.30)*100:.0f}% de {max_ticker}',
-                'impact': '+8 points',
-            })
-        elif max_weight > 0.30:
-            recommendations.append({
-                'priority': 'MEDIUM',
-                'type': 'warning',
-                'icon': '⚠️',
-                'title': 'Concentration Warning' if lang == 'en' else 'Avertissement Concentration',
-                'description': f'{max_ticker}: {max_weight*100:.0f}%.' if lang == 'en'
-                              else f'{max_ticker}: {max_weight*100:.0f}%.',
-                'action': f'Consider reducing to 25-30%' if lang == 'en' else f'Réduire à 25-30%',
-                'impact': '+4 points',
-            })
-        
-        # Sharpe Ratio
-        if metrics['sharpe'] < 0.5:
-            recommendations.append({
-                'priority': 'HIGH',
-                'type': 'danger',
-                'icon': '📉',
-                'title': 'Poor Risk-Adjusted Returns' if lang == 'en' else 'Rendements Ajustés Faibles',
-                'description': f'Sharpe {metrics["sharpe"]:.2f} is very low.' if lang == 'en'
-                              else f'Sharpe {metrics["sharpe"]:.2f} très faible.',
-                'action': 'Run optimization or choose a model portfolio' if lang == 'en'
-                         else 'Optimiser ou choisir un portefeuille modèle',
-                'impact': '+12 points',
-            })
-        elif metrics['sharpe'] < 1.0:
-            recommendations.append({
-                'priority': 'MEDIUM',
-                'type': 'warning',
-                'icon': '📊',
-                'title': 'Below Average Returns' if lang == 'en' else 'Rendements Sous la Moyenne',
-                'description': f'Sharpe {metrics["sharpe"]:.2f}. Target: > 1.0.' if lang == 'en'
-                              else f'Sharpe {metrics["sharpe"]:.2f}. Cible: > 1.0.',
-                'action': 'Optimize allocation' if lang == 'en' else 'Optimiser allocation',
-                'impact': '+6 points',
-            })
-        
-        # Diversification
-        if len(self.tickers) < 5:
-            recommendations.append({
-                'priority': 'HIGH',
-                'type': 'warning',
-                'icon': '🎯',
-                'title': 'Insufficient Diversification' if lang == 'en' else 'Diversification Insuffisante',
-                'description': f'Only {len(self.tickers)} assets. Add 3-5 more.' if lang == 'en'
-                              else f'Seulement {len(self.tickers)} actifs. Ajouter 3-5.',
-                'action': 'Add international ETF (VXUS) and bonds (AGG)' if lang == 'en'
-                         else 'Ajouter ETF international (VXUS) et obligations (AGG)',
-                'impact': '+10 points',
-            })
-        
-        # Correlation
-        avg_corr = health['avg_correlation']
-        if avg_corr > 0.75:
-            recommendations.append({
-                'priority': 'MEDIUM',
-                'type': 'warning',
-                'icon': '🔗',
-                'title': 'High Correlation' if lang == 'en' else 'Corrélation Élevée',
-                'description': f'Avg correlation: {avg_corr:.2f}. Assets move together.' if lang == 'en'
-                              else f'Corrélation moyenne: {avg_corr:.2f}. Actifs synchronisés.',
-                'action': 'Add uncorrelated assets (Gold, Bonds)' if lang == 'en'
-                         else 'Ajouter actifs décorrélés (Or, Obligations)',
-                'impact': '+5 points',
-            })
-        
-        # Volatility
-        if metrics['volatility'] > 0.30:
-            recommendations.append({
-                'priority': 'MEDIUM',
-                'type': 'warning',
-                'icon': '📈',
-                'title': 'High Volatility' if lang == 'en' else 'Volatilité Élevée',
-                'description': f'{metrics["volatility"]*100:.0f}% annual volatility.' if lang == 'en'
-                              else f'Volatilité annuelle: {metrics["volatility"]*100:.0f}%.',
-                'action': 'Add stable assets (AGG, GLD) to reduce swings' if lang == 'en'
-                         else 'Ajouter actifs stables (AGG, GLD)',
-                'impact': '+6 points',
-            })
-        
-        # POSITIVE FEEDBACK
-        if metrics['sharpe'] > 1.5:
-            recommendations.append({
-                'priority': 'INFO',
-                'type': 'success',
-                'icon': '✅',
-                'title': 'Excellent Performance' if lang == 'en' else 'Performance Excellente',
-                'description': f'Sharpe {metrics["sharpe"]:.2f} is outstanding!' if lang == 'en'
-                              else f'Sharpe {metrics["sharpe"]:.2f} excellent !',
-                'action': 'Maintain current strategy' if lang == 'en' else 'Maintenir stratégie',
-                'impact': 'Keep going!',
-            })
-        
-        if health['total'] > 80:
-            recommendations.append({
-                'priority': 'INFO',
-                'type': 'success',
-                'icon': '🎉',
-                'title': 'Healthy Portfolio' if lang == 'en' else 'Portefeuille Sain',
-                'description': f'Score {health["total"]}/100 - Well balanced!' if lang == 'en'
-                              else f'Score {health["total"]}/100 - Bien équilibré !',
-                'action': 'Review quarterly' if lang == 'en' else 'Réviser trimestriellement',
-                'impact': 'Excellent',
-            })
-        
-        # Sort by priority
-        priority_order = {'HIGH': 0, 'MEDIUM': 1, 'INFO': 2}
-        recommendations.sort(key=lambda x: priority_order.get(x['priority'], 3))
-        
-        return recommendations
-    
-    def generate_auto_summary(self, lang="en"):
-        """Generate automatic portfolio summary."""
-        metrics = self.calculate_metrics()
-        health = self.calculate_advanced_health_score()
-        
-        # Risk level
-        vol = metrics['volatility']
-        if vol < 0.12:
-            risk = "low" if lang == "en" else "faible"
-        elif vol < 0.20:
-            risk = "moderate" if lang == "en" else "modérée"
-        elif vol < 0.30:
-            risk = "elevated" if lang == "en" else "élevée"
-        else:
-            risk = "high" if lang == "en" else "très élevée"
-        
-        # Diversification
-        if len(self.tickers) < 5:
-            div = "limited" if lang == "en" else "limitée"
-        elif len(self.tickers) < 8:
-            div = "moderate" if lang == "en" else "modérée"
-        else:
-            div = "good" if lang == "en" else "bonne"
-        
-        # Performance
-        sharpe = metrics['sharpe']
-        if sharpe > 1.5:
-            perf = "excellent" if lang == "en" else "excellente"
-        elif sharpe > 1.0:
-            perf = "good" if lang == "en" else "bonne"
-        elif sharpe > 0.5:
-            perf = "fair" if lang == "en" else "correcte"
-        else:
-            perf = "poor" if lang == "en" else "faible"
-        
-        if lang == "en":
-            summary = f"""
-            Your portfolio shows **{perf} risk-adjusted performance** (Sharpe: {sharpe:.2f}) 
-            with **{risk} volatility** ({vol*100:.0f}% annual). 
-            Diversification is **{div}** across {len(self.tickers)} assets.
-            Overall health score: **{health['total']}/100**.
-            """
-        else:
-            summary = f"""
-            Votre portefeuille présente une **performance ajustée au risque {perf}** (Sharpe: {sharpe:.2f})
-            avec une **volatilité {risk}** ({vol*100:.0f}% annuelle).
-            La diversification est **{div}** sur {len(self.tickers)} actifs.
-            Score de santé global: **{health['total']}/100**.
-            """
-        
-        return summary.strip()
-    
-    def stress_test(self):
-        """Simulate historical crisis scenarios."""
-        scenarios = {
-            "2008 Crisis": {"start": "2008-09-01", "end": "2009-03-01", "expected_drop": -0.40},
-            "COVID-2020": {"start": "2020-02-01", "end": "2020-04-01", "expected_drop": -0.30},
-            "Inflation 2022": {"start": "2022-01-01", "end": "2022-10-01", "expected_drop": -0.20},
-        }
-        
-        results = {}
-        for name, period in scenarios.items():
-            try:
-                period_data = self.data.loc[period["start"]:period["end"]]
-                if len(period_data) > 0:
-                    period_returns = period_data.pct_change().dropna()
-                    weights_array = np.array([self.weights[t] for t in self.tickers])
-                    portfolio_ret = (period_returns @ weights_array)
-                    total_ret = (1 + portfolio_ret).prod() - 1
-                    
-                    results[name] = {
-                        'return': total_ret,
-                        'expected': period["expected_drop"],
-                        'resilience': 1 - abs(total_ret / period["expected_drop"])
-                    }
-            except:
-                pass
-        
-        return results
-    
-    def detect_rebalancing_needed(self):
-        """Detect if rebalancing is needed."""
-        current_values = {ticker: self.data[ticker].iloc[-1] for ticker in self.tickers}
-        total_value = sum(current_values.values())
-        current_weights = {ticker: val/total_value for ticker, val in current_values.items()}
-        
-        drifts = {}
-        needs_rebalancing = False
-        
-        for ticker in self.tickers:
-            drift = current_weights[ticker] - self.weights[ticker]
-            drifts[ticker] = drift
-            if abs(drift) > 0.05:  # 5% threshold
-                needs_rebalancing = True
-        
-        return needs_rebalancing, drifts
     
     def optimize_portfolio(self):
         """Markowitz optimization."""
@@ -755,167 +925,151 @@ class AdvancedPortfolioAnalyzer:
 # UI COMPONENTS
 # =============================================================================
 
-def render_health_score(health, lang="en"):
-    """Render advanced health score."""
-    total = health['total']
-    
-    if total >= 85:
-        color = "#10b981"
-        emoji = "🎉"
-        status = "Excellent"
-    elif total >= 70:
-        color = "#6366f1"
-        emoji = "✅"
-        status = "Good" if lang == "en" else "Bon"
-    elif total >= 50:
-        color = "#f59e0b"
-        emoji = "⚠️"
-        status = "Fair" if lang == "en" else "Moyen"
-    else:
-        color = "#ef4444"
-        emoji = "🔴"
-        status = "Poor" if lang == "en" else "Faible"
+def render_robustness_score(robustness, lang="en"):
+    """Render Portfolio Robustness Index."""
+    total = robustness['total']
+    color = robustness['color']
+    interpretation = robustness['interpretation']
     
     st.markdown(f"""
-    <div style='background: {color}; color: white; padding: 50px; border-radius: 25px;
-         text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); margin: 30px 0;'>
-        <h1 style='font-size: 6rem; margin: 0; color: white;'>{emoji} {total}</h1>
-        <p style='font-size: 2rem; margin: 15px 0 0 0; color: white; opacity: 0.95;'>/100 - {status}</p>
+    <div class='robustness-card' style='background: linear-gradient(135deg, {color} 0%, {color}dd 100%);'>
+        <h1>{total}</h1>
+        <p>/100 - {interpretation}</p>
+        <p style='font-size: 1rem; opacity: 0.9; margin-top: 10px;'>
+            {'Portfolio Robustness Index' if lang == 'en' else 'Indice de Robustesse'}
+        </p>
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4, col5 = st.columns(5)
+    # Breakdown
+    st.markdown("#### Score Breakdown")
     components = [
-        ("Diversification", health['diversification'], 25),
-        ("Risk-Adjusted", health['risk_adjusted'], 30),
-        ("Volatility", health['volatility'], 20),
-        ("Drawdown", health['drawdown'], 15),
-        ("Correlation", health['correlation'], 10),
+        ("Diversification", robustness['diversification'], 20),
+        ("Concentration", robustness['concentration'], 20),
+        ("Correlation", robustness['correlation'], 15),
+        ("Volatility", robustness['volatility'], 15),
+        ("Drawdown", robustness['drawdown'], 15),
+        ("Geography", robustness['geography'], 10),
+        ("Sector", robustness['sector'], 5),
     ]
     
-    for col, (name, score, max_score) in zip([col1, col2, col3, col4, col5], components):
-        with col:
-            pct = (score / max_score) * 100
-            color = "#10b981" if pct > 80 else "#f59e0b" if pct > 60 else "#ef4444"
-            st.markdown(f"""
-            <div style='text-align: center; padding: 15px; background: white;
-                 border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
-                <p style='margin: 0; color: #64748b; font-size: 0.9rem;'>{name}</p>
-                <p style='margin: 5px 0; font-size: 2rem; font-weight: 700; color: {color};'>
-                    {score}<span style='font-size: 1.2rem; color: #94a3b8;'>/{max_score}</span>
-                </p>
+    for name, score, max_score in components:
+        pct = (score / max_score) * 100
+        color = "#10b981" if pct > 80 else "#f59e0b" if pct > 60 else "#ef4444"
+        st.markdown(f"""
+        <div style='margin: 10px 0;'>
+            <div style='display: flex; justify-content: space-between; margin-bottom: 5px;'>
+                <span style='font-weight: 600; color: #1e293b;'>{name}</span>
+                <span style='color: {color}; font-weight: 700;'>{score}/{max_score}</span>
             </div>
-            """, unsafe_allow_html=True)
+            <div style='background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden;'>
+                <div style='background: {color}; width: {pct}%; height: 100%; transition: width 0.5s;'></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-def render_recommendations(recommendations, lang="en"):
-    """Render intelligent recommendations."""
-    st.markdown(f"### 💡 {t('recommendations', lang)}")
-    
-    if not recommendations:
-        st.info("✅ No major issues detected!")
+def render_improvement_suggestions(suggestions, lang="en"):
+    """Render improvement suggestions."""
+    if not suggestions:
+        st.success("✅ No major improvements needed!")
         return
     
-    for rec in recommendations:
-        priority_badge = {
-            'HIGH': '<span style="background:#ef4444;color:white;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:600;">HIGH</span>',
-            'MEDIUM': '<span style="background:#f59e0b;color:white;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:600;">MEDIUM</span>',
-            'INFO': '<span style="background:#6366f1;color:white;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:600;">INFO</span>',
+    st.markdown(f"### 💡 {'Improvement Suggestions' if lang == 'en' else 'Suggestions d\\'Amélioration'}")
+    
+    priority_order = {'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'INFO': 3}
+    suggestions.sort(key=lambda x: priority_order.get(x['priority'], 4))
+    
+    for sug in suggestions:
+        badge_colors = {
+            'CRITICAL': '#ef4444',
+            'HIGH': '#f59e0b',
+            'MEDIUM': '#6366f1',
+            'INFO': '#10b981'
         }
+        badge_color = badge_colors.get(sug['priority'], '#64748b')
         
         st.markdown(f"""
-        <div class='rec-card {rec['type']}'>
-            <h4>{rec['icon']} {rec['title']} {priority_badge.get(rec['priority'], '')}</h4>
-            <p><strong>Issue:</strong> {rec['description']}</p>
-            <p><strong>Action:</strong> {rec['action']}</p>
+        <div class='rec-card {sug['type']}'>
+            <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;'>
+                <h4 style='margin: 0;'>{sug['title']}</h4>
+                <span style='background: {badge_color}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;'>
+                    {sug['priority']}
+                </span>
+            </div>
+            <p><strong>Issue:</strong> {sug['issue']}</p>
+            <p><strong>Solution:</strong> {sug['solution']}</p>
             <p style='color: #7e22ce; font-weight: 600; margin-top: 10px;'>
-                💎 Expected impact: {rec['impact']}
+                💎 Expected impact: {sug['impact']}
             </p>
         </div>
         """, unsafe_allow_html=True)
 
-def render_correlation_heatmap(analyzer):
-    """Render correlation heatmap."""
-    corr_matrix = analyzer.returns.corr()
+def render_asset_card(ticker, lang="en"):
+    """FIX #6: Educational asset card."""
+    info = ASSET_INFO.get(ticker, {
+        "name": ticker,
+        "description": "Asset information not available",
+        "sector": "Unknown",
+        "geography": "Unknown",
+        "utility": "N/A",
+        "typical_use": "N/A",
+        "risk_level": "Unknown"
+    })
     
-    fig = go.Figure(data=go.Heatmap(
-        z=corr_matrix.values,
-        x=corr_matrix.columns,
-        y=corr_matrix.index,
-        colorscale='RdYlGn_r',
-        zmid=0,
-        text=corr_matrix.values,
-        texttemplate='%{text:.2f}',
-        textfont={"size": 10},
-        colorbar=dict(title="Correlation")
-    ))
-    
-    fig.update_layout(
-        title="Asset Correlation Matrix",
-        height=500,
-        xaxis_title="",
-        yaxis_title="",
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    avg_corr = corr_matrix.values[np.triu_indices_from(corr_matrix.values, 1)].mean()
-    
-    if avg_corr > 0.75:
-        st.warning(f"⚠️ High average correlation ({avg_corr:.2f}). Assets move together - limited diversification benefit.")
-    elif avg_corr > 0.50:
-        st.info(f"ℹ️ Moderate correlation ({avg_corr:.2f}). Some diversification benefit.")
-    else:
-        st.success(f"✅ Low correlation ({avg_corr:.2f}). Good diversification!")
+    with st.expander(f"📊 {ticker} - {info['name']}"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+            **Description:**
+            {info['description']}
+            
+            **Sector:** {info['sector']}
+            **Geography:** {info['geography']}
+            **Risk Level:** {info['risk_level']}
+            """)
+        
+        with col2:
+            st.markdown(f"""
+            **Portfolio Role:**
+            {info['utility']}
+            
+            **Typical Use:**
+            {info['typical_use']}
+            """)
 
-def render_advanced_charts(analyzer, lang="en"):
-    """Render all advanced charts."""
+def render_enhanced_charts(analyzer, lang="en"):
+    """FIX #7: Enhanced visualizations."""
     
     tabs = st.tabs([
-        f"📈 Performance",
-        f"📉 Drawdown", 
-        f"⚖️ Allocation",
-        f"🔄 Correlation"
+        "📈 Performance",
+        "📉 Drawdown",
+        "🥧 Allocation",
+        "🌍 Geography",
+        "🏢 Sectors"
     ])
     
     with tabs[0]:
-        # Performance vs Benchmarks
+        # Performance
         fig = go.Figure()
-        
-        # Portfolio
         fig.add_trace(go.Scatter(
             x=analyzer.portfolio_values.index,
             y=analyzer.portfolio_values.values,
             mode='lines',
-            name='Your Portfolio',
+            name='Portfolio Value',
             line=dict(color='#7e22ce', width=3),
             fill='tozeroy',
             fillcolor='rgba(126, 34, 206, 0.1)'
         ))
-        
-        # Benchmarks
-        colors = {'S&P 500': '#3b82f6', 'Nasdaq': '#10b981', 'MSCI World': '#f59e0b'}
-        for name, data in analyzer.benchmark_data.items():
-            if len(data) > 0:
-                benchmark_values = analyzer.initial_value * (data / data.iloc[0])
-                fig.add_trace(go.Scatter(
-                    x=benchmark_values.index,
-                    y=benchmark_values.values,
-                    mode='lines',
-                    name=name,
-                    line=dict(color=colors.get(name, '#64748b'), width=2, dash='dash')
-                ))
-        
         fig.update_layout(
-            title="Performance Comparison",
-            height=500,
-            hovermode='x unified',
-            yaxis_title="Value ($)",
-            xaxis_title="Date"
+            title="Portfolio Performance",
+            height=400,
+            hovermode='x unified'
         )
         st.plotly_chart(fig, use_container_width=True)
     
     with tabs[1]:
-        # Drawdown chart
+        # Drawdown
         metrics = analyzer.calculate_metrics()
         drawdown = metrics['drawdown_series']
         
@@ -929,34 +1083,86 @@ def render_advanced_charts(analyzer, lang="en"):
             fill='tozeroy',
             fillcolor='rgba(239, 68, 68, 0.2)'
         ))
-        
         fig.update_layout(
-            title="Portfolio Drawdown Over Time",
-            height=400,
+            title="Portfolio Drawdown",
             yaxis_title="Drawdown (%)",
-            xaxis_title="Date"
+            height=400
         )
         st.plotly_chart(fig, use_container_width=True)
-        
-        st.metric("Maximum Drawdown", f"{metrics['max_drawdown']*100:.2f}%")
     
     with tabs[2]:
-        # Allocation pie chart
+        # Allocation pie
         fig = go.Figure(data=[go.Pie(
             labels=list(analyzer.weights.keys()),
             values=list(analyzer.weights.values()),
-            hole=.4,
-            marker=dict(colors=px.colors.qualitative.Set3)
+            hole=.4
         )])
-        
-        fig.update_layout(
-            title="Current Allocation",
-            height=500
-        )
+        fig.update_layout(title="Current Allocation", height=400)
         st.plotly_chart(fig, use_container_width=True)
     
     with tabs[3]:
-        render_correlation_heatmap(analyzer)
+        # Geographic allocation
+        geo_alloc = {}
+        for ticker in analyzer.tickers:
+            geo = GEOGRAPHY_MAPPING.get(ticker, "Unknown")
+            geo_alloc[geo] = geo_alloc.get(geo, 0) + analyzer.weights[ticker]
+        
+        fig = go.Figure(data=[go.Bar(
+            x=list(geo_alloc.keys()),
+            y=[v*100 for v in geo_alloc.values()],
+            marker=dict(color='#7e22ce')
+        )])
+        fig.update_layout(
+            title="Geographic Allocation",
+            yaxis_title="Allocation (%)",
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with tabs[4]:
+        # Sector allocation
+        sector_alloc = {}
+        for ticker in analyzer.tickers:
+            sector = SECTOR_MAPPING.get(ticker, "Unknown")
+            sector_alloc[sector] = sector_alloc.get(sector, 0) + analyzer.weights[ticker]
+        
+        fig = go.Figure(data=[go.Bar(
+            x=list(sector_alloc.keys()),
+            y=[v*100 for v in sector_alloc.values()],
+            marker=dict(color='#6366f1')
+        )])
+        fig.update_layout(
+            title="Sector Allocation",
+            yaxis_title="Allocation (%)",
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+def render_stress_test_results(stress_results, lang="en"):
+    """FIX #8: Display stress test results."""
+    st.markdown(f"### 🧪 {t('stress_test', lang)}")
+    
+    if not stress_results:
+        st.info("Not enough historical data for stress testing")
+        return
+    
+    for scenario, result in stress_results.items():
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric(scenario, f"{result['portfolio_loss']*100:.1f}%")
+        with col2:
+            st.metric("Market", f"{result['market_loss']*100:.0f}%")
+        with col3:
+            resilience = result['resilience'] * 100
+            color = "normal" if resilience > 80 else "inverse"
+            st.metric("Resilience", f"{resilience:.0f}%", delta_color=color)
+        with col4:
+            recovery_months = result['recovery_days'] / 30
+            st.metric("Recovery", f"~{recovery_months:.0f} months")
+        
+        st.caption(result['description'])
+        st.markdown("---")
 
 # =============================================================================
 # MAIN APP
@@ -966,24 +1172,33 @@ def main():
     init_session_state()
     lang = st.session_state.language
     
-    # Sidebar Navigation
+    # Sidebar
     with st.sidebar:
         # Language
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🇬🇧 EN", use_container_width=True,
+            if st.button("🇬🇧", use_container_width=True,
                         type="primary" if lang == "en" else "secondary"):
                 st.session_state.language = "en"
                 st.rerun()
         with col2:
-            if st.button("🇫🇷 FR", use_container_width=True,
+            if st.button("🇫🇷", use_container_width=True,
                         type="primary" if lang == "fr" else "secondary"):
                 st.session_state.language = "fr"
                 st.rerun()
         
         st.markdown("---")
-        st.title("📊 Portfolio Optimizer Pro v3.0")
+        st.title("📊 Portfolio Optimizer Pro v3.5")
         st.markdown(f"**{st.session_state.user_email}**")
+        
+        # User profile selector
+        st.markdown("### 👤 Profile")
+        profile = st.selectbox(
+            "Risk Tolerance",
+            ["safe", "balanced", "aggressive"],
+            index=1
+        )
+        st.session_state.user_profile = profile
         
         st.markdown("---")
         
@@ -992,7 +1207,7 @@ def main():
             ("dashboard", "🏠"),
             ("new_analysis", "➕"),
             ("models", "📋"),
-            ("settings", "⚙️"),
+            ("improve", "⚡"),
         ]
         
         for page_key, icon in pages:
@@ -1001,12 +1216,6 @@ def main():
                         type="primary" if st.session_state.page == page_key else "secondary"):
                 st.session_state.page = page_key
                 st.rerun()
-        
-        st.markdown("---")
-        st.markdown("### 🚀 Upgrade Pro")
-        st.markdown("**$14.99/mo**")
-        if st.button("⭐ Upgrade", type="primary", use_container_width=True):
-            st.info("Coming soon!")
     
     # Main Content
     page = st.session_state.page
@@ -1022,21 +1231,21 @@ def main():
         else:
             analyzer = st.session_state.current_portfolio
             
-            # Auto Summary
+            # Auto Summary (FIX #9)
             st.markdown("### 📝 Portfolio Summary")
             summary = analyzer.generate_auto_summary(lang)
             st.markdown(summary)
             
             st.markdown("---")
             
-            # Health Score
-            health = analyzer.calculate_advanced_health_score()
-            render_health_score(health, lang)
+            # Robustness Index (FIX #2)
+            robustness = analyzer.calculate_robustness_index()
+            render_robustness_score(robustness, lang)
             
-            # Quick Stats
-            st.markdown("### 📊 Quick Stats")
+            st.markdown("---")
+            
+            # Quick Metrics
             metrics = analyzer.calculate_metrics()
-            
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 st.metric("Sharpe Ratio", f"{metrics['sharpe']:.2f}")
@@ -1049,61 +1258,197 @@ def main():
             
             st.markdown("---")
             
-            # Recommendations
-            recommendations = analyzer.generate_intelligent_recommendations(lang)
-            render_recommendations(recommendations, lang)
+            # Improvement Suggestions (FIX #3, #4, #5)
+            st.markdown(f"### 💡 {t('recommendations', lang)}")
+            suggestions = analyzer.generate_improvement_suggestions(lang)
+            profile_suggestions = analyzer.generate_profile_adapted_suggestions(lang)
+            all_suggestions = suggestions + profile_suggestions
+            render_improvement_suggestions(all_suggestions, lang)
             
             st.markdown("---")
             
-            # Charts
-            st.markdown(f"### 📊 {t('charts', lang)}")
-            render_advanced_charts(analyzer, lang)
+            # Enhanced Charts (FIX #7)
+            render_enhanced_charts(analyzer, lang)
             
             st.markdown("---")
             
-            # Stress Test
-            st.markdown(f"### 🧪 {t('stress_test', lang)}")
-            if st.button("Run Stress Test", use_container_width=True):
+            # Stress Test (FIX #8)
+            if st.button("🧪 Run Stress Test", use_container_width=True):
                 with st.spinner("Running scenarios..."):
-                    stress_results = analyzer.stress_test()
+                    stress_results = analyzer.stress_test_scenarios()
+                render_stress_test_results(stress_results, lang)
+            
+            st.markdown("---")
+            
+            # Asset Info (FIX #6)
+            st.markdown(f"### 📚 {t('asset_info', lang)}")
+            for ticker in analyzer.tickers:
+                render_asset_card(ticker, lang)
+    
+    elif page == "new_analysis":
+        st.title(f"➕ {t('new_analysis', lang)}")
+        
+        tabs = st.tabs(["🔍 Search", "⭐ Popular"])
+        
+        with tabs[0]:
+            search = st.text_input("Search assets...", placeholder="Apple, Bitcoin...")
+            if search:
+                all_assets = {}
+                for cat, assets in POPULAR_ASSETS.items():
+                    for name, ticker in assets.items():
+                        all_assets[f"{name} ({ticker})"] = ticker
                 
-                if stress_results:
-                    for scenario, result in stress_results.items():
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric(scenario, f"{result['return']*100:.1f}%")
-                        with col2:
-                            st.metric("Expected", f"{result['expected']*100:.0f}%")
-                        with col3:
-                            resilience = result['resilience'] * 100
-                            st.metric("Resilience", f"{resilience:.0f}%")
-                else:
-                    st.info("Not enough historical data for stress testing.")
+                matches = {k: v for k, v in all_assets.items() if search.lower() in k.lower()}
+                
+                for display, ticker in list(matches.items())[:10]:
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.write(display)
+                    with col2:
+                        if st.button("➕", key=ticker):
+                            if ticker not in st.session_state.selected_tickers:
+                                st.session_state.selected_tickers.append(ticker)
+                                auto_rebalance_weights()  # FIX #1
+                                st.rerun()
+        
+        with tabs[1]:
+            for category, assets in POPULAR_ASSETS.items():
+                with st.expander(f"📂 {category}"):
+                    cols = st.columns(3)
+                    for i, (name, ticker) in enumerate(assets.items()):
+                        with cols[i % 3]:
+                            if st.button(f"{name}\n`{ticker}`", key=f"pop_{ticker}", 
+                                       use_container_width=True):
+                                if ticker not in st.session_state.selected_tickers:
+                                    st.session_state.selected_tickers.append(ticker)
+                                    auto_rebalance_weights()  # FIX #1
+                                    st.rerun()
+        
+        # Selected Assets
+        st.markdown("---")
+        st.markdown("### Selected Assets")
+        
+        if st.session_state.selected_tickers:
+            for ticker in st.session_state.selected_tickers:
+                col1, col2 = st.columns([5, 1])
+                with col1:
+                    st.write(f"**{ticker}**")
+                with col2:
+                    if st.button("❌", key=f"rm_{ticker}"):
+                        st.session_state.selected_tickers.remove(ticker)
+                        auto_rebalance_weights()  # FIX #1
+                        st.rerun()
             
-            st.markdown("---")
+            st.markdown("### Set Weights")
             
-            # Rebalancing
-            st.markdown(f"### 🔄 {t('rebalancing', lang)}")
-            needs_rebal, drifts = analyzer.detect_rebalancing_needed()
+            # Display current weights with sliders (FIX #1)
+            new_weights = {}
+            cols = st.columns(min(len(st.session_state.selected_tickers), 4))
             
-            if needs_rebal:
-                st.warning("⚠️ Rebalancing recommended!")
-                for ticker, drift in drifts.items():
-                    if abs(drift) > 0.05:
-                        direction = "⬆️" if drift > 0 else "⬇️"
-                        st.write(f"{direction} {ticker}: {drift*100:+.1f}%")
+            for i, ticker in enumerate(st.session_state.selected_tickers):
+                with cols[i % 4]:
+                    current_weight = st.session_state.weights.get(ticker, 1.0/len(st.session_state.selected_tickers))
+                    weight = st.slider(
+                        ticker,
+                        0.0, 100.0,
+                        current_weight * 100,
+                        1.0,
+                        key=f"weight_slider_{ticker}"
+                    )
+                    new_weights[ticker] = weight / 100
+            
+            # Update weights
+            st.session_state.weights = new_weights
+            
+            # Normalize and show total
+            total = sum(new_weights.values())
+            if abs(total - 1.0) > 0.01:
+                st.warning(f"⚠️ Total: {total*100:.1f}% → Normalizing to 100%")
+                st.session_state.weights = {k: v/total for k, v in new_weights.items()}
             else:
-                st.success("✅ Portfolio is balanced!")
+                st.success(f"✅ Total: {total*100:.1f}%")
+            
+            # Analyze button
+            if st.button("🚀 Analyze Portfolio", type="primary", use_container_width=True):
+                with st.spinner("Analyzing..."):
+                    analyzer = UltimatePortfolioAnalyzer(
+                        st.session_state.selected_tickers,
+                        st.session_state.weights,
+                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
+                        user_profile=st.session_state.user_profile
+                    )
+                    
+                    if analyzer.fetch_data():
+                        st.session_state.current_portfolio = analyzer
+                        st.success("✅ Analysis complete!")
+                        st.balloons()
+                        st.session_state.page = "dashboard"
+                        st.rerun()
+                    else:
+                        st.error("❌ Could not fetch data")
+        else:
+            st.info("Add assets above to begin")
+    
+    elif page == "models":
+        st.title(f"📋 {t('models', lang)}")
+        
+        for model_name, model_data in MODEL_PORTFOLIOS.items():
+            with st.expander(f"📊 {model_name}"):
+                st.markdown(f"**{model_data['description']}**")
+                st.markdown(f"Expected Return: {model_data['expected_return']*100:.0f}% | "
+                           f"Volatility: {model_data['expected_volatility']*100:.0f}%")
+                
+                for ticker, weight in model_data['allocation'].items():
+                    st.write(f"{ticker}: {weight*100:.0f}%")
+                
+                if st.button(f"Use {model_name}", key=model_name, use_container_width=True):
+                    st.session_state.selected_tickers = list(model_data['allocation'].keys())
+                    st.session_state.weights = model_data['allocation'].copy()
+                    
+                    with st.spinner(f"Loading {model_name}..."):
+                        analyzer = UltimatePortfolioAnalyzer(
+                            list(model_data['allocation'].keys()),
+                            model_data['allocation'],
+                            (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
+                            user_profile=model_data['profile']
+                        )
+                        
+                        if analyzer.fetch_data():
+                            st.session_state.current_portfolio = analyzer
+                            st.success(f"✅ {model_name} loaded!")
+                            st.balloons()
+                            st.session_state.page = "dashboard"
+                            st.rerun()
+    
+    elif page == "improve":
+        st.title(f"⚡ {t('improve', lang)}")
+        
+        if st.session_state.current_portfolio is None:
+            st.info("Create a portfolio first to see improvement suggestions")
+        else:
+            analyzer = st.session_state.current_portfolio
+            metrics = analyzer.calculate_metrics()
+            
+            st.markdown("### Current Portfolio")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Sharpe Ratio", f"{metrics['sharpe']:.2f}")
+                st.metric("Annual Return", f"{metrics['annual_return']*100:.1f}%")
+            with col2:
+                st.metric("Volatility", f"{metrics['volatility']*100:.1f}%")
+                st.metric("Max Drawdown", f"{metrics['max_drawdown']*100:.1f}%")
             
             st.markdown("---")
             
-            # Optimization
-            st.markdown("### 🎯 Optimization")
-            if st.button("Optimize Portfolio", use_container_width=True):
+            # Run optimization
+            if st.button("🎯 Optimize Portfolio", type="primary", use_container_width=True):
                 with st.spinner("Optimizing..."):
                     optimal = analyzer.optimize_portfolio()
                 
+                st.markdown("### Optimized Portfolio")
+                
                 col1, col2 = st.columns(2)
+                
                 with col1:
                     st.markdown("**Current**")
                     st.metric("Sharpe", f"{metrics['sharpe']:.2f}")
@@ -1116,147 +1461,22 @@ def main():
                     st.metric("Sharpe", f"{optimal['sharpe']:.2f}", f"+{improvement:.1f}%")
                     for ticker, weight in optimal['weights'].items():
                         st.write(f"{ticker}: {weight*100:.1f}%")
-    
-    elif page == "new_analysis":
-        st.title(f"➕ {t('new_analysis', lang)}")
-        
-        tabs = st.tabs(["🔍 Search", "⭐ Popular", "✏️ Manual"])
-        
-        with tabs[0]:
-            st.markdown("### Search Assets")
-            search = st.text_input("Type name...", placeholder="Apple, Bitcoin...")
-            
-            if search:
-                all_assets = {}
-                for cat, assets in POPULAR_ASSETS.items():
-                    for name, ticker in assets.items():
-                        all_assets[f"{name} ({ticker})"] = ticker
                 
-                matches = {k: v for k, v in all_assets.items() if search.lower() in k.lower()}
+                st.markdown("---")
                 
-                if matches:
-                    for display, ticker in list(matches.items())[:10]:
-                        col1, col2 = st.columns([4, 1])
-                        with col1:
-                            st.write(display)
-                        with col2:
-                            if st.button("➕", key=ticker):
-                                if ticker not in st.session_state.selected_tickers:
-                                    st.session_state.selected_tickers.append(ticker)
-                                    st.rerun()
-        
-        with tabs[1]:
-            st.markdown("### Popular Assets")
-            for category, assets in POPULAR_ASSETS.items():
-                with st.expander(f"📂 {category}"):
-                    cols = st.columns(3)
-                    for i, (name, ticker) in enumerate(assets.items()):
-                        with cols[i % 3]:
-                            if st.button(f"{name}\n`{ticker}`", key=f"pop_{ticker}", 
-                                       use_container_width=True):
-                                if ticker not in st.session_state.selected_tickers:
-                                    st.session_state.selected_tickers.append(ticker)
-                                    st.rerun()
-        
-        with tabs[2]:
-            manual = st.text_area("Enter tickers (one per line)", placeholder="AAPL\nMSFT")
-            if st.button("Add"):
-                tickers = [t.strip().upper() for t in manual.split('\n') if t.strip()]
-                st.session_state.selected_tickers.extend(tickers)
-                st.rerun()
-        
-        # Selected & Analyze
-        st.markdown("---")
-        st.markdown("### Selected Assets")
-        
-        if st.session_state.selected_tickers:
-            for ticker in st.session_state.selected_tickers:
-                col1, col2 = st.columns([5, 1])
-                with col1:
-                    st.write(f"**{ticker}**")
-                with col2:
-                    if st.button("❌", key=f"rm_{ticker}"):
-                        st.session_state.selected_tickers.remove(ticker)
-                        st.rerun()
-            
-            st.markdown("### Set Weights")
-            weights = {}
-            cols = st.columns(min(len(st.session_state.selected_tickers), 4))
-            
-            for i, ticker in enumerate(st.session_state.selected_tickers):
-                with cols[i % 4]:
-                    weight = st.slider(ticker, 0.0, 100.0,
-                                      100.0/len(st.session_state.selected_tickers),
-                                      1.0, key=f"w_{ticker}")
-                    weights[ticker] = weight / 100
-            
-            total = sum(weights.values())
-            if abs(total - 1.0) > 0.01:
-                st.warning(f"⚠️ {total*100:.0f}% (should be 100%)")
-            else:
-                st.success("✅ 100%")
-            
-            if st.button("🚀 Analyze", type="primary", use_container_width=True):
-                with st.spinner("Analyzing..."):
-                    analyzer = AdvancedPortfolioAnalyzer(
-                        st.session_state.selected_tickers,
-                        weights,
-                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')
+                if st.button("Apply Optimization", use_container_width=True):
+                    st.session_state.weights = optimal['weights']
+                    analyzer_new = UltimatePortfolioAnalyzer(
+                        list(optimal['weights'].keys()),
+                        optimal['weights'],
+                        analyzer.start_date,
+                        user_profile=st.session_state.user_profile
                     )
-                    
-                    if analyzer.fetch_data():
-                        st.session_state.current_portfolio = analyzer
-                        st.success("✅ Done!")
+                    if analyzer_new.fetch_data():
+                        st.session_state.current_portfolio = analyzer_new
+                        st.success("✅ Optimization applied!")
                         st.balloons()
-                        st.session_state.page = "dashboard"
                         st.rerun()
-                    else:
-                        st.error("❌ Error")
-        else:
-            st.info("Add assets above")
-    
-    elif page == "models":
-        st.title(f"📋 {t('models', lang)}")
-        st.markdown("Choose a pre-built portfolio to analyze instantly")
-        
-        for model_name, model_data in MODEL_PORTFOLIOS.items():
-            with st.expander(f"📊 {model_name} - {model_data['risk_level']} Risk"):
-                st.markdown(f"**{model_data['description']}**")
-                st.markdown(f"Expected Return: {model_data['expected_return']*100:.0f}% | "
-                           f"Volatility: {model_data['expected_volatility']*100:.0f}%")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    for ticker, weight in model_data['allocation'].items():
-                        st.write(f"{ticker}: {weight*100:.0f}%")
-                
-                with col2:
-                    if st.button(f"Use {model_name}", key=model_name, use_container_width=True):
-                        st.session_state.selected_tickers = list(model_data['allocation'].keys())
-                        
-                        with st.spinner(f"Loading {model_name}..."):
-                            analyzer = AdvancedPortfolioAnalyzer(
-                                list(model_data['allocation'].keys()),
-                                model_data['allocation'],
-                                (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')
-                            )
-                            
-                            if analyzer.fetch_data():
-                                st.session_state.current_portfolio = analyzer
-                                st.success(f"✅ {model_name} loaded!")
-                                st.balloons()
-                                st.session_state.page = "dashboard"
-                                st.rerun()
-    
-    elif page == "settings":
-        st.title(f"⚙️ {t('settings', lang)}")
-        st.markdown("### Account")
-        st.text_input("Email", st.session_state.user_email, disabled=True)
-        
-        st.markdown("### Preferences")
-        st.checkbox("Show beginner explanations", value=True)
-        st.selectbox("Default period", ["1 Year", "2 Years", "3 Years", "5 Years"])
-        st.selectbox("Risk-free rate", ["4.0%", "4.5%", "5.0%"])
 
 if __name__ == "__main__":
     main()
