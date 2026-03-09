@@ -1766,53 +1766,59 @@ class UltimatePortfolioAnalyzer:
         return suggestions
     
     def stress_test_scenarios(self):
-        """
-        FIX #8: Simulate historical crisis scenarios.
-        """
+        """Simulate historical crisis scenarios using independent yfinance downloads."""
         scenarios = {
             "2008 Crisis": {
-                "start": "2008-09-01",
-                "end": "2009-03-01",
+                "start": "2008-09-01", "end": "2009-03-01",
                 "market_drop": -0.40,
-                "description": "Financial crisis, market -40%"
+                "description": "Financial crisis, market -40%",
             },
             "COVID-2020": {
-                "start": "2020-02-01",
-                "end": "2020-04-01",
+                "start": "2020-02-01", "end": "2020-04-30",
                 "market_drop": -0.30,
-                "description": "Pandemic crash, market -30%"
+                "description": "Pandemic crash, market -30%",
             },
             "Inflation 2022": {
-                "start": "2022-01-01",
-                "end": "2022-10-01",
+                "start": "2022-01-01", "end": "2022-10-01",
                 "market_drop": -0.20,
-                "description": "Rate hikes, market -20%"
+                "description": "Rate hikes, market -20%",
             },
         }
-        
+
         results = {}
         for name, scenario in scenarios.items():
             try:
-                period_data = self.data.loc[scenario["start"]:scenario["end"]]
-                if len(period_data) > 0:
-                    period_returns = period_data.pct_change().dropna()
-                    weights_array = np.array([self.weights[t] for t in self.tickers])
-                    portfolio_ret = (period_returns @ weights_array)
-                    total_ret = (1 + portfolio_ret).prod() - 1
-                    
-                    # Calculate recovery time (simplified)
-                    recovery_days = len(period_data)
-                    
-                    results[name] = {
-                        'portfolio_loss': total_ret,
-                        'market_loss': scenario['market_drop'],
-                        'resilience': 1 - abs(total_ret / scenario['market_drop']),
-                        'recovery_days': recovery_days,
-                        'description': scenario['description']
-                    }
-            except:
+                raw = yf.download(
+                    self.tickers,
+                    start=scenario["start"],
+                    end=scenario["end"],
+                    auto_adjust=True,
+                    progress=False,
+                )
+                if raw.empty:
+                    continue
+                prices = raw["Close"] if isinstance(raw.columns, pd.MultiIndex) else raw
+                # Keep only tickers that actually downloaded
+                available = [t for t in self.tickers if t in prices.columns]
+                if not available:
+                    continue
+                prices = prices[available].dropna(how="all")
+                if len(prices) < 5:
+                    continue
+                weights_arr = np.array([self.weights[t] for t in available])
+                weights_arr /= weights_arr.sum()  # renormalise for missing tickers
+                rets = prices.pct_change().dropna()
+                port_rets = rets @ weights_arr
+                total_ret = (1 + port_rets).prod() - 1
+                results[name] = {
+                    'portfolio_loss': total_ret,
+                    'market_loss': scenario['market_drop'],
+                    'resilience': 1 - abs(total_ret / scenario['market_drop']),
+                    'recovery_days': len(prices),
+                    'description': scenario['description'],
+                }
+            except Exception:
                 pass
-        
         return results
     
     def generate_auto_summary(self, lang="en"):
@@ -2881,10 +2887,12 @@ def main():
                 else "Synthèse automatique de votre portefeuille",
             )
             summary_text = analyzer.generate_auto_summary(lang)
+            import re as _re
+            summary_html = _re.sub(r'\*\*(.+?)\*\*', r'<strong style="color:#e2e8f0;">\1</strong>', summary_text)
             st.markdown(f"""
             <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);
-                 border-radius:14px;padding:20px 24px;line-height:1.8;color:#cbd5e1;font-size:0.93rem;">
-              {summary_text}
+                 border-radius:14px;padding:20px 24px;line-height:1.9;color:#94a3b8;font-size:0.93rem;">
+              {summary_html}
             </div>
             """, unsafe_allow_html=True)
 
@@ -3193,8 +3201,10 @@ def main():
                 opt_label = "Optimise Portfolio" if lang == 'en' else "Optimiser le Portefeuille"
                 if st.button(opt_label, type="primary", use_container_width=False):
                     with st.spinner("Optimising..." if lang == 'en' else "Optimisation en cours..."):
-                        optimal = analyzer.optimize_portfolio()
+                        st.session_state.optimal_result = analyzer.optimize_portfolio()
 
+                optimal = st.session_state.get("optimal_result")
+                if optimal:
                     opt_result_label = "Optimised Portfolio" if lang == 'en' else "Portefeuille Optimisé"
                     st.markdown(f"### {opt_result_label}")
 
@@ -3220,7 +3230,6 @@ def main():
                     st.markdown("---")
                     apply_label = "Apply Optimisation" if lang == 'en' else "Appliquer l'Optimisation"
                     if st.button(apply_label, use_container_width=False):
-                        st.session_state.weights = optimal['weights']
                         new_a = UltimatePortfolioAnalyzer(
                             list(optimal['weights'].keys()),
                             optimal['weights'],
@@ -3229,6 +3238,8 @@ def main():
                         )
                         if new_a.fetch_data():
                             st.session_state.current_portfolio = new_a
+                            st.session_state.weights = optimal['weights']
+                            st.session_state.optimal_result = None
                             done_msg = "Optimisation applied!" if lang == 'en' else "Optimisation appliquée !"
                             st.success(done_msg)
                             st.rerun()
