@@ -92,38 +92,36 @@ st.markdown("""
 
     /* ── App background ── */
     .stApp {
-        background: #0e1117 !important;
+        background: linear-gradient(160deg, #0d1526 0%, #111827 50%, #0f172a 100%) !important;
         min-height: 100vh;
     }
 
     /* ── Main content area ── */
     .main .block-container {
-        background: #0e1117 !important;
-        border-radius: 20px !important;
-        padding: 2.5rem 3rem !important;
-        margin: 0.75rem 0.5rem !important;
-        border: 1px solid rgba(0,212,255,0.08) !important;
-        box-shadow: 0 8px 48px rgba(0,0,0,0.4) !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        padding: 2rem 2.5rem !important;
+        max-width: 1300px !important;
         animation: fadeUp 0.45s ease-out;
     }
 
     /* ── ALL TEXT in main area ── */
     .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
-        color: #f1f5f9 !important;
+        color: #f8fafc !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
     }
     .main p, .main li, .main span, .main div, .main label {
-        color: #cbd5e1 !important;
+        color: #e2e8f0 !important;
     }
     .main .stMarkdown, .main .stText {
-        color: #cbd5e1 !important;
+        color: #e2e8f0 !important;
     }
 
     /* ── Sidebar ── */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #080d1e 0%, #0f0c2e 100%) !important;
-        border-right: 1px solid rgba(99,102,241,0.2) !important;
+        background: linear-gradient(180deg, #0d1526 0%, #111827 100%) !important;
+        border-right: 1px solid rgba(0,212,255,0.12) !important;
     }
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
@@ -265,7 +263,7 @@ st.markdown("""
 
     /* ── Dark metric cards ── */
     .metric-card {
-        background: #161b22;
+        background: #1e293b;
         border: 1px solid rgba(0,212,255,0.12);
         border-radius: 16px;
         padding: 22px 26px;
@@ -294,7 +292,7 @@ st.markdown("""
 
     /* ── Recommendation cards ── */
     .rec-card {
-        background: #161b22;
+        background: #1e293b;
         border-left: 4px solid #6366f1;
         padding: 18px 22px;
         margin: 10px 0;
@@ -318,7 +316,7 @@ st.markdown("""
 
     /* ── Asset cards ── */
     .asset-card {
-        background: #161b22;
+        background: #1e293b;
         border: 1px solid rgba(99,102,241,0.12);
         border-radius: 14px;
         padding: 20px 24px;
@@ -368,7 +366,7 @@ st.markdown("""
 
     /* ── Model portfolio cards ── */
     .model-card {
-        background: #161b22;
+        background: #1e293b;
         border: 1px solid rgba(99,102,241,0.15);
         border-radius: 16px;
         padding: 24px 28px;
@@ -462,7 +460,7 @@ st.markdown("""
 
     /* ── KPI fintech cards ── */
     .kpi-card {
-        background: linear-gradient(145deg, #161b22, #1c2333);
+        background: linear-gradient(145deg, #1e293b, #263348);
         border: 1px solid rgba(0,212,255,0.12);
         border-radius: 18px;
         padding: 22px 24px 18px;
@@ -589,274 +587,341 @@ st.markdown("""
 
 ASSET_INFO = {
     # ── US Large Cap Stocks ──────────────────────────────────────────────────
+    # ── US Large Cap Stocks ──────────────────────────────────────────────────
     "AAPL": {
         "name": "Apple Inc.",
         "description": "The world's most valuable company by market cap. Designs and sells iPhones, Macs, iPads, and services (App Store, iCloud, Apple TV+). Revenue mix shifting toward high-margin recurring services.",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "L'entreprise la plus valorisée au monde. Conçoit et vend iPhones, Macs, iPads et services (App Store, iCloud, Apple TV+). Revenus de plus en plus dominés par les services à haute marge.",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Large-cap quality growth with expanding services moat",
+        "utility_fr": "Croissance de qualité large-cap avec fort avantage concurrentiel services",
         "typical_use": "Core growth holding. 5–15% in balanced/growth portfolios.",
+        "typical_use_fr": "Holding de croissance cœur. 5–15% dans les portefeuilles équilibrés/croissance.",
         "risk_level": "Medium-High", "liquidity": 100,
-        "dividend_yield": "~0.5%", "market_cap": "~$3 trillion",
+        "dividend_yield": "~0.5%", "market_cap": "~$3 billion",
     },
     "MSFT": {
         "name": "Microsoft Corporation",
         "description": "Global leader in cloud computing (Azure, #2 worldwide), enterprise software (Office 365, Teams), and gaming (Xbox, Activision). Benefits from AI integration across all product lines.",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Leader mondial du cloud (Azure, n°2 mondial), des logiciels d'entreprise (Office 365, Teams) et du gaming (Xbox, Activision). Bénéficie de l'intégration de l'IA dans toutes ses gammes.",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Defensive tech with cloud and AI tailwinds",
+        "utility_fr": "Tech défensive portée par le cloud et l'IA",
         "typical_use": "Defensive tech core holding. Pairs well with growth assets.",
+        "typical_use_fr": "Position cœur tech défensive. Se marie bien avec des actifs de croissance.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~0.7%", "market_cap": "~$3 trillion",
     },
     "GOOGL": {
         "name": "Alphabet (Google)",
         "description": "Parent company of Google Search (dominant ~90% market share), YouTube, Google Cloud, and Waymo. Advertising is the core revenue driver, diversified by fast-growing Cloud.",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Maison mère de Google Search (~90% de parts de marché), YouTube, Google Cloud et Waymo. La publicité est le moteur principal, diversifiée par le Cloud en forte croissance.",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Search monopoly + cloud growth platform",
+        "utility_fr": "Monopole de la recherche + plateforme cloud en croissance",
         "typical_use": "Growth or core holding. Diversifier from pure hardware tech.",
+        "typical_use_fr": "Position de croissance ou cœur. Diversifie par rapport à la tech hardware.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~0.5%", "market_cap": "~$2 trillion",
     },
     "AMZN": {
         "name": "Amazon",
         "description": "E-commerce giant and owner of AWS (Amazon Web Services), the world's leading cloud platform. AWS generates most of Amazon's profit despite being a fraction of revenue.",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Géant du e-commerce et propriétaire d'AWS (Amazon Web Services), la première plateforme cloud mondiale. AWS génère l'essentiel des bénéfices d'Amazon malgré une faible part du chiffre d'affaires.",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "E-commerce + cloud infrastructure dominance",
+        "utility_fr": "Domination e-commerce + infrastructure cloud",
         "typical_use": "Growth portfolio core. Strong long-term compounding story.",
+        "typical_use_fr": "Cœur de portefeuille croissance. Excellent historique de capitalisation long terme.",
         "risk_level": "Medium-High", "liquidity": 100,
         "dividend_yield": "0%", "market_cap": "~$2 trillion",
     },
     "NVDA": {
         "name": "NVIDIA Corporation",
         "description": "Designs GPUs and AI chips. Dominant supplier of data center AI accelerators (H100, B200). Near-monopoly in AI training hardware, with expanding software (CUDA ecosystem).",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Conçoit des GPU et puces IA. Fournisseur dominant d'accélérateurs IA pour data centers (H100, B200). Quasi-monopole sur le matériel d'entraînement IA, avec l'écosystème logiciel CUDA.",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Pure-play AI infrastructure exposure",
+        "utility_fr": "Exposition pure à l'infrastructure IA",
         "typical_use": "High-conviction growth holding. High volatility, high reward.",
+        "typical_use_fr": "Position de croissance forte conviction. Volatilité élevée, rendement élevé.",
         "risk_level": "High", "liquidity": 100,
         "dividend_yield": "~0.03%", "market_cap": "~$3 trillion",
     },
     "META": {
         "name": "Meta Platforms",
         "description": "Operates Facebook, Instagram, WhatsApp, and Threads — reaching 3+ billion daily users. Heavy AI investment in recommendation algorithms and Reality Labs (Quest VR headsets).",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Opère Facebook, Instagram, WhatsApp et Threads — atteignant 3 milliards+ d'utilisateurs quotidiens. Lourds investissements IA dans les algorithmes de recommandation et Reality Labs (casques VR Quest).",
+        "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Social media advertising dominance + AI-driven monetization",
+        "utility_fr": "Domination publicité réseaux sociaux + monétisation pilotée par l'IA",
         "typical_use": "Growth holding. Strong cash generation and buybacks.",
+        "typical_use_fr": "Position de croissance. Forte génération de trésorerie et rachats d'actions.",
         "risk_level": "Medium-High", "liquidity": 100,
         "dividend_yield": "~0.4%", "market_cap": "~$1.5 trillion",
     },
     "TSLA": {
         "name": "Tesla",
         "description": "Pioneer in electric vehicles and energy storage. Also developing autonomous driving (FSD), Robotaxi network, and Optimus humanoid robots. Highly valued for optionality.",
-        "sector": "Automotive", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Pionnier des véhicules électriques et du stockage d'énergie. Développe aussi la conduite autonome (FSD), le réseau Robotaxi et les robots humanoïdes Optimus. Très valorisé pour ses options de croissance.",
+        "sector": "Automotive", "geography": "USA", "asset_class": "Stock",
         "utility": "EV/autonomy/energy disruption play",
+        "utility_fr": "Pari disruptif VE / autonomie / énergie",
         "typical_use": "Satellite holding in aggressive portfolios. Expect high volatility.",
+        "typical_use_fr": "Position satellite dans les portefeuilles agressifs. Volatilité élevée attendue.",
         "risk_level": "Very High", "liquidity": 100,
         "dividend_yield": "0%", "market_cap": "~$800 billion",
     },
     "JPM": {
         "name": "JPMorgan Chase",
         "description": "America's largest bank by assets. Diversified across investment banking, consumer banking, asset management, and trading. Known for exceptional risk management and consistent profitability.",
-        "sector": "Financials", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "La plus grande banque américaine par les actifs. Diversifiée en banque d'investissement, banque de détail, gestion d'actifs et trading. Reconnue pour sa gestion des risques et sa rentabilité constante.",
+        "sector": "Financials", "geography": "USA", "asset_class": "Stock",
         "utility": "Financial sector exposure, income + stability",
+        "utility_fr": "Exposition au secteur financier, revenus + stabilité",
         "typical_use": "Defensive income holding. Benefits from higher interest rates.",
+        "typical_use_fr": "Position défensive de revenus. Bénéficie de la hausse des taux d'intérêt.",
         "risk_level": "Medium", "liquidity": 95,
         "dividend_yield": "~2.3%", "market_cap": "~$700 billion",
     },
     "JNJ": {
         "name": "Johnson & Johnson",
         "description": "Healthcare conglomerate spanning pharmaceuticals (Janssen), MedTech (surgical robots, orthopedics), and consumer health. Known as a 'Dividend King' with 60+ years of consecutive dividend increases.",
-        "sector": "Healthcare", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Conglomérat de santé couvrant la pharmacie (Janssen), le MedTech (robots chirurgicaux, orthopédie) et la santé grand public. 'Dividend King' avec 60+ ans d'augmentations consécutives.",
+        "sector": "Healthcare", "geography": "USA", "asset_class": "Stock",
         "utility": "Defensive healthcare with reliable income",
+        "utility_fr": "Santé défensive avec revenus fiables",
         "typical_use": "Defensive anchor for conservative portfolios.",
+        "typical_use_fr": "Ancre défensive pour les portefeuilles conservateurs.",
         "risk_level": "Low-Medium", "liquidity": 95,
         "dividend_yield": "~3%", "market_cap": "~$400 billion",
     },
     "XOM": {
         "name": "ExxonMobil",
         "description": "One of the world's largest oil & gas companies. Integrated operations span exploration, refining, and chemicals. Strong free cash flow used for dividends and buybacks.",
-        "sector": "Energy", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "L'un des plus grands groupes pétroliers et gaziers mondiaux. Opérations intégrées couvrant l'exploration, le raffinage et la chimie. Fort cash-flow libre reversé en dividendes et rachats d'actions.",
+        "sector": "Energy", "geography": "USA", "asset_class": "Stock",
         "utility": "Energy sector and inflation hedge",
+        "utility_fr": "Exposition au secteur énergie et couverture contre l'inflation",
         "typical_use": "Inflation hedge, income holding. Performs well in rising oil price environments.",
+        "typical_use_fr": "Couverture inflation, revenu. Performe bien en période de hausse du pétrole.",
         "risk_level": "Medium", "liquidity": 95,
         "dividend_yield": "~3.5%", "market_cap": "~$450 billion",
     },
     "V": {
         "name": "Visa Inc.",
         "description": "The world's largest payment network. Processes billions of transactions globally. Asset-light, high-margin business model — earns a toll on every digital payment.",
-        "sector": "Financials", "geography": "USA",
-        "asset_class": "Stock",
+        "description_fr": "Le plus grand réseau de paiement mondial. Traite des milliards de transactions. Modèle économique léger en actifs et à forte marge — perçoit un péage sur chaque paiement numérique.",
+        "sector": "Financials", "geography": "USA", "asset_class": "Stock",
         "utility": "Global payments infrastructure, digital economy exposure",
+        "utility_fr": "Infrastructure paiements mondiale, exposition à l'économie numérique",
         "typical_use": "Quality compounder for long-term growth portfolios.",
+        "typical_use_fr": "Capitaliseur de qualité pour les portefeuilles de croissance long terme.",
         "risk_level": "Medium", "liquidity": 98,
         "dividend_yield": "~0.8%", "market_cap": "~$550 billion",
     },
     # ── US ETFs ──────────────────────────────────────────────────────────────
     "SPY": {
         "name": "SPDR S&P 500 ETF",
-        "description": "The world's most traded ETF. Tracks the S&P 500 index — 500 largest US companies by market cap. Provides instant, low-cost exposure to American large-cap equities. Holdings rebalanced quarterly.",
-        "sector": "Diversified", "geography": "USA",
-        "asset_class": "ETF",
+        "description": "The world's most traded ETF. Tracks the S&P 500 index — 500 largest US companies by market cap. Provides instant, low-cost exposure to American large-cap equities.",
+        "description_fr": "L'ETF le plus échangé au monde. Réplique l'indice S&P 500 — les 500 plus grandes entreprises américaines. Offre une exposition instantanée et peu coûteuse aux actions américaines large-cap.",
+        "sector": "Diversified", "geography": "USA", "asset_class": "ETF",
         "utility": "Core US large-cap equity exposure",
+        "utility_fr": "Exposition cœur aux actions américaines large-cap",
         "typical_use": "Foundation of most diversified portfolios. 20–50% core holding.",
+        "typical_use_fr": "Socle de la plupart des portefeuilles diversifiés. Position cœur de 20–50%.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~1.3%", "market_cap": "~$500 billion AUM",
     },
     "QQQ": {
         "name": "Invesco Nasdaq 100 ETF",
-        "description": "Tracks the 100 largest non-financial companies on the Nasdaq. Heavily concentrated in technology and growth stocks (Apple, Microsoft, NVIDIA, Amazon, Meta, Tesla). Higher volatility than SPY.",
-        "sector": "Technology-Heavy", "geography": "USA",
-        "asset_class": "ETF",
+        "description": "Tracks the 100 largest non-financial companies on the Nasdaq. Heavily concentrated in technology and growth stocks (Apple, Microsoft, NVIDIA, Amazon, Meta). Higher volatility than SPY.",
+        "description_fr": "Réplique les 100 plus grandes entreprises non financières du Nasdaq. Fortement concentré en tech et croissance (Apple, Microsoft, NVIDIA, Amazon, Meta). Plus volatile que SPY.",
+        "sector": "Technology-Heavy", "geography": "USA", "asset_class": "ETF",
         "utility": "Tech-focused growth exposure via index",
+        "utility_fr": "Exposition croissance axée tech via indice",
         "typical_use": "Growth tilt, tech overweight. Complement to SPY.",
+        "typical_use_fr": "Surpondération croissance/tech. Complément de SPY.",
         "risk_level": "Medium-High", "liquidity": 100,
         "dividend_yield": "~0.5%", "market_cap": "~$250 billion AUM",
     },
     "VTI": {
         "name": "Vanguard Total Market ETF",
         "description": "Broadest US equity ETF — tracks over 3,700 US stocks including small, mid, and large caps. More diversified than SPY. Ultra-low expense ratio (0.03%).",
-        "sector": "Diversified", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "L'ETF actions américaines le plus large — réplique 3 700+ titres US incluant petites, moyennes et grandes capitalisations. Plus diversifié que SPY. Frais ultra-faibles (0,03%).",
+        "sector": "Diversified", "geography": "USA", "asset_class": "ETF",
         "utility": "Total US market exposure in one ticker",
+        "utility_fr": "Exposition à l'ensemble du marché américain en un seul ticker",
         "typical_use": "Ultimate US equity core holding for long-term investors.",
+        "typical_use_fr": "Position cœur actions américaines idéale pour les investisseurs long terme.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~1.3%", "market_cap": "~$400 billion AUM",
     },
     "VOO": {
         "name": "Vanguard S&P 500 ETF",
         "description": "Vanguard's version of the S&P 500 tracker. Nearly identical holdings to SPY but with a lower expense ratio (0.03% vs 0.09%). Preferred by long-term buy-and-hold investors.",
-        "sector": "Diversified", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "La version Vanguard du tracker S&P 500. Composition quasi identique à SPY mais frais inférieurs (0,03% vs 0,09%). Préféré des investisseurs buy-and-hold long terme.",
+        "sector": "Diversified", "geography": "USA", "asset_class": "ETF",
         "utility": "Low-cost S&P 500 exposure",
+        "utility_fr": "Exposition S&P 500 à faible coût",
         "typical_use": "Core US equity holding, especially for tax-advantaged accounts.",
+        "typical_use_fr": "Position cœur actions US, idéale pour les comptes fiscalement avantageux.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~1.3%", "market_cap": "~$550 billion AUM",
     },
     "VXUS": {
         "name": "Vanguard Total International ETF",
         "description": "Tracks non-US stock markets — 7,000+ companies across developed (Europe, Japan, Canada) and emerging markets (China, India, Brazil). Essential for true global diversification.",
-        "sector": "International Diversified", "geography": "Ex-US Global",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les marchés actions hors USA — 7 000+ entreprises dans les marchés développés (Europe, Japon, Canada) et émergents (Chine, Inde, Brésil). Indispensable pour une diversification mondiale.",
+        "sector": "International Diversified", "geography": "Ex-US Global", "asset_class": "ETF",
         "utility": "Single-ticker access to all non-US equities",
+        "utility_fr": "Accès en un seul ticker à toutes les actions hors USA",
         "typical_use": "International diversification — 20–40% of equity allocation.",
+        "typical_use_fr": "Diversification internationale — 20–40% de l'allocation actions.",
         "risk_level": "Medium", "liquidity": 98,
         "dividend_yield": "~2.8%", "market_cap": "~$70 billion AUM",
     },
     "EFA": {
         "name": "iShares MSCI EAFE ETF",
         "description": "Tracks large and mid-cap stocks in developed markets outside the US: Europe, Australasia, and the Far East (Japan, UK, France, Germany, Switzerland). No emerging market exposure.",
-        "sector": "International Developed", "geography": "Developed Ex-US",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les grandes et moyennes capitalisations des marchés développés hors USA : Europe, Australasie, Extrême-Orient (Japon, UK, France, Allemagne, Suisse). Pas d'exposition aux marchés émergents.",
+        "sector": "International Developed", "geography": "Developed Ex-US", "asset_class": "ETF",
         "utility": "Developed market diversification (Europe + Asia)",
+        "utility_fr": "Diversification marchés développés (Europe + Asie)",
         "typical_use": "Conservative international allocation. Lower vol than EEM.",
+        "typical_use_fr": "Allocation internationale conservatrice. Moins volatile qu'EEM.",
         "risk_level": "Medium", "liquidity": 98,
         "dividend_yield": "~3%", "market_cap": "~$50 billion AUM",
     },
     "EEM": {
         "name": "iShares MSCI Emerging Markets ETF",
         "description": "Tracks large and mid-cap stocks in 24 emerging market countries. Top exposures: China, India, Taiwan, South Korea, Brazil. Higher growth potential, higher volatility.",
-        "sector": "Emerging Markets", "geography": "Emerging Markets",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les grandes et moyennes caps dans 24 pays émergents. Principales expositions : Chine, Inde, Taïwan, Corée du Sud, Brésil. Potentiel de croissance élevé, volatilité élevée.",
+        "sector": "Emerging Markets", "geography": "Emerging Markets", "asset_class": "ETF",
         "utility": "Emerging market growth exposure",
+        "utility_fr": "Exposition à la croissance des marchés émergents",
         "typical_use": "Satellite allocation (5–15%) for return enhancement.",
+        "typical_use_fr": "Allocation satellite (5–15%) pour améliorer les rendements.",
         "risk_level": "High", "liquidity": 97,
         "dividend_yield": "~2.5%", "market_cap": "~$20 billion AUM",
     },
     "VNQ": {
         "name": "Vanguard Real Estate ETF",
         "description": "Tracks US Real Estate Investment Trusts (REITs). Provides exposure to commercial real estate (offices, apartments, retail, industrial, data centers) without directly owning property.",
-        "sector": "Real Estate", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les fonds d'investissement immobilier américains (REITs). Donne accès à l'immobilier commercial (bureaux, appartements, commerces, entrepôts, data centers) sans détenir directement de biens.",
+        "sector": "Real Estate", "geography": "USA", "asset_class": "ETF",
         "utility": "Real estate income + inflation hedge",
+        "utility_fr": "Revenus immobiliers + couverture contre l'inflation",
         "typical_use": "Income and diversification. Often 5–10% in balanced portfolios.",
+        "typical_use_fr": "Revenus et diversification. Souvent 5–10% dans les portefeuilles équilibrés.",
         "risk_level": "Medium", "liquidity": 95,
         "dividend_yield": "~3.8%", "market_cap": "~$35 billion AUM",
     },
     "TLT": {
         "name": "iShares 20+ Year Treasury Bond ETF",
         "description": "Tracks long-duration US government bonds (20+ year maturities). High sensitivity to interest rate changes — falls when rates rise, surges when rates fall. Classic safe-haven and recession hedge.",
-        "sector": "Fixed Income", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les obligations d'État américaines à long terme (maturités 20+ ans). Très sensible aux taux : baisse quand les taux montent, monte quand ils baissent. Valeur refuge classique et couverture récession.",
+        "sector": "Fixed Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Long-duration rate hedge and crisis buffer",
+        "utility_fr": "Couverture taux longue durée et tampon de crise",
         "typical_use": "Recession hedge, deflation protection. High duration risk.",
+        "typical_use_fr": "Couverture récession, protection déflation. Risque de duration élevé.",
         "risk_level": "Medium", "liquidity": 99,
         "dividend_yield": "~4%", "market_cap": "~$50 billion AUM",
     },
     "AGG": {
         "name": "iShares Core US Aggregate Bond ETF",
         "description": "Broad US investment-grade bond market — government, corporate, and mortgage-backed securities. The benchmark fixed income ETF. Lower yield than TLT but much less rate sensitivity.",
-        "sector": "Fixed Income", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Marché obligataire américain investment-grade au sens large — obligations d'État, d'entreprises et titres adossés à des créances hypothécaires. L'ETF obligataire de référence. Rendement inférieur à TLT mais bien moins sensible aux taux.",
+        "sector": "Fixed Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Portfolio stability, income, capital preservation",
+        "utility_fr": "Stabilité du portefeuille, revenus, préservation du capital",
         "typical_use": "Ballast in balanced portfolios. Classic 40% in 60/40 allocation.",
+        "typical_use_fr": "Lest des portefeuilles équilibrés. Le classique 40% dans l'allocation 60/40.",
         "risk_level": "Low", "liquidity": 100,
         "dividend_yield": "~3.5%", "market_cap": "~$100 billion AUM",
     },
     "LQD": {
         "name": "iShares Investment Grade Corporate Bond ETF",
         "description": "Tracks investment-grade corporate bonds. Higher yield than AGG (includes corporate credit premium). More rate-sensitive than short-term bonds.",
-        "sector": "Fixed Income", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les obligations d'entreprises investment-grade. Rendement supérieur à AGG (prime de crédit corporate incluse). Plus sensible aux taux que les obligations court terme.",
+        "sector": "Fixed Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Higher-yield bond exposure with manageable credit risk",
+        "utility_fr": "Exposition obligataire à rendement élevé avec risque de crédit maîtrisé",
         "typical_use": "Enhanced income vs AGG. Complement to government bonds.",
+        "typical_use_fr": "Revenus améliorés par rapport à AGG. Complément aux obligations souveraines.",
         "risk_level": "Low-Medium", "liquidity": 98,
         "dividend_yield": "~4.5%", "market_cap": "~$35 billion AUM",
     },
     "SCHD": {
         "name": "Schwab US Dividend Equity ETF",
-        "description": "Tracks US dividend-paying stocks with a quality filter (high yield + stable growth). Concentrated in Financials, Healthcare, Consumer Staples, and Industrials. A favourite income ETF.",
-        "sector": "Dividend/Income", "geography": "USA",
-        "asset_class": "ETF",
+        "description": "Tracks US dividend-paying stocks with a quality filter (high yield + stable growth). Concentrated in Financials, Healthcare, Consumer Staples, and Industrials.",
+        "description_fr": "Réplique les actions américaines à dividende avec filtre qualité (rendement élevé + croissance stable). Concentré en Financières, Santé, Biens de consommation courante et Industrie.",
+        "sector": "Dividend/Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Quality dividend income + capital appreciation",
+        "utility_fr": "Dividendes de qualité + appréciation du capital",
         "typical_use": "Income-focused portion of equity allocation.",
+        "typical_use_fr": "Partie revenus de l'allocation actions.",
         "risk_level": "Low-Medium", "liquidity": 98,
         "dividend_yield": "~3.5%", "market_cap": "~$55 billion AUM",
     },
     "GLD": {
         "name": "SPDR Gold Shares ETF",
         "description": "Physically-backed gold ETF. Holds actual gold bars in vaults. Tracks the spot gold price minus a small expense ratio (0.40%). The most liquid gold ETF in the world.",
-        "sector": "Commodities", "geography": "Global",
-        "asset_class": "ETF",
+        "description_fr": "ETF or physique. Détient de véritables lingots d'or en coffre-fort. Réplique le cours spot de l'or moins de faibles frais (0,40%). Le plus liquide des ETF or au monde.",
+        "sector": "Commodities", "geography": "Global", "asset_class": "ETF",
         "utility": "Inflation hedge, safe haven, portfolio insurance",
+        "utility_fr": "Couverture inflation, valeur refuge, assurance portefeuille",
         "typical_use": "Crisis protection and inflation hedge — 5–15% allocation.",
+        "typical_use_fr": "Protection en crise et couverture inflation — allocation 5–15%.",
         "risk_level": "Low-Medium", "liquidity": 100,
         "dividend_yield": "0%", "market_cap": "~$60 billion AUM",
+    },
+    "SLV": {
+        "name": "iShares Silver Trust ETF",
+        "description": "Physically-backed silver ETF. Tracks the spot price of silver. More volatile than gold but also more industrial use (solar panels, electronics). Can outperform gold in bull markets.",
+        "description_fr": "ETF argent physique. Réplique le cours spot de l'argent. Plus volatile que l'or mais avec des usages industriels importants (panneaux solaires, électronique). Peut surperformer l'or en phase haussière.",
+        "sector": "Commodities", "geography": "Global", "asset_class": "ETF",
+        "utility": "Industrial metal + precious metal speculation",
+        "utility_fr": "Métal industriel + spéculation métal précieux",
+        "typical_use": "Small satellite (1–5%). More speculative than GLD.",
+        "typical_use_fr": "Petit satellite (1–5%). Plus spéculatif que GLD.",
+        "risk_level": "Medium-High", "liquidity": 95,
+        "dividend_yield": "0%", "market_cap": "~$12 billion AUM",
     },
     "XLK": {
         "name": "Technology Select Sector SPDR ETF",
         "description": "Pure tech sector ETF tracking S&P 500 technology companies. Top holdings: Apple, Microsoft, NVIDIA. More concentrated sector bet than QQQ.",
-        "sector": "Technology", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "ETF purement tech répliquant les entreprises technologiques du S&P 500. Principales positions : Apple, Microsoft, NVIDIA. Pari sectoriel plus concentré que QQQ.",
+        "sector": "Technology", "geography": "USA", "asset_class": "ETF",
         "utility": "Pure US technology sector exposure",
+        "utility_fr": "Exposition pure au secteur technologique américain",
         "typical_use": "Tactical tech overweight in growth portfolios.",
+        "typical_use_fr": "Surpondération tactique tech dans les portefeuilles de croissance.",
         "risk_level": "High", "liquidity": 98,
         "dividend_yield": "~0.6%", "market_cap": "~$65 billion AUM",
     },
     "XLF": {
         "name": "Financial Select Sector SPDR ETF",
         "description": "Tracks S&P 500 financial companies: banks, insurance, asset managers. Benefits from rising interest rates. Top holdings: JPMorgan, Berkshire, Visa, Mastercard.",
-        "sector": "Financials", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Réplique les entreprises financières du S&P 500 : banques, assurances, gestionnaires d'actifs. Bénéficie des hausses de taux. Principales positions : JPMorgan, Berkshire, Visa, Mastercard.",
+        "sector": "Financials", "geography": "USA", "asset_class": "ETF",
         "utility": "Financial sector exposure, rate-sensitive",
+        "utility_fr": "Exposition au secteur financier, sensible aux taux",
         "typical_use": "Tactical sector allocation when rates are rising.",
+        "typical_use_fr": "Allocation sectorielle tactique en période de hausse des taux.",
         "risk_level": "Medium", "liquidity": 98,
         "dividend_yield": "~1.8%", "market_cap": "~$40 billion AUM",
     },
     "ARKK": {
         "name": "ARK Innovation ETF",
         "description": "Actively managed fund focusing on disruptive technology: AI, genomics, robotics, fintech, crypto. High concentration in small and mid-cap growth companies. Very high volatility.",
-        "sector": "Disruptive Tech", "geography": "USA",
-        "asset_class": "ETF",
+        "description_fr": "Fonds actif axé sur la technologie disruptive : IA, génomique, robotique, fintech, crypto. Forte concentration en entreprises de croissance petites et moyennes caps. Volatilité très élevée.",
+        "sector": "Disruptive Tech", "geography": "USA", "asset_class": "ETF",
         "utility": "High-conviction disruptive innovation exposure",
+        "utility_fr": "Exposition forte conviction à l'innovation disruptive",
         "typical_use": "Speculative satellite allocation (max 5%). Very high risk/reward.",
+        "typical_use_fr": "Allocation satellite spéculative (max 5%). Risque/rendement très élevé.",
         "risk_level": "Very High", "liquidity": 88,
         "dividend_yield": "0%", "market_cap": "~$6 billion AUM",
     },
@@ -864,32 +929,158 @@ ASSET_INFO = {
     "BTC-USD": {
         "name": "Bitcoin (BTC)",
         "description": "The first and largest cryptocurrency by market cap. Operates on a decentralised blockchain with a hard-capped supply of 21 million coins. Increasingly viewed as 'digital gold' by institutions.",
-        "sector": "Cryptocurrency", "geography": "Global",
-        "asset_class": "Crypto",
+        "description_fr": "La première et plus grande cryptomonnaie par capitalisation. Fonctionne sur une blockchain décentralisée avec une offre limitée à 21 millions de coins. De plus en plus considéré comme 'l'or numérique' par les institutions.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Digital scarcity store-of-value, speculative return driver",
+        "utility_fr": "Réserve de valeur par rareté numérique, moteur de rendement spéculatif",
         "typical_use": "Small allocation (3–10%) as portfolio diversifier and return booster.",
+        "typical_use_fr": "Petite allocation (3–10%) comme diversificateur et booster de rendement.",
         "risk_level": "Very High", "liquidity": 85,
         "dividend_yield": "0%", "market_cap": "~$1.5 trillion",
     },
     "ETH-USD": {
         "name": "Ethereum (ETH)",
-        "description": "The leading smart contract platform powering decentralised finance (DeFi), NFTs, and Web3 applications. Transitioned to Proof-of-Stake in 2022, dramatically reducing energy consumption.",
-        "sector": "Cryptocurrency", "geography": "Global",
-        "asset_class": "Crypto",
+        "description": "The leading smart contract platform powering DeFi, NFTs, and Web3. Transitioned to Proof-of-Stake in 2022, reducing energy use by 99.9%. Ether is used to pay transaction fees.",
+        "description_fr": "La principale plateforme de contrats intelligents alimentant la DeFi, les NFTs et le Web3. Passé en Proof-of-Stake en 2022, réduisant la consommation d'énergie de 99,9%. L'Ether sert à payer les frais de transaction.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Web3 infrastructure platform exposure",
+        "utility_fr": "Exposition à la plateforme d'infrastructure Web3",
         "typical_use": "Complement to Bitcoin. Typically smaller allocation (1–5%).",
+        "typical_use_fr": "Complément du Bitcoin. Allocation généralement plus petite (1–5%).",
         "risk_level": "Very High", "liquidity": 82,
         "dividend_yield": "0% (staking ~4%)", "market_cap": "~$300 billion",
     },
     "SOL-USD": {
         "name": "Solana (SOL)",
-        "description": "High-performance Layer 1 blockchain, processing 50,000+ transactions per second at low cost. Dominant in meme coins, NFTs, and DeFi. More volatile than BTC/ETH.",
-        "sector": "Cryptocurrency", "geography": "Global",
-        "asset_class": "Crypto",
+        "description": "High-performance Layer 1 blockchain processing 50,000+ transactions per second at low cost. Dominant in meme coins, NFTs, and DeFi. More volatile than BTC/ETH but higher growth potential.",
+        "description_fr": "Blockchain Layer 1 haute performance traitant 50 000+ transactions/seconde à faible coût. Dominante dans les meme coins, NFTs et DeFi. Plus volatile que BTC/ETH mais potentiel de croissance élevé.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "High-growth crypto ecosystem exposure",
+        "utility_fr": "Exposition à l'écosystème crypto à forte croissance",
         "typical_use": "Speculative satellite (1–3%). Very high volatility.",
+        "typical_use_fr": "Satellite spéculatif (1–3%). Volatilité très élevée.",
         "risk_level": "Very High", "liquidity": 70,
         "dividend_yield": "0% (staking ~7%)", "market_cap": "~$70 billion",
+    },
+    "BNB-USD": {
+        "name": "Binance Coin (BNB)",
+        "description": "Native token of the Binance ecosystem — the world's largest crypto exchange. Used for trading fee discounts, BNB Chain transactions (DeFi/dApps), and token launches via Binance Launchpad.",
+        "description_fr": "Token natif de l'écosystème Binance — le plus grand exchange crypto au monde. Utilisé pour les réductions de frais de trading, les transactions BNB Chain (DeFi/dApps) et les lancements via Binance Launchpad.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Exchange utility token + BNB Chain ecosystem",
+        "utility_fr": "Token utilitaire d'exchange + écosystème BNB Chain",
+        "typical_use": "Speculative satellite (1–2%). Tied to Binance exchange health.",
+        "typical_use_fr": "Satellite spéculatif (1–2%). Lié à la santé de l'exchange Binance.",
+        "risk_level": "Very High", "liquidity": 78,
+        "dividend_yield": "0%", "market_cap": "~$80 billion",
+    },
+    "XRP-USD": {
+        "name": "XRP (Ripple)",
+        "description": "Digital asset designed for fast, low-cost international payments. Used by banks and financial institutions via RippleNet. Won a landmark SEC lawsuit in 2023 clarifying its legal status in the US.",
+        "description_fr": "Actif numérique conçu pour des paiements internationaux rapides et peu coûteux. Utilisé par les banques via RippleNet. A gagné un procès historique contre la SEC en 2023 clarifiant son statut légal aux USA.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Cross-border payments and banking infrastructure crypto",
+        "utility_fr": "Crypto dédiée aux paiements transfrontaliers et à l'infrastructure bancaire",
+        "typical_use": "Speculative satellite (1–3%). High regulatory sensitivity.",
+        "typical_use_fr": "Satellite spéculatif (1–3%). Très sensible aux évolutions réglementaires.",
+        "risk_level": "Very High", "liquidity": 80,
+        "dividend_yield": "0%", "market_cap": "~$120 billion",
+    },
+    "ADA-USD": {
+        "name": "Cardano (ADA)",
+        "description": "Proof-of-Stake Layer 1 blockchain built with a research-first, peer-reviewed approach. Developed by IOHK (co-founded by Ethereum co-founder Charles Hoskinson). Focuses on scalability and sustainability.",
+        "description_fr": "Blockchain Layer 1 Proof-of-Stake construite avec une approche académique et revue par les pairs. Développée par IOHK (cofondé par le co-fondateur d'Ethereum Charles Hoskinson). Axée sur la scalabilité et la durabilité.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Proof-of-Stake smart contract platform, sustainable blockchain",
+        "utility_fr": "Plateforme de contrats intelligents PoS, blockchain durable",
+        "typical_use": "Speculative alt-coin (0.5–2%). Higher risk than ETH.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Risque plus élevé qu'ETH.",
+        "risk_level": "Very High", "liquidity": 72,
+        "dividend_yield": "0% (staking ~4%)", "market_cap": "~$25 billion",
+    },
+    "AVAX-USD": {
+        "name": "Avalanche (AVAX)",
+        "description": "High-speed Layer 1 blockchain with sub-second finality and low fees. Uses a unique 3-chain architecture (X, P, C chains). Growing DeFi and gaming ecosystem, strong institutional adoption.",
+        "description_fr": "Blockchain Layer 1 haute vitesse avec finalité en sous-seconde et frais bas. Architecture unique à 3 chaînes (X, P, C). Écosystème DeFi et gaming en croissance, forte adoption institutionnelle.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "High-performance DeFi and institutional blockchain",
+        "utility_fr": "Blockchain DeFi haute performance et institutionnelle",
+        "typical_use": "Speculative alt-coin (0.5–2%). Competitive with SOL.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). En compétition avec SOL.",
+        "risk_level": "Very High", "liquidity": 68,
+        "dividend_yield": "0% (staking ~8%)", "market_cap": "~$15 billion",
+    },
+    "DOT-USD": {
+        "name": "Polkadot (DOT)",
+        "description": "Multi-chain protocol enabling different blockchains to communicate and share security. Uses a Relay Chain + Parachain architecture. Developed by Ethereum co-founder Gavin Wood and the Web3 Foundation.",
+        "description_fr": "Protocole multi-chaînes permettant à différentes blockchains de communiquer et partager leur sécurité. Architecture Relay Chain + Parachain. Développé par le co-fondateur d'Ethereum Gavin Wood et la Web3 Foundation.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Cross-chain interoperability protocol",
+        "utility_fr": "Protocole d'interopérabilité multi-chaînes",
+        "typical_use": "Speculative alt-coin (0.5–1.5%). High technical complexity.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–1,5%). Complexité technique élevée.",
+        "risk_level": "Very High", "liquidity": 65,
+        "dividend_yield": "0% (staking ~15%)", "market_cap": "~$10 billion",
+    },
+    "LINK-USD": {
+        "name": "Chainlink (LINK)",
+        "description": "Decentralised oracle network that connects smart contracts to real-world data (prices, weather, sports results). Critical DeFi infrastructure — used by 1,000+ blockchain protocols.",
+        "description_fr": "Réseau oracle décentralisé connectant les smart contracts aux données du monde réel (prix, météo, résultats sportifs). Infrastructure DeFi critique — utilisée par 1 000+ protocoles blockchain.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "DeFi infrastructure — blockchain oracle network",
+        "utility_fr": "Infrastructure DeFi — réseau oracle blockchain",
+        "typical_use": "Speculative alt-coin (0.5–2%). Fundamental DeFi infrastructure bet.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Pari sur l'infrastructure DeFi fondamentale.",
+        "risk_level": "Very High", "liquidity": 65,
+        "dividend_yield": "0%", "market_cap": "~$8 billion",
+    },
+    "MATIC-USD": {
+        "name": "Polygon (POL/MATIC)",
+        "description": "Ethereum Layer 2 scaling solution dramatically reducing gas fees and transaction times. Now rebranding to POL as it transitions to a multi-chain aggregator. Used by major brands (Starbucks, Nike, Reddit).",
+        "description_fr": "Solution de mise à l'échelle Layer 2 d'Ethereum réduisant drastiquement les frais de gas et les temps de transaction. En cours de rebranding vers POL dans sa transition vers un agrégateur multi-chaînes. Utilisé par Starbucks, Nike, Reddit.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Ethereum Layer 2 scaling and multi-chain aggregation",
+        "utility_fr": "Mise à l'échelle Layer 2 d'Ethereum et agrégation multi-chaînes",
+        "typical_use": "Speculative alt-coin (0.5–2%). Strong enterprise adoption.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Forte adoption entreprises.",
+        "risk_level": "Very High", "liquidity": 70,
+        "dividend_yield": "0%", "market_cap": "~$5 billion",
+    },
+    "DOGE-USD": {
+        "name": "Dogecoin (DOGE)",
+        "description": "Originally a meme coin, Dogecoin has become a widely recognised crypto asset with strong community support. Favoured by Elon Musk. Used for tipping and micro-payments. Unlimited supply.",
+        "description_fr": "À l'origine un meme coin, Dogecoin est devenu un actif crypto reconnu avec une forte communauté. Soutenu par Elon Musk. Utilisé pour les pourboires et micro-paiements. Offre illimitée.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Meme coin / community-driven speculative asset",
+        "utility_fr": "Meme coin / actif spéculatif piloté par la communauté",
+        "typical_use": "Pure speculation (0–1%). Very high sentiment sensitivity.",
+        "typical_use_fr": "Pure spéculation (0–1%). Très sensible au sentiment de marché.",
+        "risk_level": "Very High", "liquidity": 75,
+        "dividend_yield": "0%", "market_cap": "~$25 billion",
+    },
+    "INJ-USD": {
+        "name": "Injective (INJ)",
+        "description": "Layer 1 blockchain optimised for DeFi applications — particularly decentralised exchanges (DEX), derivatives, and prediction markets. Fast (10,000+ TPS), EVM-compatible, with a deflationary token burn mechanism.",
+        "description_fr": "Blockchain Layer 1 optimisée pour les applications DeFi — notamment les échanges décentralisés (DEX), les dérivés et les marchés prédictifs. Rapide (10 000+ TPS), compatible EVM, avec un mécanisme de burn déflationniste.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "DeFi-native blockchain for derivatives and exchanges",
+        "utility_fr": "Blockchain native DeFi pour dérivés et échanges décentralisés",
+        "typical_use": "High-risk alt-coin (0.5–1%). Emerging DeFi infrastructure.",
+        "typical_use_fr": "Alt-coin à haut risque (0,5–1%). Infrastructure DeFi émergente.",
+        "risk_level": "Very High", "liquidity": 55,
+        "dividend_yield": "0% (staking ~10%)", "market_cap": "~$3 billion",
+    },
+    "TON-USD": {
+        "name": "Toncoin (TON)",
+        "description": "Blockchain developed originally by Telegram, now operated by the TON Foundation. Deeply integrated with Telegram's 900M users. Fast, scalable, and increasingly used for payments and Web3 games.",
+        "description_fr": "Blockchain développée à l'origine par Telegram, désormais gérée par la TON Foundation. Profondément intégrée aux 900M d'utilisateurs Telegram. Rapide, scalable, de plus en plus utilisée pour les paiements et les jeux Web3.",
+        "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
+        "utility": "Telegram-integrated payments and Web3 gateway",
+        "utility_fr": "Passerelle paiements et Web3 intégrée à Telegram",
+        "typical_use": "Speculative alt-coin (0.5–1.5%). Unique Telegram distribution advantage.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5–1,5%). Avantage unique de distribution via Telegram.",
+        "risk_level": "Very High", "liquidity": 60,
+        "dividend_yield": "0% (staking ~4%)", "market_cap": "~$20 billion",
     },
 }
 
@@ -903,8 +1094,11 @@ SECTOR_MAPPING = {
     "VNQ": "Real Estate", "TLT": "Bonds", "AGG": "Bonds", "LQD": "Bonds",
     "SCHD": "Dividend", "GLD": "Commodities", "SLV": "Commodities",
     "XLK": "Technology", "XLF": "Financials", "XLE": "Energy", "XLV": "Healthcare",
-    "ARKK": "Technology", "BTC-USD": "Crypto", "ETH-USD": "Crypto", "SOL-USD": "Crypto",
-    "BNB-USD": "Crypto",
+    "ARKK": "Technology",
+    "BTC-USD": "Crypto", "ETH-USD": "Crypto", "SOL-USD": "Crypto", "BNB-USD": "Crypto",
+    "XRP-USD": "Crypto", "ADA-USD": "Crypto", "AVAX-USD": "Crypto", "DOT-USD": "Crypto",
+    "LINK-USD": "Crypto", "MATIC-USD": "Crypto", "DOGE-USD": "Crypto",
+    "INJ-USD": "Crypto", "TON-USD": "Crypto",
 }
 
 GEOGRAPHY_MAPPING = {
@@ -916,9 +1110,11 @@ GEOGRAPHY_MAPPING = {
     "VXUS": "International", "EFA": "Developed Ex-US", "EEM": "Emerging Markets",
     "VNQ": "USA", "TLT": "USA", "AGG": "USA", "LQD": "USA",
     "SCHD": "USA", "XLK": "USA", "XLF": "USA", "XLE": "USA", "XLV": "USA",
-    "ARKK": "USA",
-    "GLD": "Global", "SLV": "Global",
+    "ARKK": "USA", "GLD": "Global", "SLV": "Global",
     "BTC-USD": "Global", "ETH-USD": "Global", "SOL-USD": "Global", "BNB-USD": "Global",
+    "XRP-USD": "Global", "ADA-USD": "Global", "AVAX-USD": "Global", "DOT-USD": "Global",
+    "LINK-USD": "Global", "MATIC-USD": "Global", "DOGE-USD": "Global",
+    "INJ-USD": "Global", "TON-USD": "Global",
     "VWO": "Emerging Markets",
 }
 
@@ -942,6 +1138,10 @@ POPULAR_ASSETS = {
     },
     "Crypto": {
         "Bitcoin": "BTC-USD", "Ethereum": "ETH-USD", "Solana": "SOL-USD",
+        "BNB": "BNB-USD", "XRP": "XRP-USD", "Cardano": "ADA-USD",
+        "Avalanche": "AVAX-USD", "Polkadot": "DOT-USD", "Chainlink": "LINK-USD",
+        "Polygon": "MATIC-USD", "Dogecoin": "DOGE-USD", "Injective": "INJ-USD",
+        "Toncoin": "TON-USD",
     },
 }
 
@@ -2018,17 +2218,20 @@ def render_improvement_suggestions(suggestions, lang="en"):
             </div>
             <p><strong>{issue_label}:</strong> {sug['issue']}</p>
             <p><strong>{sol_label}:</strong> {sug['solution']}</p>
-            <p style='color: #818cf8; font-weight: 600; margin-top: 10px; font-size:0.85rem;'>
-                {(impact_label + ": " + sug["impact"]) if sug.get("impact") else ""}
-            </p>
+            {f"<p style='color:#818cf8;font-weight:600;margin-top:10px;font-size:0.85rem;'>{impact_label}: {sug['impact']}</p>" if sug.get("impact") else ""}
         </div>
         """, unsafe_allow_html=True)
 
 def render_asset_card(ticker, lang="en", show_weight=None):
     """Educational asset card with enriched content."""
+    _default_desc = (
+        "This asset is not yet in our library. It will still be analysed from market data."
+        if lang == 'en' else
+        "Cet actif n'est pas encore dans notre bibliothèque. Il sera quand même analysé à partir des données de marché."
+    )
     info = ASSET_INFO.get(ticker, {
         "name": ticker,
-        "description": "This asset is not yet in our library. It will still be analysed from market data.",
+        "description": _default_desc,
         "sector": SECTOR_MAPPING.get(ticker, "Unknown"),
         "geography": GEOGRAPHY_MAPPING.get(ticker, "Unknown"),
         "asset_class": "Unknown",
@@ -2039,6 +2242,10 @@ def render_asset_card(ticker, lang="en", show_weight=None):
         "dividend_yield": "N/A",
         "market_cap": "N/A",
     })
+    # Pick bilingual fields if available
+    description = info.get(f"description_{lang}", info.get("description", ""))
+    utility     = info.get(f"utility_{lang}",     info.get("utility", "N/A"))
+    typical_use = info.get(f"typical_use_{lang}", info.get("typical_use", "N/A"))
 
     risk_colors = {
         "Low": "#10b981", "Low-Medium": "#22d3ee", "Medium": "#6366f1",
@@ -2093,7 +2300,7 @@ def render_asset_card(ticker, lang="en", show_weight=None):
             <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk_display}</span>
             {weight_html}
           </div>
-          <p style="color:#94a3b8;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{info['description']}</p>
+          <p style="color:#94a3b8;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{description}</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:0.83rem;">
             <div><span style="color:#4b5563;font-weight:500;">{sector_label}</span><br/>
                  <span style="color:#e2e8f0;font-weight:600;">{info['sector']}</span></div>
@@ -2110,8 +2317,8 @@ def render_asset_card(ticker, lang="en", show_weight=None):
               <div class="progress-bar-fill" style="width:{liq}%;background:#6366f1;"></div>
             </div>
             <div style="font-size:0.82rem;color:#64748b;line-height:1.6;">
-              <span style="color:#94a3b8;font-weight:600;">{role_label}:</span> {info['utility']}<br/>
-              <span style="color:#94a3b8;font-weight:600;">{use_label}:</span> {info['typical_use']}
+              <span style="color:#94a3b8;font-weight:600;">{role_label}:</span> {utility}<br/>
+              <span style="color:#94a3b8;font-weight:600;">{use_label}:</span> {typical_use}
             </div>
           </div>
         </div>
@@ -2618,9 +2825,8 @@ def main():
                 st.rerun()
         else:
             analyzer = st.session_state.current_portfolio
-            metrics   = analyzer.calculate_metrics()
+            metrics    = analyzer.calculate_metrics()
             robustness = analyzer.calculate_robustness_index()
-            health     = analyzer.calculate_health_score()
 
             # ── Page header
             n_assets = len(analyzer.tickers)
@@ -2652,19 +2858,18 @@ def main():
 
             ft_divider()
 
-            # ── Section 2: Health score + Robustness (side by side)
+            # ── Section 2: Robustness Index
             section_header(
-                "🩺",
-                "Portfolio Health Overview" if lang == 'en' else "Vue d'Ensemble de la Santé",
-                "Overall quality score + robustness breakdown" if lang == 'en'
-                else "Score global + détail de la robustesse",
+                "🛡️",
+                "Robustness Index" if lang == 'en' else "Indice de Robustesse",
+                "Multi-factor portfolio quality breakdown" if lang == 'en'
+                else "Score de qualité multi-facteurs",
             )
-            col_gauge, col_robust = st.columns([1, 1.6], gap="large")
-            with col_gauge:
-                render_health_score(health, lang)
-                render_health_gauge(health['total'], lang)
-            with col_robust:
+            rob_col, gauge_col = st.columns([1.6, 1], gap="large")
+            with rob_col:
                 render_robustness_score(robustness, lang)
+            with gauge_col:
+                render_health_gauge(robustness['total'], lang)
 
             ft_divider()
 
