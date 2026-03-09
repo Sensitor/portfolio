@@ -92,18 +92,18 @@ st.markdown("""
 
     /* ── App background ── */
     .stApp {
-        background: linear-gradient(135deg, #060818 0%, #0c1228 50%, #0f0c2e 100%) !important;
+        background: #0e1117 !important;
         min-height: 100vh;
     }
 
     /* ── Main content area ── */
     .main .block-container {
-        background: #0e1525 !important;
+        background: #0e1117 !important;
         border-radius: 20px !important;
         padding: 2.5rem 3rem !important;
         margin: 0.75rem 0.5rem !important;
-        border: 1px solid rgba(99,102,241,0.15) !important;
-        box-shadow: 0 8px 48px rgba(0,0,0,0.5) !important;
+        border: 1px solid rgba(0,212,255,0.08) !important;
+        box-shadow: 0 8px 48px rgba(0,0,0,0.4) !important;
         animation: fadeUp 0.45s ease-out;
     }
 
@@ -265,15 +265,15 @@ st.markdown("""
 
     /* ── Dark metric cards ── */
     .metric-card {
-        background: #131c30;
-        border: 1px solid rgba(99,102,241,0.15);
+        background: #161b22;
+        border: 1px solid rgba(0,212,255,0.12);
         border-radius: 16px;
         padding: 22px 26px;
         transition: all 0.25s ease;
     }
     .metric-card:hover {
-        border-color: rgba(99,102,241,0.4);
-        box-shadow: 0 4px 24px rgba(99,102,241,0.15);
+        border-color: rgba(0,212,255,0.35);
+        box-shadow: 0 4px 24px rgba(0,212,255,0.10);
         transform: translateY(-2px);
     }
     .metric-label {
@@ -294,7 +294,7 @@ st.markdown("""
 
     /* ── Recommendation cards ── */
     .rec-card {
-        background: #131c30;
+        background: #161b22;
         border-left: 4px solid #6366f1;
         padding: 18px 22px;
         margin: 10px 0;
@@ -318,7 +318,7 @@ st.markdown("""
 
     /* ── Asset cards ── */
     .asset-card {
-        background: #131c30;
+        background: #161b22;
         border: 1px solid rgba(99,102,241,0.12);
         border-radius: 14px;
         padding: 20px 24px;
@@ -368,7 +368,7 @@ st.markdown("""
 
     /* ── Model portfolio cards ── */
     .model-card {
-        background: #131c30;
+        background: #161b22;
         border: 1px solid rgba(99,102,241,0.15);
         border-radius: 16px;
         padding: 24px 28px;
@@ -421,7 +421,7 @@ st.markdown("""
 
     /* ── Progress bars ── */
     .stProgress > div > div {
-        background: linear-gradient(90deg, #4f46e5 0%, #8b5cf6 100%) !important;
+        background: linear-gradient(90deg, #00d4ff 0%, #4f46e5 100%) !important;
     }
 
     /* ── Tabs ── */
@@ -439,25 +439,97 @@ st.markdown("""
         transition: all 0.2s !important;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+        background: linear-gradient(135deg, #0ea5e9, #4f46e5) !important;
         color: white !important;
-        box-shadow: 0 2px 12px rgba(79,70,229,0.4) !important;
+        box-shadow: 0 2px 12px rgba(14,165,233,0.4) !important;
     }
 
     /* ── Expanders ── */
     .streamlit-expanderHeader {
-        background: #131c30 !important;
-        border: 1px solid rgba(99,102,241,0.15) !important;
+        background: #161b22 !important;
+        border: 1px solid rgba(0,212,255,0.12) !important;
         border-radius: 10px !important;
         color: #cbd5e1 !important;
     }
     .streamlit-expanderHeader:hover {
-        background: #1a2540 !important;
-        border-color: rgba(99,102,241,0.3) !important;
+        background: #1c2333 !important;
+        border-color: rgba(0,212,255,0.3) !important;
     }
     details[open] .streamlit-expanderHeader {
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
+    }
+
+    /* ── KPI fintech cards ── */
+    .kpi-card {
+        background: linear-gradient(145deg, #161b22, #1c2333);
+        border: 1px solid rgba(0,212,255,0.12);
+        border-radius: 18px;
+        padding: 22px 24px 18px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .kpi-card:hover {
+        border-color: rgba(0,212,255,0.35);
+        box-shadow: 0 8px 32px rgba(0,212,255,0.10);
+        transform: translateY(-3px);
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: -20px; right: -20px;
+        width: 90px; height: 90px;
+        background: radial-gradient(circle, rgba(0,212,255,0.07) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .kpi-icon  { font-size: 1.3rem; margin-bottom: 10px; }
+    .kpi-label {
+        font-size: 0.67rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #475569; margin-bottom: 6px;
+    }
+    .kpi-value {
+        font-size: 2.2rem; font-weight: 900; line-height: 1;
+        letter-spacing: -0.03em; margin-bottom: 6px;
+    }
+    .kpi-sub   { font-size: 0.75rem; color: #475569; line-height: 1.4; }
+    .kpi-positive { color: #00ff9c; }
+    .kpi-negative { color: #ff4d4d; }
+    .kpi-neutral  { color: #00d4ff; }
+    .kpi-warning  { color: #ffb020; }
+
+    /* ── Section headers ── */
+    .section-header {
+        display: flex; align-items: center; gap: 12px;
+        margin: 32px 0 18px; padding-bottom: 12px;
+        border-bottom: 1px solid rgba(0,212,255,0.1);
+    }
+    .section-icon {
+        width: 34px; height: 34px;
+        background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(99,102,241,0.12));
+        border: 1px solid rgba(0,212,255,0.18);
+        border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+    }
+    .section-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
+    .section-sub   { font-size: 0.76rem; color: #475569; margin-top: 2px; }
+
+    /* ── Tooltip hint boxes ── */
+    .tooltip-hint {
+        background: rgba(0,212,255,0.05);
+        border: 1px solid rgba(0,212,255,0.12);
+        border-radius: 10px; padding: 10px 14px;
+        font-size: 0.80rem; color: #64748b; line-height: 1.55;
+    }
+    .tooltip-hint strong { color: #00d4ff; }
+
+    /* ── Fintech gradient divider ── */
+    .ft-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.25) 40%,
+                    rgba(99,102,241,0.25) 60%, transparent 100%);
+        margin: 28px 0; border: none;
     }
 
     /* ── Inputs ── */
@@ -1667,6 +1739,144 @@ class UltimatePortfolioAnalyzer:
 # UI COMPONENTS
 # =============================================================================
 
+def section_header(icon, title, subtitle=""):
+    """Styled fintech section header with icon."""
+    sub_html = f"<div class='section-sub'>{subtitle}</div>" if subtitle else ""
+    st.markdown(f"""
+    <div class="section-header">
+      <div class="section-icon">{icon}</div>
+      <div>
+        <div class="section-title">{title}</div>
+        {sub_html}
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def ft_divider():
+    """Fintech gradient divider."""
+    st.markdown("<div class='ft-divider'></div>", unsafe_allow_html=True)
+
+
+def render_kpi_cards(metrics, lang="en"):
+    """4 fintech KPI cards: Sharpe, Return, Volatility, Drawdown."""
+    sharpe = metrics['sharpe']
+    ret    = metrics['annual_return']
+    vol    = metrics['volatility']
+    dd     = metrics['max_drawdown']
+
+    sharpe_cls = "kpi-positive" if sharpe > 1 else "kpi-warning" if sharpe > 0.5 else "kpi-negative"
+    ret_cls    = "kpi-positive" if ret > 0 else "kpi-negative"
+    vol_cls    = "kpi-positive" if vol < 0.15 else "kpi-warning" if vol < 0.25 else "kpi-negative"
+    dd_cls     = "kpi-positive" if dd > -0.10 else "kpi-warning" if dd > -0.20 else "kpi-negative"
+
+    if lang == 'en':
+        cards_data = [
+            ("📈", "Sharpe Ratio",    f"{sharpe:.2f}",         "> 1.0 = excellent",        sharpe_cls),
+            ("💰", "Annual Return",   f"{ret*100:+.1f}%",      "Annualised, since start",   ret_cls),
+            ("〰️", "Volatility",      f"{vol*100:.1f}%",       "< 15% = low risk",          vol_cls),
+            ("📉", "Max Drawdown",    f"{dd*100:.1f}%",        "Worst peak-to-trough loss", dd_cls),
+        ]
+    else:
+        cards_data = [
+            ("📈", "Ratio de Sharpe",  f"{sharpe:.2f}",        "> 1.0 = excellent",           sharpe_cls),
+            ("💰", "Rendement Annuel", f"{ret*100:+.1f}%",     "Annualisé, depuis le début",  ret_cls),
+            ("〰️", "Volatilité",       f"{vol*100:.1f}%",      "< 15% = faible risque",       vol_cls),
+            ("📉", "Max Drawdown",     f"{dd*100:.1f}%",       "Perte maximale crête–creux",  dd_cls),
+        ]
+
+    cols = st.columns(4)
+    for col, (icon, label, value, hint, cls) in zip(cols, cards_data):
+        with col:
+            st.markdown(f"""
+            <div class="kpi-card">
+              <div class="kpi-icon">{icon}</div>
+              <div class="kpi-label">{label}</div>
+              <div class="kpi-value {cls}">{value}</div>
+              <div class="kpi-sub">{hint}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+
+def render_health_gauge(score, lang="en"):
+    """Plotly gauge chart for portfolio health score (0–100)."""
+    if score >= 80:
+        bar_color = "#00ff9c"
+    elif score >= 60:
+        bar_color = "#00d4ff"
+    elif score >= 40:
+        bar_color = "#ffb020"
+    else:
+        bar_color = "#ff4d4d"
+
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=score,
+        number=dict(
+            font=dict(size=52, color=bar_color, family='Inter, sans-serif'),
+            suffix="/100",
+        ),
+        gauge=dict(
+            axis=dict(
+                range=[0, 100],
+                tickwidth=1,
+                tickvals=[0, 20, 40, 60, 80, 100],
+                tickcolor='rgba(255,255,255,0.12)',
+                tickfont=dict(color='#475569', size=10),
+            ),
+            bar=dict(color=bar_color, thickness=0.22),
+            bgcolor='rgba(0,0,0,0)',
+            borderwidth=0,
+            steps=[
+                dict(range=[0,  40], color='rgba(255,77,77,0.10)'),
+                dict(range=[40, 60], color='rgba(255,176,32,0.10)'),
+                dict(range=[60, 80], color='rgba(0,212,255,0.10)'),
+                dict(range=[80,100], color='rgba(0,255,156,0.10)'),
+            ],
+            threshold=dict(
+                line=dict(color=bar_color, width=3),
+                thickness=0.80,
+                value=score,
+            ),
+        ),
+    ))
+    fig.update_layout(
+        height=240,
+        margin=dict(l=20, r=20, t=20, b=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(family='Inter, sans-serif'),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def render_metric_tooltips(lang="en"):
+    """Collapsible tooltip panel explaining key financial metrics."""
+    label = "ℹ️ Understanding the metrics" if lang == 'en' else "ℹ️ Comprendre les métriques"
+    with st.expander(label):
+        if lang == 'en':
+            tips = [
+                ("📈 Sharpe Ratio",  "Measures return per unit of risk. Above 1 is good, above 2 is excellent. Below 0 means the portfolio loses money after adjusting for risk."),
+                ("〰️ Volatility",    "Annualised standard deviation of daily returns. < 10% = very stable, 10–20% = moderate, > 25% = high risk."),
+                ("📉 Max Drawdown",  "The largest percentage drop from a portfolio peak to a trough. Lower is better. E.g. −30% means the portfolio once lost 30% of its value."),
+                ("🔀 Diversification", "Spreading assets across sectors, geographies and asset classes to reduce concentration risk. More uncorrelated assets = better diversification."),
+                ("🔗 Correlation",   "A value between −1 and +1. Assets close to +1 move together (less diversification). Assets near −1 move oppositely (good hedge)."),
+            ]
+        else:
+            tips = [
+                ("📈 Ratio de Sharpe", "Mesure le rendement par unité de risque. > 1 = bon, > 2 = excellent. < 0 = le portefeuille perd de l'argent après ajustement du risque."),
+                ("〰️ Volatilité",      "Écart-type annualisé des rendements quotidiens. < 10% = très stable, 10–20% = modéré, > 25% = risque élevé."),
+                ("📉 Max Drawdown",    "La plus grande baisse entre un sommet et un creux. Plus c'est proche de 0, mieux c'est. Ex : −30% = perte temporaire de 30% de la valeur."),
+                ("🔀 Diversification", "Répartir les actifs par secteur, zone géographique et classe d'actifs pour réduire la concentration. Plus les actifs sont décorrélés, mieux c'est."),
+                ("🔗 Corrélation",     "Valeur entre −1 et +1. Proche de +1 = actifs évoluent ensemble (moins de diversification). Proche de −1 = actifs opposés (bonne couverture)."),
+            ]
+        for title, desc in tips:
+            st.markdown(f"""
+            <div class="tooltip-hint" style="margin-bottom:8px;">
+              <strong>{title}</strong><br/>{desc}
+            </div>
+            """, unsafe_allow_html=True)
+
+
 def render_health_score(health, lang="en"):
     """Render the Global Portfolio Health Score card."""
     total = health['total']
@@ -1908,31 +2118,32 @@ def render_asset_card(ticker, lang="en", show_weight=None):
         """, unsafe_allow_html=True)
 
 def render_enhanced_charts(analyzer, lang="en"):
-    """FIX #7: Enhanced visualizations."""
-    
-    tabs = st.tabs([
-        "Performance",
-        "Drawdown",
-        "Allocation",
-        "Geography",
-        "Sectors"
-    ])
-    
+    """Enhanced visualizations with translated tabs and fintech styling."""
+
+    if lang == 'fr':
+        tab_labels = ["📈 Performance", "📉 Drawdown", "🥧 Allocation", "🌍 Géographie", "🏭 Secteurs"]
+    else:
+        tab_labels = ["📈 Performance", "📉 Drawdown", "🥧 Allocation", "🌍 Geography", "🏭 Sectors"]
+
+    tabs = st.tabs(tab_labels)
+
     CHART_LAYOUT = dict(
-        height=420,
+        height=440,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
-        margin=dict(l=10, r=10, t=44, b=10),
+        margin=dict(l=10, r=10, t=48, b=10),
         hovermode='x unified',
+        hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
+                        font=dict(color='#f1f5f9', size=12)),
     )
     AXIS_STYLE = dict(
         showgrid=True,
-        gridcolor='rgba(255,255,255,0.05)',
+        gridcolor='rgba(255,255,255,0.04)',
         gridwidth=1,
-        linecolor='rgba(255,255,255,0.08)',
-        tickfont=dict(size=11, color='#64748b'),
-        zerolinecolor='rgba(255,255,255,0.06)',
+        linecolor='rgba(255,255,255,0.06)',
+        tickfont=dict(size=11, color='#475569'),
+        zerolinecolor='rgba(255,255,255,0.05)',
     )
 
     with tabs[0]:
@@ -1941,13 +2152,17 @@ def render_enhanced_charts(analyzer, lang="en"):
             x=analyzer.portfolio_values.index,
             y=analyzer.portfolio_values.values,
             mode='lines',
-            name='Portfolio Value',
-            line=dict(color='#4f46e5', width=2.5),
+            name='Portfolio' if lang == 'en' else 'Portefeuille',
+            line=dict(color='#00d4ff', width=2.5),
             fill='tozeroy',
-            fillcolor='rgba(79,70,229,0.08)'
+            fillcolor='rgba(0,212,255,0.06)',
+            hovertemplate='<b>%{x|%b %d, %Y}</b><br>$%{y:,.0f}<extra></extra>',
         ))
         fig.update_layout(
-            title=dict(text="Portfolio Performance", font=dict(size=14, color='#e2e8f0')),
+            title=dict(
+                text="Portfolio Performance" if lang == 'en' else "Performance du Portefeuille",
+                font=dict(size=14, color='#e2e8f0', family='Inter'),
+            ),
             yaxis=dict(tickprefix="$", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1963,12 +2178,16 @@ def render_enhanced_charts(analyzer, lang="en"):
             y=drawdown.values * 100,
             mode='lines',
             name='Drawdown',
-            line=dict(color='#ef4444', width=2),
+            line=dict(color='#ff4d4d', width=2),
             fill='tozeroy',
-            fillcolor='rgba(239,68,68,0.10)'
+            fillcolor='rgba(255,77,77,0.08)',
+            hovertemplate='<b>%{x|%b %d, %Y}</b><br>%{y:.1f}%<extra></extra>',
         ))
         fig.update_layout(
-            title=dict(text="Portfolio Drawdown", font=dict(size=14, color='#e2e8f0')),
+            title=dict(
+                text="Portfolio Drawdown" if lang == 'en' else "Drawdown du Portefeuille",
+                font=dict(size=14, color='#e2e8f0', family='Inter'),
+            ),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1976,23 +2195,27 @@ def render_enhanced_charts(analyzer, lang="en"):
         st.plotly_chart(fig, use_container_width=True)
 
     with tabs[2]:
-        palette = ['#4f46e5','#6366f1','#818cf8','#a5b4fc','#c7d2fe',
-                   '#10b981','#34d399','#f59e0b','#fbbf24','#ef4444']
+        palette = ['#00d4ff','#4f46e5','#00ff9c','#ffb020','#ff4d4d',
+                   '#818cf8','#34d399','#fbbf24','#a5b4fc','#6ee7b7']
+        alloc_title = "Portfolio Allocation" if lang == 'en' else "Allocation du Portefeuille"
         fig = go.Figure(data=[go.Pie(
             labels=list(analyzer.weights.keys()),
             values=[v * 100 for v in analyzer.weights.values()],
-            hole=0.45,
-            marker=dict(colors=palette, line=dict(color='white', width=2)),
+            hole=0.50,
+            marker=dict(colors=palette, line=dict(color='#0e1117', width=2)),
             textinfo='label+percent',
-            textfont=dict(size=12),
+            textfont=dict(size=12, color='white'),
+            hovertemplate='<b>%{label}</b><br>%{value:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text="Portfolio Allocation", font=dict(size=14, color='#e2e8f0')),
+            title=dict(text=alloc_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
             showlegend=True,
-            legend=dict(orientation='v', x=1.02, y=0.5, font=dict(color='#94a3b8')),
+            legend=dict(orientation='v', x=1.02, y=0.5, font=dict(color='#94a3b8', size=11)),
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(family='Inter, sans-serif', color='#94a3b8'),
-            height=420, margin=dict(l=10, r=10, t=44, b=10),
+            height=440, margin=dict(l=10, r=10, t=48, b=10),
+            hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
+                            font=dict(color='#f1f5f9', size=12)),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -2003,15 +2226,21 @@ def render_enhanced_charts(analyzer, lang="en"):
             geo_alloc[geo] = geo_alloc.get(geo, 0) + analyzer.weights[ticker]
 
         sorted_geo = dict(sorted(geo_alloc.items(), key=lambda x: x[1], reverse=True))
+        geo_title = "Geographic Allocation" if lang == 'en' else "Allocation Géographique"
+        bar_colors = ['#00d4ff' if i == 0 else '#4f46e5' if i == 1 else '#818cf8'
+                      for i in range(len(sorted_geo))]
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_geo.keys()),
             y=[v*100 for v in sorted_geo.values()],
-            marker=dict(color='#4f46e5', opacity=0.85),
+            marker=dict(color=bar_colors, opacity=0.9,
+                        line=dict(color='rgba(0,212,255,0.3)', width=1)),
             text=[f"{v*100:.1f}%" for v in sorted_geo.values()],
             textposition='outside',
+            textfont=dict(color='#94a3b8', size=11),
+            hovertemplate='<b>%{x}</b><br>%{y:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text="Geographic Allocation", font=dict(size=14, color='#e2e8f0')),
+            title=dict(text=geo_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -2025,15 +2254,24 @@ def render_enhanced_charts(analyzer, lang="en"):
             sector_alloc[sector] = sector_alloc.get(sector, 0) + analyzer.weights[ticker]
 
         sorted_sec = dict(sorted(sector_alloc.items(), key=lambda x: x[1], reverse=True))
+        sec_title = "Sector Allocation" if lang == 'en' else "Allocation Sectorielle"
+        sec_colors = ['#00ff9c', '#00d4ff', '#4f46e5', '#ffb020', '#ff4d4d',
+                      '#818cf8', '#34d399', '#fbbf24', '#a5b4fc', '#6ee7b7']
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_sec.keys()),
             y=[v*100 for v in sorted_sec.values()],
-            marker=dict(color='#6366f1', opacity=0.85),
+            marker=dict(
+                color=sec_colors[:len(sorted_sec)],
+                opacity=0.9,
+                line=dict(color='rgba(255,255,255,0.1)', width=1),
+            ),
             text=[f"{v*100:.1f}%" for v in sorted_sec.values()],
             textposition='outside',
+            textfont=dict(color='#94a3b8', size=11),
+            hovertemplate='<b>%{x}</b><br>%{y:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text="Sector Allocation", font=dict(size=14, color='#e2e8f0')),
+            title=dict(text=sec_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -2372,60 +2610,129 @@ def main():
     # DASHBOARD PAGE
     # ─────────────────────────────────────────────────────────────────────────
     elif page == "dashboard":
-        title = "Dashboard" if lang == 'en' else "Tableau de Bord"
-        st.title(title)
-
         if st.session_state.current_portfolio is None:
+            st.title("Dashboard" if lang == 'en' else "Tableau de Bord")
             st.info(t("welcome", lang))
             if st.button(t("create_portfolio", lang), type="primary"):
                 st.session_state.page = "new_analysis"
                 st.rerun()
         else:
             analyzer = st.session_state.current_portfolio
-
-            # Summary
-            st.markdown(f"### {t('portfolio_summary', lang)}")
-            st.markdown(analyzer.generate_auto_summary(lang))
-            st.markdown("---")
-
-            # Robustness Index
+            metrics   = analyzer.calculate_metrics()
             robustness = analyzer.calculate_robustness_index()
-            render_robustness_score(robustness, lang)
-            st.markdown("---")
+            health     = analyzer.calculate_health_score()
 
-            # Quick Metrics
-            metrics = analyzer.calculate_metrics()
-            m1, m2, m3, m4 = st.columns(4)
-            with m1: st.metric(t("sharpe", lang),        f"{metrics['sharpe']:.2f}")
-            with m2: st.metric(t("annual_return", lang), f"{metrics['annual_return']*100:.1f}%")
-            with m3: st.metric(t("volatility", lang),    f"{metrics['volatility']*100:.1f}%")
-            with m4: st.metric(t("max_drawdown", lang),  f"{metrics['max_drawdown']*100:.1f}%")
-            st.markdown("---")
+            # ── Page header
+            n_assets = len(analyzer.tickers)
+            tickers_preview = ", ".join(analyzer.tickers[:4]) + ("…" if n_assets > 4 else "")
+            sub_info = (
+                f"{n_assets} assets · {tickers_preview}"
+                if lang == 'en' else
+                f"{n_assets} actifs · {tickers_preview}"
+            )
+            st.markdown(f"""
+            <div style="margin-bottom:6px;">
+              <h1 style="font-size:1.9rem;font-weight:900;color:#f1f5f9;letter-spacing:-0.03em;margin:0;">
+                {"Portfolio Dashboard" if lang == 'en' else "Tableau de Bord"}
+              </h1>
+              <p style="color:#475569;font-size:0.85rem;margin:4px 0 0;">{sub_info}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-            # Recommendations
-            st.markdown(f"### {t('recommendations', lang)}")
+            ft_divider()
+
+            # ── Section 1: KPI cards
+            section_header(
+                "⚡",
+                "Key Performance Indicators" if lang == 'en' else "Indicateurs Clés de Performance",
+                "Live metrics from your portfolio" if lang == 'en' else "Métriques en temps réel",
+            )
+            render_kpi_cards(metrics, lang)
+            render_metric_tooltips(lang)
+
+            ft_divider()
+
+            # ── Section 2: Health score + Robustness (side by side)
+            section_header(
+                "🩺",
+                "Portfolio Health Overview" if lang == 'en' else "Vue d'Ensemble de la Santé",
+                "Overall quality score + robustness breakdown" if lang == 'en'
+                else "Score global + détail de la robustesse",
+            )
+            col_gauge, col_robust = st.columns([1, 1.6], gap="large")
+            with col_gauge:
+                render_health_score(health, lang)
+                render_health_gauge(health['total'], lang)
+            with col_robust:
+                render_robustness_score(robustness, lang)
+
+            ft_divider()
+
+            # ── Section 3: Auto summary
+            section_header(
+                "📋",
+                t('portfolio_summary', lang),
+                "AI-generated overview of your portfolio" if lang == 'en'
+                else "Synthèse automatique de votre portefeuille",
+            )
+            summary_text = analyzer.generate_auto_summary(lang)
+            st.markdown(f"""
+            <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);
+                 border-radius:14px;padding:20px 24px;line-height:1.8;color:#cbd5e1;font-size:0.93rem;">
+              {summary_text}
+            </div>
+            """, unsafe_allow_html=True)
+
+            ft_divider()
+
+            # ── Section 4: Charts
+            section_header(
+                "📊",
+                "Portfolio Analytics" if lang == 'en' else "Analyses du Portefeuille",
+                "Performance, allocation & risk over time" if lang == 'en'
+                else "Performance, allocation et risque dans le temps",
+            )
+            render_enhanced_charts(analyzer, lang)
+
+            ft_divider()
+
+            # ── Section 5: AI Recommendations
+            section_header(
+                "🤖",
+                t('recommendations', lang),
+                "Personalised suggestions based on your profile" if lang == 'en'
+                else "Suggestions personnalisées selon votre profil",
+            )
             suggestions = analyzer.generate_improvement_suggestions(lang)
             profile_suggestions = analyzer.generate_profile_adapted_suggestions(lang)
             render_improvement_suggestions(suggestions + profile_suggestions, lang)
-            st.markdown("---")
 
-            # Charts
-            render_enhanced_charts(analyzer, lang)
-            st.markdown("---")
+            ft_divider()
 
-            # Stress Test
+            # ── Section 6: Stress tests
+            section_header(
+                "🔥",
+                t('stress_test', lang),
+                "Simulate historical crisis scenarios" if lang == 'en'
+                else "Simuler des scénarios de crise historiques",
+            )
             if limits['can_stress_test']:
-                if st.button(t("run_stress", lang)):
-                    with st.spinner("..." if lang == 'en' else "Calcul..."):
+                if st.button(t("run_stress", lang), type="primary"):
+                    with st.spinner("Running stress tests…" if lang == 'en' else "Calcul des stress tests…"):
                         stress_results = analyzer.stress_test_scenarios()
                     render_stress_test_results(stress_results, lang)
             else:
                 render_paywall(t("stress_test", lang), lang)
 
-            st.markdown("---")
+            ft_divider()
 
-            # Asset Info
-            st.markdown(f"### {t('asset_info', lang)}")
+            # ── Section 7: Asset details
+            section_header(
+                "🔍",
+                t('asset_info', lang),
+                "Detailed breakdown of each asset in your portfolio" if lang == 'en'
+                else "Détail de chaque actif dans votre portefeuille",
+            )
             for ticker in analyzer.tickers:
                 render_asset_card(ticker, lang, show_weight=analyzer.weights.get(ticker))
 
