@@ -1711,56 +1711,62 @@ def render_health_score(health, lang="en"):
 
 
 def render_robustness_score(robustness, lang="en"):
-    """Render Portfolio Robustness Index as a dark premium card."""
+    """Render Robustness Index using native Streamlit components — no HTML injection."""
     total = robustness['total']
     color = robustness['color']
     interpretation = robustness['interpretation']
+
+    # ── Header row
     label = "Robustness Index" if lang == 'en' else "Indice de Robustesse"
-
-    comp_names = {
-        'en': ["Diversification", "Concentration", "Correlation", "Volatility", "Drawdown", "Geography", "Sectors"],
-        'fr': ["Diversification", "Concentration", "Corrélation", "Volatilité", "Drawdown", "Géographie", "Secteurs"],
+    interp_fr = {
+        "Very Robust": "Très Robuste", "Robust": "Robuste",
+        "Fragile": "Fragile", "High Risk": "Risque Élevé",
     }
-    components = list(zip(
-        comp_names[lang],
-        [robustness['diversification'], robustness['concentration'], robustness['correlation'],
-         robustness['volatility'], robustness['drawdown'], robustness['geography'], robustness['sector']],
-        [20, 20, 15, 15, 15, 10, 5]
-    ))
+    interp_display = interpretation if lang == 'en' else interp_fr.get(interpretation, interpretation)
 
-    bars_html = ""
-    for name, score, max_score in components:
-        pct = (score / max_score) * 100
-        bar_color = "#10b981" if pct > 80 else "#f59e0b" if pct > 60 else "#ef4444"
-        bars_html += f"""
-        <div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.78rem;
-                      color:rgba(255,255,255,0.55);margin-bottom:4px;">
-            <span>{name}</span>
-            <span style="font-weight:600;color:{bar_color};">{score}/{max_score}</span>
-          </div>
-          <div class="bar-bg">
-            <div class="bar-fill" style="width:{pct}%;background:{bar_color};"></div>
-          </div>
-        </div>"""
+    score_color_map = {
+        "#10b981": "normal", "#6366f1": "normal", "#f59e0b": "inverse", "#ef4444": "inverse"
+    }
 
-    st.markdown(f"""
-    <div class="score-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;
-                  flex-wrap:wrap;gap:24px;position:relative;z-index:1;">
-        <div style="min-width:150px;">
-          <div class="score-label">{label}</div>
-          <div class="score-num">{total}<span style="font-size:2rem;font-weight:400;
-               opacity:0.45;">/100</span></div>
-          <div class="score-badge" style="color:{color};border-color:{color}44;
-               background:{color}18;">{interpretation}</div>
-        </div>
-        <div style="flex:1;min-width:220px;max-width:340px;">
-          {bars_html}
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"""<div style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);
+border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:28px 32px;margin:12px 0;
+box-shadow:0 8px 40px rgba(79,70,229,0.25);position:relative;overflow:hidden;">
+<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+color:rgba(255,255,255,0.5);margin-bottom:6px;">{label}</div>
+<div style="font-size:4.5rem;font-weight:900;color:white;line-height:1;letter-spacing:-0.04em;">
+{total}<span style="font-size:1.8rem;font-weight:400;opacity:0.4;">/100</span></div>
+<div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.12);
+border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 16px;
+font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+color:white;">{interp_display}</div></div>""", unsafe_allow_html=True)
+
+    # ── Breakdown using native Streamlit (no HTML needed)
+    breakdown_label = "Score Breakdown" if lang == 'en' else "Détail du Score"
+    st.markdown(f"**{breakdown_label}**")
+
+    components = [
+        ("Diversification",                                              robustness['diversification'], 20),
+        ("Concentration",                                                robustness['concentration'],   20),
+        ("Correlation"   if lang == 'en' else "Corrélation",            robustness['correlation'],     15),
+        ("Volatility"    if lang == 'en' else "Volatilité",             robustness['volatility'],      15),
+        ("Drawdown",                                                     robustness['drawdown'],        15),
+        ("Geography"     if lang == 'en' else "Géographie",             robustness['geography'],       10),
+        ("Sectors"       if lang == 'en' else "Secteurs",               robustness['sector'],           5),
+    ]
+
+    col_a, col_b = st.columns(2)
+    for i, (name, score, max_score) in enumerate(components):
+        pct = score / max_score
+        icon = "🟢" if pct > 0.8 else "🟡" if pct > 0.6 else "🔴"
+        target_col = col_a if i % 2 == 0 else col_b
+        with target_col:
+            st.markdown(
+                f"<div style='font-size:0.78rem;color:#94a3b8;margin-bottom:2px;"
+                f"margin-top:10px;'>{icon} <strong style='color:#e2e8f0;'>{name}</strong>"
+                f" <span style='float:right;color:#64748b;'>{score}/{max_score}</span></div>",
+                unsafe_allow_html=True
+            )
+            st.progress(pct)
 
 def render_improvement_suggestions(suggestions, lang="en"):
     """Render improvement suggestions."""
@@ -1797,8 +1803,8 @@ def render_improvement_suggestions(suggestions, lang="en"):
             </div>
             <p><strong>{issue_label}:</strong> {sug['issue']}</p>
             <p><strong>{sol_label}:</strong> {sug['solution']}</p>
-            <p style='color: #4f46e5; font-weight: 600; margin-top: 10px; font-size:0.85rem;'>
-                {impact_label}: {sug['impact']}
+            <p style='color: #818cf8; font-weight: 600; margin-top: 10px; font-size:0.85rem;'>
+                {(impact_label + ": " + sug["impact"]) if sug.get("impact") else ""}
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -2503,7 +2509,10 @@ def main():
 
             st.session_state.weights = new_weights
             total_w = sum(new_weights.values())
-            if abs(total_w - 1.0) > 0.01:
+            if total_w <= 0:
+                st.warning("All weights are 0 — please adjust the sliders." if lang == 'en'
+                           else "Tous les poids sont à 0 — ajustez les curseurs.")
+            elif abs(total_w - 1.0) > 0.01:
                 st.session_state.weights = {k: v / total_w for k, v in new_weights.items()}
                 st.warning(f"{t('total_weight', lang)}: {total_w*100:.1f}% — {t('normalised', lang)}")
             else:
@@ -2537,6 +2546,16 @@ def main():
     elif page == "models":
         title = t('models', lang)
         st.title(title)
+
+        if tier == 'free':
+            preview_note = (
+                "Model portfolios are available on the **Pro** plan. "
+                "Here is a preview — upgrade to use them."
+                if lang == 'en' else
+                "Les portefeuilles modèles sont disponibles sur le plan **Pro**. "
+                "Voici un aperçu — passez à Pro pour les utiliser."
+            )
+            st.info(preview_note)
 
         for model_name, model_data in MODEL_PORTFOLIOS.items():
             ret_pct = model_data['expected_return'] * 100
@@ -2573,23 +2592,30 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-            use_label = t("use_model", lang)
-            if st.button(use_label, key=f"use_{model_name}", use_container_width=False):
-                st.session_state.selected_tickers = list(model_data['allocation'].keys())
-                st.session_state.weights = model_data['allocation'].copy()
-                with st.spinner("Loading..." if lang == 'en' else "Chargement..."):
-                    analyzer = UltimatePortfolioAnalyzer(
-                        list(model_data['allocation'].keys()),
-                        model_data['allocation'],
-                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
-                        user_profile=model_data['profile']
-                    )
-                    if analyzer.fetch_data():
-                        st.session_state.current_portfolio = analyzer
-                        ok_msg = f"{model_name} loaded!" if lang == 'en' else f"{model_name} chargé !"
-                        st.success(ok_msg)
-                        st.session_state.page = "dashboard"
-                        st.rerun()
+            if tier == 'pro':
+                use_label = t("use_model", lang)
+                if st.button(use_label, key=f"use_{model_name}", use_container_width=False):
+                    st.session_state.selected_tickers = list(model_data['allocation'].keys())
+                    st.session_state.weights = model_data['allocation'].copy()
+                    # sync slider states
+                    for tk, w in model_data['allocation'].items():
+                        st.session_state[f"ws_{tk}"] = round(w * 100, 1)
+                    with st.spinner("Loading..." if lang == 'en' else "Chargement..."):
+                        analyzer = UltimatePortfolioAnalyzer(
+                            list(model_data['allocation'].keys()),
+                            model_data['allocation'],
+                            (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
+                            user_profile=model_data['profile']
+                        )
+                        if analyzer.fetch_data():
+                            st.session_state.current_portfolio = analyzer
+                            ok_msg = f"{model_name} loaded!" if lang == 'en' else f"{model_name} chargé !"
+                            st.success(ok_msg)
+                            st.session_state.page = "dashboard"
+                            st.rerun()
+            else:
+                locked_msg = "Pro plan required" if lang == 'en' else "Plan Pro requis"
+                st.caption(f"🔒 {locked_msg}")
 
             st.markdown("")
 
