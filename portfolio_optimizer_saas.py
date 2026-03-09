@@ -1345,9 +1345,9 @@ class UltimatePortfolioAnalyzer:
                 'type': 'critical',
                 'title': 'Critical Concentration' if lang == 'en' else 'Concentration Critique',
                 'issue': f'{max_ticker} = {max_weight*100:.0f}%',
-                'solution': f'Reduce to <30%. Diversify into VXUS + AGG' if lang == 'en' 
+                'solution': f'Reduce to <30%. Diversify into VXUS + AGG' if lang == 'en'
                            else f'Réduire <30%. Diversifier vers VXUS + AGG',
-                'impact': 'Robustness +15 pts',
+                'impact': 'Robustness +15 pts' if lang == 'en' else 'Robustesse +15 pts',
             })
         
         # Sector concentration
@@ -1362,10 +1362,10 @@ class UltimatePortfolioAnalyzer:
                     'priority': 'HIGH',
                     'type': 'warning',
                     'title': f'High {sector} Exposure' if lang == 'en' else f'Exposition {sector} Élevée',
-                    'issue': f'{exposure*100:.0f}% in {sector}',
+                    'issue': f'{exposure*100:.0f}% in {sector}' if lang == 'en' else f'{exposure*100:.0f}% dans {sector}',
                     'solution': f'Add international ETF (VXUS) or bonds (AGG)' if lang == 'en'
                                else f'Ajouter ETF international (VXUS) ou obligations (AGG)',
-                    'impact': 'Robustness +10 pts',
+                    'impact': 'Robustness +10 pts' if lang == 'en' else 'Robustesse +10 pts',
                 })
         
         # Geographic concentration
@@ -1380,10 +1380,10 @@ class UltimatePortfolioAnalyzer:
                 'priority': 'HIGH',
                 'type': 'warning',
                 'title': 'Geographic Concentration' if lang == 'en' else 'Concentration Géographique',
-                'issue': f'{usa_exposure*100:.0f}% USA exposure',
+                'issue': f'{usa_exposure*100:.0f}% USA exposure' if lang == 'en' else f'{usa_exposure*100:.0f}% exposition USA',
                 'solution': 'Add VXUS (international) for global diversification' if lang == 'en'
                            else 'Ajouter VXUS (international) pour diversification mondiale',
-                'impact': 'Robustness +8 pts',
+                'impact': 'Robustness +8 pts' if lang == 'en' else 'Robustesse +8 pts',
             })
         
         # Lack of bonds/hedges
@@ -1395,10 +1395,10 @@ class UltimatePortfolioAnalyzer:
                 'priority': 'MEDIUM',
                 'type': 'info',
                 'title': 'Missing Hedges' if lang == 'en' else 'Absence de Couverture',
-                'issue': 'No bonds or gold in portfolio',
+                'issue': 'No bonds or gold in portfolio' if lang == 'en' else 'Aucune obligation ni or dans le portefeuille',
                 'solution': 'Add 10-20% AGG (bonds) and 5-10% GLD (gold) for stability' if lang == 'en'
                            else 'Ajouter 10-20% AGG (obligations) et 5-10% GLD (or)',
-                'impact': 'Robustness +6 pts',
+                'impact': 'Robustness +6 pts' if lang == 'en' else 'Robustesse +6 pts',
             })
         
         # Low diversification
@@ -1407,10 +1407,10 @@ class UltimatePortfolioAnalyzer:
                 'priority': 'HIGH',
                 'type': 'warning',
                 'title': 'Low Diversification' if lang == 'en' else 'Faible Diversification',
-                'issue': f'Only {len(self.tickers)} assets',
+                'issue': f'Only {len(self.tickers)} assets' if lang == 'en' else f'Seulement {len(self.tickers)} actifs',
                 'solution': 'Add 3-5 more assets from different sectors/geographies' if lang == 'en'
                            else 'Ajouter 3-5 actifs de secteurs/géographies différents',
-                'impact': 'Robustness +12 pts',
+                'impact': 'Robustness +12 pts' if lang == 'en' else 'Robustesse +12 pts',
             })
         
         # High volatility
@@ -1419,10 +1419,10 @@ class UltimatePortfolioAnalyzer:
                 'priority': 'MEDIUM',
                 'type': 'warning',
                 'title': 'High Volatility' if lang == 'en' else 'Volatilité Élevée',
-                'issue': f'{metrics["volatility"]*100:.0f}% annual volatility',
+                'issue': f'{metrics["volatility"]*100:.0f}% annual volatility' if lang == 'en' else f'{metrics["volatility"]*100:.0f}% de volatilité annuelle',
                 'solution': 'Reduce high-vol assets. Add AGG (bonds) for stability' if lang == 'en'
                            else 'Réduire actifs volatils. Ajouter AGG (obligations)',
-                'impact': 'Robustness +7 pts',
+                'impact': 'Robustness +7 pts' if lang == 'en' else 'Robustesse +7 pts',
             })
         
         return suggestions
@@ -1442,7 +1442,7 @@ class UltimatePortfolioAnalyzer:
                     'priority': 'HIGH',
                     'type': 'warning',
                     'title': 'Too Risky for Safe Profile' if lang == 'en' else 'Trop Risqué pour Profil Sûr',
-                    'issue': f'Volatility {vol*100:.0f}% > recommended 12%',
+                    'issue': f'Volatility {vol*100:.0f}% > recommended 12%' if lang == 'en' else f'Volatilité {vol*100:.0f}% > recommandé 12%',
                     'solution': 'Increase bonds (AGG) to 40-50% and reduce equity exposure' if lang == 'en'
                                else 'Augmenter obligations (AGG) à 40-50% et réduire actions',
                     'recommended': ['AGG', 'GLD', 'SPY'],
@@ -1455,7 +1455,7 @@ class UltimatePortfolioAnalyzer:
                     'priority': 'HIGH',
                     'type': 'info',
                     'title': 'Add Defensive Assets' if lang == 'en' else 'Ajouter Actifs Défensifs',
-                    'issue': 'Missing safe-haven assets',
+                    'issue': 'Missing safe-haven assets' if lang == 'en' else 'Actifs refuge absents',
                     'solution': 'Add AGG (bonds 40%) and GLD (gold 15%)' if lang == 'en'
                                else 'Ajouter AGG (obligations 40%) et GLD (or 15%)',
                     'recommended': ['AGG', 'GLD'],
@@ -1471,7 +1471,7 @@ class UltimatePortfolioAnalyzer:
                     'priority': 'MEDIUM',
                     'type': 'info',
                     'title': 'Adjust to 60/40 Mix' if lang == 'en' else 'Ajuster vers 60/40',
-                    'issue': f'{stock_exposure*100:.0f}% stocks (target 60%)',
+                    'issue': f'{stock_exposure*100:.0f}% stocks (target 60%)' if lang == 'en' else f'{stock_exposure*100:.0f}% actions (cible 60%)',
                     'solution': 'Increase bonds to reach 40% allocation' if lang == 'en'
                                else 'Augmenter obligations vers 40%',
                     'recommended': ['AGG', 'VXUS', 'VNQ'],
@@ -1485,7 +1485,7 @@ class UltimatePortfolioAnalyzer:
                     'priority': 'MEDIUM',
                     'type': 'info',
                     'title': 'Add Growth Assets' if lang == 'en' else 'Ajouter Actifs Croissance',
-                    'issue': 'Missing high-growth exposure',
+                    'issue': 'Missing high-growth exposure' if lang == 'en' else 'Exposition croissance insuffisante',
                     'solution': 'Consider QQQ (Nasdaq), NVDA, or 5-10% BTC-USD' if lang == 'en'
                                else 'Considérer QQQ (Nasdaq), NVDA, ou 5-10% BTC-USD',
                     'recommended': ['QQQ', 'NVDA', 'BTC-USD', 'TSLA'],
@@ -1594,12 +1594,17 @@ class UltimatePortfolioAnalyzer:
             Robustness score: **{robustness['total']}/100 ({robustness['interpretation']})**.
             """
         else:
+            interp_fr = {
+                "Very Robust": "Très Robuste", "Robust": "Robuste",
+                "Fragile": "Fragile", "High Risk": "Risque Élevé",
+            }
+            interp_display = interp_fr.get(robustness['interpretation'], robustness['interpretation'])
             summary = f"""
             Votre portefeuille est **fortement exposé au secteur {dominant_sector}** ({sector_exposure*100:.0f}%)
             et aux marchés **{dominant_geo}** ({geo_exposure*100:.0f}%).
             La diversification est **{div_status}** sur {len(self.tickers)} actifs.
             La volatilité est **{risk_level}** ({vol*100:.0f}% annuelle).
-            Score de robustesse: **{robustness['total']}/100 ({robustness['interpretation']})**.
+            Score de robustesse: **{robustness['total']}/100 ({interp_display})**.
             """
         
         return summary.strip()
@@ -1846,6 +1851,19 @@ def render_asset_card(ticker, lang="en", show_weight=None):
     cls_bg = class_colors.get(asset_class, "#f1f5f9")
     cls_txt = class_text_colors.get(asset_class, "#64748b")
 
+    # Display labels (translated)
+    risk_labels_fr = {
+        "Low": "Faible", "Low-Medium": "Faible-Moyen", "Medium": "Moyen",
+        "Medium-High": "Moyen-Élevé", "High": "Élevé", "Very High": "Très Élevé",
+        "Unknown": "Inconnu",
+    }
+    class_labels_fr = {
+        "Stock": "Action", "ETF": "ETF", "Crypto": "Crypto",
+        "Commodity": "Matière 1ère", "Bond": "Obligation", "Unknown": "Inconnu",
+    }
+    risk_display = risk if lang == 'en' else risk_labels_fr.get(risk, risk)
+    class_display = asset_class if lang == 'en' else class_labels_fr.get(asset_class, asset_class)
+
     weight_html = ""
     if show_weight is not None:
         weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#4f46e5;margin-left:8px;'>{show_weight*100:.1f}%</span>"
@@ -1857,12 +1875,12 @@ def render_asset_card(ticker, lang="en", show_weight=None):
         sector_label = "Sector" if lang == 'en' else "Secteur"
         geo_label = "Geography" if lang == 'en' else "Géographie"
         div_label = "Dividend / Yield" if lang == 'en' else "Dividende / Rendement"
-        cap_label = "Market Cap / AUM"
+        cap_label = "Market Cap / AUM" if lang == 'en' else "Cap. Boursière / AUM"
         st.markdown(f"""
         <div class="asset-card">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-            <span class="asset-class-badge" style="background:{cls_bg};color:{cls_txt};">{asset_class}</span>
-            <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk}</span>
+            <span class="asset-class-badge" style="background:{cls_bg};color:{cls_txt};">{class_display}</span>
+            <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk_display}</span>
             {weight_html}
           </div>
           <p style="color:#94a3b8;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{info['description']}</p>
@@ -2563,12 +2581,22 @@ def main():
             desc_key = "description_fr" if lang == 'fr' else "description_en"
             description = model_data.get(desc_key, model_data.get("description_en", ""))
 
-            alloc_html = "".join(
-                f"<span style='display:inline-block;background:rgba(99,102,241,0.15);border-radius:8px;"
-                f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#a5b4fc;"
-                f"margin:3px;border:1px solid rgba(99,102,241,0.2);'>{tk} {w*100:.0f}%</span>"
-                for tk, w in model_data['allocation'].items()
-            )
+            if tier == 'pro':
+                alloc_html = "".join(
+                    f"<span style='display:inline-block;background:rgba(99,102,241,0.15);border-radius:8px;"
+                    f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#a5b4fc;"
+                    f"margin:3px;border:1px solid rgba(99,102,241,0.2);'>{tk} {w*100:.0f}%</span>"
+                    for tk, w in model_data['allocation'].items()
+                )
+            else:
+                n = len(model_data['allocation'])
+                locked_label = "assets" if lang == 'en' else "actifs"
+                alloc_html = (
+                    f"<span style='display:inline-block;background:rgba(99,102,241,0.08);border-radius:8px;"
+                    f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#64748b;"
+                    f"margin:3px;border:1px solid rgba(99,102,241,0.15);filter:blur(0px);'>"
+                    f"🔒 {n} {locked_label} — Pro</span>"
+                )
             ret_label = t("expected_return", lang)
             vol_label = t("volatility", lang)
 
