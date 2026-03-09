@@ -55,194 +55,306 @@ TIER_LIMITS = {
 
 st.set_page_config(
     page_title="Portfolio Health Pro",
-    page_icon="chart_with_upwards_trend",
+    page_icon=":chart_with_upwards_trend:",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # =============================================================================
-# CSS — Professional design with Inter font
+# CSS — Dark pro theme, Inter font, high contrast
 # =============================================================================
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-    /* ── Global ── */
     html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Inter', -apple-system, sans-serif !important;
     }
 
+    /* ── Animations ── */
     @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(16px); }
+        from { opacity: 0; transform: translateY(18px); }
         to   { opacity: 1; transform: translateY(0); }
     }
     @keyframes slideRight {
-        from { opacity: 0; transform: translateX(-12px); }
+        from { opacity: 0; transform: translateX(-14px); }
         to   { opacity: 1; transform: translateX(0); }
     }
-    @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(79,70,229,0.3); }
-        50%       { box-shadow: 0 0 0 8px rgba(79,70,229,0); }
+    @keyframes shimmer {
+        0%   { background-position: -400px 0; }
+        100% { background-position: 400px 0; }
+    }
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+        50%       { box-shadow: 0 0 40px rgba(99,102,241,0.6); }
     }
 
+    /* ── App background ── */
     .stApp {
-        background: #f0f2f8;
-        animation: fadeUp 0.4s ease-out;
+        background: linear-gradient(135deg, #060818 0%, #0c1228 50%, #0f0c2e 100%) !important;
+        min-height: 100vh;
     }
 
+    /* ── Main content area ── */
     .main .block-container {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 2rem 2.5rem;
-        margin: 0.75rem 0.5rem;
-        box-shadow: 0 4px 24px rgba(15,23,42,0.08);
-        animation: fadeUp 0.5s ease-out;
+        background: #0e1525 !important;
+        border-radius: 20px !important;
+        padding: 2.5rem 3rem !important;
+        margin: 0.75rem 0.5rem !important;
+        border: 1px solid rgba(99,102,241,0.15) !important;
+        box-shadow: 0 8px 48px rgba(0,0,0,0.5) !important;
+        animation: fadeUp 0.45s ease-out;
+    }
+
+    /* ── ALL TEXT in main area ── */
+    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+        color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em !important;
+    }
+    .main p, .main li, .main span, .main div, .main label {
+        color: #cbd5e1 !important;
+    }
+    .main .stMarkdown, .main .stText {
+        color: #cbd5e1 !important;
     }
 
     /* ── Sidebar ── */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%) !important;
-        border-right: 1px solid rgba(255,255,255,0.06);
+        background: linear-gradient(180deg, #080d1e 0%, #0f0c2e 100%) !important;
+        border-right: 1px solid rgba(99,102,241,0.2) !important;
     }
-    [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-    [data-testid="stSidebar"] .stButton>button {
-        background: rgba(255,255,255,0.07) !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] label {
         color: #e2e8f0 !important;
-        border-radius: 8px !important;
+    }
+    [data-testid="stSidebar"] .stButton > button {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #94a3b8 !important;
+        border-radius: 10px !important;
         font-weight: 500 !important;
-        transition: all 0.2s !important;
+        font-size: 0.85rem !important;
+        transition: all 0.2s ease !important;
+        text-align: left !important;
     }
-    [data-testid="stSidebar"] .stButton>button:hover {
-        background: rgba(79,70,229,0.4) !important;
-        border-color: #6366f1 !important;
-        transform: none !important;
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(99,102,241,0.2) !important;
+        border-color: rgba(99,102,241,0.5) !important;
+        color: #e2e8f0 !important;
+        transform: translateX(3px) !important;
     }
-    [data-testid="stSidebar"] .stButton>[data-testid="baseButton-primary"] {
+    [data-testid="stSidebar"] .stButton > [data-testid="baseButton-primary"] {
         background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
         border-color: transparent !important;
-        box-shadow: 0 2px 8px rgba(79,70,229,0.4) !important;
+        color: white !important;
+        box-shadow: 0 2px 12px rgba(99,102,241,0.4) !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox > div > div {
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #e2e8f0 !important;
     }
 
-    /* ── Buttons (main area) ── */
-    .stButton>button {
-        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+    /* ── Main buttons ── */
+    .stButton > button {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 10px !important;
-        padding: 10px 24px !important;
+        border-radius: 12px !important;
+        padding: 11px 26px !important;
         font-weight: 600 !important;
         font-size: 0.9rem !important;
         letter-spacing: 0.01em !important;
-        box-shadow: 0 2px 8px rgba(79,70,229,0.28) !important;
+        box-shadow: 0 4px 16px rgba(79,70,229,0.35) !important;
         transition: all 0.2s ease !important;
     }
-    .stButton>button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 16px rgba(79,70,229,0.38) !important;
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(79,70,229,0.5) !important;
     }
-    .stButton>button[kind="secondary"] {
-        background: #f8fafc !important;
-        color: #334155 !important;
-        border: 1px solid #e2e8f0 !important;
+    .stButton > button[kind="secondary"] {
+        background: rgba(255,255,255,0.06) !important;
+        color: #94a3b8 !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
         box-shadow: none !important;
     }
+    .stButton > button[kind="secondary"]:hover {
+        background: rgba(255,255,255,0.1) !important;
+        color: #e2e8f0 !important;
+        transform: translateY(-1px) !important;
+    }
 
-    /* ── Score Cards ── */
-    .health-card {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-        color: white;
-        border-radius: 16px;
+    /* ── Score / stat cards ── */
+    .score-card {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%);
+        border: 1px solid rgba(139,92,246,0.3);
+        border-radius: 20px;
         padding: 32px 36px;
         margin: 16px 0;
-        box-shadow: 0 8px 32px rgba(79,70,229,0.35);
+        box-shadow: 0 8px 40px rgba(79,70,229,0.3);
         animation: fadeUp 0.5s ease-out;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
         position: relative;
         overflow: hidden;
     }
-    .health-card::before {
+    .score-card::before {
         content: '';
         position: absolute;
-        top: -40%; right: -15%;
-        width: 280px; height: 280px;
-        background: rgba(255,255,255,0.04);
+        top: -30%; right: -10%;
+        width: 250px; height: 250px;
+        background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
         border-radius: 50%;
     }
-    .health-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(79,70,229,0.45);
+    .score-card::after {
+        content: '';
+        position: absolute;
+        bottom: -20%; left: -5%;
+        width: 180px; height: 180px;
+        background: radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%);
+        border-radius: 50%;
     }
-    .health-score-num {
-        font-size: 4.5rem;
-        font-weight: 800;
+    .score-num {
+        font-size: 5rem;
+        font-weight: 900;
+        color: white;
         line-height: 1;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
+        text-shadow: 0 2px 20px rgba(255,255,255,0.2);
     }
-    .health-grade {
+    .score-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        margin-bottom: 8px;
+    }
+    .score-badge {
         display: inline-block;
         background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.2);
         border-radius: 20px;
-        padding: 4px 16px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
+        padding: 5px 16px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-top: 8px;
+        color: white;
+        margin-top: 10px;
+    }
+    .bar-bg {
+        background: rgba(255,255,255,0.12);
+        border-radius: 6px;
+        height: 6px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    .bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.75);
+        transition: width 0.7s ease-out;
     }
 
-    .robustness-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 28px 32px;
-        margin: 12px 0;
-        animation: fadeUp 0.55s ease-out;
-        transition: box-shadow 0.2s;
+    /* ── Dark metric cards ── */
+    .metric-card {
+        background: #131c30;
+        border: 1px solid rgba(99,102,241,0.15);
+        border-radius: 16px;
+        padding: 22px 26px;
+        transition: all 0.25s ease;
     }
-    .robustness-card:hover {
-        box-shadow: 0 4px 20px rgba(79,70,229,0.12);
+    .metric-card:hover {
+        border-color: rgba(99,102,241,0.4);
+        box-shadow: 0 4px 24px rgba(99,102,241,0.15);
+        transform: translateY(-2px);
     }
-    .robustness-num {
-        font-size: 3.5rem;
+    .metric-label {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+    }
+    .metric-value {
+        font-size: 2.2rem;
         font-weight: 800;
-        color: #1e1b4b;
+        color: #f1f5f9;
         line-height: 1;
         letter-spacing: -0.02em;
     }
 
-    /* ── Metric Cards ── */
-    .metric-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+    /* ── Recommendation cards ── */
+    .rec-card {
+        background: #131c30;
+        border-left: 4px solid #6366f1;
+        padding: 18px 22px;
+        margin: 10px 0;
         border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 4px solid #6366f1;
+        animation: slideRight 0.4s ease-out;
+        transition: all 0.2s ease;
+    }
+    .rec-card:hover {
+        background: #1a2540;
+        transform: translateX(4px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .rec-card h4 { color: #f1f5f9 !important; margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 600; }
+    .rec-card p  { color: #94a3b8 !important; margin: 4px 0; line-height: 1.6; font-size: 0.87rem; }
+    .rec-card.critical { border-left-color: #ef4444 !important; }
+    .rec-card.warning  { border-left-color: #f59e0b !important; }
+    .rec-card.success  { border-left-color: #10b981 !important; }
+    .rec-card.info     { border-left-color: #6366f1 !important; }
+
+    /* ── Asset cards ── */
+    .asset-card {
+        background: #131c30;
+        border: 1px solid rgba(99,102,241,0.12);
+        border-radius: 14px;
         padding: 20px 24px;
-        text-align: center;
-        transition: box-shadow 0.2s ease;
+        margin: 6px 0;
+        transition: all 0.25s ease;
     }
-    .metric-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-    .metric-label { font-size: 0.8rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-    .metric-value { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.1; }
-    .metric-sub   { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
-
-    /* ── Sub-score bars ── */
-    .subscore-bar-bg {
-        background: rgba(255,255,255,0.15);
-        border-radius: 6px;
-        height: 6px;
-        overflow: hidden;
-        margin-top: 4px;
+    .asset-card:hover {
+        border-color: rgba(99,102,241,0.4);
+        background: #1a2540;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.15);
     }
-    .subscore-bar-fill {
-        height: 100%;
-        border-radius: 6px;
-        background: rgba(255,255,255,0.8);
-        transition: width 0.6s ease-out;
+    .asset-card p, .asset-card span, .asset-card div {
+        color: #94a3b8 !important;
     }
 
+    /* ── Badges ── */
+    .asset-class-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .risk-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    /* ── Progress bar (dark) ── */
     .progress-bar-bg {
-        background: #e2e8f0;
+        background: rgba(255,255,255,0.08);
         border-radius: 6px;
         height: 7px;
         overflow: hidden;
@@ -254,142 +366,145 @@ st.markdown("""
         transition: width 0.6s ease-out;
     }
 
-    /* ── Recommendation Cards ── */
-    .rec-card {
-        background: #ffffff;
-        border-left: 4px solid #6366f1;
-        padding: 18px 22px;
-        margin: 12px 0;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        animation: slideRight 0.4s ease-out;
-        transition: box-shadow 0.2s, transform 0.2s;
+    /* ── Model portfolio cards ── */
+    .model-card {
+        background: #131c30;
+        border: 1px solid rgba(99,102,241,0.15);
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin: 10px 0;
+        transition: all 0.25s ease;
     }
-    .rec-card:hover {
-        box-shadow: 0 6px 20px rgba(0,0,0,0.10);
-        transform: translateX(3px);
-    }
-    .rec-card h4 { color: #0f172a; margin: 0 0 8px 0; font-size: 1rem; font-weight: 600; }
-    .rec-card p  { color: #475569; margin: 4px 0; line-height: 1.6; font-size: 0.9rem; }
-    .rec-card.critical { border-left-color: #ef4444; }
-    .rec-card.warning  { border-left-color: #f59e0b; }
-    .rec-card.success  { border-left-color: #10b981; }
-    .rec-card.info     { border-left-color: #6366f1; }
-
-    /* ── Asset Card ── */
-    .asset-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 18px 22px;
-        margin: 8px 0;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .asset-card:hover {
-        border-color: #6366f1;
-        box-shadow: 0 4px 16px rgba(79,70,229,0.12);
-    }
-    .asset-class-badge {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-    }
-    .risk-badge {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 0.72rem;
-        font-weight: 600;
+    .model-card:hover {
+        border-color: rgba(99,102,241,0.4);
+        background: #1a2540;
+        box-shadow: 0 8px 32px rgba(99,102,241,0.18);
+        transform: translateY(-3px);
     }
 
-    /* ── Upgrade / Paywall Card ── */
+    /* ── Upgrade card ── */
     .upgrade-card {
-        background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-        border: 1px solid #c4b5fd;
-        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(124,58,237,0.15));
+        border: 1px solid rgba(99,102,241,0.35);
+        border-radius: 16px;
         padding: 28px 32px;
         text-align: center;
         margin: 16px 0;
     }
-    .upgrade-card h3 { color: #4338ca; margin: 0 0 8px 0; font-size: 1.25rem; }
-    .upgrade-card p  { color: #5b21b6; margin: 4px 0; font-size: 0.9rem; }
+    .upgrade-card h3 { color: #a5b4fc !important; margin: 0 0 8px 0; }
+    .upgrade-card p  { color: #818cf8 !important; font-size: 0.9rem; }
 
-    /* ── Model Portfolio Card ── */
-    .model-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+    /* ── Paywall block ── */
+    .paywall-block {
+        background: rgba(79,70,229,0.08);
+        border: 1px dashed rgba(99,102,241,0.3);
         border-radius: 14px;
-        padding: 24px 28px;
-        margin: 10px 0;
-        transition: box-shadow 0.2s, transform 0.2s;
-    }
-    .model-card:hover {
-        box-shadow: 0 6px 24px rgba(0,0,0,0.10);
-        transform: translateY(-2px);
+        padding: 32px;
+        text-align: center;
+        margin: 16px 0;
     }
 
-    /* ── Metrics (native Streamlit) ── */
+    /* ── Native Streamlit metric override ── */
     [data-testid="stMetricValue"] {
-        font-size: 1.8rem !important;
-        color: #0f172a !important;
-        font-weight: 700 !important;
+        font-size: 2rem !important;
+        color: #f1f5f9 !important;
+        font-weight: 800 !important;
         font-family: 'Inter', sans-serif !important;
     }
     [data-testid="stMetricLabel"] {
-        font-size: 0.78rem !important;
+        font-size: 0.72rem !important;
         color: #64748b !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
+        letter-spacing: 0.07em !important;
     }
 
     /* ── Progress bars ── */
     .stProgress > div > div {
-        background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%) !important;
-        transition: width 0.5s ease-out !important;
+        background: linear-gradient(90deg, #4f46e5 0%, #8b5cf6 100%) !important;
     }
 
     /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
-        background: #f1f5f9;
-        border-radius: 10px;
-        padding: 4px;
-        gap: 4px;
+        background: rgba(255,255,255,0.04) !important;
+        border-radius: 12px !important;
+        padding: 4px !important;
+        gap: 4px !important;
     }
     .stTabs [data-baseweb="tab"] {
         color: #64748b !important;
-        border-radius: 7px !important;
+        border-radius: 8px !important;
         font-weight: 500 !important;
-        font-size: 0.85rem !important;
+        font-size: 0.84rem !important;
         transition: all 0.2s !important;
     }
     .stTabs [aria-selected="true"] {
-        background: #ffffff !important;
-        color: #4f46e5 !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.10) !important;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+        color: white !important;
+        box-shadow: 0 2px 12px rgba(79,70,229,0.4) !important;
     }
 
     /* ── Expanders ── */
     .streamlit-expanderHeader {
-        background: #f8fafc !important;
-        border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
-        font-weight: 500 !important;
+        background: #131c30 !important;
+        border: 1px solid rgba(99,102,241,0.15) !important;
+        border-radius: 10px !important;
+        color: #cbd5e1 !important;
     }
-    .streamlit-expanderHeader:hover { background: #f1f5f9 !important; }
+    .streamlit-expanderHeader:hover {
+        background: #1a2540 !important;
+        border-color: rgba(99,102,241,0.3) !important;
+    }
+    details[open] .streamlit-expanderHeader {
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
 
     /* ── Inputs ── */
-    .stTextInput input, .stSelectbox select {
-        border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
+    .stTextInput > div > div > input {
+        background: #131c30 !important;
+        border: 1px solid rgba(99,102,241,0.2) !important;
+        border-radius: 10px !important;
+        color: #f1f5f9 !important;
         font-family: 'Inter', sans-serif !important;
     }
+    .stTextInput > div > div > input:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+    }
+    .stSelectbox > div > div {
+        background: #131c30 !important;
+        border: 1px solid rgba(99,102,241,0.2) !important;
+        border-radius: 10px !important;
+        color: #f1f5f9 !important;
+    }
 
-    /* Hide Streamlit chrome */
+    /* ── Sliders ── */
+    .stSlider > div > div > div {
+        color: #f1f5f9 !important;
+    }
+    .stSlider label { color: #94a3b8 !important; font-size:0.82rem !important; }
+
+    /* ── Success / warning / error ── */
+    .stAlert {
+        border-radius: 12px !important;
+        border: none !important;
+    }
+    div[data-testid="stNotification"] { border-radius: 12px !important; }
+
+    /* ── Divider ── */
+    hr {
+        border: none !important;
+        border-top: 1px solid rgba(255,255,255,0.06) !important;
+        margin: 24px 0 !important;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #060818; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
     #MainMenu { visibility: hidden; }
     footer     { visibility: hidden; }
     header     { visibility: hidden; }
@@ -759,26 +874,69 @@ POPULAR_ASSETS = {
 }
 
 MODEL_PORTFOLIOS = {
-    "Safe": {
-        "description": "Low risk, capital preservation",
+    "Capital Preservation": {
+        "description_en": "Ultra-defensive: bonds + gold. Prioritises capital protection over returns.",
+        "description_fr": "Ultra-défensif : obligations + or. Priorité à la protection du capital.",
         "profile": "safe",
-        "allocation": {"AGG": 0.40, "SPY": 0.25, "GLD": 0.15, "VTI": 0.20},
-        "expected_return": 0.06,
-        "expected_volatility": 0.08,
+        "allocation": {"AGG": 0.45, "TLT": 0.20, "GLD": 0.20, "SPY": 0.15},
+        "expected_return": 0.05,
+        "expected_volatility": 0.06,
     },
-    "Balanced": {
-        "description": "60/40 stocks/bonds mix",
+    "Defensive Income": {
+        "description_en": "Conservative mix generating reliable dividend income with low volatility.",
+        "description_fr": "Mix conservateur générant des revenus de dividendes fiables à faible volatilité.",
+        "profile": "safe",
+        "allocation": {"SCHD": 0.30, "AGG": 0.30, "VNQ": 0.15, "GLD": 0.15, "SPY": 0.10},
+        "expected_return": 0.07,
+        "expected_volatility": 0.09,
+    },
+    "Classic 60/40": {
+        "description_en": "The timeless 60% stocks / 40% bonds portfolio. Balanced risk-return profile.",
+        "description_fr": "Le classique 60% actions / 40% obligations. Profil risque/rendement équilibré.",
         "profile": "balanced",
-        "allocation": {"SPY": 0.30, "QQQ": 0.15, "VXUS": 0.15, "AGG": 0.25, "GLD": 0.10, "VNQ": 0.05},
+        "allocation": {"SPY": 0.30, "VXUS": 0.15, "QQQ": 0.15, "AGG": 0.25, "GLD": 0.10, "VNQ": 0.05},
         "expected_return": 0.08,
         "expected_volatility": 0.12,
     },
-    "Aggressive": {
-        "description": "High growth potential",
+    "Global Growth": {
+        "description_en": "Diversified across US, international and emerging markets. Long-term growth.",
+        "description_fr": "Diversifié entre marchés US, internationaux et émergents. Croissance long terme.",
+        "profile": "balanced",
+        "allocation": {"VTI": 0.30, "EFA": 0.20, "EEM": 0.15, "AGG": 0.20, "GLD": 0.10, "VNQ": 0.05},
+        "expected_return": 0.09,
+        "expected_volatility": 0.14,
+    },
+    "Tech Leaders": {
+        "description_en": "Concentrated in top technology companies driving the AI and cloud revolution.",
+        "description_fr": "Concentré sur les grandes entreprises tech à la pointe de l'IA et du cloud.",
         "profile": "aggressive",
-        "allocation": {"AAPL": 0.15, "MSFT": 0.15, "NVDA": 0.15, "TSLA": 0.10, "QQQ": 0.20, "BTC-USD": 0.15, "ETH-USD": 0.10},
-        "expected_return": 0.15,
-        "expected_volatility": 0.25,
+        "allocation": {"MSFT": 0.20, "GOOGL": 0.20, "NVDA": 0.20, "AAPL": 0.15, "AMZN": 0.15, "META": 0.10},
+        "expected_return": 0.18,
+        "expected_volatility": 0.24,
+    },
+    "Crypto & Innovation": {
+        "description_en": "High-conviction bet on digital assets and disruptive technology. Very high risk.",
+        "description_fr": "Pari fort sur les actifs numériques et la tech disruptive. Risque très élevé.",
+        "profile": "aggressive",
+        "allocation": {"BTC-USD": 0.30, "ETH-USD": 0.20, "NVDA": 0.20, "QQQ": 0.20, "ARKK": 0.10},
+        "expected_return": 0.25,
+        "expected_volatility": 0.40,
+    },
+    "Dividend Champion": {
+        "description_en": "Quality dividend payers for passive income. Defensive sectors.",
+        "description_fr": "Actions à dividendes de qualité pour revenus passifs. Secteurs défensifs.",
+        "profile": "balanced",
+        "allocation": {"SCHD": 0.35, "JNJ": 0.15, "JPM": 0.15, "XOM": 0.10, "VNQ": 0.15, "GLD": 0.10},
+        "expected_return": 0.09,
+        "expected_volatility": 0.11,
+    },
+    "All-Weather": {
+        "description_en": "Ray Dalio-inspired portfolio resilient across all economic environments.",
+        "description_fr": "Inspiré de Ray Dalio, résilient dans tous les environnements économiques.",
+        "profile": "balanced",
+        "allocation": {"SPY": 0.30, "TLT": 0.20, "AGG": 0.15, "GLD": 0.15, "EFA": 0.10, "VNQ": 0.10},
+        "expected_return": 0.08,
+        "expected_volatility": 0.10,
     },
 }
 
@@ -810,23 +968,26 @@ def init_session_state():
             st.session_state[key] = value
 
 def auto_rebalance_weights():
-    """FIX #1: Auto-rebalance weights to 100% when assets change."""
+    """Auto-rebalance weights to equal share and sync slider states."""
     tickers = st.session_state.selected_tickers
     if not tickers:
         st.session_state.weights = {}
         return
-    
-    # Equal weight distribution
+
     equal_weight = 1.0 / len(tickers)
-    
-    # If weights don't exist or have wrong tickers, reset
+
+    # Reset to equal weights whenever the asset list changes
     if not st.session_state.weights or set(st.session_state.weights.keys()) != set(tickers):
         st.session_state.weights = {ticker: equal_weight for ticker in tickers}
-    
-    # Normalize to ensure 100%
+
+    # Normalize to 100%
     total = sum(st.session_state.weights.values())
     if total > 0:
-        st.session_state.weights = {k: v/total for k, v in st.session_state.weights.items()}
+        st.session_state.weights = {k: v / total for k, v in st.session_state.weights.items()}
+
+    # Sync slider widget states so displayed values update immediately
+    for ticker, w in st.session_state.weights.items():
+        st.session_state[f"ws_{ticker}"] = round(w * 100, 1)
 
 # =============================================================================
 # TRANSLATIONS
@@ -835,15 +996,85 @@ def auto_rebalance_weights():
 T = {
     "en": {
         "dashboard": "Dashboard", "new_analysis": "New Analysis",
-        "models": "Model Portfolios", "improve": "Improve Portfolio",
+        "models": "Model Portfolios", "improve": "Optimise",
+        "library": "Asset Library", "account": "Account",
         "robustness": "Robustness Index", "recommendations": "Recommendations",
-        "stress_test": "Stress Test", "asset_info": "Asset Info",
+        "stress_test": "Stress Tests", "asset_info": "Asset Details",
+        "portfolio_summary": "Portfolio Summary",
+        "selected_assets": "Selected Assets",
+        "analyse_btn": "Analyse Portfolio",
+        "run_stress": "Run Stress Tests",
+        "optimise_btn": "Optimise Portfolio",
+        "apply_opt": "Apply Optimisation",
+        "current": "Current", "optimised": "Optimised",
+        "use_model": "Use this portfolio",
+        "expected_return": "Expected Return",
+        "volatility": "Volatility",
+        "sharpe": "Sharpe Ratio",
+        "annual_return": "Annual Return",
+        "max_drawdown": "Max Drawdown",
+        "total_weight": "Total",
+        "add": "Add", "remove": "Remove",
+        "search_ph": "Apple, Bitcoin, S&P 500...",
+        "browse": "Browse",
+        "search": "Search",
+        "welcome": "Welcome! Start by creating a portfolio.",
+        "create_portfolio": "Create Portfolio",
+        "no_portfolio": "Create a portfolio first.",
+        "loading": "Fetching market data...",
+        "analysis_done": "Analysis complete!",
+        "fetch_error": "Could not fetch data. Check ticker symbols.",
+        "upgrade_pro": "Upgrade to Pro",
+        "login": "Continue",
+        "logout": "Log out",
+        "profile_label": "Risk Profile",
+        "profile_safe": "Prudent",
+        "profile_balanced": "Balanced",
+        "profile_aggressive": "Aggressive",
+        "filter_type": "Filter by type",
+        "filter_all": "All",
+        "normalised": "Total normalised to 100%.",
     },
     "fr": {
         "dashboard": "Tableau de Bord", "new_analysis": "Nouvelle Analyse",
-        "models": "Portefeuilles Modèles", "improve": "Améliorer",
+        "models": "Portefeuilles Modèles", "improve": "Optimiser",
+        "library": "Bibliothèque", "account": "Compte",
         "robustness": "Indice de Robustesse", "recommendations": "Recommandations",
-        "stress_test": "Test de Stress", "asset_info": "Info Actifs",
+        "stress_test": "Tests de Stress", "asset_info": "Détail des Actifs",
+        "portfolio_summary": "Résumé du Portefeuille",
+        "selected_assets": "Actifs Sélectionnés",
+        "analyse_btn": "Analyser le Portefeuille",
+        "run_stress": "Lancer les Tests de Stress",
+        "optimise_btn": "Optimiser le Portefeuille",
+        "apply_opt": "Appliquer l'Optimisation",
+        "current": "Actuel", "optimised": "Optimisé",
+        "use_model": "Utiliser ce portefeuille",
+        "expected_return": "Rendement Attendu",
+        "volatility": "Volatilité",
+        "sharpe": "Ratio de Sharpe",
+        "annual_return": "Rendement Annuel",
+        "max_drawdown": "Perte Max",
+        "total_weight": "Total",
+        "add": "Ajouter", "remove": "Supprimer",
+        "search_ph": "Apple, Bitcoin, S&P 500...",
+        "browse": "Parcourir",
+        "search": "Rechercher",
+        "welcome": "Bienvenue ! Commencez par créer un portefeuille.",
+        "create_portfolio": "Créer un Portefeuille",
+        "no_portfolio": "Créez d'abord un portefeuille.",
+        "loading": "Récupération des données...",
+        "analysis_done": "Analyse terminée !",
+        "fetch_error": "Impossible de récupérer les données. Vérifiez les tickers.",
+        "upgrade_pro": "Passer à Pro",
+        "login": "Continuer",
+        "logout": "Se déconnecter",
+        "profile_label": "Profil de Risque",
+        "profile_safe": "Prudent",
+        "profile_balanced": "Équilibré",
+        "profile_aggressive": "Agressif",
+        "filter_type": "Filtrer par type",
+        "filter_all": "Tous",
+        "normalised": "Total normalisé à 100%.",
     }
 }
 
@@ -1480,47 +1711,51 @@ def render_health_score(health, lang="en"):
 
 
 def render_robustness_score(robustness, lang="en"):
-    """Render Portfolio Robustness Index."""
+    """Render Portfolio Robustness Index as a dark premium card."""
     total = robustness['total']
     color = robustness['color']
     interpretation = robustness['interpretation']
     label = "Robustness Index" if lang == 'en' else "Indice de Robustesse"
 
-    st.markdown(f"""
-    <div class="robustness-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:6px;">{label}</div>
-          <div class="robustness-num" style="color:{color};">{total}<span style="font-size:1.5rem;color:#94a3b8;font-weight:400;">/100</span></div>
-          <div style="font-size:0.88rem;font-weight:600;color:{color};margin-top:4px;">{interpretation}</div>
-        </div>
-        <div style="min-width:180px;flex:1;max-width:300px;">
-    """, unsafe_allow_html=True)
+    comp_names = {
+        'en': ["Diversification", "Concentration", "Correlation", "Volatility", "Drawdown", "Geography", "Sectors"],
+        'fr': ["Diversification", "Concentration", "Corrélation", "Volatilité", "Drawdown", "Géographie", "Secteurs"],
+    }
+    components = list(zip(
+        comp_names[lang],
+        [robustness['diversification'], robustness['concentration'], robustness['correlation'],
+         robustness['volatility'], robustness['drawdown'], robustness['geography'], robustness['sector']],
+        [20, 20, 15, 15, 15, 10, 5]
+    ))
 
-    components = [
-        ("Diversification" if lang == 'en' else "Diversification", robustness['diversification'], 20),
-        ("Concentration", robustness['concentration'], 20),
-        ("Correlation" if lang == 'en' else "Corrélation", robustness['correlation'], 15),
-        ("Volatility" if lang == 'en' else "Volatilité", robustness['volatility'], 15),
-        ("Drawdown", robustness['drawdown'], 15),
-        ("Geography" if lang == 'en' else "Géographie", robustness['geography'], 10),
-        ("Sectors" if lang == 'en' else "Secteurs", robustness['sector'], 5),
-    ]
     bars_html = ""
     for name, score, max_score in components:
         pct = (score / max_score) * 100
         bar_color = "#10b981" if pct > 80 else "#f59e0b" if pct > 60 else "#ef4444"
         bars_html += f"""
-        <div style="margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#475569;margin-bottom:3px;">
-            <span>{name}</span><span style="font-weight:600;color:{bar_color};">{score}/{max_score}</span>
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.78rem;
+                      color:rgba(255,255,255,0.55);margin-bottom:4px;">
+            <span>{name}</span>
+            <span style="font-weight:600;color:{bar_color};">{score}/{max_score}</span>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width:{pct}%;background:{bar_color};"></div>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:{pct}%;background:{bar_color};"></div>
           </div>
         </div>"""
 
     st.markdown(f"""
+    <div class="score-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;
+                  flex-wrap:wrap;gap:24px;position:relative;z-index:1;">
+        <div style="min-width:150px;">
+          <div class="score-label">{label}</div>
+          <div class="score-num">{total}<span style="font-size:2rem;font-weight:400;
+               opacity:0.45;">/100</span></div>
+          <div class="score-badge" style="color:{color};border-color:{color}44;
+               background:{color}18;">{interpretation}</div>
+        </div>
+        <div style="flex:1;min-width:220px;max-width:340px;">
           {bars_html}
         </div>
       </div>
@@ -1610,28 +1845,39 @@ def render_asset_card(ticker, lang="en", show_weight=None):
         weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#4f46e5;margin-left:8px;'>{show_weight*100:.1f}%</span>"
 
     with st.expander(f"{ticker}  —  {info['name']}"):
+        role_label = "Portfolio role" if lang == 'en' else "Rôle dans le portefeuille"
+        use_label = "Typical use" if lang == 'en' else "Utilisation typique"
+        liq_label = "Liquidity" if lang == 'en' else "Liquidité"
+        sector_label = "Sector" if lang == 'en' else "Secteur"
+        geo_label = "Geography" if lang == 'en' else "Géographie"
+        div_label = "Dividend / Yield" if lang == 'en' else "Dividende / Rendement"
+        cap_label = "Market Cap / AUM"
         st.markdown(f"""
         <div class="asset-card">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
             <span class="asset-class-badge" style="background:{cls_bg};color:{cls_txt};">{asset_class}</span>
-            <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk} risk</span>
+            <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk}</span>
             {weight_html}
           </div>
-          <p style="color:#334155;font-size:0.9rem;line-height:1.7;margin-bottom:16px;">{info['description']}</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:0.85rem;">
-            <div><span style="color:#94a3b8;font-weight:500;">Sector</span><br/><span style="color:#0f172a;font-weight:600;">{info['sector']}</span></div>
-            <div><span style="color:#94a3b8;font-weight:500;">Geography</span><br/><span style="color:#0f172a;font-weight:600;">{info['geography']}</span></div>
-            <div><span style="color:#94a3b8;font-weight:500;">Dividend / Yield</span><br/><span style="color:#0f172a;font-weight:600;">{info.get('dividend_yield', 'N/A')}</span></div>
-            <div><span style="color:#94a3b8;font-weight:500;">Market Cap / AUM</span><br/><span style="color:#0f172a;font-weight:600;">{info.get('market_cap', 'N/A')}</span></div>
+          <p style="color:#94a3b8;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{info['description']}</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:0.83rem;">
+            <div><span style="color:#4b5563;font-weight:500;">{sector_label}</span><br/>
+                 <span style="color:#e2e8f0;font-weight:600;">{info['sector']}</span></div>
+            <div><span style="color:#4b5563;font-weight:500;">{geo_label}</span><br/>
+                 <span style="color:#e2e8f0;font-weight:600;">{info['geography']}</span></div>
+            <div><span style="color:#4b5563;font-weight:500;">{div_label}</span><br/>
+                 <span style="color:#e2e8f0;font-weight:600;">{info.get('dividend_yield', 'N/A')}</span></div>
+            <div><span style="color:#4b5563;font-weight:500;">{cap_label}</span><br/>
+                 <span style="color:#e2e8f0;font-weight:600;">{info.get('market_cap', 'N/A')}</span></div>
           </div>
-          <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e2e8f0;">
-            <div style="font-size:0.78rem;color:#94a3b8;font-weight:500;margin-bottom:4px;">Liquidity</div>
-            <div class="progress-bar-bg" style="margin-bottom:8px;">
-              <div class="progress-bar-fill" style="width:{liq}%;background:#4f46e5;"></div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(99,102,241,0.12);">
+            <div style="font-size:0.75rem;color:#4b5563;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">{liq_label}</div>
+            <div class="progress-bar-bg" style="margin-bottom:10px;">
+              <div class="progress-bar-fill" style="width:{liq}%;background:#6366f1;"></div>
             </div>
-            <div style="font-size:0.82rem;color:#475569;margin-top:10px;">
-              <strong style="color:#0f172a;">Portfolio role:</strong> {info['utility']}<br/>
-              <strong style="color:#0f172a;">Typical use:</strong> {info['typical_use']}
+            <div style="font-size:0.82rem;color:#64748b;line-height:1.6;">
+              <span style="color:#94a3b8;font-weight:600;">{role_label}:</span> {info['utility']}<br/>
+              <span style="color:#94a3b8;font-weight:600;">{use_label}:</span> {info['typical_use']}
             </div>
           </div>
         </div>
@@ -1652,13 +1898,17 @@ def render_enhanced_charts(analyzer, lang="en"):
         height=420,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter, sans-serif', size=12, color='#334155'),
-        margin=dict(l=10, r=10, t=40, b=10),
+        font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
+        margin=dict(l=10, r=10, t=44, b=10),
         hovermode='x unified',
     )
     AXIS_STYLE = dict(
-        showgrid=True, gridcolor='#f1f5f9', gridwidth=1,
-        linecolor='#e2e8f0', tickfont=dict(size=11),
+        showgrid=True,
+        gridcolor='rgba(255,255,255,0.05)',
+        gridwidth=1,
+        linecolor='rgba(255,255,255,0.08)',
+        tickfont=dict(size=11, color='#64748b'),
+        zerolinecolor='rgba(255,255,255,0.06)',
     )
 
     with tabs[0]:
@@ -1673,7 +1923,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             fillcolor='rgba(79,70,229,0.08)'
         ))
         fig.update_layout(
-            title=dict(text="Portfolio Performance", font=dict(size=14, color='#0f172a')),
+            title=dict(text="Portfolio Performance", font=dict(size=14, color='#e2e8f0')),
             yaxis=dict(tickprefix="$", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1694,7 +1944,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             fillcolor='rgba(239,68,68,0.10)'
         ))
         fig.update_layout(
-            title=dict(text="Portfolio Drawdown", font=dict(size=14, color='#0f172a')),
+            title=dict(text="Portfolio Drawdown", font=dict(size=14, color='#e2e8f0')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1713,12 +1963,12 @@ def render_enhanced_charts(analyzer, lang="en"):
             textfont=dict(size=12),
         )])
         fig.update_layout(
-            title=dict(text="Portfolio Allocation", font=dict(size=14, color='#0f172a')),
+            title=dict(text="Portfolio Allocation", font=dict(size=14, color='#e2e8f0')),
             showlegend=True,
-            legend=dict(orientation='v', x=1.02, y=0.5),
+            legend=dict(orientation='v', x=1.02, y=0.5, font=dict(color='#94a3b8')),
             paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='Inter, sans-serif'),
-            height=420, margin=dict(l=10, r=10, t=40, b=10),
+            font=dict(family='Inter, sans-serif', color='#94a3b8'),
+            height=420, margin=dict(l=10, r=10, t=44, b=10),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1737,7 +1987,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             textposition='outside',
         )])
         fig.update_layout(
-            title=dict(text="Geographic Allocation", font=dict(size=14, color='#0f172a')),
+            title=dict(text="Geographic Allocation", font=dict(size=14, color='#e2e8f0')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1759,7 +2009,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             textposition='outside',
         )])
         fig.update_layout(
-            title=dict(text="Sector Allocation", font=dict(size=14, color='#0f172a')),
+            title=dict(text="Sector Allocation", font=dict(size=14, color='#e2e8f0')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1903,27 +2153,28 @@ def _sidebar(lang):
         st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:16px 0;'>",
                     unsafe_allow_html=True)
 
-        # Risk profile
-        profile_label = "Risk Profile" if lang == 'en' else "Profil de Risque"
-        profile = st.selectbox(
-            profile_label,
-            ["safe", "balanced", "aggressive"],
-            index=["safe", "balanced", "aggressive"].index(st.session_state.user_profile),
-            label_visibility="visible"
+        # Risk profile — translated labels
+        profile_options = ["safe", "balanced", "aggressive"]
+        profile_labels = [t("profile_safe", lang), t("profile_balanced", lang), t("profile_aggressive", lang)]
+        current_idx = profile_options.index(st.session_state.user_profile)
+        selected_label = st.selectbox(
+            t("profile_label", lang),
+            profile_labels,
+            index=current_idx,
         )
-        st.session_state.user_profile = profile
+        st.session_state.user_profile = profile_options[profile_labels.index(selected_label)]
 
-        st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:16px 0;'>",
+        st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
 
         # Navigation
         nav = [
-            ("dashboard",    "Dashboard"    if lang == 'en' else "Tableau de Bord"),
-            ("new_analysis", "New Analysis" if lang == 'en' else "Nouvelle Analyse"),
-            ("models",       "Model Portfolios" if lang == 'en' else "Portefeuilles Modèles"),
-            ("improve",      "Optimise"     if lang == 'en' else "Optimiser"),
-            ("library",      "Asset Library" if lang == 'en' else "Bibliothèque"),
-            ("account",      "Account"      if lang == 'en' else "Compte"),
+            ("dashboard",    t("dashboard", lang)),
+            ("new_analysis", t("new_analysis", lang)),
+            ("models",       t("models", lang)),
+            ("improve",      t("improve", lang)),
+            ("library",      t("library", lang)),
+            ("account",      t("account", lang)),
         ]
         for key, label in nav:
             btn_type = "primary" if st.session_state.page == key else "secondary"
@@ -2083,15 +2334,13 @@ def main():
         st.markdown(f"<p style='color:#64748b;margin-top:-12px;'>{subtitle}</p>",
                     unsafe_allow_html=True)
 
-        # Filter by class
         classes = sorted(set(v.get('asset_class', 'Unknown') for v in ASSET_INFO.values()))
-        filter_label = "Filter by type" if lang == 'en' else "Filtrer par type"
-        selected_class = st.selectbox(filter_label, ["All"] + classes)
+        selected_class = st.selectbox(t("filter_type", lang), [t("filter_all", lang)] + classes)
 
         st.markdown("---")
 
         for ticker, info in ASSET_INFO.items():
-            if selected_class != "All" and info.get("asset_class") != selected_class:
+            if selected_class != t("filter_all", lang) and info.get("asset_class") != selected_class:
                 continue
             render_asset_card(ticker, lang)
 
@@ -2103,85 +2352,58 @@ def main():
         st.title(title)
 
         if st.session_state.current_portfolio is None:
-            welcome = (
-                "Welcome! Start by creating a portfolio analysis."
-                if lang == 'en' else
-                "Bienvenue ! Commencez par créer une analyse de portefeuille."
-            )
-            st.info(welcome)
-            btn_label = "Create Portfolio" if lang == 'en' else "Créer un Portefeuille"
-            if st.button(btn_label, type="primary", use_container_width=False):
+            st.info(t("welcome", lang))
+            if st.button(t("create_portfolio", lang), type="primary"):
                 st.session_state.page = "new_analysis"
                 st.rerun()
         else:
             analyzer = st.session_state.current_portfolio
 
             # Summary
-            summary_label = "Portfolio Summary" if lang == 'en' else "Résumé du Portefeuille"
-            st.markdown(f"### {summary_label}")
-            summary = analyzer.generate_auto_summary(lang)
-            st.markdown(summary)
+            st.markdown(f"### {t('portfolio_summary', lang)}")
+            st.markdown(analyzer.generate_auto_summary(lang))
             st.markdown("---")
-
-            # Health Score
-            health = analyzer.calculate_health_score()
-            render_health_score(health, lang)
 
             # Robustness Index
             robustness = analyzer.calculate_robustness_index()
             render_robustness_score(robustness, lang)
-
             st.markdown("---")
 
             # Quick Metrics
             metrics = analyzer.calculate_metrics()
             m1, m2, m3, m4 = st.columns(4)
-            with m1:
-                st.metric("Sharpe Ratio", f"{metrics['sharpe']:.2f}")
-            with m2:
-                ann_r_label = "Annual Return" if lang == 'en' else "Rendement Annuel"
-                st.metric(ann_r_label, f"{metrics['annual_return']*100:.1f}%")
-            with m3:
-                vol_label = "Volatility" if lang == 'en' else "Volatilité"
-                st.metric(vol_label, f"{metrics['volatility']*100:.1f}%")
-            with m4:
-                dd_label = "Max Drawdown"
-                st.metric(dd_label, f"{metrics['max_drawdown']*100:.1f}%")
-
+            with m1: st.metric(t("sharpe", lang),        f"{metrics['sharpe']:.2f}")
+            with m2: st.metric(t("annual_return", lang), f"{metrics['annual_return']*100:.1f}%")
+            with m3: st.metric(t("volatility", lang),    f"{metrics['volatility']*100:.1f}%")
+            with m4: st.metric(t("max_drawdown", lang),  f"{metrics['max_drawdown']*100:.1f}%")
             st.markdown("---")
 
             # Recommendations
-            rec_label = t('recommendations', lang)
-            st.markdown(f"### {rec_label}")
+            st.markdown(f"### {t('recommendations', lang)}")
             suggestions = analyzer.generate_improvement_suggestions(lang)
             profile_suggestions = analyzer.generate_profile_adapted_suggestions(lang)
             render_improvement_suggestions(suggestions + profile_suggestions, lang)
-
             st.markdown("---")
 
             # Charts
             render_enhanced_charts(analyzer, lang)
-
             st.markdown("---")
 
             # Stress Test
-            st_label = "Run Stress Tests" if lang == 'en' else "Lancer les Stress Tests"
             if limits['can_stress_test']:
-                if st.button(st_label, use_container_width=False):
-                    with st.spinner("Running scenarios..." if lang == 'en' else "Calcul en cours..."):
+                if st.button(t("run_stress", lang)):
+                    with st.spinner("..." if lang == 'en' else "Calcul..."):
                         stress_results = analyzer.stress_test_scenarios()
                     render_stress_test_results(stress_results, lang)
             else:
-                render_paywall("Stress Tests", lang)
+                render_paywall(t("stress_test", lang), lang)
 
             st.markdown("---")
 
             # Asset Info
-            ai_label = t('asset_info', lang)
-            st.markdown(f"### {ai_label}")
+            st.markdown(f"### {t('asset_info', lang)}")
             for ticker in analyzer.tickers:
-                render_asset_card(ticker, lang,
-                                  show_weight=analyzer.weights.get(ticker))
+                render_asset_card(ticker, lang, show_weight=analyzer.weights.get(ticker))
 
     # ─────────────────────────────────────────────────────────────────────────
     # NEW ANALYSIS PAGE
@@ -2200,16 +2422,12 @@ def main():
                 f"Plan Free : jusqu'à {max_assets} actifs. Passez à Pro pour 50."
             )
 
-        tabs = st.tabs([
-            "Search" if lang == 'en' else "Recherche",
-            "Browse" if lang == 'en' else "Parcourir",
-        ])
+        tabs = st.tabs([t("search", lang), t("browse", lang)])
 
         with tabs[0]:
-            search_ph = "Apple, Bitcoin, S&P 500..." if lang == 'en' else "Apple, Bitcoin, S&P 500..."
             search = st.text_input(
-                "Search" if lang == 'en' else "Rechercher",
-                placeholder=search_ph,
+                t("search", lang),
+                placeholder=t("search_ph", lang),
                 label_visibility="collapsed"
             )
             if search:
@@ -2224,10 +2442,9 @@ def main():
                     direct_ticker = search.upper().strip()
                     col1, col2 = st.columns([4, 1])
                     with col1:
-                        st.write(f"{direct_ticker} (custom ticker)")
+                        st.write(f"{direct_ticker}")
                     with col2:
-                        add_label = "Add" if lang == 'en' else "Ajouter"
-                        if st.button(add_label, key=f"direct_{direct_ticker}"):
+                        if st.button(t("add", lang), key=f"direct_{direct_ticker}"):
                             if direct_ticker not in st.session_state.selected_tickers:
                                 if len(st.session_state.selected_tickers) < max_assets:
                                     st.session_state.selected_tickers.append(direct_ticker)
@@ -2240,7 +2457,7 @@ def main():
                         st.write(display)
                     with col2:
                         in_port = ticker in st.session_state.selected_tickers
-                        add_label = "Added" if in_port else ("Add" if lang == 'en' else "Ajouter")
+                        add_label = (t("add", lang) + " \u2713") if in_port else t("add", lang)
                         if not in_port and st.button(add_label, key=f"sa_{ticker}"):
                             if len(st.session_state.selected_tickers) < max_assets:
                                 st.session_state.selected_tickers.append(ticker)
@@ -2266,8 +2483,7 @@ def main():
 
         # Selected assets & weights
         st.markdown("---")
-        sel_label = "Selected Assets" if lang == 'en' else "Actifs Sélectionnés"
-        st.markdown(f"### {sel_label}")
+        st.markdown(f"### {t('selected_assets', lang)}")
 
         if st.session_state.selected_tickers:
             new_weights = {}
@@ -2278,11 +2494,9 @@ def main():
             for i, ticker in enumerate(st.session_state.selected_tickers):
                 with cols[i % cols_per_row]:
                     cur_w = st.session_state.weights.get(ticker, 1.0 / n)
-                    w = st.slider(ticker, 0.0, 100.0, cur_w * 100, 1.0,
-                                  key=f"ws_{ticker}")
+                    w = st.slider(ticker, 0.0, 100.0, step=1.0, key=f"ws_{ticker}")
                     new_weights[ticker] = w / 100
-                    rm_label = "Remove" if lang == 'en' else "Supprimer"
-                    if st.button(rm_label, key=f"rm_{ticker}", use_container_width=True):
+                    if st.button(t("remove", lang), key=f"rm_{ticker}", use_container_width=True):
                         st.session_state.selected_tickers.remove(ticker)
                         auto_rebalance_weights()
                         st.rerun()
@@ -2290,19 +2504,13 @@ def main():
             st.session_state.weights = new_weights
             total_w = sum(new_weights.values())
             if abs(total_w - 1.0) > 0.01:
-                warn_msg = (
-                    f"Total: {total_w*100:.1f}% — will be normalised to 100%."
-                    if lang == 'en' else
-                    f"Total : {total_w*100:.1f}% — sera normalisé à 100%."
-                )
-                st.warning(warn_msg)
                 st.session_state.weights = {k: v / total_w for k, v in new_weights.items()}
+                st.warning(f"{t('total_weight', lang)}: {total_w*100:.1f}% — {t('normalised', lang)}")
             else:
-                st.success(f"Total: {total_w*100:.1f}%")
+                st.success(f"{t('total_weight', lang)}: {total_w*100:.1f}%")
 
-            analyse_label = "Analyse Portfolio" if lang == 'en' else "Analyser le Portefeuille"
-            if st.button(analyse_label, type="primary", use_container_width=False):
-                with st.spinner("Fetching data..." if lang == 'en' else "Récupération des données..."):
+            if st.button(t("analyse_btn", lang), type="primary", use_container_width=False):
+                with st.spinner(t("loading", lang)):
                     analyzer = UltimatePortfolioAnalyzer(
                         st.session_state.selected_tickers,
                         st.session_state.weights,
@@ -2311,17 +2519,13 @@ def main():
                     )
                     if analyzer.fetch_data():
                         st.session_state.current_portfolio = analyzer
-                        ok_msg = "Analysis complete!" if lang == 'en' else "Analyse terminée !"
-                        st.success(ok_msg)
+                        st.success(t("analysis_done", lang))
                         st.session_state.page = "dashboard"
                         st.rerun()
                     else:
-                        st.error("Could not fetch market data. Check the ticker symbols." if lang == 'en'
-                                 else "Impossible de récupérer les données. Vérifiez les tickers.")
+                        st.error(t("fetch_error", lang))
         else:
-            hint = "Add assets above to build your portfolio." if lang == 'en' else \
-                   "Ajoutez des actifs ci-dessus pour construire votre portefeuille."
-            st.info(hint)
+            st.info(t("welcome", lang))
 
         # Show upgrade banner if near limit
         if tier == 'free' and current_count >= max_assets - 1:
@@ -2337,33 +2541,39 @@ def main():
         for model_name, model_data in MODEL_PORTFOLIOS.items():
             ret_pct = model_data['expected_return'] * 100
             vol_pct = model_data['expected_volatility'] * 100
+            desc_key = "description_fr" if lang == 'fr' else "description_en"
+            description = model_data.get(desc_key, model_data.get("description_en", ""))
 
             alloc_html = "".join(
-                f"<span style='display:inline-block;background:#f1f5f9;border-radius:6px;"
-                f"padding:2px 10px;font-size:0.8rem;font-weight:600;color:#334155;"
-                f"margin:3px;'>{tk} {w*100:.0f}%</span>"
+                f"<span style='display:inline-block;background:rgba(99,102,241,0.15);border-radius:8px;"
+                f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#a5b4fc;"
+                f"margin:3px;border:1px solid rgba(99,102,241,0.2);'>{tk} {w*100:.0f}%</span>"
                 for tk, w in model_data['allocation'].items()
             )
+            ret_label = t("expected_return", lang)
+            vol_label = t("volatility", lang)
 
             st.markdown(f"""
             <div class="model-card">
-              <div style="font-size:1.1rem;font-weight:700;color:#0f172a;margin-bottom:4px;">{model_name}</div>
-              <div style="font-size:0.85rem;color:#64748b;margin-bottom:14px;">{model_data['description']}</div>
-              <div style="display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;">
+              <div style="font-size:1.05rem;font-weight:700;color:#f1f5f9;margin-bottom:5px;">{model_name}</div>
+              <div style="font-size:0.84rem;color:#64748b;margin-bottom:16px;line-height:1.5;">{description}</div>
+              <div style="display:flex;gap:28px;margin-bottom:16px;flex-wrap:wrap;">
                 <div>
-                  <span style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;font-weight:500;">Expected return</span><br/>
-                  <span style="font-size:1.2rem;font-weight:700;color:#10b981;">+{ret_pct:.0f}%</span>
+                  <div style="font-size:0.68rem;color:#4b5563;text-transform:uppercase;font-weight:600;
+                              letter-spacing:0.07em;margin-bottom:3px;">{ret_label}</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#10b981;">+{ret_pct:.0f}%</div>
                 </div>
                 <div>
-                  <span style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;font-weight:500;">Volatility</span><br/>
-                  <span style="font-size:1.2rem;font-weight:700;color:#f59e0b;">{vol_pct:.0f}%</span>
+                  <div style="font-size:0.68rem;color:#4b5563;text-transform:uppercase;font-weight:600;
+                              letter-spacing:0.07em;margin-bottom:3px;">{vol_label}</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#f59e0b;">{vol_pct:.0f}%</div>
                 </div>
               </div>
-              <div style="margin-bottom:16px;">{alloc_html}</div>
+              <div style="margin-bottom:4px;">{alloc_html}</div>
             </div>
             """, unsafe_allow_html=True)
 
-            use_label = f"Use {model_name}" if lang == 'en' else f"Utiliser {model_name}"
+            use_label = t("use_model", lang)
             if st.button(use_label, key=f"use_{model_name}", use_container_width=False):
                 st.session_state.selected_tickers = list(model_data['allocation'].keys())
                 st.session_state.weights = model_data['allocation'].copy()
