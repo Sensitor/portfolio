@@ -1387,14 +1387,23 @@ class UltimatePortfolioAnalyzer:
         
         if not all_data:
             return False
-        
-        self.data = pd.concat(all_data, axis=1).fillna(method='ffill').fillna(method='bfill')
+
+        self.data = pd.concat(all_data, axis=1)
+        # Only keep tickers that actually downloaded successfully
+        available = [t for t in self.tickers if t in self.data.columns]
+        if not available:
+            return False
+        self.data = self.data[available].ffill().bfill()
+
+        # Sync tickers and weights to available data
+        self.tickers = available
+        total_w = sum(self.weights[t] for t in available)
+        self.weights = {t: self.weights[t] / total_w for t in available}
+
         self.returns = self.data.pct_change().dropna()
-        
         weights_array = np.array([self.weights[t] for t in self.tickers])
-        self.portfolio_returns = (self.returns @ weights_array)
+        self.portfolio_returns = self.returns @ weights_array
         self.portfolio_values = self.initial_value * (1 + self.portfolio_returns).cumprod()
-        
         return True
     
     def calculate_robustness_index(self):
@@ -2552,50 +2561,54 @@ def render_paywall(feature_name, lang="en"):
 
 
 def render_stress_test_results(stress_results, lang="en"):
-    """Display stress test results."""
-    label = "Crisis Stress Tests" if lang == 'en' else "Tests de Stress — Crises Historiques"
-    st.markdown(f"### {label}")
-
+    """Display stress test results using native Streamlit components."""
     if not stress_results:
         st.info("Not enough historical data for stress testing." if lang == 'en'
                 else "Pas assez de données historiques pour ce test.")
         return
 
-    cards_html = ""
-    for scenario, result in stress_results.items():
-        port_loss = result['portfolio_loss'] * 100
-        mkt_loss = result['market_loss'] * 100
-        resilience = result['resilience'] * 100
-        color = "#10b981" if resilience > 80 else "#f59e0b" if resilience > 50 else "#ef4444"
-        cards_html += f"""
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
-                    padding:20px 24px;flex:1;min-width:200px;">
-          <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
-                      color:#94a3b8;margin-bottom:10px;">{scenario}</div>
-          <div style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">{result['description']}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
-              <div style="font-size:0.72rem;color:#94a3b8;">{'Portfolio loss' if lang=='en' else 'Perte portefeuille'}</div>
-              <div style="font-size:1.4rem;font-weight:700;color:#ef4444;">{port_loss:.1f}%</div>
-            </div>
-            <div>
-              <div style="font-size:0.72rem;color:#94a3b8;">{'Market' if lang=='en' else 'Marché'}</div>
-              <div style="font-size:1.4rem;font-weight:700;color:#64748b;">{mkt_loss:.0f}%</div>
-            </div>
-            <div style="grid-column:span 2;">
-              <div style="font-size:0.72rem;color:#94a3b8;margin-bottom:4px;">{'Resilience' if lang=='en' else 'Résilience'} {resilience:.0f}%</div>
-              <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width:{resilience}%;background:{color};"></div>
-              </div>
-            </div>
-          </div>
-        </div>"""
+    loss_lbl       = "Portfolio loss"    if lang == 'en' else "Perte portefeuille"
+    mkt_lbl        = "Market drop"       if lang == 'en' else "Chute du marché"
+    resil_lbl      = "Resilience"        if lang == 'en' else "Résilience"
+    vs_mkt_lbl     = "vs market"         if lang == 'en' else "vs marché"
 
-    st.markdown(f"""
-    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;">
-      {cards_html}
-    </div>
-    """, unsafe_allow_html=True)
+    cols = st.columns(len(stress_results))
+    for col, (scenario, result) in zip(cols, stress_results.items()):
+        port_loss  = result['portfolio_loss'] * 100
+        mkt_loss   = result['market_loss'] * 100
+        resilience = max(0.0, min(1.0, result['resilience']))
+        resil_pct  = resilience * 100
+
+        if resil_pct >= 80:
+            resil_color = "#00ff9c"
+            badge = "🟢"
+        elif resil_pct >= 50:
+            resil_color = "#ffb020"
+            badge = "🟡"
+        else:
+            resil_color = "#ff4d4d"
+            badge = "🔴"
+
+        with col:
+            st.markdown(
+                f"<div style='background:#1e293b;border:1px solid rgba(0,212,255,0.15);"
+                f"border-radius:14px;padding:18px 20px;height:100%;'>"
+                f"<div style='font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+                f"text-transform:uppercase;color:#475569;margin-bottom:6px;'>{scenario}</div>"
+                f"<div style='font-size:0.78rem;color:#64748b;margin-bottom:14px;'>"
+                f"{result['description']}</div>"
+                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{loss_lbl}</div>"
+                f"<div style='font-size:1.6rem;font-weight:800;color:#ff4d4d;line-height:1;"
+                f"margin-bottom:10px;'>{port_loss:+.1f}%</div>"
+                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{mkt_lbl}</div>"
+                f"<div style='font-size:1rem;font-weight:600;color:#64748b;"
+                f"margin-bottom:12px;'>{mkt_loss:.0f}%</div>"
+                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:4px;'>"
+                f"{badge} {resil_lbl} {resil_pct:.0f}%</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+            st.progress(resilience)
 
 # =============================================================================
 # MAIN APP
