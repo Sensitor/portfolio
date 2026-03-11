@@ -1234,6 +1234,10 @@ def init_session_state():
         'selected_tickers': [],
         'weights': {},
         'user_profile': "balanced",
+        'analysis_mode': "simulation",       # "simulation" or "real"
+        'real_portfolio_holdings': {},        # {ticker: quantity}
+        'real_portfolio_total_value': None,   # float — computed after price fetch
+        'real_portfolio_prices': {},          # {ticker: current_price}
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -1306,6 +1310,33 @@ T = {
         "filter_type": "Filter by type",
         "filter_all": "All",
         "normalised": "Total normalised to 100%.",
+        "mode_simulation": "Portfolio Simulation",
+        "mode_real": "Real Portfolio Analysis",
+        "real_portfolio": "Real Portfolio",
+        "real_portfolio_desc": "Enter your actual holdings to see your real portfolio value.",
+        "add_holding": "Add Holding",
+        "quantity": "Quantity",
+        "ticker": "Ticker",
+        "fetch_prices": "Fetch Prices & Analyse",
+        "total_value": "Total Value",
+        "num_assets": "Number of Assets",
+        "top_asset": "Top Asset",
+        "portfolio_health": "Portfolio Health",
+        "asset_class_breakdown": "Asset Class Breakdown",
+        "dominant_asset": "Dominant Asset",
+        "diversification": "Diversification Level",
+        "overall_risk": "Overall Risk",
+        "real_synthesis": "Portfolio Synthesis",
+        "real_holdings": "Your Holdings",
+        "price": "Price",
+        "value": "Value",
+        "weight_pct": "Weight",
+        "remove_holding": "Remove",
+        "no_holdings": "Add assets and their quantities to analyse your real portfolio.",
+        "high_div": "High",
+        "medium_div": "Medium",
+        "low_div": "Low",
+        "very_low_div": "Very Low",
     },
     "fr": {
         "dashboard": "Tableau de Bord", "new_analysis": "Nouvelle Analyse",
@@ -1347,6 +1378,33 @@ T = {
         "filter_type": "Filtrer par type",
         "filter_all": "Tous",
         "normalised": "Total normalisé à 100%.",
+        "mode_simulation": "Simulation de Portefeuille",
+        "mode_real": "Analyse de Mon Portefeuille Réel",
+        "real_portfolio": "Portefeuille Réel",
+        "real_portfolio_desc": "Entrez vos positions réelles pour voir la valeur de votre portefeuille.",
+        "add_holding": "Ajouter une Position",
+        "quantity": "Quantité",
+        "ticker": "Ticker",
+        "fetch_prices": "Récupérer les Prix & Analyser",
+        "total_value": "Valeur Totale",
+        "num_assets": "Nombre d'Actifs",
+        "top_asset": "Actif Principal",
+        "portfolio_health": "Santé du Portefeuille",
+        "asset_class_breakdown": "Répartition par Classe d'Actifs",
+        "dominant_asset": "Actif Dominant",
+        "diversification": "Niveau de Diversification",
+        "overall_risk": "Risque Global",
+        "real_synthesis": "Synthèse du Portefeuille",
+        "real_holdings": "Vos Positions",
+        "price": "Prix",
+        "value": "Valeur",
+        "weight_pct": "Poids",
+        "remove_holding": "Supprimer",
+        "no_holdings": "Ajoutez des actifs et leurs quantités pour analyser votre portefeuille réel.",
+        "high_div": "Élevée",
+        "medium_div": "Moyenne",
+        "low_div": "Faible",
+        "very_low_div": "Très Faible",
     }
 }
 
@@ -2655,15 +2713,46 @@ def _sidebar(lang):
         st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
 
+        # Analysis mode selector
+        mode_options = ["simulation", "real"]
+        mode_labels = [t("mode_simulation", lang), t("mode_real", lang)]
+        current_mode_idx = mode_options.index(st.session_state.analysis_mode)
+        mode_label = "Analysis Mode" if lang == 'en' else "Mode d'Analyse"
+        selected_mode_label = st.selectbox(
+            mode_label,
+            mode_labels,
+            index=current_mode_idx,
+        )
+        new_mode = mode_options[mode_labels.index(selected_mode_label)]
+        if new_mode != st.session_state.analysis_mode:
+            st.session_state.analysis_mode = new_mode
+            # Redirect to appropriate default page
+            if new_mode == "real":
+                st.session_state.page = "real_portfolio"
+            else:
+                st.session_state.page = "dashboard"
+            st.rerun()
+
+        st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
+                    unsafe_allow_html=True)
+
         # Navigation
-        nav = [
-            ("dashboard",    t("dashboard", lang)),
-            ("new_analysis", t("new_analysis", lang)),
-            ("models",       t("models", lang)),
-            ("improve",      t("improve", lang)),
-            ("library",      t("library", lang)),
-            ("account",      t("account", lang)),
-        ]
+        if st.session_state.analysis_mode == "real":
+            nav = [
+                ("real_portfolio", t("real_portfolio", lang)),
+                ("dashboard",      t("dashboard", lang)),
+                ("library",        t("library", lang)),
+                ("account",        t("account", lang)),
+            ]
+        else:
+            nav = [
+                ("dashboard",    t("dashboard", lang)),
+                ("new_analysis", t("new_analysis", lang)),
+                ("models",       t("models", lang)),
+                ("improve",      t("improve", lang)),
+                ("library",      t("library", lang)),
+                ("account",      t("account", lang)),
+            ]
         for key, label in nav:
             btn_type = "primary" if st.session_state.page == key else "secondary"
             if st.button(label, key=f"nav_{key}", use_container_width=True, type=btn_type):
@@ -2836,12 +2925,23 @@ def main():
     # DASHBOARD PAGE
     # ─────────────────────────────────────────────────────────────────────────
     elif page == "dashboard":
+        is_real_mode = st.session_state.analysis_mode == "real"
+
         if st.session_state.current_portfolio is None:
             st.title("Dashboard" if lang == 'en' else "Tableau de Bord")
-            st.info(t("welcome", lang))
-            if st.button(t("create_portfolio", lang), type="primary"):
-                st.session_state.page = "new_analysis"
-                st.rerun()
+            if is_real_mode:
+                hint = ("Enter your holdings in the Real Portfolio page to get started."
+                        if lang == 'en' else
+                        "Entrez vos positions dans la page Portefeuille Réel pour commencer.")
+                st.info(hint)
+                if st.button(t("real_portfolio", lang), type="primary"):
+                    st.session_state.page = "real_portfolio"
+                    st.rerun()
+            else:
+                st.info(t("welcome", lang))
+                if st.button(t("create_portfolio", lang), type="primary"):
+                    st.session_state.page = "new_analysis"
+                    st.rerun()
         else:
             analyzer = st.session_state.current_portfolio
             metrics    = analyzer.calculate_metrics()
@@ -2855,16 +2955,298 @@ def main():
                 if lang == 'en' else
                 f"{n_assets} actifs · {tickers_preview}"
             )
+            dash_title = (
+                ("Real Portfolio Dashboard" if lang == 'en' else "Tableau de Bord — Portefeuille Réel")
+                if is_real_mode else
+                ("Portfolio Dashboard" if lang == 'en' else "Tableau de Bord")
+            )
             st.markdown(f"""
             <div style="margin-bottom:6px;">
               <h1 style="font-size:1.9rem;font-weight:900;color:#f1f5f9;letter-spacing:-0.03em;margin:0;">
-                {"Portfolio Dashboard" if lang == 'en' else "Tableau de Bord"}
+                {dash_title}
               </h1>
               <p style="color:#475569;font-size:0.85rem;margin:4px 0 0;">{sub_info}</p>
             </div>
             """, unsafe_allow_html=True)
 
             ft_divider()
+
+            # ── Real Portfolio value cards (only in real mode)
+            if is_real_mode and st.session_state.real_portfolio_total_value:
+                total_val = st.session_state.real_portfolio_total_value
+                prices = st.session_state.real_portfolio_prices
+                holdings = st.session_state.real_portfolio_holdings
+
+                # Compute per-asset values
+                asset_values = {}
+                for tk in analyzer.tickers:
+                    if tk in prices and tk in holdings:
+                        asset_values[tk] = prices[tk] * holdings[tk]
+
+                # Find top asset
+                top_ticker = max(asset_values, key=asset_values.get) if asset_values else "—"
+                top_info = ASSET_INFO.get(top_ticker, {})
+                top_name = top_info.get("name", top_ticker)
+                top_pct = (asset_values.get(top_ticker, 0) / total_val * 100) if total_val > 0 else 0
+
+                # Health/robustness score
+                health_score = robustness['total']
+
+                section_header(
+                    "💰",
+                    t("real_portfolio", lang),
+                    "Live portfolio value from your actual holdings" if lang == 'en'
+                    else "Valeur en temps réel de vos positions",
+                )
+
+                vc1, vc2, vc3, vc4 = st.columns(4)
+                with vc1:
+                    st.markdown(f"""
+                    <div class="kpi-card">
+                      <div class="kpi-label">{t("total_value", lang)}</div>
+                      <div class="kpi-value" style="color:#00d4ff;">${total_val:,.2f}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with vc2:
+                    st.markdown(f"""
+                    <div class="kpi-card">
+                      <div class="kpi-label">{t("num_assets", lang)}</div>
+                      <div class="kpi-value" style="color:#a5b4fc;">{n_assets}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with vc3:
+                    st.markdown(f"""
+                    <div class="kpi-card">
+                      <div class="kpi-label">{t("top_asset", lang)}</div>
+                      <div class="kpi-value" style="color:#10b981;font-size:1.3rem;">{top_name}</div>
+                      <div style="font-size:0.75rem;color:#475569;margin-top:2px;">{top_pct:.1f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with vc4:
+                    h_color = "#10b981" if health_score >= 70 else "#f59e0b" if health_score >= 40 else "#ff4d4d"
+                    st.markdown(f"""
+                    <div class="kpi-card">
+                      <div class="kpi-label">{t("portfolio_health", lang)}</div>
+                      <div class="kpi-value" style="color:{h_color};">{health_score:.0f}/100</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                ft_divider()
+
+                # ── Holdings detail table
+                section_header(
+                    "📋",
+                    t("real_holdings", lang),
+                    "Breakdown of each position" if lang == 'en' else "Détail de chaque position",
+                )
+
+                # Table header
+                hdr_cols = st.columns([2, 1.5, 1.5, 1.5, 1])
+                with hdr_cols[0]:
+                    st.markdown(f"**{t('ticker', lang)}**")
+                with hdr_cols[1]:
+                    st.markdown(f"**{t('quantity', lang)}**")
+                with hdr_cols[2]:
+                    st.markdown(f"**{t('price', lang)}**")
+                with hdr_cols[3]:
+                    st.markdown(f"**{t('value', lang)}**")
+                with hdr_cols[4]:
+                    st.markdown(f"**{t('weight_pct', lang)}**")
+
+                for tk in analyzer.tickers:
+                    if tk not in asset_values:
+                        continue
+                    qty = holdings.get(tk, 0)
+                    price = prices.get(tk, 0)
+                    val = asset_values[tk]
+                    wt = (val / total_val * 100) if total_val > 0 else 0
+                    tk_info = ASSET_INFO.get(tk, {})
+                    tk_name = tk_info.get("name", tk)
+
+                    row_cols = st.columns([2, 1.5, 1.5, 1.5, 1])
+                    with row_cols[0]:
+                        st.markdown(f"**{tk}** — {tk_name}" if tk_name != tk else f"**{tk}**")
+                    with row_cols[1]:
+                        st.write(f"{qty:,.4f}")
+                    with row_cols[2]:
+                        st.write(f"${price:,.2f}")
+                    with row_cols[3]:
+                        st.write(f"${val:,.2f}")
+                    with row_cols[4]:
+                        st.write(f"{wt:.1f}%")
+
+                ft_divider()
+
+                # ── Normalized historical chart (portfolio value scaled to actual value)
+                section_header(
+                    "📈",
+                    "Portfolio Value History" if lang == 'en' else "Historique de Valeur du Portefeuille",
+                    "Historical performance normalized to your current portfolio value"
+                    if lang == 'en' else
+                    "Performance historique normalisée à la valeur actuelle de votre portefeuille",
+                )
+
+                # Normalize: scale cumulative returns so that last value = total_val
+                cumulative = (1 + analyzer.portfolio_returns).cumprod()
+                if cumulative.iloc[-1] != 0:
+                    normalized_values = total_val * (cumulative / cumulative.iloc[-1])
+                else:
+                    normalized_values = cumulative
+
+                CHART_LAYOUT = dict(
+                    height=440,
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
+                    margin=dict(l=10, r=10, t=48, b=10),
+                    hovermode='x unified',
+                    hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
+                                    font=dict(color='#f1f5f9', size=12)),
+                )
+                AXIS_STYLE = dict(
+                    showgrid=True,
+                    gridcolor='rgba(255,255,255,0.04)',
+                    gridwidth=1,
+                    linecolor='rgba(255,255,255,0.06)',
+                    tickfont=dict(size=11, color='#475569'),
+                    zerolinecolor='rgba(255,255,255,0.05)',
+                )
+
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=normalized_values.index,
+                    y=normalized_values.values,
+                    mode='lines',
+                    name=t("total_value", lang),
+                    line=dict(color='#00d4ff', width=2.5),
+                    fill='tozeroy',
+                    fillcolor='rgba(0,212,255,0.06)',
+                    hovertemplate='<b>%{x|%b %d, %Y}</b><br>$%{y:,.0f}<extra></extra>',
+                ))
+                fig.update_layout(
+                    title=dict(
+                        text="Portfolio Value" if lang == 'en' else "Valeur du Portefeuille",
+                        font=dict(size=14, color='#e2e8f0', family='Inter'),
+                    ),
+                    yaxis=dict(tickprefix="$", **AXIS_STYLE),
+                    xaxis=AXIS_STYLE,
+                    **CHART_LAYOUT,
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+                ft_divider()
+
+                # ── Synthesis section
+                section_header(
+                    "🔎",
+                    t("real_synthesis", lang),
+                    "Asset class breakdown, diversification & risk"
+                    if lang == 'en' else
+                    "Répartition par classe d'actifs, diversification et risque",
+                )
+
+                # Asset class breakdown
+                class_alloc = {}
+                for tk in analyzer.tickers:
+                    ac = ASSET_INFO.get(tk, {}).get("asset_class",
+                         SECTOR_MAPPING.get(tk, "Unknown"))
+                    wt = analyzer.weights.get(tk, 0)
+                    class_alloc[ac] = class_alloc.get(ac, 0) + wt
+
+                syn_c1, syn_c2 = st.columns(2)
+
+                with syn_c1:
+                    st.markdown(f"**{t('asset_class_breakdown', lang)}**")
+                    palette = ['#00d4ff','#4f46e5','#00ff9c','#ffb020','#ff4d4d',
+                               '#818cf8','#34d399','#fbbf24']
+                    fig_ac = go.Figure(data=[go.Pie(
+                        labels=list(class_alloc.keys()),
+                        values=[v * 100 for v in class_alloc.values()],
+                        hole=0.50,
+                        marker=dict(colors=palette, line=dict(color='#0e1117', width=2)),
+                        textinfo='label+percent',
+                        textfont=dict(size=11, color='white'),
+                        hovertemplate='<b>%{label}</b><br>%{value:.1f}%<extra></extra>',
+                    )])
+                    fig_ac.update_layout(
+                        showlegend=False,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font=dict(family='Inter, sans-serif', color='#94a3b8'),
+                        height=300, margin=dict(l=10, r=10, t=10, b=10),
+                    )
+                    st.plotly_chart(fig_ac, use_container_width=True)
+
+                with syn_c2:
+                    # Dominant asset
+                    st.markdown(f"**{t('dominant_asset', lang)}**")
+                    st.markdown(
+                        f"<div style='background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12);"
+                        f"border-radius:10px;padding:12px 16px;margin-bottom:12px;'>"
+                        f"<div style='font-size:1.1rem;font-weight:700;color:#00d4ff;'>"
+                        f"{top_name} ({top_ticker})</div>"
+                        f"<div style='font-size:0.82rem;color:#64748b;'>{top_pct:.1f}% "
+                        f"{'of portfolio' if lang == 'en' else 'du portefeuille'}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                    # Diversification level
+                    n_classes = len(class_alloc)
+                    max_weight = max(analyzer.weights.values()) if analyzer.weights else 0
+                    if n_classes >= 4 and max_weight < 0.30:
+                        div_level = t("high_div", lang)
+                        div_color = "#10b981"
+                    elif n_classes >= 3 and max_weight < 0.45:
+                        div_level = t("medium_div", lang)
+                        div_color = "#f59e0b"
+                    elif n_classes >= 2 and max_weight < 0.60:
+                        div_level = t("low_div", lang)
+                        div_color = "#ff8c00"
+                    else:
+                        div_level = t("very_low_div", lang)
+                        div_color = "#ff4d4d"
+
+                    st.markdown(f"**{t('diversification', lang)}**")
+                    st.markdown(
+                        f"<div style='display:inline-block;background:{div_color}22;color:{div_color};"
+                        f"padding:4px 16px;border-radius:10px;font-size:0.9rem;font-weight:600;'>"
+                        f"{div_level}</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                    # Overall risk
+                    risk_levels = {"Low": 1, "Medium": 2, "Medium-High": 3, "High": 4, "Very High": 5}
+                    total_risk_score = 0
+                    total_w_risk = 0
+                    for tk in analyzer.tickers:
+                        rl = ASSET_INFO.get(tk, {}).get("risk_level", "Medium")
+                        w = analyzer.weights.get(tk, 0)
+                        total_risk_score += risk_levels.get(rl, 3) * w
+                        total_w_risk += w
+
+                    avg_risk = total_risk_score / total_w_risk if total_w_risk > 0 else 3
+                    if avg_risk <= 1.5:
+                        risk_label = "Low" if lang == 'en' else "Faible"
+                        risk_color = "#10b981"
+                    elif avg_risk <= 2.5:
+                        risk_label = "Medium" if lang == 'en' else "Moyen"
+                        risk_color = "#f59e0b"
+                    elif avg_risk <= 3.5:
+                        risk_label = "Medium-High" if lang == 'en' else "Moyen-Élevé"
+                        risk_color = "#ff8c00"
+                    else:
+                        risk_label = "High" if lang == 'en' else "Élevé"
+                        risk_color = "#ff4d4d"
+
+                    st.markdown(f"**{t('overall_risk', lang)}**")
+                    st.markdown(
+                        f"<div style='display:inline-block;background:{risk_color}22;color:{risk_color};"
+                        f"padding:4px 16px;border-radius:10px;font-size:0.9rem;font-weight:600;'>"
+                        f"{risk_label}</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                ft_divider()
 
             # ── Section 1: KPI cards
             section_header(
@@ -3179,6 +3561,180 @@ def main():
                 st.caption(f"🔒 {locked_msg}")
 
             st.markdown("")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # REAL PORTFOLIO PAGE
+    # ─────────────────────────────────────────────────────────────────────────
+    elif page == "real_portfolio":
+        st.title(t("real_portfolio", lang))
+        st.markdown(
+            f"<p style='color:#64748b;margin-top:-12px;'>{t('real_portfolio_desc', lang)}</p>",
+            unsafe_allow_html=True,
+        )
+
+        holdings = st.session_state.real_portfolio_holdings  # {ticker: qty}
+
+        # ── Add holding form
+        st.markdown(f"### {t('add_holding', lang)}")
+        add_col1, add_col2, add_col3 = st.columns([3, 2, 1])
+        with add_col1:
+            # Search from POPULAR_ASSETS + direct ticker entry
+            all_assets_flat = {}
+            for cat, assets in POPULAR_ASSETS.items():
+                for name, ticker in assets.items():
+                    all_assets_flat[f"{name} ({ticker})"] = ticker
+            rp_search = st.text_input(
+                t("ticker", lang),
+                placeholder=t("search_ph", lang),
+                key="rp_search_input",
+                label_visibility="collapsed",
+            )
+        with add_col2:
+            rp_qty = st.number_input(
+                t("quantity", lang),
+                min_value=0.0001,
+                value=1.0,
+                step=0.1,
+                format="%.4f",
+                key="rp_qty_input",
+            )
+        with add_col3:
+            st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+            add_clicked = st.button(t("add_holding", lang), key="rp_add_btn", type="primary",
+                                    use_container_width=True)
+
+        # Search results
+        if rp_search:
+            matches = {k: v for k, v in all_assets_flat.items() if rp_search.lower() in k.lower()}
+            if matches:
+                for display, ticker in list(matches.items())[:6]:
+                    mc1, mc2 = st.columns([5, 1])
+                    with mc1:
+                        st.write(display)
+                    with mc2:
+                        if ticker not in holdings:
+                            if st.button(t("add", lang), key=f"rp_sa_{ticker}"):
+                                holdings[ticker] = rp_qty
+                                st.session_state.real_portfolio_holdings = holdings
+                                st.rerun()
+                        else:
+                            st.caption("✓")
+            else:
+                # Allow direct ticker entry
+                direct = rp_search.upper().strip()
+                if add_clicked and direct:
+                    holdings[direct] = rp_qty
+                    st.session_state.real_portfolio_holdings = holdings
+                    st.rerun()
+                st.caption(
+                    f"No matches. Press '{t('add_holding', lang)}' to add **{direct}** directly."
+                    if lang == 'en' else
+                    f"Aucun résultat. Appuyez sur '{t('add_holding', lang)}' pour ajouter **{direct}** directement."
+                )
+        elif add_clicked:
+            st.warning("Enter a ticker symbol." if lang == 'en' else "Entrez un symbole ticker.")
+
+        st.markdown("---")
+
+        # ── Current holdings table
+        if holdings:
+            st.markdown(f"### {t('real_holdings', lang)}")
+
+            h_cols = st.columns([2, 2, 1])
+            with h_cols[0]:
+                st.markdown(f"**{t('ticker', lang)}**")
+            with h_cols[1]:
+                st.markdown(f"**{t('quantity', lang)}**")
+            with h_cols[2]:
+                st.markdown("")
+
+            for ticker in list(holdings.keys()):
+                rc1, rc2, rc3 = st.columns([2, 2, 1])
+                with rc1:
+                    info = ASSET_INFO.get(ticker, {})
+                    name = info.get("name", ticker)
+                    st.markdown(f"**{ticker}** — {name}" if name != ticker else f"**{ticker}**")
+                with rc2:
+                    new_qty = st.number_input(
+                        t("quantity", lang),
+                        min_value=0.0001,
+                        value=float(holdings[ticker]),
+                        step=0.1,
+                        format="%.4f",
+                        key=f"rp_qty_{ticker}",
+                        label_visibility="collapsed",
+                    )
+                    holdings[ticker] = new_qty
+                with rc3:
+                    if st.button(t("remove_holding", lang), key=f"rp_rm_{ticker}", use_container_width=True):
+                        del holdings[ticker]
+                        st.session_state.real_portfolio_holdings = holdings
+                        st.rerun()
+
+            st.session_state.real_portfolio_holdings = holdings
+
+            st.markdown("---")
+
+            # ── Fetch prices & analyse
+            if st.button(t("fetch_prices", lang), type="primary", use_container_width=False):
+                tickers_list = list(holdings.keys())
+                prices = {}
+                progress_bar = st.progress(0)
+                status = st.empty()
+
+                for i, ticker in enumerate(tickers_list):
+                    try:
+                        status.text(f"Loading {ticker}...")
+                        tk = yf.Ticker(ticker)
+                        hist = tk.history(period="5d")
+                        if not hist.empty:
+                            prices[ticker] = hist['Close'].iloc[-1]
+                    except Exception as e:
+                        st.warning(f"{ticker}: {str(e)[:50]}")
+                    progress_bar.progress((i + 1) / len(tickers_list))
+
+                status.empty()
+                progress_bar.empty()
+
+                if not prices:
+                    st.error(t("fetch_error", lang))
+                else:
+                    st.session_state.real_portfolio_prices = prices
+
+                    # Calculate total value and weights
+                    asset_values = {}
+                    for ticker in tickers_list:
+                        if ticker in prices:
+                            asset_values[ticker] = prices[ticker] * holdings[ticker]
+
+                    total_value = sum(asset_values.values())
+                    st.session_state.real_portfolio_total_value = total_value
+
+                    # Calculate weights from real values
+                    real_weights = {tk: val / total_value for tk, val in asset_values.items() if total_value > 0}
+                    available_tickers = list(real_weights.keys())
+
+                    # Store in session state for the dashboard to use
+                    st.session_state.selected_tickers = available_tickers
+                    st.session_state.weights = real_weights
+
+                    # Create analyzer with real weights
+                    analyzer = UltimatePortfolioAnalyzer(
+                        available_tickers,
+                        real_weights,
+                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
+                        initial_value=total_value,
+                        user_profile=st.session_state.user_profile,
+                    )
+                    if analyzer.fetch_data():
+                        st.session_state.current_portfolio = analyzer
+                        st.success(t("analysis_done", lang))
+                        st.session_state.page = "dashboard"
+                        st.rerun()
+                    else:
+                        st.error(t("fetch_error", lang))
+        else:
+            st.info(t("no_holdings", lang))
 
     # ─────────────────────────────────────────────────────────────────────────
     # IMPROVE / OPTIMISE PAGE
