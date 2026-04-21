@@ -1,15 +1,13 @@
 public class Rodeur extends Profil {
     public Rodeur() {
-        super("Rodeur", 8);
+        super("Rodeur", 8, 8);
+        voies.add(new VoieDeLArcher());
+        voies.add(new VoieCompagnonAnimal());
+        voies.add(new VoieDuTraqueur());
     }
 
     @Override
-    public int calculerPV(int modCon) {
-        return 8 + modCon;
-    }
-
-    @Override
-    public int getAttaqueMagique(int modInt, int modSag) {
-        return 0;
+    public int getBonusAttaqueDistance(int niv) {
+        return niv;
     }
 }

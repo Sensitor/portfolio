@@ -7,6 +7,10 @@ public abstract class Race {
 
     public abstract void appliquerModificateurs(Personnage p);
 
+    public int getBonusPVParNiveau() {
+        return 0;
+    }
+
     public String getNom() {
         return nom;
     }

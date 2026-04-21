@@ -8,4 +8,9 @@ public class Nain extends Race {
         p.getConstitution().set(p.getConstitution().get() + 2);
         p.getDexterite().set(p.getDexterite().get() - 2);
     }
+
+    @Override
+    public int getBonusPVParNiveau() {
+        return 1;
+    }
 }

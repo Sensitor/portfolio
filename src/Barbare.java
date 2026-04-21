@@ -1,6 +1,6 @@
-public class Guerrier extends Profil {
-    public Guerrier() {
-        super("Guerrier", 10, 10);
+public class Barbare extends Profil {
+    public Barbare() {
+        super("Barbare", 12, 12);
         voies.add(new VoieDuBouclier());
         voies.add(new VoieDuCombat());
         voies.add(new VoieDeLaResistance());

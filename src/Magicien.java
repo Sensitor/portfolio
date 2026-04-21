@@ -1,15 +1,13 @@
 public class Magicien extends Profil {
     public Magicien() {
-        super("Magicien", 4);
+        super("Magicien", 4, 4);
+        voies.add(new VoieMagieDestructrice());
+        voies.add(new VoieMagieProtectrice());
+        voies.add(new VoieMagieUniverselle());
     }
 
     @Override
-    public int calculerPV(int modCon) {
-        return 4 + modCon;
-    }
-
-    @Override
-    public int getAttaqueMagique(int modInt, int modSag) {
-        return modInt + 1;
+    public int getAttaqueMagique(int modInt, int modSag, int niv) {
+        return modInt + 1 + niv;
     }
 }

@@ -1,15 +1,13 @@
 public class Voleur extends Profil {
     public Voleur() {
-        super("Voleur", 6);
+        super("Voleur", 6, 6);
+        voies.add(new VoieDeLAssassin());
+        voies.add(new VoieDuDeplacement());
+        voies.add(new VoieDuRoublard());
     }
 
     @Override
-    public int calculerPV(int modCon) {
-        return 6 + modCon;
-    }
-
-    @Override
-    public int getAttaqueMagique(int modInt, int modSag) {
-        return 0;
+    public int getBonusAttaqueDistance(int niv) {
+        return niv;
     }
 }
