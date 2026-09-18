@@ -1,0 +1,89 @@
+"""
+Shared page furniture: guards, the period selector, and the benchmark selector.
+
+Keeping these in one place means every Sensitor page handles an empty portfolio,
+a two-week history or a single holding the same way — the edge cases that
+otherwise produce a stack trace or, worse, a confident number computed from four
+data points.
+"""
+
+from __future__ import annotations
+
+import streamlit as st
+
+from .. import market
+from ..components import empty_state, note
+from ..i18n import tr
+
+
+def guard(ctx, lang: str) -> bool:
+    """
+    Return True when the page has enough data to render.
+
+    Two distinct failures get two distinct messages: no portfolio at all, and a
+    portfolio whose history is too short for the statistics to mean anything.
+    """
+    if ctx is None:
+        empty_state(tr("no_data_title", lang), tr("no_data_body", lang))
+        return False
+    if not ctx.has_history:
+        empty_state(tr("short_history_title", lang), tr("short_history_body", lang), icon="◷")
+        return False
+    return True
+
+
+def period_selector(ctx, key: str) -> str:
+    """
+    Horizontal period pills.
+
+    Changing the period re-slices the returns and clears every derived value, so
+    the metrics and the charts always describe the same window — a period control
+    that only moved the chart would be worse than none.
+    """
+    options = ctx.available_periods
+    current = ctx.period if ctx.period in options else options[-1]
+    selected = st.radio(
+        tr("period", ctx.lang),
+        options,
+        index=options.index(current),
+        horizontal=True,
+        key=key,
+        label_visibility="collapsed",
+    )
+    ctx.set_period(selected)
+    return selected
+
+
+def benchmark_selector(ctx, key: str, default: str = market.DEFAULT_BENCHMARK) -> str:
+    """Benchmark picker, labelled in the active language."""
+    tickers = list(market.BENCHMARKS)
+    labels = [market.benchmark_label(t, ctx.lang) for t in tickers]
+    index = tickers.index(default) if default in tickers else 0
+    chosen = st.selectbox(
+        tr("benchmark", ctx.lang), labels, index=index, key=key,
+        label_visibility="collapsed",
+    )
+    return tickers[labels.index(chosen)]
+
+
+def load_benchmark(ctx, ticker: str):
+    """
+    Fetch and align a benchmark to the portfolio's window.
+
+    Returns (portfolio_returns, benchmark_returns) aligned on shared dates, or
+    (None, None) when the data is unavailable — callers render portfolio-only
+    figures in that case rather than failing.
+    """
+    portfolio = ctx.portfolio_returns
+    if portfolio is None or len(portfolio) < 20:
+        return None, None
+    start = portfolio.index[0].strftime("%Y-%m-%d")
+    raw = market.fetch_returns(ticker, start)
+    if raw is None:
+        return None, None
+    return market.align(portfolio, raw)
+
+
+def single_asset_note(ctx) -> None:
+    if ctx.is_single_asset:
+        note(tr("single_asset_note", ctx.lang))
