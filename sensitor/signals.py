@@ -24,9 +24,14 @@ from . import analytics as A
 # =============================================================================
 
 THRESHOLDS = {
-    # Single position as a share of the portfolio.
+    # Single position as a share of the portfolio. Broad funds get their own,
+    # much higher thresholds: a 34% position in a 500-company index fund is not
+    # the same kind of exposure as a 34% position in one company, even though the
+    # ticker weight is identical. Breadth is decided by xray.is_broad().
     "position_critical": 0.30,
     "position_serious": 0.20,
+    "position_broad_critical": 0.70,
+    "position_broad_serious": 0.55,
     # One asset's share of total portfolio volatility.
     "risk_share_critical": 0.40,
     "risk_share_serious": 0.28,
@@ -67,17 +72,37 @@ def _signal(level, key, title_en, title_fr, body_en, body_fr, footnote_en, footn
 # RULES
 # =============================================================================
 
-def _concentration_signals(conc, weights, out):
+def position_thresholds(ticker, asset_info=None, sector_map=None, geo_map=None):
+    """
+    (critical, serious) position limits for one holding.
+
+    Broad funds are judged against the wider pair, because the concentration that
+    matters is in the underlying exposure, not in the ticker.
+    """
+    t = THRESHOLDS
+    if asset_info is None:
+        return t["position_critical"], t["position_serious"]
+    from .xray import is_broad
+    if is_broad(ticker, asset_info, sector_map or {}, geo_map or {}):
+        return t["position_broad_critical"], t["position_broad_serious"]
+    return t["position_critical"], t["position_serious"]
+
+
+def _concentration_signals(conc, weights, out, asset_info=None, sector_map=None,
+                           geo_map=None):
     if not conc:
         return
     top1 = conc["top1"]
     top_ticker = max(weights, key=weights.get) if weights else "—"
     t = THRESHOLDS
 
-    if top1 >= t["position_critical"]:
-        level, limit = "critical", t["position_critical"]
-    elif top1 >= t["position_serious"]:
-        level, limit = "serious", t["position_serious"]
+    critical_limit, serious_limit = position_thresholds(
+        top_ticker, asset_info, sector_map, geo_map
+    )
+    if top1 >= critical_limit:
+        level, limit = "critical", critical_limit
+    elif top1 >= serious_limit:
+        level, limit = "serious", serious_limit
     else:
         level, limit = None, None
 
@@ -263,7 +288,8 @@ def _drawdown_signals(stats, out):
 # =============================================================================
 
 def evaluate(*, weights, returns_df, portfolio_returns, xray, stats=None,
-             rc_df=None, conc=None, limit: int | None = None) -> list[dict]:
+             rc_df=None, conc=None, limit: int | None = None,
+             asset_info=None, sector_map=None, geo_map=None) -> list[dict]:
     """
     Run every rule and return signals ordered by severity.
 
@@ -279,7 +305,7 @@ def evaluate(*, weights, returns_df, portfolio_returns, xray, stats=None,
     div_ratio = A.diversification_ratio(returns_df, weights) if returns_df is not None else 1.0
 
     out: list[dict] = []
-    _concentration_signals(conc, weights, out)
+    _concentration_signals(conc, weights, out, asset_info, sector_map, geo_map)
     _risk_signals(rc_df, out)
     _correlation_signals(avg_corr, div_ratio, len(weights), out)
     _exposure_signals(xray or {}, out)

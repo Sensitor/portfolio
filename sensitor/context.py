@@ -189,6 +189,9 @@ class Context:
             stats=self.stats,
             rc_df=self.risk_contribution,
             conc=self.concentration,
+            asset_info=self.asset_info,
+            sector_map=self.sector_map,
+            geo_map=self.geo_map,
         ))
 
     @property

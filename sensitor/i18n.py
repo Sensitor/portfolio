@@ -290,6 +290,97 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "explained_variance": {"en": "Explained Variance", "fr": "Variance Expliquée"},
     "not_significant": {"en": "not significant", "fr": "non significatif"},
+    # ── Phase 3: Simulator ──────────────────────────────────────────────────
+    "nav_simulator": {"en": "Simulator", "fr": "Simulateur"},
+    "simulator_sub": {
+        "en": "Change the allocation and watch every number move. Nothing here touches your saved portfolio.",
+        "fr": "Modifiez l'allocation et voyez chaque chiffre bouger. Rien ici ne modifie votre portefeuille enregistré.",
+    },
+    "what_if": {"en": "What-If Allocation", "fr": "Allocation Hypothétique"},
+    "what_if_sub": {
+        "en": "Move a slider and the metrics below recompute on the same history.",
+        "fr": "Déplacez un curseur et les métriques ci-dessous se recalculent sur le même historique.",
+    },
+    "reset_allocation": {"en": "Reset to current", "fr": "Revenir à l'actuel"},
+    "normalise_note": {
+        "en": "Weights are rescaled to 100% after every change, so the sliders show relative size rather than an absolute amount.",
+        "fr": "Les poids sont ramenés à 100% après chaque modification : les curseurs indiquent donc une taille relative, pas un montant absolu.",
+    },
+    "simulated": {"en": "Simulated", "fr": "Simulé"},
+    "current": {"en": "Current", "fr": "Actuel"},
+    "impact": {"en": "Impact", "fr": "Impact"},
+    "no_change_yet": {
+        "en": "Move a slider to see the effect. Everything below currently matches your portfolio.",
+        "fr": "Déplacez un curseur pour voir l'effet. Tout ce qui suit correspond actuellement à votre portefeuille.",
+    },
+    "simulation_note": {
+        "en": "Every figure restates the same historical window under different weights, rebalanced daily. It shows how this allocation would have behaved over the period analysed — it is not a projection, and an allocation that looked better in the past is not thereby better.",
+        "fr": "Chaque chiffre reformule la même fenêtre historique sous des poids différents, avec rééquilibrage quotidien. Cela montre comment cette allocation se serait comportée sur la période analysée — ce n'est pas une projection, et une allocation qui paraissait meilleure par le passé ne l'est pas pour autant.",
+    },
+    "comparison": {"en": "Allocation Comparison", "fr": "Comparaison d'Allocations"},
+    "comparison_sub": {
+        "en": "Your allocation against the optimiser's and a defensive alternative, on identical history.",
+        "fr": "Votre allocation face à celle de l'optimiseur et à une variante défensive, sur un historique identique.",
+    },
+    "conservative": {"en": "Conservative", "fr": "Prudent"},
+    "equal_weight": {"en": "Equal Weight", "fr": "Équipondéré"},
+    "best": {"en": "best", "fr": "meilleur"},
+
+    # ── Phase 3: Monte Carlo ────────────────────────────────────────────────
+    "monte_carlo": {"en": "Monte Carlo Projection", "fr": "Projection Monte Carlo"},
+    "monte_carlo_sub": {
+        "en": "Thousands of possible paths drawn from this portfolio's own return history.",
+        "fr": "Des milliers de trajectoires possibles tirées de l'historique de rendement de ce portefeuille.",
+    },
+    "horizon": {"en": "Horizon", "fr": "Horizon"},
+    "simulations": {"en": "Simulations", "fr": "Simulations"},
+    "annual_contribution": {"en": "Annual contribution", "fr": "Versement annuel"},
+    "method": {"en": "Method", "fr": "Méthode"},
+    "method_bootstrap": {"en": "Bootstrap (historical)", "fr": "Bootstrap (historique)"},
+    "method_parametric": {"en": "Parametric (normal)", "fr": "Paramétrique (normale)"},
+    "median_outcome": {"en": "Median Outcome", "fr": "Résultat Médian"},
+    "pessimistic": {"en": "Pessimistic (P10)", "fr": "Pessimiste (P10)"},
+    "optimistic": {"en": "Optimistic (P90)", "fr": "Optimiste (P90)"},
+    "prob_loss": {"en": "Probability of Loss", "fr": "Probabilité de Perte"},
+    "prob_targets": {"en": "Probability of Reaching", "fr": "Probabilité d'Atteindre"},
+    "terminal_values": {"en": "Terminal Values", "fr": "Valeurs Finales"},
+    "years_label": {"en": "years", "fr": "ans"},
+    "mc_note": {
+        "en": "Bootstrap resamples this portfolio's actual daily returns, inheriting their real fat tails; the parametric method draws from a fitted normal distribution and systematically understates extreme outcomes. Both assume the future return distribution resembles the window sampled — no regime change, no structural break, no valuation anchor. A long horizon projected from a short history is an extrapolation of that window, not a forecast.",
+        "fr": "Le bootstrap rééchantillonne les rendements quotidiens réels de ce portefeuille, en héritant de leurs vraies queues épaisses ; la méthode paramétrique tire d'une loi normale ajustée et sous-estime systématiquement les résultats extrêmes. Les deux supposent que la distribution future des rendements ressemble à la fenêtre échantillonnée — sans changement de régime, ni rupture structurelle, ni ancrage de valorisation. Un horizon long projeté depuis un historique court est une extrapolation de cette fenêtre, pas une prévision.",
+    },
+    "mc_history_warning": {
+        "en": "The projection horizon is much longer than the history it was drawn from, which makes the spread of outcomes less meaningful.",
+        "fr": "L'horizon de projection est bien plus long que l'historique dont il est tiré, ce qui rend la dispersion des résultats moins significative.",
+    },
+
+    # ── Phase 3: Copilot ────────────────────────────────────────────────────
+    "nav_copilot": {"en": "Copilot", "fr": "Copilote"},
+    "copilot_sub": {
+        "en": "Patterns worth examining, each paired with a change you can simulate.",
+        "fr": "Des configurations à examiner, chacune associée à un changement que vous pouvez simuler.",
+    },
+    "nothing_flagged": {"en": "Nothing flagged", "fr": "Rien à signaler"},
+    "nothing_flagged_body": {
+        "en": "None of the configured thresholds were crossed by this allocation. That means it sits inside the documented limits, not that it is well suited to you.",
+        "fr": "Aucun des seuils configurés n'a été franchi par cette allocation. Cela signifie qu'elle reste dans les limites documentées, pas qu'elle vous convient.",
+    },
+    "why_question": {"en": "Why?", "fr": "Pourquoi ?"},
+    "show_me": {"en": "Show me", "fr": "Montrez-moi"},
+    "simulate": {"en": "Simulate", "fr": "Simuler"},
+    "ignore": {"en": "Ignore", "fr": "Ignorer"},
+    "restore_ignored": {"en": "Restore ignored items", "fr": "Restaurer les éléments ignorés"},
+    "ignored_count": {"en": "ignored", "fr": "ignorés"},
+    "proposed_change": {"en": "Change to simulate", "fr": "Changement à simuler"},
+    "evidence": {"en": "Evidence", "fr": "Constat"},
+    "copilot_note": {
+        "en": "These are observations against documented thresholds, not advice. Each proposed change exists so you can see its trade-off: trimming a volatile holding usually lowers both risk and past return, and the impact table shows both. No item claims the change would improve future outcomes — the simulation can only restate the past under different weights.",
+        "fr": "Ce sont des observations mesurées contre des seuils documentés, pas des conseils. Chaque changement proposé existe pour que vous en voyiez l'arbitrage : réduire une position volatile diminue généralement à la fois le risque et le rendement passé, et le tableau d'impact montre les deux. Aucun élément ne prétend que le changement améliorerait les résultats futurs — la simulation ne fait que reformuler le passé sous d'autres poids.",
+    },
+    "apply_to_simulator": {"en": "Open in Simulator", "fr": "Ouvrir dans le Simulateur"},
+    "improves": {"en": "improves", "fr": "améliore"},
+    "worsens": {"en": "worsens", "fr": "dégrade"},
+
     "factor_note": {
         "en": "Loadings come from a single multivariate OLS regression of portfolio excess returns on all available factors, so correlated factors do not each claim the same variance. Style factors are long/short ETF spreads, which are proxies for the academic factors rather than the factors themselves. Loadings marked not significant have |t| below 2 and should be read as indistinguishable from zero. Estimates move with the window chosen.",
         "fr": "Les charges proviennent d'une unique régression OLS multivariée des rendements excédentaires du portefeuille sur tous les facteurs disponibles, afin que des facteurs corrélés ne revendiquent pas chacun la même variance. Les facteurs de style sont des spreads d'ETF long/short : ce sont des proxies des facteurs académiques, pas les facteurs eux-mêmes. Les charges marquées non significatives ont un |t| inférieur à 2 et doivent être lues comme indiscernables de zéro. Les estimations varient selon la fenêtre choisie.",
