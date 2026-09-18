@@ -153,7 +153,7 @@ def contribution_bars(labels, values, height: int | None = None,
                    zerolinecolor=AXIS, zerolinewidth=1,
                    range=[-span * 1.35, span * 1.35],
                    ticksuffix="%" if as_pct else ""),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=6, b=6),
     ))
@@ -201,7 +201,7 @@ def weight_vs_risk(rc_df, height: int | None = None,
         barmode="overlay", bargap=0.30,
         xaxis=dict(showgrid=True, gridcolor=GRID, ticksuffix="%",
                    range=[0, top * 1.28]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=30, b=6),
     ))
@@ -375,7 +375,7 @@ def exposure_bars(breakdown: dict, height: int | None = None, max_items: int = 9
         height=height, hovermode="closest",
         xaxis=dict(showgrid=True, gridcolor=GRID, ticksuffix="%",
                    range=[0, max(values) * 1.24 if values else 100]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=6, b=6),
     ))
@@ -534,7 +534,7 @@ def factor_bars(loadings, height: int | None = None, label_fn=None,
         xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
                    zerolinecolor=AXIS, zerolinewidth=1,
                    range=[-span * 1.3, span * 1.3]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=6, b=6),
     ))
@@ -593,7 +593,7 @@ def scenario_bars(rows, height: int | None = None,
         xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
                    zerolinecolor=AXIS, zerolinewidth=1, ticksuffix="%",
                    range=[low - pad * 1.5, high + pad * 1.5]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=30 if has_bench else 6, b=6),
     ))
@@ -643,7 +643,7 @@ def before_after_bars(rows, height: int | None = None,
         barmode="overlay", bargap=0.34,
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False,
                    range=[0, 1.42]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=30, b=6),
     ))
@@ -748,7 +748,161 @@ def allocation_change_bars(changes, height: int | None = None) -> go.Figure:
         xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
                    zerolinecolor=AXIS, zerolinewidth=1, ticksuffix="pp",
                    range=[-span * 1.7, span * 1.7]),
-        yaxis=dict(showgrid=False, autorange="reversed",
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=6, b=6),
+    ))
+    return fig
+
+
+# =============================================================================
+# MONTE CARLO
+# =============================================================================
+
+def fan_chart(result: dict, height: int = 420, currency: str = "$",
+              lang: str = "en") -> go.Figure:
+    """
+    Percentile fan of simulated paths.
+
+    Bands are drawn as nested fills of one hue at increasing opacity, so the
+    encoding reads as a single probability gradient rather than as four unrelated
+    categories. The median is the only line with real weight; the band edges stay
+    recessive because the space between them is the message, not the edges.
+    """
+    percentiles = result.get("paths_percentiles") or {}
+    if not percentiles:
+        return go.Figure()
+
+    horizon = len(next(iter(percentiles.values())))
+
+    # A ten-year projection is ~2500 daily points per band. Sent whole, the filled
+    # polygons alone push the figure past 400 KB of JSON for no visible gain —
+    # the bands are smooth by construction. Subsample to a few hundred points,
+    # always keeping the final day so the terminal values stay exact.
+    max_points = 240
+    if horizon > max_points:
+        keep = np.unique(np.concatenate([
+            np.linspace(0, horizon - 1, max_points).astype(int), [horizon - 1],
+        ]))
+        percentiles = {p: np.asarray(v)[keep] for p, v in percentiles.items()}
+        x = keep / 252.0
+    else:
+        x = np.arange(horizon) / 252.0
+
+    fig = go.Figure()
+    band_label = "confidence band" if lang == "en" else "intervalle"
+
+    # Outer band first so the inner one paints over it.
+    for lower, upper, opacity in ((10, 90, 0.10), (25, 75, 0.20)):
+        if lower not in percentiles or upper not in percentiles:
+            continue
+        fig.add_trace(go.Scatter(
+            x=np.concatenate([x, x[::-1]]),
+            y=np.concatenate([percentiles[upper], percentiles[lower][::-1]]),
+            fill="toself", fillcolor=f"rgba(57,135,229,{opacity})",
+            line=dict(width=0), hoverinfo="skip",
+            name=f"{lower}–{upper}% {band_label}",
+        ))
+
+    for p, width, dash in ((10, 1, "dot"), (90, 1, "dot")):
+        if p in percentiles:
+            fig.add_trace(go.Scatter(
+                x=x, y=percentiles[p], mode="lines", name=f"P{p}",
+                line=dict(color="rgba(57,135,229,0.55)", width=width, dash=dash),
+                hovertemplate=f"P{p}  {currency}%{{y:,.0f}}<extra></extra>",
+            ))
+
+    if 50 in percentiles:
+        fig.add_trace(go.Scatter(
+            x=x, y=percentiles[50], mode="lines",
+            name="Median" if lang == "en" else "Médiane",
+            line=dict(color=ACCENT, width=2.6),
+            hovertemplate=f"Median  {currency}%{{y:,.0f}}<extra></extra>",
+        ))
+
+    initial = result.get("initial_value")
+    if initial:
+        fig.add_hline(y=initial, line=dict(color=INK_FAINT, width=1, dash="dash"))
+
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=True, hovermode="x unified",
+        xaxis=dict(title=dict(text="Years" if lang == "en" else "Années",
+                              font=dict(size=11, color=INK_MUTED)),
+                   showspikes=True, spikecolor=BORDER_STRONG,
+                   spikethickness=1, spikemode="across", spikedash="dot"),
+        yaxis=dict(tickprefix=currency, tickformat=",.0f"),
+        margin=dict(l=8, r=8, t=30, b=34),
+    ))
+    return fig
+
+
+def terminal_distribution(result: dict, height: int = 240, currency: str = "$",
+                          lang: str = "en") -> go.Figure:
+    """
+    Distribution of simulated terminal values, with the break-even point marked.
+
+    Bars below the amount invested take the critical colour, which turns
+    "probability of losing money" from a number into a visible region.
+    """
+    terminal = result.get("terminal")
+    if terminal is None or len(terminal) == 0:
+        return go.Figure()
+
+    invested = result.get("invested") or result.get("initial_value") or 0
+    # Trim the extreme right tail so the bulk of the distribution stays readable.
+    upper = float(np.percentile(terminal, 99))
+    clipped = terminal[terminal <= upper]
+
+    counts, edges = np.histogram(clipped, bins=55)
+    centers = (edges[:-1] + edges[1:]) / 2
+    colors = [STATUS["critical"] if c < invested else ACCENT for c in centers]
+
+    fig = go.Figure(go.Bar(
+        x=centers, y=counts, marker=_bar_marker(colors),
+        hovertemplate=f"{currency}%{{x:,.0f}}<br>%{{y}} paths<extra></extra>",
+        width=(edges[1] - edges[0]) * 0.9,
+    ))
+    fig.add_vline(
+        x=invested, line=dict(color=INK, width=1.5, dash="dash"),
+        annotation_text=("invested" if lang == "en" else "investi"),
+        annotation_position="top right",
+        annotation_font=dict(size=10, color=INK_2),
+    )
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest", bargap=0.04,
+        xaxis=dict(tickprefix=currency, tickformat=",.0f", showgrid=False),
+        yaxis=dict(title=None),
+    ))
+    return fig
+
+
+def probability_bars(rows, height: int | None = None, currency: str = "$") -> go.Figure:
+    """Probability of reaching each target — a simple, direct-labelled bar row."""
+    rows = list(rows)
+    if not rows:
+        return go.Figure()
+    height = height or max(160, 34 * len(rows) + 36)
+    labels = [f"{currency}{r['target']:,.0f}" for r in rows]
+    values = [r["probability"] * 100 for r in rows]
+
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation="h",
+        marker=_bar_marker([
+            STATUS["good"] if v >= 60 else STATUS["warning"] if v >= 30 else STATUS["critical"]
+            for v in values
+        ]),
+        text=[f"{v:.0f}%" for v in values],
+        textposition="outside", textfont=dict(size=11, color=INK_2),
+        hovertemplate="<b>%{y}</b>  %{x:.1f}%<extra></extra>",
+        width=0.6,
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        xaxis=dict(showgrid=True, gridcolor=GRID, ticksuffix="%", range=[0, 118]),
+        # Explicitly categorical. Currency labels like "$700,000" get coerced to a
+        # numeric axis otherwise, which collapses every bar to a hairline and
+        # reformats the labels as plain numbers.
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
                    tickfont=dict(size=11, color=INK_2)),
         margin=dict(l=8, r=8, t=6, b=6),
     ))

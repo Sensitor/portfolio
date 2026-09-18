@@ -7,6 +7,8 @@ from .risk import render_risk
 from .xray_page import render_xray
 from .stress import render_stress
 from .optimize_page import render_optimize
+from .simulator import render_simulator
+from .copilot_page import render_copilot
 
 __all__ = [
     "render_overview",
@@ -16,4 +18,6 @@ __all__ = [
     "render_xray",
     "render_stress",
     "render_optimize",
+    "render_simulator",
+    "render_copilot",
 ]

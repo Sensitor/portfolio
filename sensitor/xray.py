@@ -369,3 +369,35 @@ def direct_vs_lookthrough(weights: dict, xray: dict, dimension: str = "sector") 
 
     resolved = xray.get(dimension, {})
     return [{"bucket": k, "share": v} for k, v in resolved.items()]
+
+
+# =============================================================================
+# BREADTH
+# =============================================================================
+
+# A holding resolving to at least this many meaningful sector buckets is treated
+# as a broad fund rather than a single bet.
+BROAD_BUCKET_COUNT = 4
+BROAD_BUCKET_FLOOR = 0.05
+
+
+def is_broad(ticker: str, asset_info: dict, sector_map: dict, geo_map: dict) -> bool:
+    """
+    Whether a holding is itself diversified.
+
+    Concentration rules that treat every ticker as one bet misread index funds: a
+    34% position in a 500-company fund is not the same kind of exposure as a 34%
+    position in one company, even though the weight is identical. Callers use this
+    to apply a different threshold rather than to skip the check entirely.
+    """
+    profile = resolve_profile(ticker, asset_info, sector_map, geo_map)
+    sectors = profile.get("sector") or {}
+    meaningful = [v for v in sectors.values() if v >= BROAD_BUCKET_FLOOR]
+    return len(meaningful) >= BROAD_BUCKET_COUNT
+
+
+def breadth(ticker: str, asset_info: dict, sector_map: dict, geo_map: dict) -> int:
+    """Number of meaningful sector buckets a holding resolves into."""
+    profile = resolve_profile(ticker, asset_info, sector_map, geo_map)
+    sectors = profile.get("sector") or {}
+    return sum(1 for v in sectors.values() if v >= BROAD_BUCKET_FLOOR)

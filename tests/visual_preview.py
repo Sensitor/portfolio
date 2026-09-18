@@ -33,8 +33,8 @@ st.set_page_config(page_title="Sensitor — Visual Preview", layout="wide",
 from sensitor import design, market                      # noqa: E402
 from sensitor.context import Context                     # noqa: E402
 from sensitor.pages import (                             # noqa: E402
-    render_health, render_optimize, render_overview, render_performance,
-    render_risk, render_stress, render_xray,
+    render_copilot, render_health, render_optimize, render_overview,
+    render_performance, render_risk, render_simulator, render_stress, render_xray,
 )
 
 design.inject_theme()
@@ -143,6 +143,8 @@ PAGES = {
     "Risk Lab": render_risk,
     "Stress Lab": render_stress,
     "Optimize": render_optimize,
+    "Simulator": render_simulator,
+    "Copilot": render_copilot,
 }
 
 page_name = st.query_params.get("page", "Overview")
