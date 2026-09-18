@@ -25,7 +25,7 @@ import plotly.graph_objects as go
 
 from .design import (
     ACCENT, AXIS, BORDER_STRONG, DIVERGING, GRID, INK, INK_2, INK_FAINT,
-    INK_MUTED, NEG, PALETTE, POS, STATUS, SURFACE, SURFACE_2,
+    INK_MUTED, NEG, PALETTE, PALETTE_ALLPAIRS, POS, STATUS, SURFACE, SURFACE_2,
     plotly_layout, series_color,
 )
 
@@ -485,4 +485,271 @@ def radar(labels, values, height: int = 320, max_value: float = 100,
         hoverlabel=dict(bgcolor=SURFACE_2, bordercolor=BORDER_STRONG,
                         font=dict(family="Inter", size=12, color=INK)),
     )
+    return fig
+
+
+# =============================================================================
+# FACTORS
+# =============================================================================
+
+def factor_bars(loadings, height: int | None = None, label_fn=None,
+                ns_suffix: str = "n.s.") -> go.Figure:
+    """
+    Factor loadings diverging from zero.
+
+    Statistically weak loadings (|t| < 2) are drawn faded *and* suffixed in their
+    label, so the distinction survives for a reader who cannot separate the two
+    opacities — opacity alone would be a colour-only encoding.
+    """
+    loadings = list(loadings)
+    if not loadings:
+        return go.Figure()
+
+    labels, values, colors, texts = [], [], [], []
+    for item in loadings:
+        name = label_fn(item["factor"]) if label_fn else item["factor"]
+        significant = item.get("significant", True)
+        labels.append(name if significant else f"{name}  ({ns_suffix})")
+        values.append(item["loading"])
+        base = POS if item["loading"] >= 0 else NEG
+        colors.append(base if significant else "rgba(154,168,191,0.45)")
+        texts.append(f"{item['loading']:+.2f}")
+
+    height = height or max(200, 32 * len(labels) + 40)
+    span = max(abs(v) for v in values) or 1
+
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation="h",
+        marker=_bar_marker(colors),
+        text=texts, textposition="outside",
+        textfont=dict(size=11, color=INK_2),
+        customdata=[[item.get("t_stat", 0.0), item.get("stderr", 0.0)] for item in loadings],
+        hovertemplate=("<b>%{y}</b><br>Loading %{x:+.3f}"
+                       "<br>t = %{customdata[0]:+.2f}  ·  s.e. %{customdata[1]:.3f}"
+                       "<extra></extra>"),
+        width=0.6,
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
+                   zerolinecolor=AXIS, zerolinewidth=1,
+                   range=[-span * 1.3, span * 1.3]),
+        yaxis=dict(showgrid=False, autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=6, b=6),
+    ))
+    return fig
+
+
+# =============================================================================
+# STRESS
+# =============================================================================
+
+def scenario_bars(rows, height: int | None = None,
+                  label_portfolio: str = "Portfolio",
+                  label_benchmark: str = "Benchmark") -> go.Figure:
+    """
+    Portfolio versus benchmark impact per crisis scenario.
+
+    Both series are returns over the same window, so one axis carries them. Rows
+    arrive worst-first, which puts the scenarios that matter at the top.
+    """
+    rows = list(rows)
+    if not rows:
+        return go.Figure()
+    labels = [r["label"] for r in rows]
+    height = height or max(220, 42 * len(labels) + 46)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=[r["portfolio"] * 100 for r in rows], y=labels, orientation="h",
+        name=label_portfolio,
+        marker=_bar_marker([NEG if r["portfolio"] < 0 else POS for r in rows]),
+        text=[f"{r['portfolio'] * 100:+.1f}%" for r in rows],
+        textposition="outside", textfont=dict(size=11, color=INK_2),
+        hovertemplate="<b>%{y}</b> — " + label_portfolio + " %{x:+.1f}%<extra></extra>",
+        width=0.34, offset=-0.34,
+    ))
+    has_bench = any(r.get("benchmark") is not None for r in rows)
+    if has_bench:
+        fig.add_trace(go.Bar(
+            x=[(r.get("benchmark") or 0) * 100 for r in rows], y=labels, orientation="h",
+            name=label_benchmark,
+            marker=_bar_marker("rgba(154,168,191,0.42)"),
+            hovertemplate="<b>%{y}</b> — " + label_benchmark + " %{x:+.1f}%<extra></extra>",
+            width=0.34, offset=0.0,
+        ))
+
+    values = [r["portfolio"] * 100 for r in rows] + \
+             [(r.get("benchmark") or 0) * 100 for r in rows]
+    # Each side gets its own headroom. A single asymmetric range assumed losses
+    # dominate, which clipped the bars of any scenario the portfolio gained in.
+    low = min(min(values), 0.0)
+    high = max(max(values), 0.0)
+    pad = max(abs(low), abs(high), 1) * 0.16
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=has_bench, hovermode="closest",
+        barmode="overlay", bargap=0.3,
+        xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
+                   zerolinecolor=AXIS, zerolinewidth=1, ticksuffix="%",
+                   range=[low - pad * 1.5, high + pad * 1.5]),
+        yaxis=dict(showgrid=False, autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=30 if has_bench else 6, b=6),
+    ))
+    return fig
+
+
+def before_after_bars(rows, height: int | None = None,
+                      label_before: str = "Before", label_after: str = "After") -> go.Figure:
+    """
+    Paired before/after values for a small set of metrics, each on its own row.
+
+    Values are normalised to a common 0-1 scale per row before plotting, because
+    a Sharpe ratio and a drawdown percentage cannot share an axis; the readable
+    figures are carried by the direct labels.
+    """
+    rows = list(rows)
+    if not rows:
+        return go.Figure()
+    height = height or max(200, 44 * len(rows) + 40)
+    labels = [r["label"] for r in rows]
+
+    def norm(row, key):
+        span = max(abs(row["before"]), abs(row["after"])) or 1
+        return abs(row[key]) / span
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=[norm(r, "before") for r in rows], y=labels, orientation="h",
+        name=label_before,
+        marker=_bar_marker("rgba(154,168,191,0.40)"),
+        text=[r["before_text"] for r in rows],
+        textposition="outside", textfont=dict(size=11, color=INK_MUTED),
+        hovertemplate="<b>%{y}</b> — " + label_before + " %{text}<extra></extra>",
+        width=0.32, offset=-0.34,
+    ))
+    fig.add_trace(go.Bar(
+        x=[norm(r, "after") for r in rows], y=labels, orientation="h",
+        name=label_after,
+        marker=_bar_marker([STATUS[r.get("tone", "warning")] for r in rows]),
+        text=[r["after_text"] for r in rows],
+        textposition="outside", textfont=dict(size=11, color=INK),
+        hovertemplate="<b>%{y}</b> — " + label_after + " %{text}<extra></extra>",
+        width=0.32, offset=0.02,
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=True, hovermode="closest",
+        barmode="overlay", bargap=0.34,
+        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False,
+                   range=[0, 1.42]),
+        yaxis=dict(showgrid=False, autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=30, b=6),
+    ))
+    return fig
+
+
+# =============================================================================
+# OPTIMISATION
+# =============================================================================
+
+def frontier_scatter(result: dict, height: int = 430, lang: str = "en") -> go.Figure:
+    """
+    Risk/return scatter with the efficient frontier and the named portfolios.
+
+    A scatter is an all-pairs colour form, so only the three all-pairs-safe slots
+    carry identity here; each named portfolio is additionally given its own marker
+    shape and a direct label, and the individual assets stay muted so they read as
+    context rather than as a fourth series.
+    """
+    frontier = result.get("frontier") or []
+    fig = go.Figure()
+
+    if frontier:
+        fig.add_trace(go.Scatter(
+            x=[p["volatility"] * 100 for p in frontier],
+            y=[p["return"] * 100 for p in frontier],
+            mode="lines", name="Efficient frontier" if lang == "en" else "Frontière efficiente",
+            line=dict(color=PALETTE_ALLPAIRS[0], width=2.4),
+            hovertemplate="Vol %{x:.1f}%  ·  Return %{y:.1f}%<extra></extra>",
+        ))
+
+    assets = result.get("assets") or []
+    if assets:
+        fig.add_trace(go.Scatter(
+            x=[a["volatility"] * 100 for a in assets],
+            y=[a["return"] * 100 for a in assets],
+            mode="markers+text", name="Holdings" if lang == "en" else "Positions",
+            marker=dict(size=9, color="rgba(154,168,191,0.55)", symbol="circle",
+                        line=dict(width=1.5, color=SURFACE)),
+            text=[a["ticker"] for a in assets],
+            textposition="top center",
+            textfont=dict(size=10, color=INK_MUTED),
+            hovertemplate="<b>%{text}</b><br>Vol %{x:.1f}%  ·  Return %{y:.1f}%<extra></extra>",
+        ))
+
+    named = [
+        ("current", "Current" if lang == "en" else "Actuel",
+         PALETTE_ALLPAIRS[1], "diamond", 15),
+        ("max_sharpe", "Max Sharpe", PALETTE_ALLPAIRS[2], "star", 17),
+        ("min_volatility", "Min volatility" if lang == "en" else "Vol. minimale",
+         STATUS["warning"], "square", 13),
+    ]
+    for key, label, color, symbol, size in named:
+        point = result.get(key)
+        if not point:
+            continue
+        # No direct label on these three. They routinely land within a couple of
+        # percent of one another, and their labels collided into unreadable mush;
+        # the legend carries each one's own marker shape, so identity survives
+        # without depending on colour alone.
+        fig.add_trace(go.Scatter(
+            x=[point["volatility"] * 100], y=[point["return"] * 100],
+            mode="markers", name=label,
+            marker=dict(size=size, color=color, symbol=symbol,
+                        line=dict(width=2, color=SURFACE)),
+            hovertemplate=(f"<b>{label}</b><br>Vol %{{x:.1f}}%  ·  Return %{{y:.1f}}%"
+                           f"<br>Sharpe {point['sharpe']:.2f}<extra></extra>"),
+        ))
+
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=True, hovermode="closest",
+        xaxis=dict(showgrid=True, gridcolor=GRID, ticksuffix="%",
+                   title=dict(text="Volatility" if lang == "en" else "Volatilité",
+                              font=dict(size=11, color=INK_MUTED))),
+        yaxis=dict(ticksuffix="%",
+                   title=dict(text="Expected return" if lang == "en" else "Rendement attendu",
+                              font=dict(size=11, color=INK_MUTED))),
+        margin=dict(l=8, r=8, t=30, b=34),
+    ))
+    return fig
+
+
+def allocation_change_bars(changes, height: int | None = None) -> go.Figure:
+    """Weight moves between two allocations, largest first."""
+    changes = list(changes)
+    if not changes:
+        return go.Figure()
+    height = height or max(180, 32 * len(changes) + 40)
+    deltas = [c["delta"] * 100 for c in changes]
+    span = max(abs(d) for d in deltas) or 1
+
+    fig = go.Figure(go.Bar(
+        x=deltas, y=[c["ticker"] for c in changes], orientation="h",
+        marker=_bar_marker([POS if d >= 0 else NEG for d in deltas]),
+        text=[f"{c['before'] * 100:.0f}% → {c['after'] * 100:.0f}%" for c in changes],
+        textposition="outside", textfont=dict(size=11, color=INK_2),
+        hovertemplate="<b>%{y}</b>  %{x:+.1f}pp<extra></extra>",
+        width=0.6,
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
+                   zerolinecolor=AXIS, zerolinewidth=1, ticksuffix="pp",
+                   range=[-span * 1.7, span * 1.7]),
+        yaxis=dict(showgrid=False, autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=6, b=6),
+    ))
     return fig

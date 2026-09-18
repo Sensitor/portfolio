@@ -27,7 +27,8 @@ from sensitor import design as sensitor_design
 from sensitor.context import build_context
 from sensitor.i18n import tr as s_tr
 from sensitor.pages import (
-    render_health, render_overview, render_performance, render_risk, render_xray,
+    render_health, render_optimize, render_overview, render_performance,
+    render_risk, render_stress, render_xray,
 )
 
 # =============================================================================
@@ -2761,6 +2762,8 @@ def _sidebar(lang):
             ("health",      s_tr("nav_health", lang)),
             ("xray",        s_tr("nav_xray", lang)),
             ("risk",        s_tr("nav_risk", lang)),
+            ("stress",      s_tr("nav_stress", lang)),
+            ("optimize",    s_tr("nav_optimize", lang)),
         ]
         if st.session_state.analysis_mode == "real":
             tools = [
@@ -2824,6 +2827,8 @@ SENSITOR_PAGES = {
     "health": render_health,
     "xray": render_xray,
     "risk": render_risk,
+    "stress": render_stress,
+    "optimize": render_optimize,
 }
 
 
