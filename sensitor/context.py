@@ -19,6 +19,7 @@ from typing import Any
 
 from . import analytics as A
 from . import health as H
+from . import optimize as O
 from . import signals as S
 from . import xray as X
 
@@ -32,6 +33,7 @@ class Context:
     is_real: bool = False
     current_value: float | None = None
     currency: str = "$"
+    frontier_bounds: tuple = O.DEFAULT_BOUNDS
     asset_info: dict = field(default_factory=dict)
     sector_map: dict = field(default_factory=dict)
     geo_map: dict = field(default_factory=dict)
@@ -190,6 +192,18 @@ class Context:
         ))
 
     @property
+    def frontier(self) -> dict:
+        """
+        Efficient frontier over the selected window.
+
+        Computed here rather than in the page because the solver runs ~40 times
+        and Streamlit reruns the script on every widget interaction.
+        """
+        return self._memo("frontier", lambda: O.efficient_frontier(
+            self.returns_df, self.weights, bounds=self.frontier_bounds
+        ))
+
+    @property
     def available_periods(self) -> list:
         return A.available_periods(self.full_portfolio_returns)
 
@@ -216,6 +230,12 @@ class Context:
         if period != self.period:
             self.period = period
             self._cache.clear()
+
+    def set_frontier_bounds(self, bounds: tuple) -> None:
+        """Change the position cap; only the frontier depends on it."""
+        if tuple(bounds) != tuple(self.frontier_bounds):
+            self.frontier_bounds = tuple(bounds)
+            self._cache.pop("frontier", None)
 
 
 def build_context(analyzer, *, lang, profile, period, asset_info, sector_map, geo_map,

@@ -210,6 +210,90 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Direct ticker weight versus resolved exposure, for the buckets where the two diverge most.",
         "fr": "Poids direct des tickers contre exposition résolue, pour les buckets où l'écart est le plus grand.",
     },
+# ── Phase 2: Stress Lab ─────────────────────────────────────────────────
+    "nav_stress": {"en": "Stress Lab", "fr": "Laboratoire de Stress"},
+    "stress_sub": {
+        "en": "What this allocation did in past crises, and what it would do under shocks you choose.",
+        "fr": "Ce que cette allocation a fait lors des crises passées, et ce qu'elle ferait sous des chocs que vous choisissez.",
+    },
+    "historical_scenarios": {"en": "Historical Scenarios", "fr": "Scénarios Historiques"},
+    "historical_sub": {
+        "en": "Real prices over real crisis windows — arithmetic on history, not a model.",
+        "fr": "Prix réels sur de vraies fenêtres de crise — de l'arithmétique sur l'historique, pas un modèle.",
+    },
+    "custom_stress": {"en": "Custom Stress Test", "fr": "Test de Stress Personnalisé"},
+    "custom_stress_sub": {
+        "en": "Set a move on each driver. Each holding responds through its estimated beta.",
+        "fr": "Définissez un mouvement sur chaque facteur. Chaque position réagit via son bêta estimé.",
+    },
+    "portfolio_impact": {"en": "Portfolio Impact", "fr": "Impact sur le Portefeuille"},
+    "benchmark_impact": {"en": "Benchmark Impact", "fr": "Impact sur l'Indice"},
+    "coverage": {"en": "Coverage", "fr": "Couverture"},
+    "coverage_warning": {
+        "en": "Not enough of the portfolio had price history in this window for the result to describe the portfolio you hold.",
+        "fr": "Une part trop faible du portefeuille disposait d'un historique sur cette fenêtre pour que le résultat décrive le portefeuille que vous détenez.",
+    },
+    "no_history_window": {"en": "No data in this window", "fr": "Aucune donnée sur cette fenêtre"},
+    "missing_holdings": {"en": "Holdings without history", "fr": "Positions sans historique"},
+    "worst_contributor": {"en": "Worst contributor", "fr": "Pire contributeur"},
+    "best_contributor": {"en": "Best contributor", "fr": "Meilleur contributeur"},
+    "apply_shock": {"en": "Apply shock", "fr": "Appliquer le choc"},
+    "reset_shock": {"en": "Reset", "fr": "Réinitialiser"},
+    "before": {"en": "Before", "fr": "Avant"},
+    "after": {"en": "After", "fr": "Après"},
+    "stressed": {"en": "Stressed", "fr": "Sous stress"},
+    "estimated_impact": {"en": "Estimated Impact", "fr": "Impact Estimé"},
+    "shock_note": {
+        "en": "Each holding's response is estimated from its regression betas to the drivers above, measured over the selected period. This is a first-order linear estimate calibrated on ordinary conditions: in a real crash correlations rise toward one, so diversification typically helps less than these betas suggest. Treat the figure as an order of magnitude, not a forecast.",
+        "fr": "La réaction de chaque position est estimée à partir de ses bêtas de régression sur les facteurs ci-dessus, mesurés sur la période sélectionnée. C'est une estimation linéaire du premier ordre calibrée en conditions normales : lors d'un vrai krach, les corrélations montent vers 1, et la diversification protège donc généralement moins que ne le suggèrent ces bêtas. À prendre comme un ordre de grandeur, pas comme une prévision.",
+    },
+    "historical_note": {
+        "en": "Each scenario replays the real prices of the holdings that existed at the time. Holdings with no history in a window are excluded and the covered share of the portfolio is shown, because a crisis replayed on part of the book does not describe the whole book.",
+        "fr": "Chaque scénario rejoue les prix réels des positions qui existaient à l'époque. Les positions sans historique sur une fenêtre sont exclues et la part couverte du portefeuille est affichée : une crise rejouée sur une partie du portefeuille ne décrit pas l'ensemble.",
+    },
+    "fit_quality": {"en": "Average fit", "fr": "Qualité d'ajustement moyenne"},
+
+    # ── Phase 2: Optimize ───────────────────────────────────────────────────
+    "nav_optimize": {"en": "Optimize", "fr": "Optimiser"},
+    "optimize_sub": {
+        "en": "The risk/return geometry of your holdings, and where your allocation sits on it.",
+        "fr": "La géométrie risque/rendement de vos positions, et où se situe votre allocation.",
+    },
+    "efficient_frontier": {"en": "Efficient Frontier", "fr": "Frontière Efficiente"},
+    "current_portfolio": {"en": "Current Portfolio", "fr": "Portefeuille Actuel"},
+    "max_sharpe_portfolio": {"en": "Max Sharpe", "fr": "Sharpe Maximal"},
+    "min_vol_portfolio": {"en": "Minimum Volatility", "fr": "Volatilité Minimale"},
+    "expected_return": {"en": "Expected Return", "fr": "Rendement Attendu"},
+    "allocation_change": {"en": "Allocation Change", "fr": "Changement d'Allocation"},
+    "compare_portfolios": {"en": "Compare Allocations", "fr": "Comparer les Allocations"},
+    "target_allocation": {"en": "Target", "fr": "Cible"},
+    "max_position": {"en": "Max position size", "fr": "Taille max par position"},
+    "frontier_note": {
+        "en": "Expected returns and covariances are estimated from the selected window. Mean-variance optimisation is highly sensitive to the expected-return estimates — small input changes move the optimal weights a lot — and a position cap is applied by default because unconstrained solutions pile into whichever asset happened to perform best. This shows the geometry of a set of assets over one past period; it is not a recommendation and past performance does not predict future returns.",
+        "fr": "Les rendements attendus et les covariances sont estimés sur la fenêtre sélectionnée. L'optimisation moyenne-variance est très sensible aux estimations de rendement attendu — de petits changements d'entrée déplacent beaucoup les poids optimaux — et un plafond par position est appliqué par défaut, car les solutions sans contrainte se concentrent sur l'actif qui a le mieux performé. Ceci montre la géométrie d'un ensemble d'actifs sur une période passée ; ce n'est pas une recommandation et les performances passées ne préjugent pas des performances futures.",
+    },
+    "frontier_unavailable": {
+        "en": "At least two holdings and 60 trading days of shared history are needed to build a frontier.",
+        "fr": "Au moins deux positions et 60 jours de bourse d'historique commun sont nécessaires pour construire une frontière.",
+    },
+
+    # ── Phase 2: Factor exposure ────────────────────────────────────────────
+    "factor_exposure": {"en": "Factor Exposure", "fr": "Exposition Factorielle"},
+    "factor_sub": {
+        "en": "Which systematic risks this portfolio is actually taking, estimated against liquid ETF proxies.",
+        "fr": "Quels risques systématiques ce portefeuille prend réellement, estimés contre des proxies ETF liquides.",
+    },
+    "factor_loading": {"en": "Loading", "fr": "Charge"},
+    "factor_unavailable": {
+        "en": "Factor proxy data could not be retrieved. Everything else on this page is unaffected.",
+        "fr": "Les données des proxies factoriels n'ont pas pu être récupérées. Le reste de cette page n'est pas affecté.",
+    },
+    "explained_variance": {"en": "Explained Variance", "fr": "Variance Expliquée"},
+    "not_significant": {"en": "not significant", "fr": "non significatif"},
+    "factor_note": {
+        "en": "Loadings come from a single multivariate OLS regression of portfolio excess returns on all available factors, so correlated factors do not each claim the same variance. Style factors are long/short ETF spreads, which are proxies for the academic factors rather than the factors themselves. Loadings marked not significant have |t| below 2 and should be read as indistinguishable from zero. Estimates move with the window chosen.",
+        "fr": "Les charges proviennent d'une unique régression OLS multivariée des rendements excédentaires du portefeuille sur tous les facteurs disponibles, afin que des facteurs corrélés ne revendiquent pas chacun la même variance. Les facteurs de style sont des spreads d'ETF long/short : ce sont des proxies des facteurs académiques, pas les facteurs eux-mêmes. Les charges marquées non significatives ont un |t| inférieur à 2 et doivent être lues comme indiscernables de zéro. Les estimations varient selon la fenêtre choisie.",
+    },
 }
 
 

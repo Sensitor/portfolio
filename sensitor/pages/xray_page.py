@@ -17,8 +17,13 @@ import streamlit as st
 
 from .. import charts as C
 from .. import xray as X
-from ..components import data_table, metric_card, note, page_header, pct, section
-from ..design import ACCENT, PLOTLY_CONFIG, class_color
+from ..components import (
+    data_table, metric_card, note, page_header, pct, section, spacer,
+)
+from ..design import ACCENT, PLOTLY_CONFIG, STATUS, class_color
+
+STATUS_GOOD = STATUS["good"]
+STATUS_WARNING = STATUS["warning"]
 from ..i18n import define, tr
 from ._shared import guard
 
@@ -130,6 +135,8 @@ def render_xray(ctx) -> None:
     )
     note(f"{X.DATA_VINTAGE}. {tr('xray_note', lang)}")
 
+    _factor_block(ctx, lang)
+
 
 def _top_bucket(profile: dict, dimension: str) -> str:
     """Largest bucket of a dimension, annotated when the holding is a blend."""
@@ -138,3 +145,94 @@ def _top_bucket(profile: dict, dimension: str) -> str:
         return "—"
     bucket, share = max(buckets.items(), key=lambda kv: kv[1])
     return bucket if share > 0.95 else f"{bucket} ({share * 100:.0f}%)"
+
+
+# =============================================================================
+# FACTOR EXPOSURE
+# =============================================================================
+
+def _factor_block(ctx, lang: str) -> None:
+    """
+    Systematic risk exposures, estimated against liquid ETF proxies.
+
+    Sits on the X-Ray page because it answers the same question as look-through —
+    what you actually own — in the language of risk premia rather than sectors.
+    """
+    from .. import charts as C
+    from .. import factors as FA
+    from .. import market
+    from ..components import metric_card, num
+
+    section(tr("factor_exposure", lang).upper(), tr("factor_sub", lang))
+
+    returns = ctx.portfolio_returns
+    if returns is None or len(returns) < 90:
+        note(tr("short_history_body", lang))
+        return
+
+    start = returns.index[0].strftime("%Y-%m-%d")
+    with st.spinner(""):
+        proxies = market.fetch_many_returns(tuple(FA.required_tickers()), start)
+
+    factor_matrix = FA.build_factors(proxies)
+    if factor_matrix.empty:
+        note(tr("factor_unavailable", lang))
+        return
+
+    result = FA.factor_exposure(market.normalise_index(returns), factor_matrix)
+    if not result:
+        note(tr("factor_unavailable", lang))
+        return
+
+    significant = [item for item in result["loadings"] if item["significant"]]
+
+    c1, c2, c3 = st.columns(3, gap="medium")
+    with c1:
+        metric_card(
+            tr("explained_variance", lang), pct(result["r_squared"], 0),
+            bar=result["r_squared"],
+            bar_color=(STATUS_GOOD if result["r_squared"] >= 0.7 else STATUS_WARNING),
+            caption=f"adj. R² {result['adj_r_squared']:.2f} · {result['n_days']} {tr('days', lang)}",
+        )
+    with c2:
+        metric_card(
+            tr("alpha", lang), pct(result["alpha"], 2),
+            bar=min(max((result["alpha"] + 0.1) / 0.2, 0), 1),
+            tooltip=define("alpha", lang),
+            caption=f"t = {result['alpha_t']:+.2f}",
+        )
+    with c3:
+        top = significant[0] if significant else None
+        metric_card(
+            "Dominant factor" if lang == "en" else "Facteur dominant",
+            FA.factor_label(top["factor"], lang) if top else "—",
+            bar=min(abs(top["loading"]) / 1.2, 1) if top else 0,
+            caption=(f"{tr('factor_loading', lang)} {top['loading']:+.2f}" if top
+                     else tr("not_significant", lang)),
+            compact=True,
+        )
+
+    spacer(10)
+    chart_col, table_col = st.columns([1.3, 1], gap="large")
+    with chart_col:
+        st.plotly_chart(
+            C.factor_bars(result["loadings"],
+                          label_fn=lambda k: FA.factor_label(k, lang),
+                          ns_suffix=tr("not_significant", lang)),
+            width="stretch", config=PLOTLY_CONFIG, key="xray_factors",
+        )
+    with table_col:
+        rows = [
+            [FA.factor_label(item["factor"], lang),
+             num(item["loading"], 2),
+             num(item["t_stat"], 1),
+             "✓" if item["significant"] else "—"]
+            for item in result["loadings"]
+        ]
+        data_table(
+            [tr("factor_exposure", lang), tr("factor_loading", lang), "t",
+             "sig." if lang == "en" else "signif."],
+            rows, align="lrrr",
+        )
+
+    note(tr("factor_note", lang))

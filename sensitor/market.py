@@ -56,6 +56,24 @@ def fetch_returns(ticker: str, start: str) -> pd.Series | None:
     return returns if len(returns) > 5 else None
 
 
+def normalise_index(obj):
+    """
+    Force a Series or DataFrame onto naive, midnight-normalised dates.
+
+    yfinance returns timezone-aware timestamps whose offsets differ by asset type
+    (US equities, crypto, European funds), so joining two series straight from the
+    API can intersect to nothing. Every join in the app goes through this first.
+    """
+    if obj is None or len(obj) == 0:
+        return obj
+    out = obj.copy()
+    index = pd.DatetimeIndex(out.index)
+    if index.tz is not None:
+        index = index.tz_localize(None)
+    out.index = index.normalize()
+    return out[~out.index.duplicated(keep="last")]
+
+
 def align(portfolio_returns, benchmark_returns):
     """
     Align two return series on their shared dates.
@@ -67,16 +85,34 @@ def align(portfolio_returns, benchmark_returns):
     if portfolio_returns is None or benchmark_returns is None:
         return None, None
 
-    def _normalise(series):
-        series = series.copy()
-        index = pd.DatetimeIndex(series.index)
-        if index.tz is not None:
-            index = index.tz_localize(None)
-        series.index = index.normalize()
-        return series[~series.index.duplicated(keep="last")]
-
-    left, right = _normalise(portfolio_returns), _normalise(benchmark_returns)
+    left, right = normalise_index(portfolio_returns), normalise_index(benchmark_returns)
     shared = left.index.intersection(right.index)
     if len(shared) < 20:
         return None, None
     return left.loc[shared], right.loc[shared]
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_many_returns(tickers: tuple, start: str) -> dict:
+    """
+    Daily returns for several tickers. Missing ones are simply absent from the
+    result, so callers decide what to do about a gap rather than getting a silent
+    zero series. Takes a tuple because Streamlit's cache key must be hashable.
+    """
+    out = {}
+    for ticker in tickers:
+        series = fetch_returns(ticker, start)
+        if series is not None:
+            out[ticker] = series
+    return out
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_many_prices(tickers: tuple, start: str) -> dict:
+    """Price history for several tickers, same contract as fetch_many_returns."""
+    out = {}
+    for ticker in tickers:
+        series = fetch_prices(ticker, start)
+        if series is not None:
+            out[ticker] = series
+    return out

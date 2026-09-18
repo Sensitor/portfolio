@@ -24,7 +24,7 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "portfolio_optimizer_saas.py")
 
-PAGES = ["overview", "performance", "health", "xray", "risk"]
+PAGES = ["overview", "performance", "health", "xray", "risk", "stress", "optimize"]
 
 
 class FakeAnalyzer:
