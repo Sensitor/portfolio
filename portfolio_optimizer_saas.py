@@ -18,6 +18,18 @@ from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
+# ── Sensitor Portfolio Intelligence ──────────────────────────────────────────
+# The premium analytics surface lives in the `sensitor` package: design system,
+# quantitative engine, visual components and the Overview / Health / Performance
+# / Risk Lab / X-Ray pages. The legacy engine below is untouched and still powers
+# simulation, optimisation and stress testing; Sensitor reads from it.
+from sensitor import design as sensitor_design
+from sensitor.context import build_context
+from sensitor.i18n import tr as s_tr
+from sensitor.pages import (
+    render_health, render_overview, render_performance, render_risk, render_xray,
+)
+
 # =============================================================================
 # STRIPE / SUBSCRIPTION CONFIGURATION
 # =============================================================================
@@ -580,6 +592,10 @@ st.markdown("""
     header     { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
+
+# Sensitor design system — injected after the legacy stylesheet so its tokens win
+# on the new pages while the existing pages keep their current appearance.
+sensitor_design.inject_theme()
 
 # =============================================================================
 # DATA: ASSET INFO, MODEL PORTFOLIOS, SECTORS
@@ -1229,7 +1245,7 @@ def init_session_state():
         'user_email': "",
         'user_tier': 'free',
         'current_portfolio': None,
-        'page': "dashboard",
+        'page': "overview",
         'language': "en",
         'selected_tickers': [],
         'weights': {},
@@ -2730,34 +2746,54 @@ def _sidebar(lang):
             if new_mode == "real":
                 st.session_state.page = "real_portfolio"
             else:
-                st.session_state.page = "dashboard"
+                st.session_state.page = "overview"
             st.rerun()
 
         st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
 
-        # Navigation
+        # ── Navigation ───────────────────────────────────────────────────────
+        # Sensitor Intelligence pages lead; the build/model/legacy tools follow
+        # under their own heading so nothing that existed before is lost.
+        intelligence = [
+            ("overview",    s_tr("nav_overview", lang)),
+            ("performance", s_tr("nav_performance", lang)),
+            ("health",      s_tr("nav_health", lang)),
+            ("xray",        s_tr("nav_xray", lang)),
+            ("risk",        s_tr("nav_risk", lang)),
+        ]
         if st.session_state.analysis_mode == "real":
-            nav = [
+            tools = [
                 ("real_portfolio", t("real_portfolio", lang)),
                 ("dashboard",      t("dashboard", lang)),
                 ("library",        t("library", lang)),
                 ("account",        t("account", lang)),
             ]
         else:
-            nav = [
-                ("dashboard",    t("dashboard", lang)),
+            tools = [
                 ("new_analysis", t("new_analysis", lang)),
                 ("models",       t("models", lang)),
                 ("improve",      t("improve", lang)),
+                ("dashboard",    t("dashboard", lang)),
                 ("library",      t("library", lang)),
                 ("account",      t("account", lang)),
             ]
-        for key, label in nav:
-            btn_type = "primary" if st.session_state.page == key else "secondary"
-            if st.button(label, key=f"nav_{key}", use_container_width=True, type=btn_type):
-                st.session_state.page = key
-                st.rerun()
+
+        def _nav_group(title, entries):
+            st.markdown(
+                f"<div style='font-size:0.63rem;font-weight:700;letter-spacing:0.15em;"
+                f"text-transform:uppercase;color:#465065;margin:6px 0 6px 4px;'>{title}</div>",
+                unsafe_allow_html=True,
+            )
+            for key, label in entries:
+                btn_type = "primary" if st.session_state.page == key else "secondary"
+                if st.button(label, key=f"nav_{key}", use_container_width=True, type=btn_type):
+                    st.session_state.page = key
+                    st.rerun()
+
+        _nav_group("Intelligence", intelligence)
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+        _nav_group("Build" if lang == "en" else "Construire", tools)
 
         st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:16px 0;'>",
                     unsafe_allow_html=True)
@@ -2782,6 +2818,43 @@ def _sidebar(lang):
                 st.rerun()
 
 
+SENSITOR_PAGES = {
+    "overview": render_overview,
+    "performance": render_performance,
+    "health": render_health,
+    "xray": render_xray,
+    "risk": render_risk,
+}
+
+
+def _sensitor_context(lang):
+    """
+    Build the shared analysis context for the Sensitor pages.
+
+    Wraps the existing analyzer rather than replacing it, so every Sensitor page
+    reads the same returns the legacy engine computed. Returns None when no
+    portfolio is loaded; the pages render their own empty state in that case.
+    """
+    analyzer = st.session_state.current_portfolio
+    if analyzer is None:
+        return None
+
+    is_real = st.session_state.analysis_mode == "real"
+    real_value = st.session_state.get("real_portfolio_total_value") if is_real else None
+
+    return build_context(
+        analyzer,
+        lang=lang,
+        profile=st.session_state.user_profile,
+        period=st.session_state.get("sensitor_period", "MAX"),
+        asset_info=ASSET_INFO,
+        sector_map=SECTOR_MAPPING,
+        geo_map=GEOGRAPHY_MAPPING,
+        is_real=is_real,
+        current_value=real_value,
+    )
+
+
 def main():
     init_session_state()
     lang = st.session_state.language
@@ -2791,6 +2864,16 @@ def main():
     _sidebar(lang)
 
     page = st.session_state.page
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # SENSITOR INTELLIGENCE PAGES
+    # ─────────────────────────────────────────────────────────────────────────
+    if page in SENSITOR_PAGES:
+        ctx = _sensitor_context(lang)
+        SENSITOR_PAGES[page](ctx)
+        if ctx is not None:
+            st.session_state.sensitor_period = ctx.period
+        return
 
     # ─────────────────────────────────────────────────────────────────────────
     # ACCOUNT / LOGIN PAGE
@@ -3462,7 +3545,7 @@ def main():
                     if analyzer.fetch_data():
                         st.session_state.current_portfolio = analyzer
                         st.success(t("analysis_done", lang))
-                        st.session_state.page = "dashboard"
+                        st.session_state.page = "overview"
                         st.rerun()
                     else:
                         st.error(t("fetch_error", lang))
@@ -3554,7 +3637,7 @@ def main():
                             st.session_state.current_portfolio = analyzer
                             ok_msg = f"{model_name} loaded!" if lang == 'en' else f"{model_name} chargé !"
                             st.success(ok_msg)
-                            st.session_state.page = "dashboard"
+                            st.session_state.page = "overview"
                             st.rerun()
             else:
                 locked_msg = "Pro plan required" if lang == 'en' else "Plan Pro requis"
@@ -3729,7 +3812,7 @@ def main():
                     if analyzer.fetch_data():
                         st.session_state.current_portfolio = analyzer
                         st.success(t("analysis_done", lang))
-                        st.session_state.page = "dashboard"
+                        st.session_state.page = "overview"
                         st.rerun()
                     else:
                         st.error(t("fetch_error", lang))
