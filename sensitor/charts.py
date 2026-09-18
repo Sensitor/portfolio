@@ -48,12 +48,17 @@ def _bar_marker(color, **kw):
 # =============================================================================
 
 def cumulative_performance(series_map: dict, height: int = 380,
-                           value_prefix: str = "") -> go.Figure:
+                           value_prefix: str = "", fill: bool = True) -> go.Figure:
     """
     Growth-of-capital lines, portfolio first.
 
     `series_map` is {name: Series}. All series are indexed to the same base by the
     caller, so one axis carries them all.
+
+    `fill=False` drops the area under a single series and lets the y-axis scale to
+    the data. A filled area has to reach zero, which is right for a growth curve
+    starting at a known base and wrong for a value history sampled at a few
+    points — there it flattens the line against the top of the plot.
     """
     fig = go.Figure()
     for i, (name, series) in enumerate(series_map.items()):
@@ -65,8 +70,9 @@ def cumulative_performance(series_map: dict, height: int = 380,
             x=series.index, y=series.to_numpy(),
             name=name, mode="lines",
             line=dict(color=color, width=width),
-            fill="tozeroy" if i == 0 and len(series_map) == 1 else None,
-            fillcolor="rgba(57,135,229,0.10)" if i == 0 and len(series_map) == 1 else None,
+            fill="tozeroy" if fill and i == 0 and len(series_map) == 1 else None,
+            fillcolor=("rgba(57,135,229,0.10)"
+                       if fill and i == 0 and len(series_map) == 1 else None),
             hovertemplate=f"<b>{name}</b>  {value_prefix}%{{y:,.2f}}<extra></extra>",
         ))
 

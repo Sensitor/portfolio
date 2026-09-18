@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+
+# Local persistence — saved portfolios and snapshots. Personal financial data;
+# never committed. Override the location with SENSITOR_DB_PATH.
+sensitor_data.db
+*.db-journal
