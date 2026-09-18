@@ -218,16 +218,25 @@ def correlation_heatmap(corr_df, height: int | None = None) -> go.Figure:
     tickers = list(corr_df.columns)
     n = len(tickers)
     height = height or max(280, 46 * n + 70)
-    values = corr_df.to_numpy()
+    values = corr_df.to_numpy().astype(float).copy()
+
+    # Mask the diagonal. Every asset correlates 1.00 with itself, so those cells
+    # carry no information while taking the strongest colour on the scale and
+    # pulling the eye away from the pairs that matter.
+    labels = [[f"{v:.2f}" for v in row] for row in values]
+    np.fill_diagonal(values, np.nan)
+    for i in range(n):
+        labels[i][i] = ""
 
     fig = go.Figure(go.Heatmap(
         z=values, x=tickers, y=tickers,
         colorscale=DIVERGING, zmid=0, zmin=-1, zmax=1,
         xgap=2, ygap=2,
-        text=[[f"{v:.2f}" for v in row] for row in values],
+        text=labels,
         texttemplate="%{text}",
         textfont=dict(size=10 if n <= 10 else 9, color=INK),
         hovertemplate="<b>%{y} ↔ %{x}</b><br>Correlation %{z:.3f}<extra></extra>",
+        hoverongaps=False,
         colorbar=dict(
             thickness=9, len=0.62, outlinewidth=0,
             tickfont=dict(size=10, color=INK_MUTED),
