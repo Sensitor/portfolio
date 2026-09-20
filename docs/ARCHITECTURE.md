@@ -140,6 +140,7 @@ cycle in any import order. Verified by importing `performance` before
 |---|---|
 | `tests/test_sensitor_pages.py` | 159 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
+| `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
 
@@ -188,7 +189,7 @@ sensitor/
 |---|---|---|
 | 1 | Restructure the package into the target layout, with shims | none |
 | 2 | Extract reference data, config and the analyzer out of the monolith | none |
-| 3 | Trading engine | additive |
+| 3 | Trading engine — **done** | additive |
 | 4 | Trading journal | additive |
 | 5 | MT5 connector | additive |
 | 6 | Database models for trading | additive |
@@ -198,3 +199,61 @@ sensitor/
 
 A phase is not started until the previous one leaves the 159 render checks and
 the legacy page renders passing.
+
+
+---
+
+## 9. Trading engine (Phase 3)
+
+2,386 lines under `sensitor/trading/`, pure computation, no Streamlit and no
+broker SDK.
+
+| Module | Holds |
+|---|---|
+| `models` | the `Trade` model, `Direction`, `Session`, validation |
+| `setups` | setup and mistake taxonomies, tag folding |
+| `analytics` | P&L, win rate, profit factor, expectancy, R, drawdown, streaks |
+| `performance` | the same metrics by symbol, setup, combination, session, weekday, month, hour, timeframe, regime, risk band |
+| `risk` | sizing consistency, drift, stop discipline, concurrent exposure, expected losing runs |
+| `psychology` | behavioural comparisons, framed as correlations |
+| `journal` | `TradeJournal` and `TradeFilter` — a queryable collection |
+
+### The platform-agnostic boundary
+
+The brief's hardest constraint is that nothing above the connector may depend on
+a broker's object format. `Trade` is Sensitor's own shape; a connector normalises
+into it and everything above only ever sees `Trade`. `Direction.parse` accepts
+the spellings brokers actually use (0/1, BUY/SELL, B/S) and **raises** on an
+unknown one rather than defaulting — silently guessing a side would invert a
+trade's entire P&L.
+
+### Three decisions that keep the numbers honest
+
+**A missing stop leaves R undefined, not zero.** R is P&L over the amount risked,
+and the amount risked comes from the stop. Returning 0R would drag every average
+toward zero and make a book with no stops look disciplined. `r_coverage` reports
+what share of trades the R statistics actually describe.
+
+**Profit factor with no losses is undefined, not infinite.** It is a division by
+zero; reporting "∞" puts a meaningless value in a column of meaningful ones.
+
+**Stop discipline is measured on gross R, everything else on net R.** This one
+was found by reading the engine's own output: 92% of losses were being flagged as
+"beyond the stop" on a book whose stops all held. Net R includes commission, so a
+trade stopped out at exactly -1R gross lands past -1R net on costs alone. Judged
+that way, any trader paying commission looks like one whose stops never work.
+`Trade.r_multiple_gross` exists solely for this check.
+
+### Sample size is structural, not advisory
+
+Every breakdown bucket carries `n` and a `reliable` flag, and `performance.best()`
+refuses to promote a bucket below the threshold. A table sorted by win rate will
+always put a two-trade bucket on top; calling that "your best setup" is how a
+journal teaches someone the wrong lesson.
+
+### The psychology framing is asserted, not trusted
+
+`psychology.findings()` fixes the wording in the engine rather than the UI, so a
+page cannot shorten "your data shows a correlation" into a verdict. The test
+suite asserts that every finding names itself a correlation in both languages,
+carries its sample size in the sentence, and contains no causal verb.
