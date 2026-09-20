@@ -86,18 +86,22 @@ catalogued here so a later phase can converge them deliberately.
 
 ---
 
-## 4. Business logic mixed into the UI
+## 4. Business logic mixed into the UI — resolved in Phase 2
 
-The Phase 2 targets, in priority order:
+All four targets have been extracted. The entry point went from **3,921 to
+2,594 lines**; it is now page config, the stylesheet, session state, the sidebar,
+routing and the seven legacy pages, and it computes nothing the package cannot.
 
-1. **`UltimatePortfolioAnalyzer.fetch_data()`** writes to the UI while computing —
-   `st.progress`, `st.empty`, `st.warning`. It cannot be called from an API or a
-   test without a Streamlit runtime.
-2. **630 lines of reference data** (`ASSET_INFO` and friends) sit in the entry
-   point. Pure data, no Streamlit, imported by the package through the bridge.
-3. **`STRIPE_CONFIG` / `TIER_LIMITS` / `resolve_tier`** — configuration and
-   entitlement logic in the UI file.
-4. **The `T` translation dict** — a parallel i18n system.
+| Was in the entry point | Now | Note |
+|---|---|---|
+| `UltimatePortfolioAnalyzer` (596 lines) | `investment/portfolio.py` | `fetch_data()` takes `progress` and `on_error` callbacks instead of calling `st.progress` / `st.warning`; `_fetch_with_progress()` in the app supplies Streamlit-backed ones, so the bar and the warnings look identical |
+| `ASSET_INFO` + 4 mappings (630 lines) | `investment/assets.py` | pure data, re-bound to the original module-level names |
+| `STRIPE_CONFIG` / `TIER_LIMITS` / `PRO_EMAILS` / `resolve_tier` | `core/config.py` | `resolve_tier` now delegates |
+| `T` dict (142 lines) | `core/i18n.py` as `LEGACY_STRINGS` | kept separate from `STRINGS`; merging them would edit what the legacy pages render |
+
+The calculations were moved unchanged — including their pre-existing lint
+warnings, which are left alone on purpose. Tidying code while moving it is how a
+move becomes a regression.
 
 ---
 
@@ -135,8 +139,12 @@ cycle in any import order. Verified by importing `performance` before
 | Suite | Covers |
 |---|---|
 | `tests/test_sensitor_pages.py` | 159 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles |
+| `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
+
+`test_investment_engine.py` only became possible in Phase 2. Before the
+extraction, testing the analyzer meant standing up a Streamlit app.
 
 The render harness is the safety net for the whole restructure: it exercises
 every page through the real Streamlit script, so an import that breaks during a

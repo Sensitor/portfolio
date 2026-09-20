@@ -8,6 +8,15 @@ KeyError mid-render.
 
 Metric definitions live here too (`DEFS`) and feed the tooltip system: every
 quantitative metric on screen can be explained without leaving the app.
+
+
+Two dictionaries live here, on purpose.
+
+`STRINGS` is the Sensitor surface — the twelve Intelligence and Workspace pages.
+`LEGACY_STRINGS` is the original product's dictionary, feeding the seven older
+pages. They are kept apart rather than merged because merging them would mean
+editing strings the legacy pages render, and Phase 2 changes where code lives,
+not what users read. A later phase can converge them deliberately.
 """
 
 from __future__ import annotations
@@ -612,3 +621,154 @@ def define(key: str, lang: str = "en") -> str:
     if not entry:
         return ""
     return entry.get(lang) or entry.get("en") or ""
+
+
+# =============================================================================
+# LEGACY SURFACE
+# =============================================================================
+# The original product's translations, moved out of the Streamlit entry point in
+# V2 Phase 2. Unchanged: the seven legacy pages render these exact strings.
+
+LEGACY_STRINGS = {
+    "en": {
+        "dashboard": "Dashboard", "new_analysis": "New Analysis",
+        "models": "Model Portfolios", "improve": "Optimise",
+        "library": "Asset Library", "account": "Account",
+        "robustness": "Robustness Index", "recommendations": "Recommendations",
+        "stress_test": "Stress Tests", "asset_info": "Asset Details",
+        "portfolio_summary": "Portfolio Summary",
+        "selected_assets": "Selected Assets",
+        "analyse_btn": "Analyse Portfolio",
+        "run_stress": "Run Stress Tests",
+        "optimise_btn": "Optimise Portfolio",
+        "apply_opt": "Apply Optimisation",
+        "current": "Current", "optimised": "Optimised",
+        "use_model": "Use this portfolio",
+        "expected_return": "Expected Return",
+        "volatility": "Volatility",
+        "sharpe": "Sharpe Ratio",
+        "annual_return": "Annual Return",
+        "max_drawdown": "Max Drawdown",
+        "total_weight": "Total",
+        "add": "Add", "remove": "Remove",
+        "search_ph": "Apple, Bitcoin, S&P 500...",
+        "browse": "Browse",
+        "search": "Search",
+        "welcome": "Welcome! Start by creating a portfolio.",
+        "create_portfolio": "Create Portfolio",
+        "no_portfolio": "Create a portfolio first.",
+        "loading": "Fetching market data...",
+        "analysis_done": "Analysis complete!",
+        "fetch_error": "Could not fetch data. Check ticker symbols.",
+        "upgrade_pro": "Upgrade to Pro",
+        "login": "Continue",
+        "logout": "Log out",
+        "profile_label": "Risk Profile",
+        "profile_safe": "Prudent",
+        "profile_balanced": "Balanced",
+        "profile_aggressive": "Aggressive",
+        "filter_type": "Filter by type",
+        "filter_all": "All",
+        "normalised": "Total normalised to 100%.",
+        "mode_simulation": "Portfolio Simulation",
+        "mode_real": "Real Portfolio Analysis",
+        "real_portfolio": "Real Portfolio",
+        "real_portfolio_desc": "Enter your actual holdings to see your real portfolio value.",
+        "add_holding": "Add Holding",
+        "quantity": "Quantity",
+        "ticker": "Ticker",
+        "fetch_prices": "Fetch Prices & Analyse",
+        "total_value": "Total Value",
+        "num_assets": "Number of Assets",
+        "top_asset": "Top Asset",
+        "portfolio_health": "Portfolio Health",
+        "asset_class_breakdown": "Asset Class Breakdown",
+        "dominant_asset": "Dominant Asset",
+        "diversification": "Diversification Level",
+        "overall_risk": "Overall Risk",
+        "real_synthesis": "Portfolio Synthesis",
+        "real_holdings": "Your Holdings",
+        "price": "Price",
+        "value": "Value",
+        "weight_pct": "Weight",
+        "remove_holding": "Remove",
+        "no_holdings": "Add assets and their quantities to analyse your real portfolio.",
+        "high_div": "High",
+        "medium_div": "Medium",
+        "low_div": "Low",
+        "very_low_div": "Very Low",
+    },
+    "fr": {
+        "dashboard": "Tableau de Bord", "new_analysis": "Nouvelle Analyse",
+        "models": "Portefeuilles Modèles", "improve": "Optimiser",
+        "library": "Bibliothèque", "account": "Compte",
+        "robustness": "Indice de Robustesse", "recommendations": "Recommandations",
+        "stress_test": "Tests de Stress", "asset_info": "Détail des Actifs",
+        "portfolio_summary": "Résumé du Portefeuille",
+        "selected_assets": "Actifs Sélectionnés",
+        "analyse_btn": "Analyser le Portefeuille",
+        "run_stress": "Lancer les Tests de Stress",
+        "optimise_btn": "Optimiser le Portefeuille",
+        "apply_opt": "Appliquer l'Optimisation",
+        "current": "Actuel", "optimised": "Optimisé",
+        "use_model": "Utiliser ce portefeuille",
+        "expected_return": "Rendement Attendu",
+        "volatility": "Volatilité",
+        "sharpe": "Ratio de Sharpe",
+        "annual_return": "Rendement Annuel",
+        "max_drawdown": "Perte Max",
+        "total_weight": "Total",
+        "add": "Ajouter", "remove": "Supprimer",
+        "search_ph": "Apple, Bitcoin, S&P 500...",
+        "browse": "Parcourir",
+        "search": "Rechercher",
+        "welcome": "Bienvenue ! Commencez par créer un portefeuille.",
+        "create_portfolio": "Créer un Portefeuille",
+        "no_portfolio": "Créez d'abord un portefeuille.",
+        "loading": "Récupération des données...",
+        "analysis_done": "Analyse terminée !",
+        "fetch_error": "Impossible de récupérer les données. Vérifiez les tickers.",
+        "upgrade_pro": "Passer à Pro",
+        "login": "Continuer",
+        "logout": "Se déconnecter",
+        "profile_label": "Profil de Risque",
+        "profile_safe": "Prudent",
+        "profile_balanced": "Équilibré",
+        "profile_aggressive": "Agressif",
+        "filter_type": "Filtrer par type",
+        "filter_all": "Tous",
+        "normalised": "Total normalisé à 100%.",
+        "mode_simulation": "Simulation de Portefeuille",
+        "mode_real": "Analyse de Mon Portefeuille Réel",
+        "real_portfolio": "Portefeuille Réel",
+        "real_portfolio_desc": "Entrez vos positions réelles pour voir la valeur de votre portefeuille.",
+        "add_holding": "Ajouter une Position",
+        "quantity": "Quantité",
+        "ticker": "Ticker",
+        "fetch_prices": "Récupérer les Prix & Analyser",
+        "total_value": "Valeur Totale",
+        "num_assets": "Nombre d'Actifs",
+        "top_asset": "Actif Principal",
+        "portfolio_health": "Santé du Portefeuille",
+        "asset_class_breakdown": "Répartition par Classe d'Actifs",
+        "dominant_asset": "Actif Dominant",
+        "diversification": "Niveau de Diversification",
+        "overall_risk": "Risque Global",
+        "real_synthesis": "Synthèse du Portefeuille",
+        "real_holdings": "Vos Positions",
+        "price": "Prix",
+        "value": "Valeur",
+        "weight_pct": "Poids",
+        "remove_holding": "Supprimer",
+        "no_holdings": "Ajoutez des actifs et leurs quantités pour analyser votre portefeuille réel.",
+        "high_div": "Élevée",
+        "medium_div": "Moyenne",
+        "low_div": "Faible",
+        "very_low_div": "Très Faible",
+    }
+}
+
+
+def legacy_tr(key, lang="en"):
+    """Look-up for the legacy surface. Falls back to English, then to the key."""
+    return LEGACY_STRINGS.get(lang, LEGACY_STRINGS.get("en", {})).get(key, key)
