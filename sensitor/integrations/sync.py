@@ -194,6 +194,12 @@ def sync_trades(source, store, user_email: str, *, since: datetime,
                              broker=account.broker, currency=account.currency)
     if to_write:
         store.save_trades(user_email, to_write)
+    if account is not None and hasattr(store, "record_sync"):
+        # Recorded even when nothing came back. A sync that found no trades is
+        # still a sync, and the next window should start from when we looked,
+        # not from the last close — otherwise a quiet fortnight makes every
+        # subsequent sync reach further back than the one before it.
+        store.record_sync(user_email, account.id, trades=result.fetched)
     return result
 
 
@@ -211,11 +217,22 @@ def default_window(store=None, user_email: str = "", account_id: str | None = No
     """
     latest = None
     if store is not None and user_email:
-        try:
-            trades = store.list_trades(user_email, account_id=account_id, limit=1)
-            latest = trades[0].closed_at if trades and trades[0].closed_at else None
-        except Exception:                            # noqa: BLE001
-            latest = None
+        # When the account was last pulled from, if it was recorded. Preferred
+        # over the newest close because it advances even on a sync that found
+        # nothing, which is exactly when the close-time proxy stalls.
+        if account_id and hasattr(store, "last_synced_at"):
+            try:
+                stamp = store.last_synced_at(user_email, account_id)
+                if stamp:
+                    latest = datetime.fromisoformat(stamp).replace(tzinfo=None)
+            except Exception:                        # noqa: BLE001
+                latest = None
+        if latest is None:
+            try:
+                trades = store.list_trades(user_email, account_id=account_id, limit=1)
+                latest = trades[0].closed_at if trades and trades[0].closed_at else None
+            except Exception:                        # noqa: BLE001
+                latest = None
 
     if latest is None:
         return datetime.now().replace(microsecond=0) - timedelta(days=fallback_days)

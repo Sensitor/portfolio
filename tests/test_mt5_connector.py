@@ -676,10 +676,28 @@ def test_sync_against_the_store():
     store.delete_all_trades(other)
     check("the sync did not reach another user", store.count_trades(other) == 0)
 
+    # The incremental window is anchored to when the account was last pulled
+    # from, which the sync records — not to the newest close. The difference
+    # shows up exactly here: these trades closed in March 2025, the syncs above
+    # ran just now, and the next window should start days ago rather than
+    # eighteen months ago.
+    stamp = store.last_synced_at(email, "mt5-51234567")
+    check("the sync recorded when it ran", bool(stamp), f"stamp {stamp}")
+
     window = sync.default_window(store, email, "mt5-51234567")
     latest = max(t.closed_at for t in store.list_trades(email) if t.closed_at)
-    check("the incremental window overlaps the last close",
-          window < latest, f"window {window} vs latest {latest}")
+    check("the window is anchored to the last sync, not the last close",
+          window > latest, f"window {window} vs latest close {latest}")
+    check("and it overlaps the last sync by a few days",
+          timedelta(days=2) < (datetime.now() - window) < timedelta(days=5),
+          f"window {window}")
+
+    # An account that has never been synced still has to start somewhere, and
+    # the newest close is the right guess there.
+    never = sync.default_window(store, email, account_id=None)
+    check("an unsynced account falls back to the last close",
+          never < latest, f"got {never}")
+
     check("an empty journal falls back to a year",
           sync.default_window(store, "nobody@example.com")
           < datetime.now() - timedelta(days=364))

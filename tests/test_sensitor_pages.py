@@ -156,10 +156,99 @@ def main() -> int:
         else:
             print(f"  ok    health       profile {profile}")
 
+    # ── The persistence flows, driven through their buttons ─────────────────
+    # A render check never clicks anything, so every call inside an
+    # `if st.button(...)` body is unexercised by the 159 above — which is where
+    # the store's signatures are actually used.
+    checks += _persistence_flow(failures)
+
     print(f"\n{checks} render checks, {len(failures)} failures")
     for scenario, page, error in failures:
         print(f"\n--- {page} / {scenario} ---\n{error}")
     return 1 if failures else 0
+
+
+def _persistence_flow(failures) -> int:
+    """Save a portfolio, snapshot it, open its history, delete it."""
+    from sensitor.database import Store
+
+    email = "flow@example.com"
+    analyzer = make_portfolio({"SPY": 0.6, "AGG": 0.4})
+    store = Store(os.environ["SENSITOR_DB_PATH"])
+    store.delete_user(email)
+
+    def fresh(page="portfolios"):
+        app = AppTest.from_file(APP, default_timeout=240)
+        app.session_state["authenticated"] = True
+        app.session_state["user_email"] = email
+        app.session_state["user_tier"] = "pro"
+        app.session_state["language"] = "en"
+        app.session_state["user_profile"] = "balanced"
+        app.session_state["analysis_mode"] = "simulation"
+        app.session_state["current_portfolio"] = analyzer
+        app.session_state["sensitor_period"] = "MAX"
+        app.session_state["page"] = page
+        return app
+
+    def buttons(app, prefix):
+        return [b for b in app.button if (b.key or "").startswith(prefix)]
+
+    def step(label, condition, detail=""):
+        if condition:
+            print(f"  ok    flow         {label}")
+        else:
+            failures.append(("persistence flow", label, detail or "failed"))
+            print(f"  FAIL  flow         {label}")
+
+    checks = 0
+
+    app = fresh()
+    app.run()
+    app.text_input(key="pf_name").set_value("Flow Book").run()
+    buttons(app, "pf_save")[0].click().run()
+    saved = store.list_portfolios(email)
+    checks += 1
+    step("save writes a portfolio and its first snapshot",
+         len(saved) == 1 and len(store.list_snapshots(email, saved[0].id)) == 1,
+         f"{len(saved)} portfolios")
+    if not saved:
+        return checks
+    portfolio_id = saved[0].id
+
+    app = fresh()
+    app.run()
+    buttons(app, "pf_snap_")[0].click().run()
+    checks += 1
+    step("the snapshot button appends to the history",
+         not app.exception and len(store.list_snapshots(email, portfolio_id)) == 2,
+         str(app.exception[0].value)[:200] if app.exception else "")
+
+    app = fresh()
+    app.run()
+    buttons(app, "pf_hist_")[0].click().run()
+    checks += 1
+    step("the history view renders",
+         not app.exception,
+         str(app.exception[0].value)[:200] if app.exception else "")
+
+    app = fresh()
+    app.run()
+    buttons(app, "pf_del_")[0].click().run()
+    confirm = buttons(app, "pf_del2_")
+    checks += 1
+    step("delete asks for confirmation first", bool(confirm))
+    if confirm:
+        confirm[0].click().run()
+        orphans = store._read(
+            "SELECT COUNT(*) AS n FROM snapshots WHERE portfolio_id NOT IN "
+            "(SELECT id FROM portfolios)")[0]["n"]
+        checks += 1
+        step("delete removes the portfolio and leaves no orphaned snapshots",
+             not app.exception and not store.list_portfolios(email)
+             and int(orphans) == 0,
+             f"orphans {orphans}")
+
+    return checks
 
 
 if __name__ == "__main__":

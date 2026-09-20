@@ -13,18 +13,36 @@ import json
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-    email       TEXT PRIMARY KEY,
-    tier        TEXT NOT NULL DEFAULT 'free',
-    display_name TEXT,
-    created_at  TEXT NOT NULL,
-    updated_at  TEXT NOT NULL
-);
+# =============================================================================
+# SCHEMA
+# =============================================================================
+#
+# Declared per table rather than as one script, so a migration can rebuild a
+# single table from the same definition the fresh schema uses. Two copies of a
+# CREATE TABLE drift, and the copy that drifts is always the one only old
+# databases ever see.
 
+SCHEMA_VERSION = 2
+
+TABLES: dict[str, str] = {
+    "users": """
+CREATE TABLE IF NOT EXISTS users (
+    email        TEXT PRIMARY KEY,
+    tier         TEXT NOT NULL DEFAULT 'free',
+    display_name TEXT,
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+)""",
+
+    # Every table below cascades from `users`. Deleting a person removes their
+    # portfolios, their snapshots, their accounts and their trades in one
+    # statement — which is what makes `delete_user` a guarantee rather than a
+    # list of deletes someone has to remember to keep up to date.
+    "portfolios": """
 CREATE TABLE IF NOT EXISTS portfolios (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email  TEXT NOT NULL,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
     name        TEXT NOT NULL,
     holdings    TEXT NOT NULL,           -- JSON {ticker: weight or quantity}
     mode        TEXT NOT NULL DEFAULT 'simulation',
@@ -34,40 +52,63 @@ CREATE TABLE IF NOT EXISTS portfolios (
     created_at  TEXT NOT NULL,
     updated_at  TEXT NOT NULL,
     UNIQUE(user_email, name)
-);
+)""",
 
+    # Snapshots carry no user column: they reach their owner through the
+    # portfolio. Every query for them joins through it, so there is no second
+    # place for the two to disagree about who owns what.
+    "snapshots": """
 CREATE TABLE IF NOT EXISTS snapshots (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    portfolio_id INTEGER NOT NULL,
+    portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
     taken_at     TEXT NOT NULL,
     total_value  REAL,
     weights      TEXT NOT NULL,          -- JSON {ticker: weight}
-    metrics      TEXT NOT NULL,          -- JSON of the headline figures
-    FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
-);
+    metrics      TEXT NOT NULL           -- JSON of the headline figures
+)""",
 
+    "trading_accounts": """
 CREATE TABLE IF NOT EXISTS trading_accounts (
-    id          TEXT NOT NULL,
-    user_email  TEXT NOT NULL,
-    name        TEXT NOT NULL,
-    broker      TEXT,
-    currency    TEXT NOT NULL DEFAULT 'USD',
-    created_at  TEXT NOT NULL,
-    updated_at  TEXT NOT NULL,
-    PRIMARY KEY (user_email, id)
-);
+    id               TEXT NOT NULL,
+    user_email       TEXT NOT NULL REFERENCES users(email)
+                     ON DELETE CASCADE ON UPDATE CASCADE,
+    name             TEXT NOT NULL,
+    broker           TEXT,
+    currency         TEXT NOT NULL DEFAULT 'USD',
 
--- Trades are keyed by (user_email, id), not by id alone. A broker deal id is
--- only unique within one broker account, so two users importing from the same
--- platform can genuinely collide. Scoping the key by user makes that impossible
--- rather than unlikely, and it is the same shape multi-user needs later.
+    -- Recorded by a broker sync rather than inferred from the trades. The last
+    -- close is a proxy for "when did we last look", and it is wrong in the one
+    -- case that matters: a sync that found nothing new leaves it unchanged, so
+    -- the next window reaches further back every time nothing happens.
+    last_synced_at   TEXT,
+    last_sync_trades INTEGER,
+
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    PRIMARY KEY (user_email, id)
+)""",
+
+    # Trades are keyed by (user_email, id), not by id alone. A broker deal id is
+    # only unique within one broker account, so two users importing from the same
+    # platform can genuinely collide. Scoping the key by user makes that
+    # impossible rather than unlikely.
+    #
+    # `direction` is the only CHECK on this table, and the absence of the others
+    # is deliberate. The journal accepts a trade whose numbers are wrong and
+    # flags it, because a trader importing a messy CSV needs to see the bad rows
+    # rather than have the import refused. A CHECK on `size > 0` would turn that
+    # into a hard failure at the worst moment. Direction is different: it is a
+    # closed vocabulary the model already enforces, and a third value would mean
+    # a P&L sign nothing downstream could interpret.
+    "trades": """
 CREATE TABLE IF NOT EXISTS trades (
     id               TEXT NOT NULL,
-    user_email       TEXT NOT NULL,
+    user_email       TEXT NOT NULL REFERENCES users(email)
+                     ON DELETE CASCADE ON UPDATE CASCADE,
     account_id       TEXT,
 
     symbol           TEXT NOT NULL,
-    direction        TEXT NOT NULL,
+    direction        TEXT NOT NULL CHECK (direction IN ('long', 'short')),
     entry_price      REAL NOT NULL,
     exit_price       REAL,
     size             REAL NOT NULL,
@@ -111,14 +152,24 @@ CREATE TABLE IF NOT EXISTS trades (
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL,
     PRIMARY KEY (user_email, id)
-);
+)""",
+}
 
+INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_portfolios_user ON portfolios(user_email);
 CREATE INDEX IF NOT EXISTS idx_snapshots_portfolio ON snapshots(portfolio_id, taken_at);
+CREATE INDEX IF NOT EXISTS idx_accounts_user ON trading_accounts(user_email);
 CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_email, closed_at);
 CREATE INDEX IF NOT EXISTS idx_trades_account ON trades(user_email, account_id);
 CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
 """
+
+SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES
+
+# Tables that reference `users` and must be rebuilt together when that
+# relationship changes. Order matters: a child is rebuilt after its parent.
+USER_OWNED = ("portfolios", "trading_accounts", "trades")
+
 
 # Columns written by the trade upsert, in order. Kept as a list so the INSERT,
 # the placeholder count and the UPDATE clause can never drift apart.
@@ -229,13 +280,20 @@ class TradingAccount:
     currency: str
     created_at: str
     updated_at: str
+    last_synced_at: str | None = None
+    last_sync_trades: int | None = None
 
 
 def _to_account(row: sqlite3.Row) -> TradingAccount:
+    keys = row.keys()
     return TradingAccount(
         id=row["id"], user_email=row["user_email"], name=row["name"],
         broker=row["broker"], currency=row["currency"],
         created_at=row["created_at"], updated_at=row["updated_at"],
+        # Read defensively: these arrive with the version 2 migration, and this
+        # mapper is also used by a migration tool reading an older file.
+        last_synced_at=row["last_synced_at"] if "last_synced_at" in keys else None,
+        last_sync_trades=row["last_sync_trades"] if "last_sync_trades" in keys else None,
     )
 
 

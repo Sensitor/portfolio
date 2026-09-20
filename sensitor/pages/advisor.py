@@ -153,7 +153,7 @@ def _cards(ctx, summaries, lang, store) -> None:
                 # Snapshots the *currently loaded* portfolio against this client's
                 # row, which is only meaningful when the advisor has loaded that
                 # client's book first — hence the caption on the page.
-                store.add_snapshot(portfolio.id, total_value=ctx.end_value,
+                store.add_snapshot(email, portfolio.id, total_value=ctx.end_value,
                                    weights=ctx.weights, metrics=snapshot_metrics(ctx))
                 st.success(tr("snapshot_taken", lang))
                 st.rerun()

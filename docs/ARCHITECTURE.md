@@ -138,7 +138,8 @@ cycle in any import order. Verified by importing `performance` before
 
 | Suite | Covers |
 |---|---|
-| `tests/test_sensitor_pages.py` | 159 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles |
+| `tests/test_database.py` | 86 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
+| `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
 | `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
 | `tests/test_mt5_connector.py` | 128 checks with `streamlit` poisoned and a mocked terminal: balance-operation filtering, the 0.0 stop sentinel, deal folding, scaling in and out, partial closes, the implied point value, stops from orders, server-time conversion, the connector's lifecycle and failure modes, the merge rules, an end-to-end sync against a real store, and id namespacing across accounts |
@@ -194,7 +195,7 @@ sensitor/
 | 3 | Trading engine — **done** | additive |
 | 4 | Trading journal — **done** | additive |
 | 5 | MT5 connector — **done** | additive |
-| 6 | Database models for trading | additive |
+| 6 | Database models for multi-user — **done** | **breaking inside the package** |
 | 7 | Multi-user | additive |
 | 8 | FastAPI | additive |
 | 9 | Mobile-ready backend | additive |
@@ -418,3 +419,80 @@ that may no longer be reachable.
 column never reaches anyone who has already saved anything — which is every real
 user. `connection._migrate()` adds missing columns on open. Verified against a
 database built from the previous schema: the legacy rows survive and read back.
+
+---
+
+## 12. Multi-user data model (Phase 6)
+
+The first phase whose changes are **breaking inside the package**. Seven `Store`
+methods changed signature and every call site moved with them.
+
+### What was wrong
+
+`get_portfolio(portfolio_id)`, `rename_portfolio`, `delete_portfolio`,
+`add_snapshot`, `list_snapshots`, `latest_snapshot` and `delete_snapshot` took an
+integer id and no user. An integer primary key is guessable, so each of them
+returned, renamed or deleted whatever row held that id — regardless of whose it
+was. On a single-user desktop app that is harmless. It is also exactly the hole
+the multi-user architecture of Phase 7 and the API of Phase 8 would have been
+built on top of, and the brief's hardest constraint is that one user's data is
+never reachable by another.
+
+Every one of them now leads with the owner, and the user parameter has no
+default — a parameter with a default is how this comes back.
+
+### Snapshots reach their owner through the portfolio
+
+`snapshots` carries no user column. Adding one would create a second place for
+ownership to be recorded and therefore a place for the two to disagree. Every
+query joins through `portfolios` instead, so a snapshot cannot be read, written
+or deleted across the boundary even when its own id is known.
+
+### Schema version 2
+
+| Change | Why |
+|---|---|
+| `portfolios`, `trading_accounts`, `trades` cascade from `users` | makes `delete_user` a guarantee rather than a list of deletes someone must remember to maintain |
+| `trades.direction` gains a CHECK | a third value means a P&L sign nothing downstream can interpret |
+| `trading_accounts.last_synced_at` / `last_sync_trades` | recorded by a sync rather than inferred from the newest close, which stalls whenever a sync finds nothing |
+| `idx_accounts_user` | the account list is read on every trading page |
+
+The constraints deliberately **not** added are as important. There is no
+`CHECK (size > 0)` on `trades`, because the journal accepts a trade whose numbers
+are wrong and flags it — a trader importing a messy CSV needs to see the bad rows
+rather than have the import refused. A CHECK there would turn the product's
+stated behaviour into a hard failure at the worst moment.
+
+### Migrating, and the trap it hit
+
+SQLite cannot add a foreign key or a CHECK in place, so the three user-owned
+tables are rebuilt: rename aside, create at the current definition, copy the
+columns both shapes share, drop the old. Copying by shared column rather than
+`SELECT *` is what lets it run on a database that did or did not receive the
+`raw` column from Phase 5.
+
+Two things had to be got right, and one was got wrong first:
+
+**Users are backfilled before the constraint exists.** Older databases wrote
+portfolios and trades without ever creating the `users` row, and a foreign key
+to a missing parent is unsatisfiable.
+
+**`ALTER TABLE ... RENAME TO` rewrites other tables' foreign keys to follow the
+new name.** Renaming `portfolios` aside repointed `snapshots` at the scratch
+table; dropping the scratch table then left `snapshots` referencing something
+that no longer existed — a database that opens fine and fails on the first
+cascade. The test caught it. `PRAGMA legacy_alter_table = ON` during the rebuild
+turns that rewriting off, which is what a rebuild wants: a referencing table
+should keep pointing at the *name*, because the name is about to hold the new
+table.
+
+The migration finishes with `foreign_key_check` and `integrity_check`, and
+raises rather than returning a database that opens and is quietly broken.
+
+### The test that will catch the next one
+
+`test_every_user_method_is_scoped` derives its list from the `Store` class
+rather than from a list written down beside it, and asserts that every public
+method leads with `user_email` or `email` and that neither is optional. The seven
+unscoped methods survived four phases of review; a list maintained by hand would
+have let the eighth through too.
