@@ -15,13 +15,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import charts as C
-from .. import optimize as O
-from ..components import (
+from ..ui import charts as C
+from ..investment import optimize as O
+from ..ui.components import (
     data_table, empty_state, metric_card, note, num, page_header, pct, section, spacer,
 )
-from ..design import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..i18n import define, tr
+from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
+from ..core.i18n import define, tr
 from ._shared import guard, period_selector
 
 

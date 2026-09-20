@@ -15,16 +15,16 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from .. import charts as C
-from .. import market
-from .. import stress as S
-from ..components import (
+from ..ui import charts as C
+from ..integrations import market_data as market
+from ..investment import stress as S
+from ..ui.components import (
     alert, data_table, metric_card, money, note, num, page_header, pct, pill_html,
     section, spacer,
 )
-from ..design import INK, INK_2, INK_FAINT, INK_MUTED, PLOTLY_CONFIG, STATUS, html
-from ..i18n import tr
-from ..market import benchmark_label
+from ..ui.themes import INK, INK_2, INK_FAINT, INK_MUTED, PLOTLY_CONFIG, STATUS, html
+from ..core.i18n import tr
+from ..integrations.market_data import benchmark_label
 from ._shared import benchmark_selector, guard
 
 # Crisis windows reach back to 2000, well before any portfolio's own window.

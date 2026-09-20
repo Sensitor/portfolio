@@ -11,12 +11,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import analytics as A
-from .. import market
-from .. import report as R
-from .. import stress as S
-from ..components import metric_card, note, page_header, section, spacer
-from ..i18n import tr
+from ..investment import analytics as A
+from ..integrations import market_data as market
+from ..investment import report as R
+from ..investment import stress as S
+from ..ui.components import metric_card, note, page_header, section, spacer
+from ..core.i18n import tr
 from ._shared import benchmark_selector, guard, load_benchmark, period_selector
 
 _HISTORY_START = "1999-01-01"

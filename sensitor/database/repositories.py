@@ -1,22 +1,10 @@
 """
-Persistence layer — saved portfolios, snapshots and users.
+Repositories — the query layer the application talks to.
 
-Everything in the app up to now lived in session state and vanished on reload.
-This module gives it somewhere to go.
-
-Where the data actually lives, and the catch
---------------------------------------------
-The default backend is a local SQLite file. That is correct for running on your
-own machine and correct for a single-user deployment. It is **not** durable on
-Streamlit Cloud: that filesystem is ephemeral, so the database is wiped whenever
-the app restarts, redeploys or sleeps. Anything saved there should be treated as
-a convenience cache, not as storage.
-
-For a real multi-user deployment, point `SENSITOR_DB_PATH` at a persistent volume
-or replace `_connect()` with a Postgres connection — every query below is plain
-SQL through the DB-API, and the repository interface is what the pages depend on,
-so swapping the driver does not touch the UI. The schema is deliberately boring
-for the same reason.
+`Store` is the only database surface the pages and the future API use. It owns a
+connection from `connection.connect()` and serialises access behind a lock,
+because Streamlit serves reruns from a thread pool and SQLite connections are
+not safe to share across threads without one.
 
 Privacy
 -------
@@ -32,83 +20,12 @@ No Streamlit import: this module is testable and reusable on its own.
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 import threading
 from contextlib import contextmanager
-from dataclasses import dataclass
-from datetime import datetime, timezone
 
-DEFAULT_PATH = os.getenv("SENSITOR_DB_PATH", "sensitor_data.db")
-
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-    email       TEXT PRIMARY KEY,
-    tier        TEXT NOT NULL DEFAULT 'free',
-    display_name TEXT,
-    created_at  TEXT NOT NULL,
-    updated_at  TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS portfolios (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email  TEXT NOT NULL,
-    name        TEXT NOT NULL,
-    holdings    TEXT NOT NULL,           -- JSON {ticker: weight or quantity}
-    mode        TEXT NOT NULL DEFAULT 'simulation',
-    currency    TEXT NOT NULL DEFAULT '$',
-    notes       TEXT,
-    client_name TEXT,                    -- set when the book belongs to a client
-    created_at  TEXT NOT NULL,
-    updated_at  TEXT NOT NULL,
-    UNIQUE(user_email, name)
-);
-
-CREATE TABLE IF NOT EXISTS snapshots (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    portfolio_id INTEGER NOT NULL,
-    taken_at     TEXT NOT NULL,
-    total_value  REAL,
-    weights      TEXT NOT NULL,          -- JSON {ticker: weight}
-    metrics      TEXT NOT NULL,          -- JSON of the headline figures
-    FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS idx_portfolios_user ON portfolios(user_email);
-CREATE INDEX IF NOT EXISTS idx_snapshots_portfolio ON snapshots(portfolio_id, taken_at);
-"""
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-
-@dataclass
-class Portfolio:
-    id: int
-    user_email: str
-    name: str
-    holdings: dict
-    mode: str
-    currency: str
-    notes: str | None
-    client_name: str | None
-    created_at: str
-    updated_at: str
-
-    @property
-    def is_client(self) -> bool:
-        return bool(self.client_name)
-
-
-@dataclass
-class Snapshot:
-    id: int
-    portfolio_id: int
-    taken_at: str
-    total_value: float | None
-    weights: dict
-    metrics: dict
+from .connection import DEFAULT_PATH, connect, now as _now
+from .models import Portfolio, Snapshot, _jsonable, _to_portfolio, _to_snapshot
 
 
 class Store:
@@ -122,15 +39,7 @@ class Store:
     def __init__(self, path: str = DEFAULT_PATH):
         self.path = path
         self._lock = threading.Lock()
-        directory = os.path.dirname(os.path.abspath(path))
-        if directory:
-            os.makedirs(directory, exist_ok=True)
-        self._conn = sqlite3.connect(path, check_same_thread=False)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA foreign_keys = ON")
-        with self._lock:
-            self._conn.executescript(SCHEMA)
-            self._conn.commit()
+        self._conn = connect(path)
 
     # ── Plumbing ─────────────────────────────────────────────────────────────
 
@@ -302,56 +211,3 @@ class Store:
                 "n_snapshots": len(self.list_snapshots(portfolio.id, limit=500)),
             })
         return out
-
-
-# =============================================================================
-# ROW MAPPING
-# =============================================================================
-
-def _to_portfolio(row: sqlite3.Row) -> Portfolio:
-    return Portfolio(
-        id=int(row["id"]),
-        user_email=row["user_email"],
-        name=row["name"],
-        holdings=json.loads(row["holdings"]),
-        mode=row["mode"],
-        currency=row["currency"],
-        notes=row["notes"],
-        client_name=row["client_name"],
-        created_at=row["created_at"],
-        updated_at=row["updated_at"],
-    )
-
-
-def _to_snapshot(row: sqlite3.Row) -> Snapshot:
-    return Snapshot(
-        id=int(row["id"]),
-        portfolio_id=int(row["portfolio_id"]),
-        taken_at=row["taken_at"],
-        total_value=row["total_value"],
-        weights=json.loads(row["weights"]),
-        metrics=json.loads(row["metrics"]),
-    )
-
-
-def _jsonable(value):
-    """
-    Coerce numpy scalars and pandas objects to plain JSON types.
-
-    Metrics dicts come straight from the analytics layer and are full of
-    numpy.float64, which json.dumps refuses. Anything it cannot place becomes a
-    string rather than failing the write — a snapshot with one odd field is worth
-    more than no snapshot.
-    """
-    if isinstance(value, dict):
-        return {str(k): _jsonable(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_jsonable(v) for v in value]
-    if value is None or isinstance(value, (bool, int, float, str)):
-        return value
-    if hasattr(value, "item"):          # numpy scalar
-        try:
-            return value.item()
-        except Exception:
-            pass
-    return str(value)

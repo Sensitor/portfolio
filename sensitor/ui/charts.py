@@ -23,7 +23,7 @@ from __future__ import annotations
 import numpy as np
 import plotly.graph_objects as go
 
-from .design import (
+from .themes import (
     ACCENT, AXIS, BORDER_STRONG, DIVERGING, GRID, INK, INK_2, INK_FAINT,
     INK_MUTED, NEG, PALETTE, PALETTE_ALLPAIRS, POS, STATUS, SURFACE, SURFACE_2,
     plotly_layout, series_color,

@@ -15,17 +15,17 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import charts as C
-from .. import xray as X
-from ..components import (
+from ..ui import charts as C
+from ..investment import xray as X
+from ..ui.components import (
     data_table, metric_card, note, page_header, pct, section, spacer,
 )
-from ..design import ACCENT, PLOTLY_CONFIG, STATUS, class_color
+from ..ui.themes import ACCENT, PLOTLY_CONFIG, STATUS, class_color
+from ..core.i18n import define, tr
+from ._shared import guard
 
 STATUS_GOOD = STATUS["good"]
 STATUS_WARNING = STATUS["warning"]
-from ..i18n import define, tr
-from ._shared import guard
 
 
 def render_xray(ctx) -> None:
@@ -158,10 +158,10 @@ def _factor_block(ctx, lang: str) -> None:
     Sits on the X-Ray page because it answers the same question as look-through —
     what you actually own — in the language of risk premia rather than sectors.
     """
-    from .. import charts as C
-    from .. import factors as FA
-    from .. import market
-    from ..components import metric_card, num
+    from ..ui import charts as C
+    from ..investment import factors as FA
+    from ..integrations import market_data as market
+    from ..ui.components import metric_card, num
 
     section(tr("factor_exposure", lang).upper(), tr("factor_sub", lang))
 

@@ -19,13 +19,13 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from .. import charts as C
-from ..components import (
+from ..ui import charts as C
+from ..ui.components import (
     data_table, empty_state, money, note, num, page_header, pct,
     pill_html, section, spacer,
 )
-from ..design import INK, INK_MUTED, PLOTLY_CONFIG, html
-from ..i18n import tr
+from ..ui.themes import INK, INK_MUTED, PLOTLY_CONFIG, html
+from ..core.i18n import tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 LOADED_KEY = "sensitor_loaded_portfolio"

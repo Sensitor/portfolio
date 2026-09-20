@@ -11,13 +11,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import charts as C
-from ..components import (
+from ..ui import charts as C
+from ..ui.components import (
     metric_card, note, num, page_header, pct, score_bar, section, spacer, stat_card,
 )
-from ..design import INK_2, INK_MUTED, PLOTLY_CONFIG, STATUS, html
-from ..health import WEIGHTS
-from ..i18n import define, tr
+from ..ui.themes import INK_2, INK_MUTED, PLOTLY_CONFIG, STATUS, html
+from ..investment.health import WEIGHTS
+from ..core.i18n import define, tr
 from ._shared import guard, period_selector, single_asset_note
 
 _COMPONENT_ORDER = ["performance", "risk", "diversification", "concentration", "liquidity"]

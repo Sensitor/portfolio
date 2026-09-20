@@ -20,7 +20,7 @@ from typing import Any
 from . import analytics as A
 from . import health as H
 from . import optimize as O
-from . import signals as S
+from ..ai import signals as S
 from . import xray as X
 
 

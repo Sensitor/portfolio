@@ -23,9 +23,9 @@ warnings.filterwarnings('ignore')
 # quantitative engine, visual components and the Overview / Health / Performance
 # / Risk Lab / X-Ray pages. The legacy engine below is untouched and still powers
 # simulation, optimisation and stress testing; Sensitor reads from it.
-from sensitor import design as sensitor_design
-from sensitor.context import build_context
-from sensitor.i18n import tr as s_tr
+from sensitor.ui import themes as sensitor_design
+from sensitor.investment.context import build_context
+from sensitor.core.i18n import tr as s_tr
 from sensitor.pages import (
     render_advisor, render_copilot, render_health, render_optimize, render_overview,
     render_performance, render_portfolios, render_reports, render_risk,

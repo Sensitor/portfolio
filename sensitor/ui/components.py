@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import html as _html
 
-from .design import (
+from .themes import (
     ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, POS,
     RADIUS_SM, STATUS, STATUS_ICON, html,
 )
