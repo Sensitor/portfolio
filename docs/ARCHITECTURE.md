@@ -141,6 +141,7 @@ cycle in any import order. Verified by importing `performance` before
 | `tests/test_sensitor_pages.py` | 159 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
 | `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
+| `tests/test_trading_pages.py` | 81 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
 
@@ -190,7 +191,7 @@ sensitor/
 | 1 | Restructure the package into the target layout, with shims | none |
 | 2 | Extract reference data, config and the analyzer out of the monolith | none |
 | 3 | Trading engine — **done** | additive |
-| 4 | Trading journal | additive |
+| 4 | Trading journal — **done** | additive |
 | 5 | MT5 connector | additive |
 | 6 | Database models for trading | additive |
 | 7 | Multi-user | additive |
@@ -257,3 +258,81 @@ journal teaches someone the wrong lesson.
 page cannot shorten "your data shows a correlation" into a verdict. The test
 suite asserts that every finding names itself a correlation in both languages,
 carries its sample size in the sentence, and contains no causal verb.
+
+---
+
+## 10. Trading journal (Phase 4)
+
+Five pages under `sensitor/pages/`, plus `_trading_shared.py`, plus the tables
+and repository methods that let a journal survive a restart. Nothing in the
+investment half was touched: the 159 investment render checks and the 14 legacy
+page renders pass unchanged.
+
+| Piece | Holds |
+|---|---|
+| `_trading_shared.py` | the journal loader, the three guards, the period / account selectors, the filter panel, and the formatters that decide what an undefined value looks like |
+| `trading_overview.py` | eight KPI cards, equity and R curves, daily P&L, R distribution, a breakdown on any dimension, recent trades |
+| `trading_journal.py` | the only page that writes — entry form, open positions, data problems, the paged trade list |
+| `trading_analytics.py` | Trading DNA, the free-form slicer, and where the result concentrates |
+| `trading_risk.py` | sizing, drift, stop discipline, simultaneous exposure, losing runs against expectation |
+| `trading_psychology.py` | the findings, the streak comparisons, mistakes, and the self-reported fields |
+
+### Navigation
+
+The sidebar is now **Investment · Trading · Workspace · Build**. The headings are
+not decoration: "Risk" means portfolio volatility on one side and position sizing
+on the other, and an ungrouped list would put the same word twice with no way to
+tell which is which.
+
+`TRADING_PAGES` is a separate map from `SENSITOR_PAGES` in the entry point,
+because a trading page takes no investment context. Routing it through the same
+map would build a `Context` — and fetch prices — for a page that never reads one.
+
+### Two rules enforced in the shared module, not per page
+
+**Trades are read per user, per rerun, and never cached across users.** The
+journal is loaded by the signed-in email at read time. A `@st.cache_data` on the
+journal would be keyed by its arguments, and one wrong key would serve one
+person's book to another. The composite primary key `(user_email, id)` is what
+makes that safe at the database level: two traders whose brokers both number a
+deal `t0001` get two rows, and the harness asserts that neither appears in the
+other's list.
+
+**The filter vocabulary comes from the unfiltered journal.** `ctx.all_symbols`
+and its siblings read `ctx.journal`, not `ctx.scoped`. A dropdown that only
+offers what survived the current filter cannot be widened again.
+
+### What the pages refuse to show
+
+The restraint in the engine only matters if the UI honours it, so each of these
+is a rendering decision, not a computation:
+
+* **A percentage drawdown.** The trading equity curve is cumulative P&L from
+  zero, so "percent of peak" is a percentage of whatever the running total
+  happened to be — an early $19 peak followed by a $135 decline reads as −703%.
+  Money and R are shown instead; a percentage drawdown needs an account balance,
+  which the journal does not hold.
+* **A best bucket below the sample threshold.** `P.best()` returns nothing, and
+  the card shows a dash and says why rather than promoting a three-trade setup.
+* **An infinite profit factor**, or a zero R for a trade that had no stop.
+* **A cause.** Every psychology finding is phrased in the engine and rendered
+  verbatim; the page has no wording of its own to shorten.
+
+### Found by looking at the rendered pages
+
+The unit tests passed the whole time. These did not survive a screenshot:
+
+| Seen | Was |
+|---|---|
+| "−703.4% from peak" under the drawdown | a percentage of a near-zero peak — now money and R |
+| "Average R −2.66R" on a profitable book | the *harness* priced commission at a flat $0.5–$4 against a $4 median risk; costs were half of R. The engine was right |
+| "1 vs 1" with a full meter | an equal comparison drawing a 100% bar — now centred at 0.5 and labelled "no difference" |
+| An amber card for sizing up after wins | a judgement the data does not carry; the warning colour is now only for the after-losses comparison |
+| A white time input on a dark form | Streamlit's time control nests its surface below `div[role="group"]`, so the theme missed it |
+| A scarlet "Save trade" | a form submit is `kind="primaryFormSubmit"`, not `primary`, and fell through to Streamlit's default red |
+| Red filter chips, a white dropdown panel, a white expander header | three more controls the theme had never been pointed at — all of them reachable only by opening a panel |
+| A breakdown axis spanning −300…+300 for bars of +243 and −51 | a symmetric range; now headroom per side |
+
+The last four are theme gaps that predate this phase and affect the investment
+pages too. They were fixed in `ui/themes.py`, which is why the change is not
+confined to `pages/`.

@@ -445,32 +445,80 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
    now `.react-aria-ComboBox > div[role="group"]`, which paints its own light
    surface. Both generations are covered so the theme holds either way. */
 :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
-    [data-testid="stNumberInput"], [data-testid="stDateInput"]) div[role="group"] {{
+    [data-testid="stNumberInput"], [data-testid="stDateInput"],
+    [data-testid="stTimeInput"], [data-testid="stMultiSelect"]) div[role="group"] {{
   background: {SURFACE_3} !important;
   border: 1px solid {BORDER} !important;
   border-radius: {RADIUS_SM} !important;
 }}
 :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
-    [data-testid="stNumberInput"]) :is(input, button, span, div) {{
+    [data-testid="stNumberInput"], [data-testid="stMultiSelect"])
+    :is(input, button, span, div) {{
   color: {INK} !important;
 }}
-:is([data-testid="stSelectbox"], [data-testid="stTextInput"]) input::placeholder {{
+/* The chips a multiselect shows for chosen values. Streamlit's default paints
+   them in its own red, which on this palette reads as an error state — three
+   instruments chosen in a filter looked like three validation failures. The
+   chip is `span[data-tag]`, two levels inside the tags container. */
+[data-testid="stMultiSelectTagsContainer"] span[data-tag],
+[data-testid="stMultiSelectTagsContainer"] [data-baseweb="tag"] {{
+  background: {ACCENT_SOFT} !important;
+  border: 1px solid {BORDER} !important;
+  border-radius: {RADIUS_PILL} !important;
+  color: {INK} !important;
+}}
+[data-testid="stMultiSelectTagsContainer"] span[data-tag] :is(span, svg) {{
+  color: {INK} !important; fill: {INK_2} !important;
+}}
+/* The time input nests its segmented spinbuttons two levels below the group,
+   and paints a light surface on the wrapper rather than on the group. Without
+   this it is the one white control on a dark form — which is exactly how it
+   looked until the journal form was opened in a browser. */
+[data-testid="stTimeInput"] [data-testid="stTimeInputTimeDisplay"],
+[data-testid="stTimeInput"] [data-testid="stTimeInputTimeDisplay"] > div {{
+  background: {SURFACE_3} !important;
+  border-color: {BORDER} !important;
+  border-radius: {RADIUS_SM} !important;
+}}
+[data-testid="stTimeInput"] :is(span[role="spinbutton"], span[data-type="literal"]) {{
+  color: {INK} !important;
+}}
+[data-testid="stTimeInput"] span[role="spinbutton"]:focus {{
+  background: {ACCENT_SOFT} !important; color: {INK} !important;
+}}
+[data-testid="stDateInput"] :is(input, span, div[role="spinbutton"]) {{
+  color: {INK} !important;
+}}
+:is([data-testid="stSelectbox"], [data-testid="stTextInput"],
+    [data-testid="stMultiSelect"]) input::placeholder {{
   color: {INK_FAINT} !important;
 }}
 [data-testid="stSelectbox"] svg,
+[data-testid="stMultiSelect"] svg,
 [data-testid="stNumberInput"] svg {{ fill: {INK_MUTED} !important; color: {INK_MUTED} !important; }}
 [data-testid="stWidgetLabel"] p {{ color: {INK_MUTED} !important; }}
 
-.react-aria-Popover, .react-aria-ListBox {{
+/* Dropdown panels. Targeted by role as well as by class: this build emits no
+   `.react-aria-Popover` class on the multiselect's panel, only an emotion hash,
+   so a class-only rule left it white — visible as a white "No results" box
+   hanging under a dark filter panel. The `:has()` rule catches the panel that
+   wraps the list, which is what actually paints the surface. */
+.react-aria-Popover, .react-aria-ListBox,
+[role="listbox"], div:has(> [role="listbox"]) {{
   background: {SURFACE_2} !important;
-  border: 1px solid {BORDER} !important;
+  border-color: {BORDER} !important;
   border-radius: {RADIUS_SM} !important;
   box-shadow: 0 16px 40px -14px rgba(0,0,0,0.85) !important;
 }}
-.react-aria-ListBox [role="option"] {{ color: {INK_2} !important; background: transparent !important; }}
-.react-aria-ListBox [role="option"][data-focused],
-.react-aria-ListBox [role="option"]:hover {{ background: rgba(154,168,191,0.10) !important; }}
-.react-aria-ListBox [role="option"][data-selected] {{
+[role="listbox"] {{ color: {INK_2} !important; }}
+:is(.react-aria-ListBox, [role="listbox"]) [role="option"] {{
+  color: {INK_2} !important; background: transparent !important;
+}}
+:is(.react-aria-ListBox, [role="listbox"]) [role="option"][data-focused],
+:is(.react-aria-ListBox, [role="listbox"]) [role="option"]:hover {{
+  background: rgba(154,168,191,0.10) !important;
+}}
+:is(.react-aria-ListBox, [role="listbox"]) [role="option"][data-selected] {{
   background: {ACCENT_SOFT} !important; color: {INK} !important;
 }}
 
@@ -498,6 +546,28 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
 }}
 
 /* ---------- Main buttons ---------- */
+/* A form's submit button is `kind="primaryFormSubmit"`, not `primary`, and so
+   fell through to Streamlit's own red default — a scarlet "Save trade" in the
+   middle of a blue product. Styled alongside the ordinary primary button so the
+   two cannot drift apart. */
+{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"] {{
+  background: linear-gradient(135deg, {ACCENT}, #2A6FC4) !important;
+  border: none !important; border-radius: {RADIUS_SM} !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important; letter-spacing: -0.01em !important;
+  box-shadow: 0 6px 20px -8px {ACCENT_GLOW} !important;
+  transition: transform .15s ease, box-shadow .15s ease;
+}}
+{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover {{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px -8px {ACCENT_GLOW} !important;
+}}
+{MAIN} .stFormSubmitButton > button[kind="secondaryFormSubmit"] {{
+  background: {SURFACE_3} !important;
+  border: 1px solid {BORDER} !important;
+  color: {INK_2} !important; border-radius: {RADIUS_SM} !important;
+  font-weight: 500 !important;
+}}
 {MAIN} .stButton > button[kind="primary"] {{
   background: linear-gradient(135deg, {ACCENT}, #2A6FC4) !important;
   border: none !important; border-radius: {RADIUS_SM} !important;
@@ -531,6 +601,32 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
   color: {INK} !important;
   box-shadow: inset 0 -2px 0 0 {ACCENT} !important;
 }}
+/* Streamlit's own selected-tab bar, which it paints in its default red. The
+   tab underneath already carries an accent underline, so left alone the two
+   stack into a red line over a blue one. Predates the trading pages; fixed
+   here because it is two lines and it is visibly wrong. */
+.stTabs .react-aria-SelectionIndicator {{ background: {ACCENT} !important; }}
+::selection {{ background: {ACCENT_GLOW}; color: {INK}; }}
+
+/* ---------- Expanders ---------- */
+/* Untouched, an open expander paints a white header and body — the journal's
+   trade form and the trading filter panel both live in one, so a light slab
+   opened in the middle of a dark page. Styled as a card so an expander reads
+   like the rest of the surface rather than like a different application. */
+[data-testid="stExpander"] details {{
+  background: {SURFACE} !important;
+  border: 1px solid {BORDER} !important;
+  border-radius: {RADIUS_SM} !important;
+  overflow: hidden;
+}}
+[data-testid="stExpander"] summary {{
+  background: {SURFACE_3} !important;
+  color: {INK_2} !important;
+  font-size: 0.83rem !important; font-weight: 600 !important;
+}}
+[data-testid="stExpander"] summary:hover {{ background: {SURFACE_2} !important; }}
+[data-testid="stExpander"] summary :is(p, span, div) {{ color: {INK_2} !important; }}
+[data-testid="stExpander"] details > div {{ background: transparent !important; }}
 
 /* ---------- Radio pills (period selector) ---------- */
 div[role="radiogroup"] {{ gap: 4px !important; flex-wrap: wrap; }}

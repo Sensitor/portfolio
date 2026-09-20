@@ -32,6 +32,8 @@ from sensitor.pages import (
     render_advisor, render_copilot, render_health, render_optimize, render_overview,
     render_performance, render_portfolios, render_reports, render_risk,
     render_simulator, render_stress, render_xray,
+    render_trading_analytics, render_trading_journal, render_trading_overview,
+    render_trading_psychology, render_trading_risk,
 )
 
 # =============================================================================
@@ -1428,8 +1430,11 @@ def _sidebar(lang):
                     unsafe_allow_html=True)
 
         # ── Navigation ───────────────────────────────────────────────────────
-        # Sensitor Intelligence pages lead; the build/model/legacy tools follow
-        # under their own heading so nothing that existed before is lost.
+        # Two products under one roof. The headings say which analytics a page
+        # belongs to, because "Risk" means portfolio volatility on one side and
+        # position sizing on the other — the same word for two different things.
+        # The build/model/legacy tools keep their own heading so nothing that
+        # existed before the restructure is lost.
         intelligence = [
             ("overview",    s_tr("nav_overview", lang)),
             ("performance", s_tr("nav_performance", lang)),
@@ -1440,6 +1445,13 @@ def _sidebar(lang):
             ("optimize",    s_tr("nav_optimize", lang)),
             ("simulator",   s_tr("nav_simulator", lang)),
             ("copilot",     s_tr("nav_copilot", lang)),
+        ]
+        trading = [
+            ("trading_overview",   s_tr("nav_trading_overview", lang)),
+            ("trading_journal",    s_tr("nav_trading_journal", lang)),
+            ("trading_analytics",  s_tr("nav_trading_analytics", lang)),
+            ("trading_risk",       s_tr("nav_trading_risk", lang)),
+            ("trading_psychology", s_tr("nav_trading_psychology", lang)),
         ]
         workspace = [
             ("portfolios", s_tr("nav_portfolios", lang)),
@@ -1475,7 +1487,9 @@ def _sidebar(lang):
                     st.session_state.page = key
                     st.rerun()
 
-        _nav_group("Intelligence", intelligence)
+        _nav_group(s_tr("nav_investment", lang), intelligence)
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+        _nav_group(s_tr("nav_trading", lang), trading)
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
         _nav_group("Workspace" if lang == "en" else "Espace de travail", workspace)
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
@@ -1517,6 +1531,17 @@ SENSITOR_PAGES = {
     "portfolios": render_portfolios,
     "reports": render_reports,
     "advisor": render_advisor,
+}
+
+# The trading pages take no investment context — they build their own from the
+# journal. Kept in a separate map so `main()` does not have to construct an
+# analysis context for a page that has no use for one.
+TRADING_PAGES = {
+    "trading_overview": render_trading_overview,
+    "trading_journal": render_trading_journal,
+    "trading_analytics": render_trading_analytics,
+    "trading_risk": render_trading_risk,
+    "trading_psychology": render_trading_psychology,
 }
 
 
@@ -1561,6 +1586,10 @@ def main():
     # ─────────────────────────────────────────────────────────────────────────
     # SENSITOR INTELLIGENCE PAGES
     # ─────────────────────────────────────────────────────────────────────────
+    if page in TRADING_PAGES:
+        TRADING_PAGES[page]()
+        return
+
     if page in SENSITOR_PAGES:
         ctx = _sensitor_context(lang)
         SENSITOR_PAGES[page](ctx)

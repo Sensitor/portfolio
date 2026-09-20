@@ -913,3 +913,288 @@ def probability_bars(rows, height: int | None = None, currency: str = "$") -> go
         margin=dict(l=8, r=8, t=6, b=6),
     ))
     return fig
+
+
+# =============================================================================
+# TRADING
+# =============================================================================
+
+def trading_equity(points, height: int = 360, currency: str = "$",
+                   lang: str = "en", show_drawdown: bool = True) -> go.Figure:
+    """
+    Cumulative net P&L, one point per closed trade.
+
+    The x-axis is trade close time, not trade number: a trader's equity moves in
+    calendar time, and plotting against an index hides a month of inactivity.
+    The running peak is drawn behind the curve when asked, so the depth of every
+    drawdown is visible as the gap rather than inferred from the shape.
+    """
+    if not points:
+        return go.Figure()
+
+    x = [p["at"] for p in points]
+    y = [p["equity"] for p in points]
+
+    fig = go.Figure()
+
+    if show_drawdown and len(y) > 1:
+        peaks, running = [], y[0]
+        for value in y:
+            running = max(running, value)
+            peaks.append(running)
+        fig.add_trace(go.Scatter(
+            x=x, y=peaks, mode="lines", name="Peak" if lang == "en" else "Sommet",
+            line=dict(color="rgba(154,168,191,0.35)", width=1, dash="dot"),
+            hoverinfo="skip",
+        ))
+
+    final = y[-1]
+    colour = POS if final >= 0 else NEG
+    fig.add_trace(go.Scatter(
+        x=x, y=y, mode="lines", name="P&L",
+        line=dict(color=colour, width=2.4),
+        fill="tozeroy",
+        fillcolor="rgba(22,185,121,0.10)" if final >= 0 else "rgba(226,80,79,0.10)",
+        hovertemplate=f"{currency}%{{y:,.2f}}<extra></extra>",
+    ))
+    fig.add_hline(y=0, line=dict(color=AXIS, width=1))
+
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=show_drawdown and len(y) > 1,
+        yaxis=dict(tickprefix=currency, tickformat=",.0f"),
+        xaxis=dict(showspikes=True, spikecolor=BORDER_STRONG,
+                   spikethickness=1, spikemode="across", spikedash="dot"),
+        margin=dict(l=8, r=8, t=28 if show_drawdown else 8, b=8),
+    ))
+    return fig
+
+
+def trading_r_curve(points, height: int = 260) -> go.Figure:
+    """Cumulative R, over the trades that had a stop."""
+    if not points:
+        return go.Figure()
+    x = [p["at"] for p in points]
+    y = [p["equity"] for p in points]
+    colour = POS if y[-1] >= 0 else NEG
+
+    fig = go.Figure(go.Scatter(
+        x=x, y=y, mode="lines", line=dict(color=colour, width=2.2),
+        hovertemplate="%{y:+.2f}R<extra></extra>",
+    ))
+    fig.add_hline(y=0, line=dict(color=AXIS, width=1))
+    fig.update_layout(**plotly_layout(
+        height=height, yaxis=dict(ticksuffix="R"),
+        xaxis=dict(showspikes=True, spikecolor=BORDER_STRONG,
+                   spikethickness=1, spikemode="across", spikedash="dot"),
+    ))
+    return fig
+
+
+def trading_daily_pnl(days, height: int = 240, currency: str = "$") -> go.Figure:
+    """Net P&L per trading day, one bar per day that traded."""
+    if not days:
+        return go.Figure()
+    x = [d["date"] for d in days]
+    y = [d["pnl"] for d in days]
+
+    fig = go.Figure(go.Bar(
+        x=x, y=y,
+        marker=_bar_marker([POS if v >= 0 else NEG for v in y]),
+        customdata=[[d["n"]] for d in days],
+        hovertemplate=(f"%{{x|%Y-%m-%d}}<br>{currency}%{{y:,.2f}}"
+                       "<br>%{customdata[0]} trades<extra></extra>"),
+    ))
+    fig.add_hline(y=0, line=dict(color=AXIS, width=1))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        yaxis=dict(tickprefix=currency, tickformat=",.0f"),
+        xaxis=dict(showgrid=False),
+    ))
+    return fig
+
+
+def trading_r_distribution(dist, height: int = 260, lang: str = "en") -> go.Figure:
+    """
+    R outcomes in the buckets traders think in.
+
+    "Worse than -1R" gets the critical colour because it is the one bucket that
+    means something went wrong mechanically rather than just unluckily — the stop
+    did not hold.
+    """
+    if not dist:
+        return go.Figure()
+
+    labels, counts = dist["labels"], dist["counts"]
+    colours = []
+    for label in labels:
+        if label == "< -1R":
+            colours.append(STATUS["critical"])
+        elif label.startswith("-"):
+            colours.append(NEG)
+        else:
+            colours.append(POS)
+
+    fig = go.Figure(go.Bar(
+        x=labels, y=counts, marker=_bar_marker(colours),
+        text=[str(c) for c in counts], textposition="outside",
+        textfont=dict(size=11, color=INK_2),
+        hovertemplate="<b>%{x}</b><br>%{y} trades<extra></extra>",
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        xaxis=dict(showgrid=False, tickfont=dict(size=11, color=INK_2)),
+        yaxis=dict(title=None),
+    ))
+    return fig
+
+
+def trading_breakdown(rows, height: int | None = None, metric: str = "net_pnl",
+                      currency: str = "$", max_items: int = 12,
+                      lang: str = "en") -> go.Figure:
+    """
+    A performance breakdown as horizontal bars.
+
+    Buckets below the sample threshold are drawn faded *and* have their count
+    appended to the label. A breakdown chart's most dangerous property is that a
+    three-trade bucket looks exactly as authoritative as a three-hundred-trade
+    one; opacity alone would not survive a colourblind reader or a printout, so
+    the count is in the text too.
+    """
+    rows = [r for r in rows if r.get(metric) is not None][:max_items]
+    if not rows:
+        return go.Figure()
+
+    height = height or max(200, 32 * len(rows) + 44)
+    is_money = metric in ("net_pnl", "expectancy", "avg_pnl")
+    values = [r[metric] for r in rows]
+    if metric == "win_rate":
+        values = [v * 100 for v in values]
+
+    labels = [f"{r['label']}  ({r['n']})" for r in rows]
+    colours = [
+        (POS if v >= 0 else NEG) if r["reliable"]
+        else ("rgba(22,185,121,0.40)" if v >= 0 else "rgba(226,80,79,0.40)")
+        for v, r in zip(values, rows)
+    ]
+
+    if is_money:
+        text = [f"{currency}{v:,.0f}" for v in values]
+        suffix = ""
+    elif metric == "win_rate":
+        text = [f"{v:.0f}%" for v in values]
+        suffix = "%"
+    else:
+        text = [f"{v:+.2f}" for v in values]
+        suffix = ""
+
+    low, high = min(values), max(values)
+    has_negative = low < 0
+    # Headroom per side, not a symmetric range around zero. A book where one
+    # instrument lost $51 against another's $243 gain would otherwise be drawn
+    # on a -330…+330 axis, spending half the width on empty space and shrinking
+    # every bar that matters. The outside labels need the room on their own
+    # side; they do not need it on the other.
+    left = low * 1.35 if has_negative else 0
+    right = high * 1.35 if high > 0 else 0
+    if left == right:                       # every value is zero
+        left, right = -1, 1
+
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation="h",
+        marker=_bar_marker(colours),
+        text=text, textposition="outside", textfont=dict(size=11, color=INK_2),
+        customdata=[[r["n"], "yes" if r["reliable"] else "no"] for r in rows],
+        hovertemplate=("<b>%{y}</b><br>%{x:,.2f}" + suffix +
+                       "<br>%{customdata[0]} trades"
+                       "<br>above sample threshold: %{customdata[1]}<extra></extra>"),
+        width=0.62,
+    ))
+    fig.update_layout(**plotly_layout(
+        height=height, hovermode="closest",
+        xaxis=dict(showgrid=True, gridcolor=GRID,
+                   zeroline=has_negative, zerolinecolor=AXIS, zerolinewidth=1,
+                   ticksuffix=suffix, range=[left, right]),
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=6, b=6),
+    ))
+    return fig
+
+
+def trading_risk_over_time(points, height: int = 240, currency: str = "$",
+                           lang: str = "en") -> go.Figure:
+    """Rolling median position risk, with the overall median as a reference."""
+    if not points:
+        return go.Figure()
+    x = [p["at"] for p in points]
+    y = [p["median_risk"] for p in points]
+    reference = sorted(y)[len(y) // 2]
+
+    fig = go.Figure(go.Scatter(
+        x=x, y=y, mode="lines", line=dict(color=ACCENT, width=2),
+        fill="tozeroy", fillcolor="rgba(57,135,229,0.09)",
+        hovertemplate=f"{currency}%{{y:,.2f}}<extra></extra>",
+    ))
+    # Annotated on the right — at top left the label lands on the y-axis tick
+    # labels, where it reads as part of the scale rather than as the reference —
+    # and on an opaque chip, because a rolling series is dense enough that the
+    # label will land on the line wherever it is put.
+    fig.add_hline(y=reference, line=dict(color=INK_FAINT, width=1, dash="dot"),
+                  annotation_text=("median" if lang == "en" else "médiane"),
+                  annotation_position="top right",
+                  annotation_bgcolor=SURFACE, annotation_borderpad=3,
+                  annotation_font=dict(size=10, color=INK_MUTED))
+    fig.update_layout(**plotly_layout(
+        height=height, yaxis=dict(tickprefix=currency, tickformat=",.2f"),
+    ))
+    return fig
+
+
+def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.Figure:
+    """
+    A psychology comparison: one group against the rest, on average P&L.
+
+    Both bars carry their sample size, because the whole claim rests on them.
+    """
+    rows = [r for r in rows if r.get("group")][:8]
+    if not rows:
+        return go.Figure()
+    height = height or max(200, 44 * len(rows) + 46)
+
+    labels = [r.get("display", r["label"]) for r in rows]
+    inside = [r["group"]["avg_pnl"] for r in rows]
+    outside = [r["rest"]["avg_pnl"] for r in rows]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=outside, y=labels, orientation="h",
+        name="Rest" if lang == "en" else "Les autres",
+        marker=_bar_marker("rgba(154,168,191,0.42)"),
+        customdata=[[r["rest"]["n"]] for r in rows],
+        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        width=0.32, offset=-0.34,
+    ))
+    fig.add_trace(go.Bar(
+        x=inside, y=labels, orientation="h",
+        name="Flagged" if lang == "en" else "Marqués",
+        marker=_bar_marker([POS if v >= 0 else NEG for v in inside]),
+        text=[f"{v:+.2f}  n={r['group']['n']}" for v, r in zip(inside, rows)],
+        textposition="outside", textfont=dict(size=11, color=INK_2),
+        customdata=[[r["group"]["n"]] for r in rows],
+        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        width=0.32, offset=0.02,
+    ))
+
+    values = inside + outside
+    span = max(abs(min(values)), abs(max(values))) or 1
+    fig.update_layout(**plotly_layout(
+        height=height, showlegend=True, hovermode="closest",
+        barmode="overlay", bargap=0.34,
+        xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=True,
+                   zerolinecolor=AXIS, zerolinewidth=1,
+                   range=[-span * 1.5, span * 1.5]),
+        yaxis=dict(showgrid=False, type="category", autorange="reversed",
+                   tickfont=dict(size=11, color=INK_2)),
+        margin=dict(l=8, r=8, t=30, b=6),
+    ))
+    return fig

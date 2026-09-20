@@ -25,7 +25,10 @@ import threading
 from contextlib import contextmanager
 
 from .connection import DEFAULT_PATH, connect, now as _now
-from .models import Portfolio, Snapshot, _jsonable, _to_portfolio, _to_snapshot
+from .models import (
+    TRADE_COLUMNS, Portfolio, Snapshot, TradingAccount, _jsonable,
+    _to_account, _to_portfolio, _to_snapshot, row_to_trade, trade_to_row,
+)
 
 
 class Store:
@@ -211,3 +214,138 @@ class Store:
                 "n_snapshots": len(self.list_snapshots(portfolio.id, limit=500)),
             })
         return out
+
+    # ── Trading accounts ─────────────────────────────────────────────────────
+
+    def upsert_account(self, user_email: str, account_id: str, name: str, *,
+                       broker: str | None = None, currency: str = "USD") -> None:
+        user_email = user_email.strip().lower()
+        now = _now()
+        with self._write() as conn:
+            conn.execute(
+                """INSERT INTO trading_accounts
+                     (id, user_email, name, broker, currency, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(user_email, id) DO UPDATE SET
+                     name = excluded.name,
+                     broker = excluded.broker,
+                     currency = excluded.currency,
+                     updated_at = excluded.updated_at""",
+                (str(account_id), user_email, name, broker, currency, now, now),
+            )
+
+    def list_accounts(self, user_email: str) -> list[TradingAccount]:
+        rows = self._read(
+            "SELECT * FROM trading_accounts WHERE user_email = ? ORDER BY name",
+            (user_email.strip().lower(),),
+        )
+        return [_to_account(r) for r in rows]
+
+    def delete_account(self, user_email: str, account_id: str) -> None:
+        """Removes the account and every trade filed under it."""
+        user_email = user_email.strip().lower()
+        with self._write() as conn:
+            conn.execute("DELETE FROM trades WHERE user_email = ? AND account_id = ?",
+                         (user_email, str(account_id)))
+            conn.execute("DELETE FROM trading_accounts WHERE user_email = ? AND id = ?",
+                         (user_email, str(account_id)))
+
+    # ── Trades ───────────────────────────────────────────────────────────────
+
+    def save_trade(self, user_email: str, trade) -> None:
+        self.save_trades(user_email, [trade])
+
+    def save_trades(self, user_email: str, trades) -> int:
+        """
+        Upsert a batch of trades, returning how many were written.
+
+        One statement per batch rather than per trade: a broker sync arrives with
+        thousands at once, and a commit per row turns a two-second import into a
+        two-minute one.
+
+        `created_at` is preserved on conflict so a re-sync does not rewrite when a
+        trade was first seen — that timestamp is the only record of it.
+        """
+        user_email = user_email.strip().lower()
+        if not user_email:
+            raise ValueError("user_email is required")
+
+        now = _now()
+        rows = [trade_to_row(t, user_email, now) for t in trades]
+        if not rows:
+            return 0
+
+        columns = ", ".join(TRADE_COLUMNS)
+        placeholders = ", ".join("?" for _ in TRADE_COLUMNS)
+        updates = ", ".join(
+            f"{c} = excluded.{c}" for c in TRADE_COLUMNS
+            if c not in ("id", "user_email", "created_at")
+        )
+        sql = (f"INSERT INTO trades ({columns}) VALUES ({placeholders}) "
+               f"ON CONFLICT(user_email, id) DO UPDATE SET {updates}")
+
+        with self._write() as conn:
+            conn.executemany(sql, [[row[c] for c in TRADE_COLUMNS] for row in rows])
+        return len(rows)
+
+    def list_trades(self, user_email: str, *, account_id: str | None = None,
+                    symbol: str | None = None, limit: int | None = None) -> list:
+        """
+        Trades for a user, newest close first.
+
+        Open trades have a null `closed_at` and sort last under `DESC`; that is
+        deliberate — a list of results should lead with results.
+        """
+        sql = "SELECT * FROM trades WHERE user_email = ?"
+        params: list = [user_email.strip().lower()]
+        if account_id:
+            sql += " AND account_id = ?"
+            params.append(str(account_id))
+        if symbol:
+            sql += " AND symbol = ?"
+            params.append(symbol)
+        sql += " ORDER BY closed_at DESC, opened_at DESC"
+        if limit:
+            sql += " LIMIT ?"
+            params.append(int(limit))
+        return [row_to_trade(r) for r in self._read(sql, tuple(params))]
+
+    def get_trade(self, user_email: str, trade_id: str):
+        rows = self._read(
+            "SELECT * FROM trades WHERE user_email = ? AND id = ?",
+            (user_email.strip().lower(), str(trade_id)),
+        )
+        return row_to_trade(rows[0]) if rows else None
+
+    def delete_trade(self, user_email: str, trade_id: str) -> None:
+        with self._write() as conn:
+            conn.execute("DELETE FROM trades WHERE user_email = ? AND id = ?",
+                         (user_email.strip().lower(), str(trade_id)))
+
+    def delete_all_trades(self, user_email: str, account_id: str | None = None) -> int:
+        user_email = user_email.strip().lower()
+        with self._write() as conn:
+            if account_id:
+                cursor = conn.execute(
+                    "DELETE FROM trades WHERE user_email = ? AND account_id = ?",
+                    (user_email, str(account_id)))
+            else:
+                cursor = conn.execute("DELETE FROM trades WHERE user_email = ?",
+                                      (user_email,))
+            return cursor.rowcount
+
+    def count_trades(self, user_email: str, account_id: str | None = None) -> int:
+        sql = "SELECT COUNT(*) AS n FROM trades WHERE user_email = ?"
+        params: list = [user_email.strip().lower()]
+        if account_id:
+            sql += " AND account_id = ?"
+            params.append(str(account_id))
+        rows = self._read(sql, tuple(params))
+        return int(rows[0]["n"]) if rows else 0
+
+    def trade_symbols(self, user_email: str) -> list[str]:
+        rows = self._read(
+            "SELECT DISTINCT symbol FROM trades WHERE user_email = ? ORDER BY symbol",
+            (user_email.strip().lower(),),
+        )
+        return [r["symbol"] for r in rows]

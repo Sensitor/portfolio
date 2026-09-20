@@ -46,9 +46,86 @@ CREATE TABLE IF NOT EXISTS snapshots (
     FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS trading_accounts (
+    id          TEXT NOT NULL,
+    user_email  TEXT NOT NULL,
+    name        TEXT NOT NULL,
+    broker      TEXT,
+    currency    TEXT NOT NULL DEFAULT 'USD',
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    PRIMARY KEY (user_email, id)
+);
+
+-- Trades are keyed by (user_email, id), not by id alone. A broker deal id is
+-- only unique within one broker account, so two users importing from the same
+-- platform can genuinely collide. Scoping the key by user makes that impossible
+-- rather than unlikely, and it is the same shape multi-user needs later.
+CREATE TABLE IF NOT EXISTS trades (
+    id               TEXT NOT NULL,
+    user_email       TEXT NOT NULL,
+    account_id       TEXT,
+
+    symbol           TEXT NOT NULL,
+    direction        TEXT NOT NULL,
+    entry_price      REAL NOT NULL,
+    exit_price       REAL,
+    size             REAL NOT NULL,
+    stop_loss        REAL,
+    take_profit      REAL,
+    opened_at        TEXT NOT NULL,
+    closed_at        TEXT,
+
+    gross_pnl        REAL,
+    commission       REAL NOT NULL DEFAULT 0,
+    swap             REAL NOT NULL DEFAULT 0,
+    account_currency TEXT NOT NULL DEFAULT 'USD',
+
+    setups           TEXT NOT NULL DEFAULT '[]',   -- JSON array
+    mistakes         TEXT NOT NULL DEFAULT '[]',   -- JSON array
+    timeframe        TEXT,
+    market_regime    TEXT,
+    setup_quality    INTEGER,
+    confidence       INTEGER,
+    entry_reason     TEXT,
+    exit_reason      TEXT,
+
+    emotion_before   TEXT,
+    emotion_during   TEXT,
+    emotion_after    TEXT,
+    discipline       INTEGER,
+    notes            TEXT,
+
+    image_pre        TEXT,
+    image_post       TEXT,
+    image_annotated  TEXT,
+
+    source           TEXT NOT NULL DEFAULT 'manual',
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    PRIMARY KEY (user_email, id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_portfolios_user ON portfolios(user_email);
 CREATE INDEX IF NOT EXISTS idx_snapshots_portfolio ON snapshots(portfolio_id, taken_at);
+CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_email, closed_at);
+CREATE INDEX IF NOT EXISTS idx_trades_account ON trades(user_email, account_id);
+CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
 """
+
+# Columns written by the trade upsert, in order. Kept as a list so the INSERT,
+# the placeholder count and the UPDATE clause can never drift apart.
+TRADE_COLUMNS = [
+    "id", "user_email", "account_id",
+    "symbol", "direction", "entry_price", "exit_price", "size",
+    "stop_loss", "take_profit", "opened_at", "closed_at",
+    "gross_pnl", "commission", "swap", "account_currency",
+    "setups", "mistakes", "timeframe", "market_regime",
+    "setup_quality", "confidence", "entry_reason", "exit_reason",
+    "emotion_before", "emotion_during", "emotion_after", "discipline", "notes",
+    "image_pre", "image_post", "image_annotated",
+    "source", "created_at", "updated_at",
+]
 
 
 @dataclass
@@ -130,3 +207,123 @@ def _jsonable(value):
         except Exception:
             pass
     return str(value)
+
+
+# =============================================================================
+# TRADING ACCOUNT
+# =============================================================================
+
+@dataclass
+class TradingAccount:
+    id: str
+    user_email: str
+    name: str
+    broker: str | None
+    currency: str
+    created_at: str
+    updated_at: str
+
+
+def _to_account(row: sqlite3.Row) -> TradingAccount:
+    return TradingAccount(
+        id=row["id"], user_email=row["user_email"], name=row["name"],
+        broker=row["broker"], currency=row["currency"],
+        created_at=row["created_at"], updated_at=row["updated_at"],
+    )
+
+
+# =============================================================================
+# TRADE ROW MAPPING
+# =============================================================================
+
+def trade_to_row(trade, user_email: str, now: str) -> dict:
+    """
+    A `trading.Trade` flattened to database columns.
+
+    Derived values (P&L, R multiple, duration) are deliberately not stored: they
+    are functions of the stored fields, and persisting them means a schema where
+    two columns can disagree. The engine recomputes them on load, which is cheap.
+    """
+    return {
+        "id": trade.id,
+        "user_email": user_email,
+        "account_id": trade.account_id,
+        "symbol": trade.symbol,
+        "direction": trade.direction.value,
+        "entry_price": float(trade.entry_price),
+        "exit_price": trade.exit_price,
+        "size": float(trade.size),
+        "stop_loss": trade.stop_loss,
+        "take_profit": trade.take_profit,
+        "opened_at": trade.opened_at.isoformat() if trade.opened_at else None,
+        "closed_at": trade.closed_at.isoformat() if trade.closed_at else None,
+        "gross_pnl": trade.gross_pnl,
+        "commission": float(trade.commission or 0.0),
+        "swap": float(trade.swap or 0.0),
+        "account_currency": trade.account_currency or "USD",
+        "setups": json.dumps(list(trade.setups or [])),
+        "mistakes": json.dumps(list(trade.mistakes or [])),
+        "timeframe": trade.timeframe,
+        "market_regime": trade.market_regime,
+        "setup_quality": trade.setup_quality,
+        "confidence": trade.confidence,
+        "entry_reason": trade.entry_reason,
+        "exit_reason": trade.exit_reason,
+        "emotion_before": trade.emotion_before,
+        "emotion_during": trade.emotion_during,
+        "emotion_after": trade.emotion_after,
+        "discipline": trade.discipline,
+        "notes": trade.notes,
+        "image_pre": trade.image_pre,
+        "image_post": trade.image_post,
+        "image_annotated": trade.image_annotated,
+        "source": trade.source or "manual",
+        "created_at": now,
+        "updated_at": now,
+    }
+
+
+def row_to_trade(row: sqlite3.Row):
+    """
+    Rebuild a `trading.Trade` from a database row.
+
+    Imported here rather than at module scope so `database.models` stays
+    importable without pulling the trading engine in — the schema is useful on
+    its own, for a migration tool or an inspection script.
+    """
+    from ..trading.models import Trade
+
+    return Trade.from_dict({
+        "id": row["id"],
+        "symbol": row["symbol"],
+        "direction": row["direction"],
+        "entry_price": row["entry_price"],
+        "exit_price": row["exit_price"],
+        "size": row["size"],
+        "stop_loss": row["stop_loss"],
+        "take_profit": row["take_profit"],
+        "opened_at": row["opened_at"],
+        "closed_at": row["closed_at"],
+        "gross_pnl": row["gross_pnl"],
+        "commission": row["commission"],
+        "swap": row["swap"],
+        "account_id": row["account_id"],
+        "account_currency": row["account_currency"],
+        "setups": json.loads(row["setups"] or "[]"),
+        "mistakes": json.loads(row["mistakes"] or "[]"),
+        "timeframe": row["timeframe"],
+        "market_regime": row["market_regime"],
+        "setup_quality": row["setup_quality"],
+        "confidence": row["confidence"],
+        "entry_reason": row["entry_reason"],
+        "exit_reason": row["exit_reason"],
+        "emotion_before": row["emotion_before"],
+        "emotion_during": row["emotion_during"],
+        "emotion_after": row["emotion_after"],
+        "discipline": row["discipline"],
+        "notes": row["notes"],
+        "image_pre": row["image_pre"],
+        "image_post": row["image_post"],
+        "image_annotated": row["image_annotated"],
+        "source": row["source"],
+    })
