@@ -446,10 +446,20 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
    surface. Both generations are covered so the theme holds either way. */
 :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
     [data-testid="stNumberInput"], [data-testid="stDateInput"],
-    [data-testid="stTimeInput"], [data-testid="stMultiSelect"]) div[role="group"] {{
+    [data-testid="stTimeInput"], [data-testid="stMultiSelect"]) div[role="group"],
+/* The text input's inner wrapper carries no role, so the rule above misses it
+   and it keeps Streamlit's light default. Invisible on an ordinary input, where
+   the field covers the whole width — but a password input leaves a strip beside
+   it for the reveal button, and that strip is a white block on a dark form. */
+.react-aria-TextField > div {{
   background: {SURFACE_3} !important;
   border: 1px solid {BORDER} !important;
   border-radius: {RADIUS_SM} !important;
+}}
+.react-aria-TextField > div > input {{ border: none !important; }}
+.react-aria-TextField button {{ background: transparent !important; }}
+.react-aria-TextField button :is(span, svg) {{
+  color: {INK_MUTED} !important; fill: {INK_MUTED} !important;
 }}
 :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
     [data-testid="stNumberInput"], [data-testid="stMultiSelect"])

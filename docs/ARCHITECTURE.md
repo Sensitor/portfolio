@@ -141,7 +141,8 @@ cycle in any import order. Verified by importing `performance` before
 | `tests/test_sensitor_pages.py` | 159 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
 | `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
-| `tests/test_trading_pages.py` | 81 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
+| `tests/test_mt5_connector.py` | 128 checks with `streamlit` poisoned and a mocked terminal: balance-operation filtering, the 0.0 stop sentinel, deal folding, scaling in and out, partial closes, the implied point value, stops from orders, server-time conversion, the connector's lifecycle and failure modes, the merge rules, an end-to-end sync against a real store, and id namespacing across accounts |
+| `tests/test_trading_pages.py` | 82 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
 
@@ -192,7 +193,7 @@ sensitor/
 | 2 | Extract reference data, config and the analyzer out of the monolith | none |
 | 3 | Trading engine — **done** | additive |
 | 4 | Trading journal — **done** | additive |
-| 5 | MT5 connector | additive |
+| 5 | MT5 connector — **done** | additive |
 | 6 | Database models for trading | additive |
 | 7 | Multi-user | additive |
 | 8 | FastAPI | additive |
@@ -336,3 +337,84 @@ The unit tests passed the whole time. These did not survive a screenshot:
 The last four are theme gaps that predate this phase and affect the investment
 pages too. They were fixed in `ui/themes.py`, which is why the change is not
 confined to `pages/`.
+
+---
+
+## 11. Broker connector (Phase 5)
+
+`integrations/mt5.py` and `integrations/sync.py`. The full operating manual is
+`docs/MT5_SYNC.md`; what follows is where the boundaries sit and why.
+
+### Three boundaries
+
+**MT5 is known in one file.** `mt5.py` is the only module that has heard of a
+deal, a position ticket or a `DEAL_ENTRY_IN`. Everything above it — sync, store,
+pages, metrics — sees `trading.models.Trade`.
+
+**`sync.py` does not import `mt5.py`.** It asks a source for `fetch_trades()`.
+A second broker is a new connector and no change to the merge rules, the
+idempotency or the journal protection.
+
+**The page does not know what a deal is.** The Journal's sync panel collects
+settings, calls the connector, and reports the result. The rule about what a
+sync may overwrite lives in `sync.py`, so the next broker inherits it.
+
+`MetaTrader5` is imported inside `connect()`, never at module scope: the package
+is Windows-only, and a top-level import would make the module — and the whole
+normalisation layer — unimportable on the machine this was written on. The test
+suite asserts that it is never imported at module scope, and that neither file
+imports Streamlit.
+
+### Four decisions that decide whether the numbers are right
+
+**Deposits are filtered out.** Balance operations arrive in the same history
+stream carrying a `profit`. A $10,000 deposit imported as a trade becomes the
+best trade, the largest win, most of the gross profit, and it moves expectancy,
+profit factor, win rate and the equity curve with it. `is_trading_deal()` is the
+most consequential line in the connector.
+
+**A stop of 0.0 is not a stop at zero.** MT5 writes `0.0` for "none attached".
+Taken literally, `risk_amount` becomes the whole notional and every R collapses
+toward zero — a book with no stops would report flawless discipline. `_price()`
+maps it to None, and the trade is then excluded from R rather than counted as a
+zero.
+
+**R is calibrated from the broker's own arithmetic.** MT5 gives volume in lots
+and prices in quote terms, so `abs(entry - stop) * volume` is wrong by the
+contract size and wrong again by the quote-to-account rate. Rather than look
+either up, the point value is derived as `gross_pnl / (distance * volume)` — the
+broker already said what the position made in account currency. `size` is stored
+in account currency per price unit, which makes risk money and R dimensionless.
+On a USDJPY trade from a USD account it gives 2.00R where the naive version gives
+1324.
+
+**Direction comes from the opening deal.** A long is closed by a sell; reading
+the side off the exit inverts the entire book.
+
+### Two hazards the tests found
+
+Both were real, and both were found because a test asserted an outcome rather
+than a call:
+
+*The sync scoped its lookup of existing trades by account.* Any mismatch — a
+trade stored before the account was labelled, a label since changed — made every
+incoming trade look new, and the re-sync overwrote the journal with the broker's
+bare record. The merge rule was correct; the lookup that fed it was not. It now
+reads every trade for the user and merges by id.
+
+*Trade ids were not namespaced by account.* A position ticket is unique within
+an account and nothing more, and the primary key is `(user_email, id)` — so two
+accounts reaching position 12345 meant the second silently replacing the first.
+Ids are now `mt5-<account>-<position>`.
+
+### The schema gained a column, and a migration step
+
+`trades.raw` holds the connector's original payload as JSON. Derived values are
+still never stored; the *source record* is, so a corrected normaliser can rebuild
+the trades from what the broker actually said instead of re-downloading a history
+that may no longer be reachable.
+
+`CREATE TABLE IF NOT EXISTS` leaves an existing database untouched, so a new
+column never reaches anyone who has already saved anything — which is every real
+user. `connection._migrate()` adds missing columns on open. Verified against a
+database built from the previous schema: the legacy rows survive and read back.

@@ -22,7 +22,7 @@ Three things this page does deliberately:
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 import streamlit as st
 
@@ -60,6 +60,7 @@ def render_trading_journal(ctx=None) -> None:
         return
 
     _entry_form(lang, store, email, tctx)
+    _broker_sync(lang, store, email)
 
     # The journal is useful with a single open position in it, so unlike the
     # analytics pages it does not require a closed trade.
@@ -326,6 +327,83 @@ def _form_body(lang, store, email, existing) -> None:
     store.save_trade(email, trade)
     st.session_state.pop(EDIT_KEY, None)
     st.success(tr("trade_saved", lang))
+    st.rerun()
+
+
+# =============================================================================
+# BROKER SYNC
+# =============================================================================
+
+def _broker_sync(lang, store, email) -> None:
+    """
+    The MetaTrader 5 import, as a form.
+
+    Every line of MT5 knowledge lives in `integrations/mt5.py`; this collects
+    settings, calls the connector, and reports what came back. The page does not
+    know what a deal is, and it is not the place that decides what a sync may
+    overwrite — `integrations/sync.py` owns that rule, so a second broker gets
+    the same protection without this function being touched.
+    """
+    with st.expander(f"⇵ {tr('sync_broker', lang)}", expanded=False):
+        note(tr("mt5_platform_note", lang))
+
+        c1, c2, c3 = st.columns(3, gap="medium")
+        with c1:
+            login = st.text_input(tr("mt5_login", lang), key="tsync_login")
+            server = st.text_input(tr("mt5_server", lang), key="tsync_server")
+        with c2:
+            password = st.text_input(tr("mt5_password", lang), type="password",
+                                     key="tsync_password")
+            path = st.text_input(tr("mt5_path", lang), key="tsync_path",
+                                 placeholder="terminal64.exe")
+        with c3:
+            # The offset decides which session every trade is attributed to, so
+            # it is a first-class field rather than something buried in config.
+            offset = st.number_input(tr("mt5_offset", lang), min_value=-12.0,
+                                     max_value=14.0, value=0.0, step=1.0,
+                                     key="tsync_offset")
+            days = st.number_input(tr("mt5_days", lang), min_value=1,
+                                   max_value=3650, value=365, step=30,
+                                   key="tsync_days")
+
+        note(tr("mt5_offset_note", lang))
+
+        if st.button(tr("sync_now", lang), key="tsync_go", type="primary"):
+            _run_sync(lang, store, email, login=login, password=password,
+                      server=server, path=path, offset=offset, days=int(days))
+
+
+def _run_sync(lang, store, email, *, login, password, server, path,
+              offset, days) -> None:
+    from ..core.exceptions import IntegrationError
+    from ..integrations import sync as broker_sync
+    from ..integrations.mt5 import MT5Config, MT5Connector
+
+    config = MT5Config(
+        login=int(login) if str(login).strip().isdigit() else None,
+        password=password or None,
+        server=server.strip() or None,
+        path=path.strip() or None,
+        server_utc_offset_hours=float(offset),
+    )
+    since = datetime.now().replace(microsecond=0) - timedelta(days=days)
+
+    with st.spinner(tr("sync_running", lang)):
+        try:
+            with MT5Connector(config) as broker:
+                result = broker_sync.sync_trades(broker, store, email, since=since)
+        except IntegrationError as exc:
+            # The connector's message already says what to do about it, and it
+            # never contains the password.
+            st.error(str(exc))
+            return
+        except Exception as exc:                        # noqa: BLE001
+            st.error(f"{tr('sync_failed', lang)}: {exc}")
+            return
+
+    st.success(f"{tr('sync_done', lang)} — {result.summary(lang)}")
+    if result.annotations_kept:
+        st.info(f"{result.annotations_kept} {tr('annotations_kept', lang)}")
     st.rerun()
 
 

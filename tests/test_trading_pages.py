@@ -280,6 +280,25 @@ def main() -> int:
     # ── Not signed in: no journal to read, and it must say so ────────────────
     checks += check("no user", email="", failures=failures)
 
+    # ── The broker-sync panel renders without MetaTrader5 installed ─────────
+    # The connector imports the package inside connect(), so the Journal must
+    # render its sync form on a machine that has never heard of MetaTrader.
+    seed(make_book(n=20, seed=41, open_positions=0))
+    checks += 1
+    app = run_page("trading_journal")
+    if app.exception:
+        failures.append(("sync panel", "trading_journal",
+                         str(app.exception[0].value)[:500]))
+        print("  FAIL  journal     sync panel renders")
+    else:
+        labels = " ".join(str(m.value or "") for m in app.markdown)
+        if "MetaTrader 5" not in labels:
+            failures.append(("sync panel", "trading_journal",
+                             "the sync expander did not render"))
+            print("  FAIL  journal     sync panel renders")
+        else:
+            print("  ok    journal     sync panel renders")
+
     # ── Cross-user isolation, asserted through the rendered app ──────────────
     seed(make_book(n=30, seed=15, open_positions=0), email=EMAIL)
     seed(make_book(n=5, seed=16, open_positions=0), email=OTHER_EMAIL)

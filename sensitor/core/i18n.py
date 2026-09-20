@@ -534,6 +534,31 @@ STRINGS: dict[str, dict[str, str]] = {
     "weakest_bucket": {"en": "Weakest", "fr": "Le plus faible"},
     "currency": {"en": "Currency", "fr": "Devise"},
     "time_label": {"en": "time", "fr": "heure"},
+
+    # ── Trading: broker synchronisation ─────────────────────────────────────
+    "sync_broker": {"en": "Import from MetaTrader 5", "fr": "Importer depuis MetaTrader 5"},
+    "sync_now": {"en": "Sync now", "fr": "Synchroniser"},
+    "sync_running": {"en": "Reading the terminal…", "fr": "Lecture du terminal…"},
+    "sync_done": {"en": "Sync complete", "fr": "Synchronisation terminée"},
+    "sync_failed": {"en": "Sync failed", "fr": "Échec de la synchronisation"},
+    "annotations_kept": {
+        "en": "trades kept the setups, notes and ratings you had added",
+        "fr": "trades ont conservé les setups, notes et évaluations que vous aviez ajoutés",
+    },
+    "mt5_login": {"en": "Account number", "fr": "Numéro de compte"},
+    "mt5_password": {"en": "Password", "fr": "Mot de passe"},
+    "mt5_server": {"en": "Server", "fr": "Serveur"},
+    "mt5_path": {"en": "Terminal path", "fr": "Chemin du terminal"},
+    "mt5_offset": {"en": "Server UTC offset (hours)", "fr": "Décalage UTC du serveur (heures)"},
+    "mt5_days": {"en": "History to fetch (days)", "fr": "Historique à récupérer (jours)"},
+    "mt5_platform_note": {
+        "en": "Requires MetaTrader 5 running on the same machine as this app, with the MetaTrader5 Python package installed. That package is published for Windows only. Leave the credentials blank to use the account already signed in to the terminal. Re-syncing is safe: trades are matched on the broker's own position number, and anything you have written — setups, notes, emotions, ratings — is kept.",
+        "fr": "Nécessite MetaTrader 5 en fonctionnement sur la même machine que cette application, avec le paquet Python MetaTrader5 installé. Ce paquet n'est publié que pour Windows. Laissez les identifiants vides pour utiliser le compte déjà connecté dans le terminal. Resynchroniser est sans risque : les trades sont appariés sur le numéro de position du courtier, et tout ce que vous avez écrit — setups, notes, émotions, évaluations — est conservé.",
+    },
+    "mt5_offset_note": {
+        "en": "MetaTrader timestamps are the broker's server clock, and most brokers run on UTC+2 or UTC+3 rather than UTC. Enter the offset your terminal's Market Watch clock shows against UTC. Left at zero on a UTC+3 server, every trade lands three hours late and a third of them are attributed to the wrong session.",
+        "fr": "Les horodatages MetaTrader sont l'heure du serveur du courtier, et la plupart des courtiers tournent en UTC+2 ou UTC+3 plutôt qu'en UTC. Saisissez le décalage qu'affiche l'horloge du Market Watch de votre terminal par rapport à UTC. Laissé à zéro sur un serveur UTC+3, chaque trade arrive avec trois heures de retard et un tiers d'entre eux est attribué à la mauvaise séance.",
+    },
     "metric": {"en": "Metric", "fr": "Métrique"},
     "no_stops_at_all": {
         "en": "No trade in this view recorded a stop loss, so there is no amount risked to measure. Every R statistic in the product is empty until a stop is recorded.",

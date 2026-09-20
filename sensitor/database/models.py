@@ -101,6 +101,13 @@ CREATE TABLE IF NOT EXISTS trades (
     image_annotated  TEXT,
 
     source           TEXT NOT NULL DEFAULT 'manual',
+
+    -- The connector's original payload, as JSON. Derived values are never
+    -- stored, but the *source* record is: when the normaliser is corrected, the
+    -- trades can be rebuilt from what the broker actually said instead of
+    -- re-downloading a history that may no longer be reachable.
+    raw              TEXT,
+
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL,
     PRIMARY KEY (user_email, id)
@@ -124,7 +131,7 @@ TRADE_COLUMNS = [
     "setup_quality", "confidence", "entry_reason", "exit_reason",
     "emotion_before", "emotion_during", "emotion_after", "discipline", "notes",
     "image_pre", "image_post", "image_annotated",
-    "source", "created_at", "updated_at",
+    "source", "raw", "created_at", "updated_at",
 ]
 
 
@@ -278,6 +285,7 @@ def trade_to_row(trade, user_email: str, now: str) -> dict:
         "image_post": trade.image_post,
         "image_annotated": trade.image_annotated,
         "source": trade.source or "manual",
+        "raw": json.dumps(trade.raw) if trade.raw else None,
         "created_at": now,
         "updated_at": now,
     }
@@ -326,4 +334,10 @@ def row_to_trade(row: sqlite3.Row):
         "image_post": row["image_post"],
         "image_annotated": row["image_annotated"],
         "source": row["source"],
+        "raw": json.loads(row["raw"]) if _has(row, "raw") and row["raw"] else {},
     })
+
+
+def _has(row: sqlite3.Row, column: str) -> bool:
+    """Whether a row carries a column — true after the migration, false before."""
+    return column in row.keys()

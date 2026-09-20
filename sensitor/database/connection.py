@@ -45,5 +45,26 @@ def connect(path: str = DEFAULT_PATH) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
+    _migrate(conn)
     conn.commit()
     return conn
+
+
+# Columns added after a table first shipped. `CREATE TABLE IF NOT EXISTS` leaves
+# an existing database untouched, so a new column never reaches anyone who
+# already has the file — which is every user who has saved anything. Each entry
+# is applied only when the column is absent, so this is safe to run on every
+# open and cheap enough to.
+_ADDED_COLUMNS = {
+    "trades": [("raw", "TEXT")],
+}
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    for table, columns in _ADDED_COLUMNS.items():
+        existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if not existing:                      # table not created yet
+            continue
+        for name, declaration in columns:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {declaration}")
