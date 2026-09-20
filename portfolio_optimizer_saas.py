@@ -27,8 +27,9 @@ from sensitor import design as sensitor_design
 from sensitor.context import build_context
 from sensitor.i18n import tr as s_tr
 from sensitor.pages import (
-    render_copilot, render_health, render_optimize, render_overview,
-    render_performance, render_risk, render_simulator, render_stress, render_xray,
+    render_advisor, render_copilot, render_health, render_optimize, render_overview,
+    render_performance, render_portfolios, render_reports, render_risk,
+    render_simulator, render_stress, render_xray,
 )
 
 # =============================================================================
@@ -2767,6 +2768,11 @@ def _sidebar(lang):
             ("simulator",   s_tr("nav_simulator", lang)),
             ("copilot",     s_tr("nav_copilot", lang)),
         ]
+        workspace = [
+            ("portfolios", s_tr("nav_portfolios", lang)),
+            ("reports",    s_tr("nav_reports", lang)),
+            ("advisor",    s_tr("nav_advisor", lang)),
+        ]
         if st.session_state.analysis_mode == "real":
             tools = [
                 ("real_portfolio", t("real_portfolio", lang)),
@@ -2797,6 +2803,8 @@ def _sidebar(lang):
                     st.rerun()
 
         _nav_group("Intelligence", intelligence)
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+        _nav_group("Workspace" if lang == "en" else "Espace de travail", workspace)
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
         _nav_group("Build" if lang == "en" else "Construire", tools)
 
@@ -2833,6 +2841,9 @@ SENSITOR_PAGES = {
     "optimize": render_optimize,
     "simulator": render_simulator,
     "copilot": render_copilot,
+    "portfolios": render_portfolios,
+    "reports": render_reports,
+    "advisor": render_advisor,
 }
 
 

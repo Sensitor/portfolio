@@ -381,6 +381,98 @@ STRINGS: dict[str, dict[str, str]] = {
     "improves": {"en": "improves", "fr": "améliore"},
     "worsens": {"en": "worsens", "fr": "dégrade"},
 
+    # ── Phase 4: Portfolios & persistence ───────────────────────────────────
+    "nav_portfolios": {"en": "Portfolios", "fr": "Portefeuilles"},
+    "portfolios_sub": {
+        "en": "Save an allocation, reload it later, and keep a record of how it changed.",
+        "fr": "Enregistrez une allocation, rechargez-la plus tard, et gardez une trace de son évolution.",
+    },
+    "save_current": {"en": "Save current portfolio", "fr": "Enregistrer le portefeuille actuel"},
+    "portfolio_name": {"en": "Name", "fr": "Nom"},
+    "client_name": {"en": "Client (optional)", "fr": "Client (optionnel)"},
+    "notes": {"en": "Notes", "fr": "Notes"},
+    "save": {"en": "Save", "fr": "Enregistrer"},
+    "load": {"en": "Load", "fr": "Charger"},
+    "delete": {"en": "Delete", "fr": "Supprimer"},
+    "confirm_delete": {"en": "Confirm delete", "fr": "Confirmer la suppression"},
+    "saved_portfolios": {"en": "Saved Portfolios", "fr": "Portefeuilles Enregistrés"},
+    "no_saved_portfolios": {"en": "Nothing saved yet", "fr": "Rien d'enregistré pour l'instant"},
+    "no_saved_body": {
+        "en": "Save the portfolio you are analysing to reload it in a later session and start building its history.",
+        "fr": "Enregistrez le portefeuille que vous analysez pour le recharger lors d'une prochaine session et commencer à constituer son historique.",
+    },
+    "take_snapshot": {"en": "Take snapshot", "fr": "Prendre un instantané"},
+    "snapshots": {"en": "History", "fr": "Historique"},
+    "snapshot_taken": {"en": "Snapshot recorded", "fr": "Instantané enregistré"},
+    "portfolio_saved": {"en": "Portfolio saved", "fr": "Portefeuille enregistré"},
+    "portfolio_loaded": {"en": "Portfolio loaded", "fr": "Portefeuille chargé"},
+    "last_updated": {"en": "Updated", "fr": "Mis à jour"},
+    "taken_at": {"en": "Date", "fr": "Date"},
+    "no_snapshots": {
+        "en": "No snapshots yet. A snapshot records the allocation and its metrics at a moment in time — the app can always recompute today's figures, but it cannot recover what the allocation was last month unless it was written down.",
+        "fr": "Aucun instantané. Un instantané enregistre l'allocation et ses métriques à un instant donné — l'application peut toujours recalculer les chiffres du jour, mais elle ne peut pas retrouver ce qu'était l'allocation le mois dernier si cela n'a pas été consigné.",
+    },
+    "storage_note": {
+        "en": "Data is stored in a local SQLite file on whatever machine runs this app, and is never sent anywhere. On Streamlit Cloud that filesystem is ephemeral: saved portfolios are wiped whenever the app restarts, redeploys or sleeps. For durable storage, point SENSITOR_DB_PATH at a persistent volume or connect an external database.",
+        "fr": "Les données sont stockées dans un fichier SQLite local sur la machine qui exécute l'application, et ne sont envoyées nulle part. Sur Streamlit Cloud ce système de fichiers est éphémère : les portefeuilles enregistrés sont effacés à chaque redémarrage, redéploiement ou mise en veille. Pour un stockage durable, pointez SENSITOR_DB_PATH vers un volume persistant ou connectez une base externe.",
+    },
+    "sign_in_required": {"en": "Sign in to save portfolios", "fr": "Connectez-vous pour enregistrer des portefeuilles"},
+    "sign_in_body": {
+        "en": "Saved portfolios are filed under your email address. Enter one on the Account page to use this feature.",
+        "fr": "Les portefeuilles enregistrés sont classés sous votre adresse email. Saisissez-en une sur la page Compte pour utiliser cette fonctionnalité.",
+    },
+
+    # ── Phase 4: Reports ────────────────────────────────────────────────────
+    "nav_reports": {"en": "Reports", "fr": "Rapports"},
+    "reports_sub": {
+        "en": "A self-contained document you can send to a client or print to PDF.",
+        "fr": "Un document autonome que vous pouvez envoyer à un client ou imprimer en PDF.",
+    },
+    "report_title": {"en": "Report title", "fr": "Titre du rapport"},
+    "prepared_by": {"en": "Prepared by", "fr": "Préparé par"},
+    "include_sections": {"en": "Sections to include", "fr": "Sections à inclure"},
+    "generate_report": {"en": "Generate report", "fr": "Générer le rapport"},
+    "download_report": {"en": "Download report", "fr": "Télécharger le rapport"},
+    "report_ready": {"en": "Report ready", "fr": "Rapport prêt"},
+    "report_preview": {"en": "Preview", "fr": "Aperçu"},
+    "report_format_note": {
+        "en": "The report is a single self-contained HTML file: no scripts, no external requests, every chart drawn as inline SVG. It opens anywhere and works offline. To get a PDF, open it and print to PDF from your browser — the page breaks and margins are already set up for A4.",
+        "fr": "Le rapport est un fichier HTML unique et autonome : aucun script, aucune requête externe, chaque graphique dessiné en SVG. Il s'ouvre partout et fonctionne hors ligne. Pour obtenir un PDF, ouvrez-le et imprimez en PDF depuis votre navigateur — les sauts de page et les marges sont déjà réglés pour l'A4.",
+    },
+    "s_overview": {"en": "Portfolio Overview", "fr": "Vue d'Ensemble"},
+    "s_performance": {"en": "Performance", "fr": "Performance"},
+    "s_risk": {"en": "Risk", "fr": "Risque"},
+    "s_diversification": {"en": "Diversification", "fr": "Diversification"},
+    "s_concentration": {"en": "Concentration", "fr": "Concentration"},
+    "s_stress": {"en": "Stress Tests", "fr": "Tests de Résistance"},
+    "s_observations": {"en": "Key Observations", "fr": "Observations Clés"},
+    "s_optimization": {"en": "Optimization", "fr": "Optimisation"},
+    "s_dna": {"en": "Portfolio DNA", "fr": "ADN du Portefeuille"},
+
+    # ── Phase 4: Advisor ────────────────────────────────────────────────────
+    "nav_advisor": {"en": "Advisor", "fr": "Conseiller"},
+    "advisor_sub": {
+        "en": "Every client book you have saved, side by side.",
+        "fr": "Tous les portefeuilles clients que vous avez enregistrés, côte à côte.",
+    },
+    "clients": {"en": "Clients", "fr": "Clients"},
+    "total_aum": {"en": "Total Assets", "fr": "Actifs Totaux"},
+    "avg_health": {"en": "Average Health", "fr": "Santé Moyenne"},
+    "open_client": {"en": "Open", "fr": "Ouvrir"},
+    "no_clients": {"en": "No client portfolios", "fr": "Aucun portefeuille client"},
+    "no_clients_body": {
+        "en": "Save a portfolio with a client name on the Portfolios page and it will appear here.",
+        "fr": "Enregistrez un portefeuille avec un nom de client sur la page Portefeuilles et il apparaîtra ici.",
+    },
+    "advisor_note": {
+        "en": "Figures come from each portfolio's most recent snapshot, not from live prices. Take a snapshot to refresh a client's row.",
+        "fr": "Les chiffres proviennent du dernier instantané de chaque portefeuille, pas des cours en direct. Prenez un instantané pour rafraîchir la ligne d'un client.",
+    },
+    "stale_snapshot": {"en": "No snapshot", "fr": "Aucun instantané"},
+    "lowest_health": {"en": "Lowest Health", "fr": "Santé la Plus Faible"},
+    "as_of_snapshot": {"en": "as of last snapshot", "fr": "au dernier instantané"},
+    "with_snapshot": {"en": "with a snapshot", "fr": "avec instantané"},
+
     "factor_note": {
         "en": "Loadings come from a single multivariate OLS regression of portfolio excess returns on all available factors, so correlated factors do not each claim the same variance. Style factors are long/short ETF spreads, which are proxies for the academic factors rather than the factors themselves. Loadings marked not significant have |t| below 2 and should be read as indistinguishable from zero. Estimates move with the window chosen.",
         "fr": "Les charges proviennent d'une unique régression OLS multivariée des rendements excédentaires du portefeuille sur tous les facteurs disponibles, afin que des facteurs corrélés ne revendiquent pas chacun la même variance. Les facteurs de style sont des spreads d'ETF long/short : ce sont des proxies des facteurs académiques, pas les facteurs eux-mêmes. Les charges marquées non significatives ont un |t| inférieur à 2 et doivent être lues comme indiscernables de zéro. Les estimations varient selon la fenêtre choisie.",

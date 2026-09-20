@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -27,14 +28,21 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Persistence pages write to SQLite. Keep the preview off any real database.
+os.environ.setdefault(
+    "SENSITOR_DB_PATH",
+    os.path.join(tempfile.gettempdir(), "sensitor-preview", "preview.db"),
+)
+
 st.set_page_config(page_title="Sensitor — Visual Preview", layout="wide",
                    initial_sidebar_state="collapsed")
 
 from sensitor import design, market                      # noqa: E402
 from sensitor.context import Context                     # noqa: E402
 from sensitor.pages import (                             # noqa: E402
-    render_copilot, render_health, render_optimize, render_overview,
-    render_performance, render_risk, render_simulator, render_stress, render_xray,
+    render_advisor, render_copilot, render_health, render_optimize, render_overview,
+    render_performance, render_portfolios, render_reports, render_risk,
+    render_simulator, render_stress, render_xray,
 )
 
 design.inject_theme()
@@ -145,7 +153,15 @@ PAGES = {
     "Optimize": render_optimize,
     "Simulator": render_simulator,
     "Copilot": render_copilot,
+    "Portfolios": render_portfolios,
+    "Reports": render_reports,
+    "Advisor": render_advisor,
 }
+
+# The persistence pages file data under a signed-in email.
+st.session_state.setdefault("user_email", "preview@sensitor.local")
+st.session_state.setdefault("user_tier", "pro")
+st.session_state.setdefault("analysis_mode", "simulation")
 
 page_name = st.query_params.get("page", "Overview")
 if page_name not in PAGES:

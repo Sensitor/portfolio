@@ -87,3 +87,68 @@ def load_benchmark(ctx, ticker: str):
 def single_asset_note(ctx) -> None:
     if ctx.is_single_asset:
         note(tr("single_asset_note", ctx.lang))
+
+
+@st.cache_resource(show_spinner=False)
+def get_store():
+    """
+    The shared persistence layer.
+
+    Cached as a resource, not data: one SQLite connection per app process, reused
+    across reruns and sessions. Returns None if the database cannot be opened —
+    a read-only filesystem, for instance — so the pages can degrade to a clear
+    message instead of failing on import.
+    """
+    try:
+        from ..storage import Store
+        return Store()
+    except Exception:                                   # noqa: BLE001
+        return None
+
+
+def current_user_email() -> str:
+    """Whoever is signed in, normalised. Empty string when nobody is."""
+    return (st.session_state.get("user_email") or "").strip().lower()
+
+
+def require_store_and_user(lang: str):
+    """
+    Guard for the pages that persist things.
+
+    Returns (store, email) or (None, None) after rendering the reason. Saved
+    portfolios are filed under an email address, so an anonymous session has
+    nowhere to file them.
+    """
+    store = get_store()
+    if store is None:
+        note(tr("storage_note", lang))
+        return None, None
+    email = current_user_email()
+    if not email:
+        empty_state(tr("sign_in_required", lang), tr("sign_in_body", lang), icon="◔")
+        return None, None
+    return store, email
+
+
+def snapshot_metrics(ctx) -> dict:
+    """
+    The figures worth freezing in a snapshot.
+
+    Deliberately a small, flat set: enough to draw a history chart and an advisor
+    row without storing series that would balloon the database.
+    """
+    stats = ctx.stats
+    health = ctx.health
+    concentration = ctx.concentration
+    return {
+        "total_return": stats["total_return"],
+        "cagr": stats["cagr"],
+        "volatility": stats["volatility"],
+        "sharpe": stats["sharpe"],
+        "max_drawdown": stats["max_drawdown"],
+        "health": health["total"],
+        "health_band": health["band"],
+        "effective_assets": concentration.get("effective_assets"),
+        "n_assets": len(ctx.tickers),
+        "period": ctx.period,
+    }

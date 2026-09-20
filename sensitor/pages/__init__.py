@@ -9,6 +9,9 @@ from .stress import render_stress
 from .optimize_page import render_optimize
 from .simulator import render_simulator
 from .copilot_page import render_copilot
+from .portfolios import render_portfolios
+from .reports import render_reports
+from .advisor import render_advisor
 
 __all__ = [
     "render_overview",
@@ -20,4 +23,7 @@ __all__ = [
     "render_optimize",
     "render_simulator",
     "render_copilot",
+    "render_portfolios",
+    "render_reports",
+    "render_advisor",
 ]

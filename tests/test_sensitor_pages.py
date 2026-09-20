@@ -13,11 +13,19 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 
 import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Persistence pages write to SQLite. Point them at a throwaway file so a test run
+# can never touch a real database.
+os.environ.setdefault(
+    "SENSITOR_DB_PATH",
+    os.path.join(tempfile.mkdtemp(prefix="sensitor-test-"), "test.db"),
+)
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
@@ -25,7 +33,7 @@ APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "portfolio_optimizer_saas.py")
 
 PAGES = ["overview", "performance", "health", "xray", "risk", "stress",
-         "optimize", "simulator", "copilot"]
+         "optimize", "simulator", "copilot", "portfolios", "reports", "advisor"]
 
 
 class FakeAnalyzer:
