@@ -535,6 +535,59 @@ STRINGS: dict[str, dict[str, str]] = {
     "currency": {"en": "Currency", "fr": "Devise"},
     "time_label": {"en": "time", "fr": "heure"},
 
+    # ── Authentication ──────────────────────────────────────────────────────
+    "sign_in": {"en": "Sign in", "fr": "Connexion"},
+    "sign_out": {"en": "Sign out", "fr": "Se déconnecter"},
+    "sign_out_all": {"en": "Sign out everywhere", "fr": "Déconnecter partout"},
+    "signed_in_as": {"en": "Signed in as", "fr": "Connecté en tant que"},
+    "create_account": {"en": "Create an account", "fr": "Créer un compte"},
+    "choose_password": {"en": "Password", "fr": "Mot de passe"},
+    "repeat_password": {"en": "Repeat password", "fr": "Confirmez le mot de passe"},
+    "current_password": {"en": "Current password", "fr": "Mot de passe actuel"},
+    "change_password": {"en": "Change password", "fr": "Changer le mot de passe"},
+    "password_changed": {
+        "en": "Password changed. Every other session has been signed out.",
+        "fr": "Mot de passe modifié. Toutes les autres sessions ont été déconnectées.",
+    },
+    "single_user_intro": {
+        "en": "Enter your email to open your data. If you have a Pro subscription, its features unlock automatically.",
+        "fr": "Saisissez votre email pour ouvrir vos données. Si vous avez un abonnement Pro, ses fonctionnalités se débloquent automatiquement.",
+    },
+    "auth_mode_single": {
+        "en": "Single-user mode. Your email is a label for your data, not a login — anyone who can reach this app can open any of it. That is the right setup on your own machine. Before putting this somewhere other people can reach, set SENSITOR_AUTH=multi, which requires a password and expires sessions.",
+        "fr": "Mode mono-utilisateur. Votre email est une étiquette pour vos données, pas un identifiant — quiconque atteint cette application peut ouvrir n'importe quelles données. C'est la bonne configuration sur votre propre machine. Avant de la déployer là où d'autres peuvent y accéder, définissez SENSITOR_AUTH=multi, qui exige un mot de passe et fait expirer les sessions.",
+    },
+    "auth_mode_multi": {
+        "en": "Multi-user mode. Accounts are protected by a password, sessions expire, and no account can reach another's data.",
+        "fr": "Mode multi-utilisateur. Les comptes sont protégés par mot de passe, les sessions expirent, et aucun compte ne peut atteindre les données d'un autre.",
+    },
+    "auth_invalid_email": {
+        "en": "That does not look like an email address.",
+        "fr": "Cela ne ressemble pas à une adresse email.",
+    },
+    "auth_invalid_credentials": {
+        "en": "That email and password do not match an account.",
+        "fr": "Cet email et ce mot de passe ne correspondent à aucun compte.",
+    },
+    "auth_already_registered": {
+        "en": "An account already exists for that address. Sign in instead.",
+        "fr": "Un compte existe déjà pour cette adresse. Connectez-vous plutôt.",
+    },
+    "auth_weak_password": {"en": "That password is too weak.",
+                           "fr": "Ce mot de passe est trop faible."},
+    "auth_locked": {
+        "en": "Too many failed attempts. Locked until",
+        "fr": "Trop de tentatives échouées. Bloqué jusqu'à",
+    },
+    "auth_not_multi_user": {
+        "en": "Passwords are only used in multi-user mode.",
+        "fr": "Les mots de passe ne sont utilisés qu'en mode multi-utilisateur.",
+    },
+    "auth_passwords_differ": {
+        "en": "The two passwords do not match.",
+        "fr": "Les deux mots de passe ne correspondent pas.",
+    },
+
     # ── Trading: broker synchronisation ─────────────────────────────────────
     "sync_broker": {"en": "Import from MetaTrader 5", "fr": "Importer depuis MetaTrader 5"},
     "sync_now": {"en": "Sync now", "fr": "Synchroniser"},

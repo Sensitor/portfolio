@@ -138,7 +138,8 @@ cycle in any import order. Verified by importing `performance` before
 
 | Suite | Covers |
 |---|---|
-| `tests/test_database.py` | 86 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
+| `tests/test_auth.py` | 95 checks with `streamlit` poisoned: scrypt hashing, salting and rehash-on-sign-in, token fingerprints, both auth modes, throttling and lockout across a restart, session expiry and revocation, password change revoking every other session, and what an attacker holding the database file cannot do |
+| `tests/test_database.py` | 89 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
 | `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
 | `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
@@ -196,7 +197,7 @@ sensitor/
 | 4 | Trading journal — **done** | additive |
 | 5 | MT5 connector — **done** | additive |
 | 6 | Database models for multi-user — **done** | **breaking inside the package** |
-| 7 | Multi-user | additive |
+| 7 | Multi-user — **done** | additive |
 | 8 | FastAPI | additive |
 | 9 | Mobile-ready backend | additive |
 
@@ -496,3 +497,90 @@ rather than from a list written down beside it, and asserts that every public
 method leads with `user_email` or `email` and that neither is optional. The seven
 unscoped methods survived four phases of review; a list maintained by hand would
 have let the eighth through too.
+
+---
+
+## 13. Authentication (Phase 7)
+
+Phase 6 made the data layer enforce ownership of whatever identity was claimed.
+This is the layer that decides whether the claim is true.
+
+### What was wrong
+
+Typing any address into the Account page's text box set `authenticated = True`
+and `user_email` to whatever was typed. Every page then read that value and the
+store faithfully scoped its queries to it. The scoping was correct and
+worthless: an unverified email *is* the authorisation when the data layer trusts
+it.
+
+`current_user_email()` now resolves a session token against the store. The email
+in session state is written **by that function**, from a verified session, and
+never by a widget.
+
+### Two modes, one code path
+
+| | |
+|---|---|
+| **single** (default) | the app is one person's, on their own machine. The email is a filing label; there is nobody to verify against, and demanding a password to open your own spreadsheet is theatre |
+| **multi** (`SENSITOR_AUTH=multi`) | accounts have passwords, sign-in verifies, failures throttle, sessions expire |
+
+Both modes issue a session and run the same code. A second, simpler path for the
+common case is a path that does not get exercised and therefore does not get
+fixed — this way the plumbing multi-user depends on is the plumbing that runs on
+every single-user sign-in too.
+
+An unrecognised value of `SENSITOR_AUTH` falls back to **single**, not multi: a
+typo must not silently claim protection the deployment does not have.
+
+### The mode is stated, not assumed
+
+The Account page says which mode it is in, and in single mode it says plainly
+that the email is not a login and what to set before putting the app somewhere
+other people can reach. An access-control mode nobody can see is how a
+deployment ends up open with a text box for a login and no way to notice.
+
+### Choices in `core/security.py`
+
+**scrypt from the standard library** — memory-hard, so a stolen database cannot
+be attacked as cheaply as one hashed with SHA-256, and no new dependency for
+someone installing this on their own machine.
+
+**The hash carries its own parameters** (`scrypt$n$r$p$salt$key`). Raising the
+cost later must not invalidate every existing password: old hashes keep
+verifying at their old cost and are upgraded on the next successful sign-in,
+which is the only moment the plaintext is in hand.
+
+**Session tokens are stored as a SHA-256 fingerprint.** A leaked database yields
+no usable session. Fast hashing is right for a token and wrong for a password —
+32 random bytes have no dictionary behind them.
+
+**Every comparison is `hmac.compare_digest`.** A bearer credential compared with
+`==` leaks its prefix to anyone willing to measure.
+
+**An unknown account and a wrong password return the same reason.**
+Distinguishing them tells an attacker which addresses are registered, which is
+worth more to them than it is to a user who mistyped.
+
+**A password change revokes every session.** A password is usually changed
+because someone fears it is known; a change that leaves their session alive has
+solved nothing.
+
+### The harness had to change, and that is the point
+
+The render harnesses seeded `user_email` directly. Once identity came from a
+token, every persistence page rendered its sign-in wall — and the harness
+reported green, because it only watched for exceptions. A page that quietly
+refuses to show anything raises nothing at all.
+
+Both harnesses now sign in through `Auth`, and the trading harness asserts that
+a signed-in run renders content and an anonymous one renders the wall. Verified
+by breaking the token deliberately and confirming the suite fails.
+
+### One more DOM-migration casualty
+
+The app's original stylesheet styled tabs as a gradient pill. Streamlit moved
+tabs from BaseWeb to react-aria, which stopped its `[data-baseweb="tab-list"]`
+and `[data-baseweb="tab"]` rules from matching while its generic
+`[aria-selected="true"]` rule kept firing — leaving an orphaned gradient pill
+with no container, on every tab in the app. Found because the new sign-in form
+uses tabs. Fixed for all of them.

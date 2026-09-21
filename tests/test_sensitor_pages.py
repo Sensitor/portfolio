@@ -36,6 +36,19 @@ PAGES = ["overview", "performance", "health", "xray", "risk", "stress",
          "optimize", "simulator", "copilot", "portfolios", "reports", "advisor"]
 
 
+def _session_for(email: str) -> str:
+    """
+    A real session token for the harness.
+
+    Identity is resolved from the token the app issued, not from `user_email`.
+    Without this every persistence page renders its sign-in wall, and a harness
+    that only watches for exceptions would call that a pass.
+    """
+    from sensitor.core.auth import Auth
+    from sensitor.database import Store
+    return Auth(Store(os.environ["SENSITOR_DB_PATH"])).sign_in(email).token
+
+
 class FakeAnalyzer:
     """Minimal stand-in exposing exactly what `Context` reads off the real one."""
 
@@ -84,6 +97,7 @@ def run_page(page: str, analyzer, *, lang="en", mode="simulation", real_value=No
     app = AppTest.from_file(APP, default_timeout=180)
     app.session_state["authenticated"] = True
     app.session_state["user_email"] = "harness@example.com"
+    app.session_state["session_token"] = _session_for("harness@example.com")
     app.session_state["user_tier"] = "pro"
     app.session_state["language"] = lang
     app.session_state["user_profile"] = profile
@@ -181,6 +195,7 @@ def _persistence_flow(failures) -> int:
         app = AppTest.from_file(APP, default_timeout=240)
         app.session_state["authenticated"] = True
         app.session_state["user_email"] = email
+        app.session_state["session_token"] = _session_for(email)
         app.session_state["user_tier"] = "pro"
         app.session_state["language"] = "en"
         app.session_state["user_profile"] = "balanced"

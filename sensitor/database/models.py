@@ -22,16 +22,44 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 TABLES: dict[str, str] = {
     "users": """
 CREATE TABLE IF NOT EXISTS users (
-    email        TEXT PRIMARY KEY,
-    tier         TEXT NOT NULL DEFAULT 'free',
-    display_name TEXT,
-    created_at   TEXT NOT NULL,
-    updated_at   TEXT NOT NULL
+    email         TEXT PRIMARY KEY,
+    tier          TEXT NOT NULL DEFAULT 'free',
+    display_name  TEXT,
+
+    -- A self-describing scrypt hash, or NULL for an account with no password.
+    -- NULL is a real state, not a missing value: in single-user mode the email
+    -- is a filing label and there is nothing to verify. `auth.sign_in` is what
+    -- decides whether that is acceptable, so the distinction lives in one place
+    -- rather than being inferred from a null check at every call site.
+    password_hash TEXT,
+
+    last_login_at TEXT,
+    -- Throttling state. Kept on the user rather than in memory so a restart
+    -- does not reset an attacker's budget.
+    failed_logins INTEGER NOT NULL DEFAULT 0,
+    locked_until  TEXT,
+
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+)""",
+
+    # Sessions hold the *fingerprint* of a token, never the token. A stolen
+    # database yields nothing anyone can sign in with, which is the same reason
+    # the password column holds a hash.
+    "sessions": """
+CREATE TABLE IF NOT EXISTS sessions (
+    fingerprint TEXT PRIMARY KEY,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    created_at  TEXT NOT NULL,
+    expires_at  TEXT NOT NULL,
+    last_seen_at TEXT,
+    label       TEXT
 )""",
 
     # Every table below cascades from `users`. Deleting a person removes their
@@ -156,6 +184,8 @@ CREATE TABLE IF NOT EXISTS trades (
 }
 
 INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_email);
+CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_portfolios_user ON portfolios(user_email);
 CREATE INDEX IF NOT EXISTS idx_snapshots_portfolio ON snapshots(portfolio_id, taken_at);
 CREATE INDEX IF NOT EXISTS idx_accounts_user ON trading_accounts(user_email);
@@ -168,7 +198,7 @@ SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES
 
 # Tables that reference `users` and must be rebuilt together when that
 # relationship changes. Order matters: a child is rebuilt after its parent.
-USER_OWNED = ("portfolios", "trading_accounts", "trades")
+USER_OWNED = ("portfolios", "trading_accounts", "trades", "sessions")
 
 
 # Columns written by the trade upsert, in order. Kept as a list so the INSERT,

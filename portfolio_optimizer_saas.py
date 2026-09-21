@@ -615,6 +615,10 @@ def init_session_state():
     defaults = {
         'authenticated': False,
         'user_email': "",
+        # The session token is the only thing that makes `user_email` true.
+        # `current_user_email()` resolves this against the store on every rerun
+        # and clears both when it no longer resolves.
+        'session_token': "",
         'user_tier': 'free',
         'current_portfolio': None,
         'page': "overview",
@@ -1573,6 +1577,147 @@ def _sensitor_context(lang):
     )
 
 
+def _account_page(lang, tier):
+    """
+    Sign in, sign out, and say how this deployment protects the data.
+
+    The identity is issued by `core.auth`, never taken from the text box. Both
+    modes go through the same call, so the session plumbing multi-user depends
+    on is the plumbing that runs on every single-user sign-in too.
+    """
+    from sensitor.pages._shared import get_auth
+
+    st.title("Your Account" if lang == "en" else "Votre Compte")
+
+    auth = get_auth()
+    if auth is None:
+        st.warning(s_tr("storage_note", lang))
+        return
+
+    mode = auth.describe_mode(lang)
+    email = _signed_in_email()
+
+    # The mode is stated, not assumed. An access-control mode nobody can see is
+    # how a deployment ends up open with a text box for a login.
+    st.info(s_tr(mode["key"], lang))
+
+    if email:
+        st.success(f"{s_tr('signed_in_as', lang)} **{email}** — "
+                   f"{TIER_LIMITS[tier]['label']}")
+        cols = st.columns([1, 1, 3])
+        with cols[0]:
+            if st.button(s_tr("sign_out", lang), key="acct_out"):
+                auth.sign_out(st.session_state.get("session_token"))
+                _clear_session()
+                st.rerun()
+        with cols[1]:
+            if auth.multi_user and st.button(s_tr("sign_out_all", lang),
+                                             key="acct_out_all"):
+                auth.sign_out_everywhere(email)
+                _clear_session()
+                st.rerun()
+
+        if auth.multi_user:
+            _change_password(auth, email, lang)
+        return
+
+    if auth.multi_user:
+        _multi_user_sign_in(auth, lang)
+    else:
+        _single_user_sign_in(auth, lang)
+
+
+def _signed_in_email() -> str:
+    from sensitor.pages._shared import current_user_email
+    return current_user_email()
+
+
+def _clear_session():
+    st.session_state.session_token = ""
+    st.session_state.user_email = ""
+    st.session_state.authenticated = False
+    st.session_state.user_tier = "free"
+
+
+def _apply(result, lang):
+    """Put a successful sign-in into session state."""
+    st.session_state.session_token = result.token
+    st.session_state.user_email = result.email
+    st.session_state.user_tier = resolve_tier(result.email)
+    st.session_state.authenticated = True
+
+
+def _auth_error(result, lang):
+    message = s_tr(f"auth_{result.reason}", lang)
+    st.error(f"{message} {result.detail}" if result.detail else message)
+
+
+def _single_user_sign_in(auth, lang):
+    st.markdown(s_tr("single_user_intro", lang))
+    email_input = st.text_input("Email", placeholder="you@example.com",
+                                label_visibility="collapsed", key="acct_email")
+    if st.button("Continue" if lang == "en" else "Continuer",
+                 type="primary", key="acct_continue"):
+        result = auth.sign_in(email_input)
+        if result:
+            _apply(result, lang)
+            st.rerun()
+        else:
+            _auth_error(result, lang)
+
+
+def _multi_user_sign_in(auth, lang):
+    sign_in_tab, sign_up_tab = st.tabs(
+        [s_tr("sign_in", lang), s_tr("create_account", lang)])
+
+    with sign_in_tab:
+        with st.form("acct_signin"):
+            email_input = st.text_input("Email", placeholder="you@example.com")
+            password = st.text_input(s_tr("mt5_password", lang), type="password")
+            if st.form_submit_button(s_tr("sign_in", lang), type="primary"):
+                result = auth.sign_in(email_input, password)
+                if result:
+                    _apply(result, lang)
+                    st.rerun()
+                else:
+                    _auth_error(result, lang)
+
+    with sign_up_tab:
+        with st.form("acct_signup"):
+            email_input = st.text_input("Email", placeholder="you@example.com")
+            password = st.text_input(s_tr("choose_password", lang), type="password")
+            again = st.text_input(s_tr("repeat_password", lang), type="password")
+            if st.form_submit_button(s_tr("create_account", lang), type="primary"):
+                if password != again:
+                    st.error(s_tr("auth_passwords_differ", lang))
+                else:
+                    result = auth.sign_up(email_input, password)
+                    if result:
+                        _apply(result, lang)
+                        st.rerun()
+                    else:
+                        _auth_error(result, lang)
+
+
+def _change_password(auth, email, lang):
+    with st.expander(s_tr("change_password", lang)):
+        with st.form("acct_password"):
+            current = st.text_input(s_tr("current_password", lang), type="password")
+            new = st.text_input(s_tr("choose_password", lang), type="password")
+            again = st.text_input(s_tr("repeat_password", lang), type="password")
+            if st.form_submit_button(s_tr("change_password", lang), type="primary"):
+                if new != again:
+                    st.error(s_tr("auth_passwords_differ", lang))
+                    return
+                result = auth.change_password(email, current, new)
+                if result:
+                    _apply(result, lang)
+                    st.success(s_tr("password_changed", lang))
+                    st.rerun()
+                else:
+                    _auth_error(result, lang)
+
+
 def main():
     init_session_state()
     lang = st.session_state.language
@@ -1601,39 +1746,7 @@ def main():
     # ACCOUNT / LOGIN PAGE
     # ─────────────────────────────────────────────────────────────────────────
     if page == "account":
-        title = "Your Account" if lang == 'en' else "Votre Compte"
-        st.title(title)
-
-        if st.session_state.authenticated and st.session_state.user_email:
-            st.success(f"Logged in as **{st.session_state.user_email}** — {TIER_LIMITS[tier]['label']} plan")
-            if st.button("Log out" if lang == 'en' else "Se déconnecter"):
-                st.session_state.authenticated = False
-                st.session_state.user_email = ""
-                st.session_state.user_tier = "free"
-                st.rerun()
-        else:
-            st.markdown(
-                "Enter your email to access your account. "
-                "If you have a Pro subscription, your features will unlock automatically."
-                if lang == 'en' else
-                "Entrez votre email pour accéder à votre compte. "
-                "Vos fonctionnalités Pro seront débloquées automatiquement."
-            )
-            email_input = st.text_input(
-                "Email", placeholder="you@example.com", label_visibility="collapsed"
-            )
-            if st.button("Continue" if lang == 'en' else "Continuer",
-                         type="primary", use_container_width=False):
-                if email_input:
-                    st.session_state.user_email = email_input
-                    st.session_state.user_tier = resolve_tier(email_input)
-                    st.session_state.authenticated = True
-                    st.rerun()
-                else:
-                    # Guest / demo mode — still let them use the free tier
-                    st.session_state.authenticated = True
-                    st.session_state.user_tier = "free"
-                    st.rerun()
+        _account_page(lang, tier)
 
         st.markdown("---")
         st.markdown("### Plans" if lang == 'en' else "### Abonnements")
