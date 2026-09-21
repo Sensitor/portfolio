@@ -91,7 +91,7 @@ def r_curve(ctx=Depends(_common)) -> list[CurvePoint]:
 
 @router.get("/daily", response_model=list[DayPnL])
 def daily(ctx=Depends(_common)) -> list[DayPnL]:
-    return [DayPnL(date=str(d["date"]), pnl=d["pnl"], n=d["n"])
+    return [DayPnL(date=d["date"], pnl=d["pnl"], n=d["n"])
             for d in ctx.daily_pnl]
 
 

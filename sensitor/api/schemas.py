@@ -22,7 +22,7 @@ the whole failure this project keeps designing against.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
@@ -171,7 +171,10 @@ class CurvePoint(BaseModel):
 
 
 class DayPnL(BaseModel):
-    date: str
+    # A real date, not a string. The engine yields `datetime.date`, and typing
+    # it as such both serialises correctly and tells a client in the OpenAPI
+    # document that this is a calendar day rather than an opaque label.
+    date: date
     pnl: float
     n: int
 
@@ -246,3 +249,60 @@ class SavePortfolioRequest(BaseModel):
 class Deleted(BaseModel):
     deleted: bool
     detail: str | None = None
+
+
+# =============================================================================
+# MOBILE
+# =============================================================================
+
+class OverviewNotes(BaseModel):
+    """
+    The caveats that travel with the numbers elsewhere, restated.
+
+    A client rendering a home screen from this payload alone would otherwise
+    have the figures without the conditions under which they mean anything.
+    """
+
+    r_coverage: float | None = None
+    undefined_is_null: bool = True
+    findings_are_correlations: bool = True
+
+
+class MobileOverview(BaseModel):
+    """
+    A whole home screen in one response.
+
+    Declaring the curve fields as `CurvePoint` is not decoration: the engine's
+    curve points carry the trade id, the symbol and the per-trade P&L alongside
+    the two numbers a chart needs, and serialising them whole made this endpoint
+    *larger* than the six separate requests it exists to replace. The response
+    model is what projects each point down to what a chart actually plots.
+    """
+
+    etag: str
+    period: str
+    available_periods: list[str]
+    currency: str
+    metrics: TradingMetrics
+    equity: list[CurvePoint]
+    r_curve: list[CurvePoint] = Field(
+        default_factory=list,
+        description="Empty unless `include_r=true`. A second full curve is bytes "
+                    "a home screen does not draw.")
+    daily: list[DayPnL]
+    by_symbol: list[BreakdownRow]
+    findings: list[Finding]
+    open_positions: int
+    accounts: list[dict]
+    notes: OverviewNotes
+
+
+class TradeDelta(BaseModel):
+    etag: str
+    server_time: str = Field(
+        description="Store this as the next cursor — the server's clock, not "
+                    "the device's.")
+    since: str | None = None
+    trades: list[TradeOut]
+    count: int
+    complete: bool

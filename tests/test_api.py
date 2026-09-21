@@ -509,6 +509,179 @@ def test_pagination():
           and "session" in trade)
 
 
+# =============================================================================
+# 5. THE MOBILE SURFACE
+# =============================================================================
+
+def test_mobile_overview():
+    print("\nMobile: one request for a home screen")
+    client, token, bob_token, store = build_world()
+    headers = auth_header(token)
+
+    response = client.get("/mobile/overview")
+    check("it needs a token", response.status_code == 401)
+
+    body = client.get("/mobile/overview", headers=headers).json()
+    for field in ("etag", "period", "metrics", "equity", "daily", "by_symbol",
+                  "findings", "open_positions", "accounts", "notes"):
+        check(f"the payload carries {field}", field in body)
+
+    check("the metrics are the engine's",
+          body["metrics"]["n"] ==
+          client.get("/trading/metrics", headers=headers).json()["n"])
+    check("the caveats travel with the numbers",
+          body["notes"]["undefined_is_null"] is True
+          and body["notes"]["findings_are_correlations"] is True)
+
+    # The curve is projected to what a chart plots. Serialising the engine's own
+    # points whole made this endpoint larger than the six requests it replaces.
+    point = body["equity"][0]
+    check("curve points carry only what a chart needs",
+          set(point) == {"at", "equity"}, f"got {sorted(point)}")
+
+    check("the R curve is off by default", body["r_curve"] == [])
+    with_r = client.get("/mobile/overview?include_r=true", headers=headers).json()
+    check("and can be asked for", len(with_r["r_curve"]) > 0)
+
+    # Bob has no trades, and an empty journal must answer rather than fail.
+    empty = client.get("/mobile/overview", headers=auth_header(bob_token))
+    check("an empty journal returns 200", empty.status_code == 200)
+    check("with n = 0", empty.json()["metrics"]["n"] == 0)
+    check("and reaches none of Alice's data",
+          empty.json()["by_symbol"] == [] and empty.json()["accounts"] == [])
+
+
+def test_mobile_downsampling():
+    print("\nMobile: curves are thinned without losing their shape")
+    client, token, _, store = build_world()
+    headers = auth_header(token)
+
+    # A book long enough that the budget bites.
+    store.delete_all_trades(ALICE)
+    store.save_trades(ALICE, [a_trade(i, pnl=(200.0 if i % 3 else -150.0))
+                              for i in range(900)])
+
+    full = client.get("/trading/equity", headers=headers).json()
+    thinned = client.get("/mobile/overview?curve_points=200",
+                         headers=headers).json()["equity"]
+
+    check("the full curve has a point per trade", len(full) == 900)
+    check("the mobile curve is within its budget", len(thinned) <= 200,
+          f"got {len(thinned)}")
+    check("and is much smaller", len(thinned) < len(full) / 3)
+
+    # The reason for min/max bucketing rather than striding: the deepest trough
+    # must survive, or the phone draws a shallower drawdown than the desktop.
+    check("the lowest point survives",
+          min(p["equity"] for p in thinned) == min(p["equity"] for p in full))
+    check("the highest point survives",
+          max(p["equity"] for p in thinned) == max(p["equity"] for p in full))
+    check("the endpoints survive",
+          thinned[0]["equity"] == full[0]["equity"]
+          and thinned[-1]["equity"] == full[-1]["equity"])
+    check("and it stays in time order",
+          [p["at"] for p in thinned] == sorted(p["at"] for p in thinned))
+
+
+def test_mobile_caching():
+    print("\nMobile: conditional requests")
+    client, token, _, store = build_world()
+    headers = auth_header(token)
+
+    first = client.get("/mobile/overview", headers=headers)
+    etag = first.headers.get("etag")
+    check("a response carries an ETag", bool(etag), f"headers {dict(first.headers)}")
+
+    # The failure this covers: with a response_model attached, returning an
+    # empty dict for a 304 fails validation and the endpoint answers 500 on
+    # exactly the request it exists to make cheap.
+    unchanged = client.get("/mobile/overview",
+                           headers={**headers, "If-None-Match": etag})
+    check("an unchanged reopen is 304", unchanged.status_code == 304,
+          f"got {unchanged.status_code}")
+    check("with no body", not unchanged.content)
+
+    several = client.get("/mobile/overview",
+                         headers={**headers, "If-None-Match": f'W/"other", {etag}'})
+    check("a list of tags still matches", several.status_code == 304)
+
+    check("a stale tag gets a fresh body",
+          client.get("/mobile/overview",
+                     headers={**headers, "If-None-Match": 'W/"stale"'}
+                     ).status_code == 200)
+
+    # Writing to the journal must change the version.
+    store.save_trades(ALICE, [a_trade(9999, pnl=10.0)])
+    after = client.get("/mobile/overview",
+                       headers={**headers, "If-None-Match": etag})
+    check("a new trade invalidates the cache", after.status_code == 200,
+          f"got {after.status_code}")
+    check("and the ETag has moved", after.headers.get("etag") != etag)
+
+    version = client.get("/mobile/version", headers=headers).json()
+    check("the version endpoint agrees", version["etag"] == after.headers.get("etag"))
+
+    check("the version is scoped by user",
+          client.get("/mobile/version",
+                     headers=headers).json()["etag"] != "empty")
+
+
+def test_mobile_incremental_sync():
+    print("\nMobile: incremental sync")
+    client, token, _, store = build_world()
+    headers = auth_header(token)
+
+    first = client.get("/mobile/trades?limit=10", headers=headers).json()
+    check("a first page arrives", len(first["trades"]) == 10)
+    check("it carries a server cursor", bool(first["server_time"]))
+    check("and reports it is incomplete", first["complete"] is False)
+
+    # URL-encoded, because the offset's `+` would otherwise decode to a space.
+    # That is the client's job, and the server repairs it anyway — both are
+    # asserted below.
+    from urllib.parse import quote
+    cursor = first["server_time"]
+    nothing = client.get(f"/mobile/trades?since={quote(cursor)}",
+                         headers=headers).json()
+    check("nothing has changed since the cursor", nothing["count"] == 0,
+          f"got {nothing['count']}")
+    check("and that page is complete", nothing["complete"] is True)
+
+    # A trade written after the cursor comes back; one annotated after it does
+    # too, which is why the filter is on updated_at rather than closed_at.
+    import time
+    time.sleep(1.1)
+    store.save_trades(ALICE, [a_trade(5000, pnl=75.0)])
+    after = client.get(f"/mobile/trades?since={quote(cursor)}",
+                       headers=headers).json()
+    check("a new trade appears after the cursor", after["count"] == 1,
+          f"got {after['count']}")
+    check("and it is the right one", after["trades"][0]["id"] == "t5000")
+
+    stored = store.get_trade(ALICE, "t5000")
+    time.sleep(1.1)
+    cursor2 = after["server_time"]
+    store.save_trade(ALICE, stored.annotated(notes="annotated later"))
+    annotated = client.get(f"/mobile/trades?since={quote(cursor2)}",
+                           headers=headers).json()
+    check("an annotation counts as a change", annotated["count"] == 1,
+          f"got {annotated['count']}")
+    check("even though the trade closed long before",
+          annotated["trades"][0]["notes"] == "annotated later")
+
+    # A `+` that reached the server as a space must not match everything. This
+    # is what an unencoded cursor does, and the failure is silent: the endpoint
+    # returns the whole journal and looks like it worked.
+    mangled = client.get(f"/mobile/trades?since={cursor.replace('+', ' ')}",
+                         headers=headers).json()
+    check("a cursor whose plus became a space is repaired, not ignored",
+          mangled["count"] <= 1, f"got {mangled['count']} of {store.count_trades(ALICE)}")
+
+    check("an unparseable cursor is rejected rather than returning everything",
+          client.get("/mobile/trades?since=yesterday",
+                     headers=headers).status_code == 422)
+
+
 def main() -> int:
     for test in (test_no_duplicated_calculation, test_numbers_match_the_engine,
                  test_every_protected_route_requires_a_token,
@@ -516,7 +689,8 @@ def main() -> int:
                  test_one_account_cannot_read_another, test_sign_in_flow,
                  test_single_user_mode_refuses_to_issue_sessions,
                  test_undefined_survives_the_wire, test_sample_sizes_travel,
-                 test_pagination):
+                 test_pagination, test_mobile_overview, test_mobile_downsampling,
+                 test_mobile_caching, test_mobile_incremental_sync):
         test()
 
     failures = [c for c in CHECKS if not c[1]]

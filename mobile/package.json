@@ -1,0 +1,16 @@
+{
+  "name": "@sensitor/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Sensitor API client, and the Expo app that consumes it.",
+  "main": "src/api/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:integration": "tsx tests/integration.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -138,7 +138,7 @@ cycle in any import order. Verified by importing `performance` before
 
 | Suite | Covers |
 |---|---|
-| `tests/test_api.py` | 121 checks with `streamlit` poisoned: that the API computes nothing (its modules are parsed for arithmetic and numeric imports), that its numbers equal the engine's, that every protected route refuses an absent or invented token, that no endpoint names a user, that a second account reaches none of the first's data, both sign-in flows, single-user mode's refusal to issue sessions, undefined surviving as `null`, and pagination |
+| `tests/test_api.py` | 170 checks with `streamlit` poisoned: that the API computes nothing (its modules are parsed for arithmetic and numeric imports), that its numbers equal the engine's, that every protected route refuses an absent or invented token, that no endpoint names a user, that a second account reaches none of the first's data, both sign-in flows, single-user mode's refusal to issue sessions, undefined surviving as `null`, and pagination |
 | `tests/test_auth.py` | 95 checks with `streamlit` poisoned: scrypt hashing, salting and rehash-on-sign-in, token fingerprints, both auth modes, throttling and lockout across a restart, session expiry and revocation, password change revoking every other session, and what an attacker holding the database file cannot do |
 | `tests/test_database.py` | 89 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
 | `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
@@ -147,6 +147,7 @@ cycle in any import order. Verified by importing `performance` before
 | `tests/test_mt5_connector.py` | 128 checks with `streamlit` poisoned and a mocked terminal: balance-operation filtering, the 0.0 stop sentinel, deal folding, scaling in and out, partial closes, the implied point value, stops from orders, server-time conversion, the connector's lifecycle and failure modes, the merge rules, an end-to-end sync against a real store, and id namespacing across accounts |
 | `tests/test_trading_pages.py` | 82 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
+| `mobile/tests/integration.ts` | 38 checks from the TypeScript client against a live uvicorn process: sign-in, the aggregate payload, ETag caching, incremental sync, undefined arriving as null, findings passed through verbatim, and an unreachable server flagged as offline rather than as a failure |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
 
 `test_investment_engine.py` only became possible in Phase 2. Before the
@@ -200,7 +201,7 @@ sensitor/
 | 6 | Database models for multi-user — **done** | **breaking inside the package** |
 | 7 | Multi-user — **done** | additive |
 | 8 | FastAPI — **done** | additive |
-| 9 | Mobile-ready backend | additive |
+| 9 | Mobile-ready backend — **done** | additive |
 
 A phase is not started until the previous one leaves the 159 render checks and
 the legacy page renders passing.
@@ -651,3 +652,77 @@ module.
 travel on these requests, and a wildcard that arrived by default rather than by
 decision is how a browser on any site ends up able to call the API with a user's
 token.
+
+---
+
+## 15. The mobile surface (Phase 9)
+
+`sensitor/api/routers/mobile.py` and `mobile/src/api/`. The manual is
+`docs/MOBILE.md`.
+
+### What was built, and what was not
+
+The backend and a typed client, both verified end to end — the client runs
+against a real uvicorn process, not a mock. **The React Native screens were
+not built**, deliberately: there is no simulator in this environment, and every
+visual decision in this project was made by rendering the thing and looking at
+it. Ten bugs in the trading pages were found that way and none by a test.
+Shipping screens nobody could look at would break the practice that found them.
+
+### Three endpoints, three reasons
+
+**`/mobile/overview`** — a home screen in one request rather than six. On a
+mobile network each round trip costs more than the bytes it carries, and six
+requests can each land on a different moment; one `TradingContext` cannot, so
+the whole screen describes the same set of trades.
+
+**`/mobile/trades?since=`** — only what changed, filtered on `updated_at` rather
+than `closed_at`, because a trade annotated today is a change the client needs
+even though it closed in March.
+
+**`/mobile/version`** — a tiny poll for deciding whether to fetch at all.
+
+Measured on 900 trades: 60,119 bytes over six requests becomes 24,535 over one,
+12,283 gzipped becomes 6,029, and an unchanged reopen transfers nothing.
+
+### Downsampling belongs in the engine
+
+`trading.analytics.downsample` keeps each bucket's first, lowest, highest and
+last point rather than sampling at a stride. The reason is specific: on an
+equity curve the point most likely to fall between strided samples is the
+deepest trough, so the phone would draw a shallower drawdown than the desktop —
+one figure disagreeing with itself across two screens. Extremes survive by
+construction.
+
+It lives in the engine and not the router because the router is not allowed to
+compute anything, and because the Streamlit charts have the same problem.
+
+### Two bugs the live server found that the test client did not
+
+**`/mobile/overview` was larger than the six requests it replaced.** The
+engine's curve points carry a trade id, a symbol and a per-trade P&L alongside
+the two numbers a chart plots, and serialising them whole cost more than the
+round trips saved. The `response_model` is what projects them down — measuring
+the payload is what revealed it.
+
+**A malformed sync cursor returned the entire journal.** A `+` in a query string
+decodes to a space, so an ISO timestamp with a UTC offset arrives as
+`…12:00:00 00:00`. The stored timestamps keep their `+`, and `'+' > ' '`, so the
+string comparison matched *every* row — the endpoint silently served the whole
+history, which is the exact download it exists to avoid. It is now repaired when
+unambiguous and rejected with 422 when not.
+
+Both were invisible to the FastAPI test client and to typechecking. Neither
+would have been found without running the client against a live process.
+
+### The client's job is the other half of the server's
+
+`strictNullChecks` plus `| null` on every undefinable figure means
+`metrics.profit_factor.toFixed(2)` does not compile. The dangerous line is the
+one that does: `(metrics.profit_factor ?? 0).toFixed(2)` prints `0.00` when the
+truth is "there were no losing trades". `format.ts` exists so no screen has to
+make that choice.
+
+The client also clears its ETag cache on sign-out. A cached overview belongs to
+whoever was signed in when it was fetched; the server is built to make
+cross-user reads impossible, and the client keeping one would undo that locally.

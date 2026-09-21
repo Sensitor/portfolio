@@ -595,12 +595,19 @@ class Store:
         return len(rows)
 
     def list_trades(self, user_email: str, *, account_id: str | None = None,
-                    symbol: str | None = None, limit: int | None = None) -> list:
+                    symbol: str | None = None, limit: int | None = None,
+                    updated_since: str | None = None) -> list:
         """
         Trades for a user, newest close first.
 
         Open trades have a null `closed_at` and sort last under `DESC`; that is
         deliberate — a list of results should lead with results.
+
+        `updated_since` is what makes an incremental sync possible: a client
+        that already holds the journal asks only for what has changed since it
+        last looked. It filters on `updated_at`, not `closed_at`, because a
+        trade annotated today is a change the client needs even though it closed
+        in March.
         """
         sql = "SELECT * FROM trades WHERE user_email = ?"
         params: list = [_email(user_email)]
@@ -610,6 +617,9 @@ class Store:
         if symbol:
             sql += " AND symbol = ?"
             params.append(symbol)
+        if updated_since:
+            sql += " AND updated_at > ?"
+            params.append(str(updated_since))
         sql += " ORDER BY closed_at DESC, opened_at DESC"
         if limit:
             sql += " LIMIT ?"
@@ -648,6 +658,30 @@ class Store:
             params.append(str(account_id))
         rows = self._read(sql, tuple(params))
         return int(rows[0]["n"]) if rows else 0
+
+    def trades_version(self, user_email: str) -> str:
+        """
+        A short string that changes whenever this user's journal changes.
+
+        The API turns it into an `ETag`, so a phone reopening the app gets a 304
+        and re-downloads nothing. Built from the row count and the newest
+        `updated_at`: a save bumps the timestamp, a delete bumps the count, and
+        the pair moves for either.
+
+        Hashed here rather than in the route, because the route layer is not
+        allowed to compute anything — and because a caller should not have to
+        know what the version is made of to compare two of them.
+        """
+        import hashlib
+
+        rows = self._read(
+            "SELECT COUNT(*) AS n, COALESCE(MAX(updated_at), '') AS newest "
+            "FROM trades WHERE user_email = ?", (_email(user_email),))
+        if not rows:
+            return "empty"
+        digest = hashlib.sha256(
+            f"{rows[0]['n']}:{rows[0]['newest']}".encode()).hexdigest()
+        return digest[:16]
 
     def trade_symbols(self, user_email: str) -> list[str]:
         rows = self._read(

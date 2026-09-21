@@ -30,6 +30,7 @@ from ..core.auth import auth_mode
 from ..database.models import SCHEMA_VERSION
 from .deps import single_user_key_configured
 from .routers import auth as auth_router
+from .routers import mobile as mobile_router
 from .routers import portfolios as portfolios_router
 from .routers import trading as trading_router
 from .schemas import MetaResponse
@@ -61,14 +62,18 @@ def create_app() -> FastAPI:
             {"name": "auth", "description": "Sessions and identity."},
             {"name": "trading", "description": "The journal and its analytics."},
             {"name": "portfolios", "description": "Saved allocations and their history."},
+            {"name": "mobile", "description": "Aggregated, thinned and cacheable — "
+                                              "shaped for a handset on a mobile network."},
             {"name": "meta", "description": "What this deployment is."},
         ],
     )
 
+    _add_compression(app)
     _add_cors(app)
 
     app.include_router(auth_router.router)
     app.include_router(trading_router.router)
+    app.include_router(mobile_router.router)
     app.include_router(portfolios_router.router)
 
     @app.get("/health", tags=["meta"])
@@ -95,6 +100,20 @@ def create_app() -> FastAPI:
         )
 
     return app
+
+
+def _add_compression(app: FastAPI) -> None:
+    """
+    Gzip anything worth compressing.
+
+    These payloads are JSON full of repeated keys, which compresses to a small
+    fraction of its size. On a mobile network that is the difference between a
+    screen that appears and one that spins. The 500-byte floor is there because
+    compressing a tiny response costs more in CPU on both ends than it saves on
+    the wire.
+    """
+    from fastapi.middleware.gzip import GZipMiddleware
+    app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 def _add_cors(app: FastAPI) -> None:
