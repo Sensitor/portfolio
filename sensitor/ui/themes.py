@@ -626,6 +626,33 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
 .stTabs .react-aria-SelectionIndicator {{ background: {ACCENT} !important; }}
 ::selection {{ background: {ACCENT_GLOW}; color: {INK}; }}
 
+/* ---------- Checkboxes, toggles and the download button ---------- */
+/* Streamlit paints a checked box and a download button in its own red default.
+   Neither carries a `kind` attribute or a testid on the painted element, so
+   they are reached by structure: the only filled element inside a checkbox is
+   its box, and a download button is the only button inside its container.
+   Same family as the form-submit button and the tab indicator — controls the
+   theme had simply never been pointed at. */
+[data-testid="stCheckbox"] div[class]:not([data-testid]),
+[data-testid="stToggle"] div[class]:not([data-testid]) {{
+  background-color: {ACCENT} !important;
+  border-color: {ACCENT} !important;
+}}
+[data-testid="stCheckbox"] label {{ color: {INK_2} !important; }}
+[data-testid="stCheckbox"] :is(p, span) {{ color: {INK_2} !important; }}
+
+{MAIN} [data-testid="stDownloadButton"] > button {{
+  background: {SURFACE_3} !important;
+  border: 1px solid {BORDER} !important;
+  color: {INK} !important;
+  border-radius: {RADIUS_SM} !important;
+  font-weight: 600 !important;
+}}
+{MAIN} [data-testid="stDownloadButton"] > button:hover {{
+  border-color: {ACCENT} !important; color: {INK} !important;
+}}
+{MAIN} [data-testid="stDownloadButton"] :is(p, span, div) {{ color: inherit !important; }}
+
 /* ---------- Expanders ---------- */
 /* Untouched, an open expander paints a white header and body — the journal's
    trade form and the trading filter panel both live in one, so a light slab

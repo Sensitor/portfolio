@@ -143,7 +143,7 @@ cycle in any import order. Verified by importing `performance` before
 | `tests/test_database.py` | 89 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
 | `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
-| `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
+| `tests/test_trading_engine.py` | 173 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal, the weekly review's window and document, and the trading Copilot's framing |
 | `tests/test_mt5_connector.py` | 128 checks with `streamlit` poisoned and a mocked terminal: balance-operation filtering, the 0.0 stop sentinel, deal folding, scaling in and out, partial closes, the implied point value, stops from orders, server-time conversion, the connector's lifecycle and failure modes, the merge rules, an end-to-end sync against a real store, and id namespacing across accounts |
 | `tests/test_trading_pages.py` | 82 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
@@ -726,3 +726,76 @@ make that choice.
 The client also clears its ETag cache on sign-out. A cached overview belongs to
 whoever was signed in when it was fetched; the server is built to make
 cross-user reads impossible, and the client keeping one would undo that locally.
+
+---
+
+## 16. The weekly review and the trading Copilot
+
+The two pieces of the brief that outlived the nine phases.
+
+### Document primitives moved to `core/document.py`
+
+The palette, the formatters, the inline-SVG charts and the print stylesheet were
+inside `investment/report.py`. The weekly review needs all of them, and the
+alternative — a second hand-written SVG renderer — would drift, with the
+drifting copy being whichever had fewer readers. Two client-facing documents
+that slowly stop looking like the same product is the one thing a deliverable
+cannot afford.
+
+`investment/report.py` imports them by name and its sections are unchanged;
+it went from 695 lines to 388.
+
+### `trading/report.py` — the weekly review
+
+Six sections: the week, every trade, where it came from, how it was risked,
+what the data lines up with, and the week against the trader's own baseline.
+
+Four decisions carry it:
+
+**The window is half-open and selected by close.** A Sunday 23:59 close is in
+the week and a Monday 00:00 close is in the next; an inclusive end would put a
+midnight close in both. And a position opened Friday and closed Tuesday
+produced its result in the following week, so a review — which is about
+results — belongs to that one.
+
+**A short week says so before its numbers.** Under ten closed trades the
+document leads with the fact that most of what follows describes those trades
+and not a method. Burying that under the figures is how a review teaches
+over-interpretation of noise, which is the mistake it exists to prevent.
+
+**The baseline is the trader's own history.** A −1.2R week means nothing
+against zero and a great deal against a usual week of +0.4R. That comparison is
+what makes a single week legible, so it is a section rather than a footnote.
+
+**The psychology section passes the engine's sentences through verbatim.** Each
+already names itself a correlation and carries its sample size; a document that
+paraphrased them would be the one place that safeguard did not reach.
+
+### `ai/trading_copilot.py` — and what it deliberately cannot do
+
+The portfolio Copilot pairs an observation with a **simulatable change**: a
+weight vector is a complete description of a portfolio, and the past can be
+replayed under it.
+
+A trading book has no equivalent. There is no "what if I had risked less" that
+can be replayed, because the trades taken under a different rule would have been
+different trades. So every item here carries `proposed_change: None`, and the
+test asserts that no item's text contains a counterfactual — no "would have",
+no "you should". Inventing one would be the single most dishonest thing this
+codebase could do, precisely because it would be the most useful-sounding.
+
+`combined()` merges threshold items with `psychology.findings()`. The two mean
+different things — an item is one figure crossing a stated line, a finding is a
+comparison between two groups — and each keeps its own framing in the merged
+list.
+
+### Found by rendering the document
+
+| Seen | Was |
+|---|---|
+| daily P&L bars reading "+142893.0%" | `svg_diverging_bars` formats as a percentage; it was built for contribution deltas and the review passes it money |
+| four KPI cards stacked full-width | a CSS class that does not exist — `kpi-row` instead of `kpi-grid` |
+| "reak of Structure (7)" | an SVG has no overflow to clip against, so a long label is not truncated, it is drawn outside the picture. Labels are now fitted — and the *count* is what survives the shortening, never the thing that falls off |
+| red checkboxes, a white download button | two more controls the theme had never been pointed at |
+
+The first three were invisible to every test and to the type checker.

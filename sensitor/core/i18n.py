@@ -535,6 +535,55 @@ STRINGS: dict[str, dict[str, str]] = {
     "currency": {"en": "Currency", "fr": "Devise"},
     "time_label": {"en": "time", "fr": "heure"},
 
+    # ── Weekly trading review ───────────────────────────────────────────────
+    "weekly_review": {"en": "Weekly Trading Review", "fr": "Bilan Hebdomadaire de Trading"},
+    "copilot_nothing_title": {
+        "en": "Nothing crossed a threshold",
+        "fr": "Aucun seuil n'a été franchi",
+    },
+    "copilot_nothing_body": {
+        "en": "No figure in this view is outside the range the product flags, and no behavioural comparison has two groups large enough to report. That is a statement about this data, not a verdict on your trading.",
+        "fr": "Aucun chiffre de cette vue n'est hors de la plage que le produit signale, et aucune comparaison comportementale n'a deux groupes assez grands pour être rapportée. C'est un constat sur ces données, pas un verdict sur votre trading.",
+    },
+    "copilot_scope_note": {
+        "en": "Each item is a figure crossing a stated threshold, or a comparison between two groups of your own trades. Unlike the portfolio Copilot, none proposes a change: a portfolio can be replayed under different weights, a trading book cannot — the trades taken under a different rule would have been different trades.",
+        "fr": "Chaque élément est un chiffre franchissant un seuil indiqué, ou une comparaison entre deux groupes de vos propres trades. Contrairement au Copilote de portefeuille, aucun ne propose de changement : un portefeuille peut être rejoué sous d'autres pondérations, un carnet de trading non — les trades pris sous une autre règle auraient été d'autres trades.",
+    },
+    "generate_review": {"en": "Generate the review", "fr": "Générer le bilan"},
+    "review_week": {"en": "Week", "fr": "Semaine"},
+    "review_sections": {"en": "Sections", "fr": "Sections"},
+    "download_review": {"en": "Download the review", "fr": "Télécharger le bilan"},
+    "review_ready": {
+        "en": "Your review is ready. Open it and press Ctrl+P (Cmd+P) to save it as a PDF.",
+        "fr": "Votre bilan est prêt. Ouvrez-le et appuyez sur Ctrl+P (Cmd+P) pour l'enregistrer en PDF.",
+    },
+    "review_no_trades": {
+        "en": "No trades closed in this week. Nothing to review — which is itself a fact worth recording.",
+        "fr": "Aucun trade clôturé cette semaine. Rien à analyser — ce qui est en soi un fait à consigner.",
+    },
+    "review_daily_note": {
+        "en": "Net profit and loss per trading day, after commission and swap. Days with no closed trade are absent rather than drawn at zero.",
+        "fr": "Profit et perte nets par jour de trading, après commission et swap. Les jours sans trade clôturé sont absents plutôt que tracés à zéro.",
+    },
+    "review_sample_note": {
+        "en": "Each bar carries the number of trades behind it. Over one week most groups hold very few, and a group of two says nothing about a setup — it says what those two trades did.",
+        "fr": "Chaque barre porte le nombre de trades qui la compose. Sur une semaine, la plupart des groupes en contiennent très peu, et un groupe de deux ne dit rien d'un setup — il dit ce qu'ont fait ces deux trades.",
+    },
+    "review_no_patterns": {
+        "en": "No comparison this week has two groups large enough to be worth reporting. That is a statement about the sample, not a clean bill of health.",
+        "fr": "Aucune comparaison cette semaine n'a deux groupes assez grands pour mériter d'être signalée. C'est un constat sur l'échantillon, pas un satisfecit.",
+    },
+    "review_no_baseline": {
+        "en": "Not enough history before this week to compare against. A baseline needs at least two prior weeks of closed trades.",
+        "fr": "Pas assez d'historique avant cette semaine pour établir une comparaison. Une référence exige au moins deux semaines antérieures de trades clôturés.",
+    },
+    "review_this_week": {"en": "This week", "fr": "Cette semaine"},
+    "review_your_usual": {"en": "Your usual", "fr": "Votre habitude"},
+    "review_baseline_note": {
+        "en": "The baseline is your own history before this week: {n} trades over {weeks} weeks. Per-week figures are that total divided by the weeks you traded, not by calendar weeks.",
+        "fr": "La référence est votre propre historique avant cette semaine : {n} trades sur {weeks} semaines. Les chiffres hebdomadaires sont ce total divisé par les semaines tradées, non par les semaines calendaires.",
+    },
+
     # ── Authentication ──────────────────────────────────────────────────────
     "sign_in": {"en": "Sign in", "fr": "Connexion"},
     "sign_out": {"en": "Sign out", "fr": "Se déconnecter"},

@@ -481,6 +481,164 @@ def test_setups() -> None:
     check("mistakes fold too", TS.canonical_mistake("fear of missing out") == "fomo")
 
 
+# =============================================================================
+# WEEKLY REVIEW AND THE TRADING COPILOT
+# =============================================================================
+
+# Naive timestamps here, matching production: trades come back from the store
+# and from the MT5 connector without a timezone, and `week_bounds` follows
+# whatever it is handed. Mixing the two would raise on the first comparison.
+def _at(day: int, hour: int = 9) -> datetime:
+    return datetime(2026, 9, 14) + timedelta(days=day, hours=hour)
+
+
+def _closed(id_, pnl, *, opened, hours=3, stop=100.0 - 5.0, **extra) -> Trade:
+    """A closed trade with a known P&L, for the review and copilot fixtures."""
+    return Trade(
+        id=id_, symbol=extra.pop("symbol", "XAUUSD"), direction=Direction.LONG,
+        entry_price=100.0, exit_price=100.0 + pnl, size=1.0, stop_loss=stop,
+        opened_at=opened, closed_at=opened + timedelta(hours=hours),
+        gross_pnl=pnl, **extra,
+    )
+
+
+def test_weekly_review() -> None:
+    print("\nWeekly review")
+    from sensitor.trading import report as WR
+
+    start, end = WR.week_bounds(datetime(2026, 9, 17, 14, 0))   # a Thursday
+    check("a week starts on Monday", start.weekday() == 0 and start.hour == 0)
+    check("and spans seven days", (end - start) == timedelta(days=7))
+
+    # Half-open: a Sunday 23:59 close is in the week, a Monday 00:00 close is in
+    # the next. An inclusive end would put a midnight close in both.
+    sunday = _closed("w1", 10.0, opened=end - timedelta(hours=5), hours=4)
+    monday = _closed("w2", 10.0, opened=end - timedelta(hours=3), hours=3)
+    picked = WR.trades_in_week([sunday, monday], start, end)
+    check("the window is half-open",
+          [t.id for t in picked] == ["w1"], f"got {[t.id for t in picked]}")
+
+    # Selected by close, not open: a position opened Friday and closed Tuesday
+    # produced its result in the following week.
+    across = _closed("w3", 5.0, opened=start - timedelta(days=3), hours=96)
+    check("trades are selected by close time",
+          [t.id for t in WR.trades_in_week([across], start, end)] == ["w3"])
+
+    week = [_closed(f"r{i}", 12.0 if i % 3 else -8.0, opened=_at(i % 5, 9 + i % 6),
+                    symbol=("XAUUSD", "EURUSD", "GBPUSD")[i % 3],
+                    setups=[("bos", "order_block", "breakout")[i % 3]],
+                    mistakes=[] if i % 3 else ["fomo"])
+            for i in range(20)]
+    history = [_closed(f"h{i}", 9.0 if i % 3 else -6.0,
+                       opened=start - timedelta(days=30 - (i % 20)))
+               for i in range(60)]
+
+    for lang in ("en", "fr"):
+        html = WR.build_weekly_html(week + history, week_of=_at(2), lang=lang,
+                                    currency="$")
+        check(f"[{lang}] the document renders", len(html) > 3000, f"{len(html)} bytes")
+        check(f"[{lang}] it is self-contained",
+              "<script" not in html and "http://" not in html)
+        check(f"[{lang}] the disclaimer is present", WR.DISCLAIMER[lang][:40] in html)
+        # Compared against the escaped form: a French title like "D'où Cela
+        # Vient" is written into the document as `D&#x27;où`, which is correct
+        # HTML and displays correctly — the raw string is simply not what is in
+        # the file.
+        import html as _h
+        check(f"[{lang}] every section title appears",
+              all(_h.escape(WR.TITLES[k][lang], quote=True) in html
+                  for k in WR.SECTIONS))
+        check(f"[{lang}] the baseline compares against the trader's own history",
+              _h.escape(WR.TITLES["baseline"][lang], quote=True) in html
+              and "%" in html)
+
+    # A short week is announced before its numbers, not after them.
+    thin = WR.build_weekly_html(week[:4] + history, week_of=_at(2), lang="en")
+    check("a thin week is announced", "Only 4 closed trades" in thin)
+    check("and the warning precedes the trade table",
+          thin.index("Only 4 closed trades") < thin.index(WR.TITLES["trades"]["en"]))
+    check("a thin week still renders its sections", len(thin) > 2000)
+
+    empty = WR.build_weekly_html(history, week_of=_at(2), lang="en")
+    check("a week with no trades still renders", len(empty) > 1000)
+    check("and says there is nothing to review", "No trades closed" in empty)
+
+    check("no baseline without prior weeks",
+          "Not enough history" in WR.build_weekly_html(week, week_of=_at(2), lang="en"))
+
+    check("an unknown section is ignored",
+          "Section unavailable" not in WR.build_weekly_html(
+              week + history, week_of=_at(2), lang="en",
+              sections=["summary", "nonexistent"]))
+
+    # Every grouped bar carries its sample size, and the count is what survives
+    # when a long label has to be shortened.
+    check("a shortened label keeps its count",
+          WR._with_count("Break of Structure", 7).endswith("(7)"))
+
+
+def test_trading_copilot() -> None:
+    print("\nTrading copilot")
+    from sensitor.ai import trading_copilot as TC
+
+    rng = random.Random(4)
+    book = []
+    for i in range(120):
+        won = rng.random() < 0.5
+        pnl = rng.uniform(8, 24) if won else -rng.uniform(6, 20)
+        book.append(_closed(f"c{i:03d}", pnl, opened=_at(-200 + i, 9 + i % 8),
+                            stop=95.0 if rng.random() > 0.35 else None))
+
+    check("a short book yields nothing", TC.diagnose(book[:5]) == [])
+
+    items = TC.diagnose(book, lang="en")
+    check("a real book yields items", len(items) > 0, f"{len(items)}")
+
+    for item in items:
+        key = item["key"]
+        check(f"'{key}' proposes no change", item["proposed_change"] is None)
+        check(f"'{key}' carries evidence", bool(item["evidence"]))
+        check(f"'{key}' is bilingual",
+              bool(item["why"]["en"]) and bool(item["why"]["fr"]))
+        check(f"'{key}' has a known level",
+              item["level"] in ("critical", "serious", "warning", "good", "neutral"))
+
+    levels = [TC._ORDER.get(i["level"], 9) for i in items]
+    check("items are sorted by severity", levels == sorted(levels))
+
+    check("dismissal removes an item",
+          all(i["key"] != items[0]["key"]
+              for i in TC.diagnose(book, dismissed={items[0]["key"]})))
+    check("a limit is honoured", len(TC.diagnose(book, limit=2)) <= 2)
+
+    combined = TC.combined(book, lang="en")
+    check("combined includes the threshold items", len(combined) >= len(items))
+    for finding in [i for i in combined
+                    if i["evidence"].get("interpretation") == "correlation"]:
+        check(f"finding '{finding['key']}' still names itself a correlation",
+              "correlation" in finding["why"]["en"].lower()
+              and "corrélation" in finding["why"]["fr"].lower())
+        check(f"finding '{finding['key']}' carries its sample size",
+              "n = " in finding["footnote"]["en"])
+
+    # The claim that nothing here invents a counterfactual. The portfolio
+    # Copilot can simulate a change; a trading book cannot be replayed, because
+    # the trades taken under a different rule would have been different trades.
+    forbidden = ("would have", "you should", "aurait été", "vous devriez",
+                 "il faudrait")
+    for item in items:
+        text = (item["why"]["en"] + item["why"]["fr"]).lower()
+        check(f"'{item['key']}' states no counterfactual",
+              not any(phrase in text for phrase in forbidden),
+              next((p for p in forbidden if p in text), ""))
+
+    # The stop-discipline item must carry the caveat that keeps it honest.
+    for item in items:
+        if item["key"] == "beyond_stop":
+            check("the stop item says it is measured gross",
+                  "before commission" in item["footnote"]["en"])
+
+
 def main() -> int:
     test_pnl_and_r()
     test_direction_and_session()
@@ -494,6 +652,8 @@ def main() -> int:
     test_psychology()
     test_journal()
     test_setups()
+    test_weekly_review()
+    test_trading_copilot()
 
     print(f"\n{len(FAILURES)} failures")
     for failure in FAILURES:
