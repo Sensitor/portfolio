@@ -17,7 +17,7 @@ Levels map to the design system's status roles: critical, serious, warning, good
 
 from __future__ import annotations
 
-from . import analytics as A
+from ..investment import analytics as A
 
 # =============================================================================
 # CONFIGURABLE THRESHOLDS
@@ -82,7 +82,7 @@ def position_thresholds(ticker, asset_info=None, sector_map=None, geo_map=None):
     t = THRESHOLDS
     if asset_info is None:
         return t["position_critical"], t["position_serious"]
-    from .xray import is_broad
+    from ..investment.xray import is_broad
     if is_broad(ticker, asset_info, sector_map or {}, geo_map or {}):
         return t["position_broad_critical"], t["position_broad_serious"]
     return t["position_critical"], t["position_serious"]

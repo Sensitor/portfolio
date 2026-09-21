@@ -13,6 +13,12 @@ from .portfolios import render_portfolios
 from .reports import render_reports
 from .advisor import render_advisor
 
+from .trading_overview import render_trading_overview
+from .trading_journal import render_trading_journal
+from .trading_analytics import render_trading_analytics
+from .trading_risk import render_trading_risk
+from .trading_psychology import render_trading_psychology
+
 __all__ = [
     "render_overview",
     "render_performance",
@@ -26,4 +32,9 @@ __all__ = [
     "render_portfolios",
     "render_reports",
     "render_advisor",
+    "render_trading_overview",
+    "render_trading_journal",
+    "render_trading_analytics",
+    "render_trading_risk",
+    "render_trading_psychology",
 ]

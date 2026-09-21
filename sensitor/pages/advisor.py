@@ -12,12 +12,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..components import (
+from ..ui.components import (
     data_table, empty_state, metric_card, money, note, num, page_header, pct,
     pill_html, section, spacer,
 )
-from ..design import INK, INK_MUTED, STATUS, html
-from ..i18n import tr
+from ..ui.themes import INK, INK_MUTED, STATUS, html
+from ..core.i18n import tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 
@@ -153,7 +153,7 @@ def _cards(ctx, summaries, lang, store) -> None:
                 # Snapshots the *currently loaded* portfolio against this client's
                 # row, which is only meaningful when the advisor has loaded that
                 # client's book first — hence the caption on the page.
-                store.add_snapshot(portfolio.id, total_value=ctx.end_value,
+                store.add_snapshot(email, portfolio.id, total_value=ctx.end_value,
                                    weights=ctx.weights, metrics=snapshot_metrics(ctx))
                 st.success(tr("snapshot_taken", lang))
                 st.rerun()

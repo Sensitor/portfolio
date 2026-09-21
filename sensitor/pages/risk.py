@@ -16,13 +16,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import analytics as A
-from .. import charts as C
-from ..components import (
+from ..investment import analytics as A
+from ..ui import charts as C
+from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
-from ..design import INK_MUTED, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..i18n import define, tr
+from ..ui.themes import INK_MUTED, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
+from ..core.i18n import define, tr
 from ._shared import guard, period_selector, single_asset_note
 
 

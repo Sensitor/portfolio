@@ -11,16 +11,16 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import charts as C
-from ..components import (
+from ..ui import charts as C
+from ..ui.components import (
     alert, data_table, metric_card, money, note, num, page_header, pct,
     section, spacer,
 )
-from ..design import (
+from ..ui.themes import (
     ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS, class_color,
 )
-from ..i18n import define, tr
-from ..market import benchmark_label
+from ..core.i18n import define, tr
+from ..integrations.market_data import benchmark_label
 from ._shared import benchmark_selector, guard, load_benchmark, period_selector, single_asset_note
 
 
@@ -48,7 +48,7 @@ def render_overview(ctx) -> None:
     stats = ctx.stats
     bench_stats = None
     if bench_aligned is not None:
-        from .. import analytics as A
+        from ..investment import analytics as A
         bench_stats = A.perf_stats(bench_aligned)
 
 
@@ -179,7 +179,7 @@ def render_overview(ctx) -> None:
 
     series_map = {tr("portfolio", lang): values}
     if bench_aligned is not None:
-        from .. import analytics as A
+        from ..investment import analytics as A
         bench_curve = A.cumulative(bench_aligned) * ctx.start_value
         series_map[bench_name] = bench_curve
 

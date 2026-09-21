@@ -17,13 +17,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import copilot as CP
-from .. import simulate as SI
-from ..components import (
+from ..ai import copilot as CP
+from ..investment import simulate as SI
+from ..ui.components import (
     data_table, empty_state, note, num, page_header, pct, pill_html, section, spacer,
 )
-from ..design import BORDER, INK, INK_2, INK_FAINT, STATUS, html
-from ..i18n import tr
+from ..ui.themes import BORDER, INK, INK_2, INK_FAINT, STATUS, html
+from ..core.i18n import tr
 from ._shared import guard, period_selector
 
 DISMISSED_KEY = "sensitor_copilot_dismissed"

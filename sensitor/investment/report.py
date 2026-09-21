@@ -30,7 +30,7 @@ import html as _html
 from datetime import datetime
 
 from . import xray as X
-from .i18n import tr
+from ..core.i18n import tr
 
 SECTIONS = [
     "overview", "performance", "risk", "diversification",

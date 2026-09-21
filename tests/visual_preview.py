@@ -37,8 +37,9 @@ os.environ.setdefault(
 st.set_page_config(page_title="Sensitor — Visual Preview", layout="wide",
                    initial_sidebar_state="collapsed")
 
-from sensitor import design, market                      # noqa: E402
-from sensitor.context import Context                     # noqa: E402
+from sensitor.ui import themes as design                 # noqa: E402
+from sensitor.integrations import market_data as market   # noqa: E402
+from sensitor.investment.context import Context           # noqa: E402
 from sensitor.pages import (                             # noqa: E402
     render_advisor, render_copilot, render_health, render_optimize, render_overview,
     render_performance, render_portfolios, render_reports, render_risk,

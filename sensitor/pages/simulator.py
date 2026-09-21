@@ -19,15 +19,15 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import charts as C
-from .. import montecarlo as MC
-from .. import simulate as SI
-from ..components import (
+from ..ui import charts as C
+from ..investment import montecarlo as MC
+from ..investment import simulate as SI
+from ..ui.components import (
     alert, data_table, metric_card, money, note, num, page_header, pct, section,
     spacer,
 )
-from ..design import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..i18n import define, tr
+from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
+from ..core.i18n import define, tr
 from ._shared import guard, period_selector
 
 SIM_KEY = "sensitor_sim_weights"

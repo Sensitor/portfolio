@@ -12,14 +12,14 @@ from __future__ import annotations
 import numpy as np
 import streamlit as st
 
-from .. import analytics as A
-from .. import charts as C
-from ..components import (
+from ..investment import analytics as A
+from ..ui import charts as C
+from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
-from ..design import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..i18n import define, tr
-from ..market import benchmark_label
+from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
+from ..core.i18n import define, tr
+from ..integrations.market_data import benchmark_label
 from ._shared import benchmark_selector, guard, load_benchmark, period_selector
 
 _MONTHS = {

@@ -19,13 +19,13 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from .. import charts as C
-from ..components import (
+from ..ui import charts as C
+from ..ui.components import (
     data_table, empty_state, money, note, num, page_header, pct,
     pill_html, section, spacer,
 )
-from ..design import INK, INK_MUTED, PLOTLY_CONFIG, html
-from ..i18n import tr
+from ..ui.themes import INK, INK_MUTED, PLOTLY_CONFIG, html
+from ..core.i18n import tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 LOADED_KEY = "sensitor_loaded_portfolio"
@@ -83,7 +83,7 @@ def _save_block(ctx, lang, store, email) -> None:
         )
         # Save and snapshot together: a saved book with no history is a dead end,
         # and the first snapshot is the only one the user cannot take later.
-        store.add_snapshot(portfolio_id, total_value=ctx.end_value,
+        store.add_snapshot(email, portfolio_id, total_value=ctx.end_value,
                            weights=ctx.weights, metrics=snapshot_metrics(ctx))
         st.success(f"{tr('portfolio_saved', lang)} — {name}")
         st.rerun()
@@ -102,10 +102,10 @@ def _list_block(ctx, lang, store, email) -> None:
         return
 
     for index, entry in enumerate(summaries):
-        _portfolio_card(ctx, lang, store, entry, index)
+        _portfolio_card(ctx, lang, store, email, entry, index)
 
 
-def _portfolio_card(ctx, lang, store, entry, index) -> None:
+def _portfolio_card(ctx, lang, store, email, entry, index) -> None:
     portfolio = entry["portfolio"]
     metrics = entry["metrics"] or {}
 
@@ -154,7 +154,7 @@ def _portfolio_card(ctx, lang, store, entry, index) -> None:
         disabled = ctx is None or not ctx.has_history
         if st.button(tr("take_snapshot", lang), key=f"pf_snap_{index}",
                      width="stretch", disabled=disabled):
-            store.add_snapshot(portfolio.id, total_value=ctx.end_value,
+            store.add_snapshot(email, portfolio.id, total_value=ctx.end_value,
                                weights=ctx.weights, metrics=snapshot_metrics(ctx))
             st.success(tr("snapshot_taken", lang))
             st.rerun()
@@ -166,7 +166,7 @@ def _portfolio_card(ctx, lang, store, entry, index) -> None:
         if state == "confirm":
             if st.button(tr("confirm_delete", lang), key=f"pf_del2_{index}",
                          type="primary", width="stretch"):
-                store.delete_portfolio(portfolio.id)
+                store.delete_portfolio(email, portfolio.id)
                 st.session_state.pop(state_key, None)
                 st.rerun()
         else:
@@ -175,13 +175,13 @@ def _portfolio_card(ctx, lang, store, entry, index) -> None:
                 st.rerun()
 
     if state == "history":
-        _history(store, portfolio, lang)
+        _history(store, email, portfolio, lang)
 
     spacer(8)
 
 
-def _history(store, portfolio, lang) -> None:
-    snapshots = store.list_snapshots(portfolio.id, limit=200)
+def _history(store, email, portfolio, lang) -> None:
+    snapshots = store.list_snapshots(email, portfolio.id, limit=200)
     if len(snapshots) < 1:
         note(tr("no_snapshots", lang))
         return

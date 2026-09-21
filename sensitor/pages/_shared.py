@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import streamlit as st
 
-from .. import market
-from ..components import empty_state, note
-from ..i18n import tr
+from ..integrations import market_data as market
+from ..ui.components import empty_state, note
+from ..core.i18n import tr
 
 
 def guard(ctx, lang: str) -> bool:
@@ -100,7 +100,7 @@ def get_store():
     message instead of failing on import.
     """
     try:
-        from ..storage import Store
+        from ..database import Store
         return Store()
     except Exception:                                   # noqa: BLE001
         return None

@@ -29,8 +29,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import analytics as A
-from . import simulate as SI
+from ..investment import analytics as A
+from ..investment import simulate as SI
 from .signals import THRESHOLDS, position_thresholds
 
 # Minimum weight a position needs before a change to it is worth proposing.
@@ -216,7 +216,7 @@ def _exposure_concentration(weights, xray, asset_info, sector_map, out):
         return
 
     # Attribute the bucket to the holding contributing most of it.
-    from . import xray as X
+    from ..investment import xray as X
     contributions = {}
     total = sum(weights.values()) or 1.0
     for ticker, weight in weights.items():
