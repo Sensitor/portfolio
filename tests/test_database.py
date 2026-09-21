@@ -182,7 +182,12 @@ def test_every_user_method_is_scoped():
 
     exempt = {
         # Plumbing and schema-level operations, not user data access.
-        "close", "list_users",
+        "close", "list_users", "purge_expired_sessions",
+        # Keyed by a session fingerprint, which is the SHA-256 of 256 random
+        # bits. Unlike a portfolio's integer id, the key *is* the authorisation:
+        # holding it is what proves identity, and the lookup is how the user is
+        # discovered rather than something to check the user against.
+        "session", "touch_session", "revoke_session",
     }
     offenders = []
     for name, method in inspect.getmembers(Store, inspect.isfunction):
@@ -210,6 +215,15 @@ def test_every_user_method_is_scoped():
                     and signature.parameters[param].default is not inspect.Parameter.empty):
                 optional.append(name)
     check("and none of them defaults it", not optional, f"optional: {optional}")
+
+    # The exempt ones are only safe because their key is unguessable. A
+    # fingerprint that could be enumerated would make them the same hole the
+    # portfolio methods were.
+    from sensitor.core.security import TOKEN_BYTES, new_token, token_fingerprint
+    check("session keys carry at least 256 bits of entropy", TOKEN_BYTES >= 32)
+    check("two tokens never collide", new_token() != new_token())
+    check("a fingerprint is a digest, not the token",
+          token_fingerprint("abc") != "abc" and len(token_fingerprint("abc")) == 64)
 
 
 # =============================================================================
@@ -246,7 +260,8 @@ def test_user_lifecycle():
 
     counts = store.delete_user(ALICE)
     check("deletion reports what it removed",
-          counts == {"portfolios": 1, "snapshots": 1, "accounts": 1, "trades": 2},
+          counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
+                     "trades": 2, "sessions": 0},
           f"got {counts}")
     check("the user is gone", store.get_user(ALICE) is None)
     check("the portfolios are gone", store.list_portfolios(ALICE) == [])

@@ -1,142 +1,271 @@
-# 📊 Portfolio Optimizer Pro - SaaS
+# Sensitor
 
-**Professional portfolio analysis and optimization platform.**
-
-Built by a Finance Masters student from International University of Monaco.
-
----
-
-## 🎯 What It Does
-
-Portfolio Optimizer Pro helps investors:
-- Analyze portfolio performance with professional-grade metrics
-- Optimize asset allocation using Markowitz theory
-- Calculate Value at Risk (VaR) and Expected Shortfall
-- Run Monte Carlo simulations
-- Generate PDF reports
+Investment and trading analytics over one engine. A Streamlit application, an
+HTTP API and a typed mobile client — all reading the same calculations, so no
+two surfaces can disagree about what a number means.
 
 ---
 
-## ✨ Features
+## What it does
 
-### Free Tier
-- 1 portfolio analysis per day
-- Up to 5 assets
-- Basic performance metrics (Sharpe, Sortino, Max Drawdown)
-- Performance charts
+**Investment.** Twelve pages over a portfolio: performance against a benchmark,
+risk decomposed by holding, a fund look-through X-ray, eight historical stress
+windows, mean-variance optimisation, Monte Carlo, and a Copilot that pairs an
+observation with a change you can simulate.
 
-### Pro Tier ($9.99/month)
-- Unlimited portfolios
-- Up to 50 assets
-- Portfolio optimization (Markowitz)
-- Value at Risk analysis
-- Monte Carlo simulations
-- PDF reports
-- Priority support
+**Trading.** Five pages over a journal: what the book made, where it came from,
+how it was risked, and what the behaviour lines up with. Imports from
+MetaTrader 5, or entered by hand.
 
-### Business Tier ($49/month)
-- Everything in Pro
-- Unlimited assets
-- API access
-- White label reports
-- Team collaboration
-- Dedicated support
+**Documents.** A client portfolio report and a weekly trading review, each one
+self-contained HTML you print or send.
 
 ---
 
-## 🚀 Quick Start
+## Installing
 
-### For Users
-
-Visit: [your-app-url.streamlit.app](https://your-app-url.streamlit.app)
-
-1. Sign up (free)
-2. Enter your portfolio (tickers + weights)
-3. Click "Analyze"
-4. Get professional insights instantly
-
-### For Developers
+Python 3.11 or later.
 
 ```bash
-# Clone repo
-git clone https://github.com/YOUR_USERNAME/portfolio-optimizer
-cd portfolio-optimizer
-
-# Install dependencies
+git clone https://github.com/Sensitor/portfolio.git
+cd portfolio
 pip install -r requirements.txt
-
-# Run locally
 streamlit run portfolio_optimizer_saas.py
+```
+
+Optional extras, each independent:
+
+```bash
+pip install fastapi uvicorn     # the HTTP API
+pip install MetaTrader5         # the broker connector — Windows only
+cd mobile && npm install        # the TypeScript client
+```
+
+Neither extra is needed by the app, and the API process needs no Streamlit.
+
+---
+
+## Configuration
+
+| Variable | Default | |
+|---|---|---|
+| `SENSITOR_DB_PATH` | `sensitor_data.db` | where the SQLite file lives |
+| `SENSITOR_AUTH` | `single` | `multi` for real accounts |
+| `SENSITOR_API_TOKEN` | *(unset)* | single-user API key; without it the API issues no sessions |
+| `SENSITOR_CORS_ORIGINS` | *(unset)* | comma-separated; never defaults to `*` |
+| `PRO_EMAILS` | *(unset)* | comma-separated addresses on the Pro tier |
+| `STRIPE_PAYMENT_LINK` | *(unset)* | the upgrade link |
+
+### The two authentication modes
+
+**single** — the app is one person's, on their own machine. The email is a
+filing label; there is nobody to verify against, and demanding a password to
+open your own spreadsheet is theatre. The Account page says so plainly.
+
+**multi** — accounts have passwords (scrypt), sign-in verifies, repeated
+failures throttle, sessions expire, and no account can reach another's data.
+
+An unrecognised value falls back to **single**, not multi: a typo must not
+silently claim protection the deployment does not have.
+
+> Before putting this anywhere other people can reach: set `SENSITOR_AUTH=multi`,
+> put TLS in front of it, and point `SENSITOR_DB_PATH` at a persistent volume.
+
+---
+
+## The database
+
+SQLite, created and migrated on first open. Nothing to set up.
+
+The file holds personal financial data. It stays on whatever machine runs the
+app, it is gitignored, and nothing in this codebase sends it anywhere.
+
+**Streamlit Cloud's filesystem is ephemeral** — the database is wiped on every
+restart, redeploy and sleep. Point `SENSITOR_DB_PATH` at a persistent volume
+before treating saved data as safe.
+
+Migrations run automatically and are versioned by `PRAGMA user_version`. Added
+columns are applied in place; changed constraints rebuild the table, inside a
+transaction, copying only columns both shapes share, and the migration refuses
+to finish if `foreign_key_check` or `integrity_check` reports a problem. The
+rebuild is tested against a populated database built from the previous schema.
+
+```python
+from sensitor.database import Store
+store = Store()
+store.export_user("you@example.com")   # everything, as JSON-able data
+store.delete_user("you@example.com")   # and it is gone, counted and reported
 ```
 
 ---
 
-## 📖 Documentation
+## MetaTrader 5
 
-Full deployment guide: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+Journal → **Import from MetaTrader 5**. Requires the terminal running on the
+same machine and `pip install MetaTrader5`, which MetaQuotes publishes for
+Windows only.
 
----
+**Set the server UTC offset.** MetaTrader timestamps are the broker's server
+clock, and most brokers run on UTC+2 or UTC+3. Left at zero, every trade lands
+hours late and a third of them are attributed to the wrong session.
 
-## 🛠️ Tech Stack
+Re-syncing is safe. Trades are matched on the broker's own position number, and
+everything you have written — setups, notes, emotions, ratings — is kept.
 
-- **Frontend**: Streamlit
-- **Backend**: Python
-- **Data**: Yahoo Finance (yfinance)
-- **Analytics**: Pandas, NumPy, SciPy
-- **Visualization**: Plotly
-- **Payments**: Stripe
-- **Hosting**: Streamlit Cloud (free)
-
----
-
-## 📊 Metrics Explained
-
-**Sharpe Ratio**: Risk-adjusted return. Higher is better (>1.0 = good, >2.0 = excellent)
-
-**Sortino Ratio**: Like Sharpe but only penalizes downside volatility
-
-**Max Drawdown**: Worst peak-to-trough decline. Shows maximum historical loss
-
-**Value at Risk (VaR)**: Maximum expected loss at 95% confidence level
-
-**Expected Shortfall**: Average loss when VaR is exceeded (worst-case scenario)
+Full detail, including why deposits are filtered out and how R is calibrated
+without a contract-size table: **[docs/MT5_SYNC.md](docs/MT5_SYNC.md)**.
 
 ---
 
-## 🎓 About the Creator
+## The API
 
-Built by a Finance Masters student specializing in quantitative finance and portfolio management.
+```bash
+pip install fastapi uvicorn
+SENSITOR_AUTH=multi uvicorn sensitor.api.app:app --port 8000
+```
 
-The goal: Make professional portfolio analysis accessible to everyone, not just institutional investors.
+Interactive documentation at `/docs`. Every endpoint that touches your data
+needs `Authorization: Bearer <token>` from `POST /auth/sign-in` — the same
+session the desktop app issues.
 
----
+**It computes nothing.** Every number comes from `sensitor.trading` and
+`sensitor.investment`. The test suite parses every module under `sensitor/api/`
+for arithmetic and for imports of numpy, pandas and scipy, and compares twelve
+served figures against the engine called directly.
 
-## 📧 Contact
+**The caller comes from the token and nowhere else.** No endpoint takes a user
+as a parameter, so none can be asked for someone else's data.
 
-- Email: your-email@example.com
-- LinkedIn: [your-linkedin]
-- Twitter: [@your-handle]
-
----
-
-## 📝 License
-
-MIT License - Free to use, modify, and distribute.
-
----
-
-## 🙏 Acknowledgments
-
-- Markowitz Portfolio Theory (Nobel Prize, 1990)
-- Modern Portfolio Theory resources
-- Open-source community
+**[docs/API.md](docs/API.md)** — every endpoint, how to read the responses, and
+deployment.
 
 ---
 
-## ⭐ Star Us!
+## Mobile
 
-If you find this useful, give us a star on GitHub! It helps others discover the project.
+```bash
+cd mobile
+npm install
+npm run typecheck
+SENSITOR_API_URL=http://localhost:8000 npm run test:integration
+```
+
+`mobile/src/api/` is a dependency-free TypeScript client: ETag caching, typed
+errors that distinguish offline from refused, and `| null` on every figure the
+engine can leave undefined — so `metrics.profit_factor.toFixed(2)` does not
+compile.
+
+Three endpoints are shaped for a handset. On 900 trades, a home screen goes
+from 60 KB over six requests to 24 KB over one, and an unchanged reopen
+transfers nothing.
+
+**The React Native screens are not built** — there is no simulator in the
+environment this was developed in, and every visual decision here was made by
+rendering the thing and looking at it.
+**[docs/MOBILE.md](docs/MOBILE.md)** says what they should be.
 
 ---
 
-**Made with ❤️ for investors worldwide**
+## Architecture
+
+```
+portfolio_optimizer_saas.py     Streamlit entry point — routing and the legacy pages
+sensitor/
+├── core/          config · exceptions · i18n · security · auth · document
+├── investment/    analytics · performance · risk · factors · optimize · montecarlo
+│                  stress · xray · health · simulate · context · report
+├── trading/       models · setups · analytics · performance · risk · psychology
+│                  journal · context · report
+├── integrations/  market_data · mt5 · sync
+├── database/      connection · models · repositories
+├── ai/            copilot · signals · trading_copilot
+├── api/           app · deps · schemas · routers/
+├── ui/            themes · components · charts
+└── pages/         17 page renderers
+mobile/src/api/    the TypeScript client
+docs/              ARCHITECTURE · API · MOBILE · MT5_SYNC
+```
+
+**The rule the layout enforces: business logic never imports Streamlit.**
+`core`, `investment`, `trading`, `database`, `integrations` and `ai` are
+importable from a script, a test or an API process with no UI runtime present.
+Only `ui` and `pages` touch it, and every engine test suite asserts it by
+setting `sys.modules["streamlit"] = None` before importing.
+
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — the full map, the phase
+history, and the decisions behind each boundary.
+
+---
+
+## The discipline the code is built around
+
+These are not style preferences. Each one exists because the alternative
+produces a confident, wrong number that a person would act on.
+
+**Undefined is never zero.** A profit factor with no losing trades has no
+denominator; an R multiple on a trade with no stop has no amount risked; a
+percentage drawdown from a peak at zero is a percentage of nothing. All three
+come back `null` and render as a dash. Rendering them as `0` tells a trader
+their system loses money when it does not.
+
+**Sample size travels with every grouped figure.** A table sorted by win rate
+always puts a two-trade bucket on top. Every bucket carries `n` and a
+`reliable` flag, and `performance.best()` refuses to promote one below the
+threshold — calling that "your best setup" is how a journal teaches someone the
+wrong lesson and then watches them size up on it.
+
+**Correlation is never called cause.** The psychology module phrases its own
+findings, in both languages, each naming itself a correlation and carrying its
+sample size. The wording is fixed in the engine so no page, document or client
+can shorten it into a verdict — and the test suite asserts it, including the
+absence of causal verbs.
+
+**Thresholds are stated.** Every alert says the number that triggered it and
+the line it crossed.
+
+**One user's data is unreachable by another.** Every `Store` method leads with
+the owner and none defaults it — a test derives that list from the class rather
+than a list maintained by hand.
+
+---
+
+## Testing
+
+```bash
+python tests/test_investment_engine.py    #  44 checks — engine, no Streamlit
+python tests/test_trading_engine.py       # 173 checks — engine, review, copilot
+python tests/test_mt5_connector.py        # 131 checks — mocked terminal
+python tests/test_database.py             #  89 checks — isolation, migrations
+python tests/test_auth.py                 #  95 checks — crypto, sessions, lockout
+python tests/test_api.py                  # 170 checks — HTTP, isolation, no maths
+python tests/test_sensitor_pages.py       # 164 render checks
+python tests/test_trading_pages.py        #  82 render checks
+cd mobile && npm run test:integration     #  38 checks against a live server
+```
+
+No pytest and no test framework: each file runs standalone, prints one line per
+check, and exits non-zero on failure. That keeps them runnable anywhere and
+readable as documentation of what is guaranteed.
+
+The render harnesses drive the real Streamlit script through `AppTest` and
+assert that a page renders *content* rather than merely not raising — a page
+that quietly refuses to show anything raises nothing at all.
+
+---
+
+## Deploying
+
+**Streamlit Cloud.** Point it at `portfolio_optimizer_saas.py`. Set the
+environment variables above; remember the filesystem is ephemeral.
+
+**A server.** Run the Streamlit app and, if you want the API, a separate
+uvicorn process against the same `SENSITOR_DB_PATH`. Put TLS in front of both.
+Set `SENSITOR_AUTH=multi`.
+
+---
+
+## Licence and scope
+
+Personal project. Nothing in this repository is investment advice, a
+recommendation, or a forecast. Every figure describes how something behaved
+over the window analysed; past performance does not predict future returns.

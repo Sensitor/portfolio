@@ -597,26 +597,61 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
 }}
 
 /* ---------- Tabs ---------- */
-.stTabs [data-baseweb="tab-list"] {{
+/* Both DOM generations are targeted. Streamlit moved tabs from BaseWeb to
+   react-aria, which left the app's original stylesheet in a bad half-state: its
+   `[data-baseweb="tab-list"]` and `[data-baseweb="tab"]` rules stopped matching,
+   while its `[aria-selected="true"]` rule — a generic attribute selector — kept
+   firing. The result was an orphaned gradient pill with no container around it,
+   sitting on every tab in the app. The selectors below carry the tab's testid
+   so they outrank that rule rather than racing it in the cascade. */
+.stTabs :is([data-baseweb="tab-list"], [role="tablist"]) {{
   gap: 4px; border-bottom: 1px solid {BORDER};
-  background: transparent; padding-bottom: 0;
+  background: transparent !important; padding: 0 !important;
+  border-radius: 0 !important;
 }}
-.stTabs [data-baseweb="tab"] {{
-  background: transparent !important; border: none !important;
+.stTabs :is([data-baseweb="tab"], [data-testid="stTab"]) {{
+  background: none !important; background-color: transparent !important;
+  border: none !important; box-shadow: none !important;
   color: {INK_MUTED} !important; font-size: 0.8rem !important;
   font-weight: 600 !important; letter-spacing: 0.02em;
   padding: 9px 14px !important; border-radius: 0 !important;
 }}
-.stTabs [aria-selected="true"] {{
+.stTabs :is([data-baseweb="tab"], [data-testid="stTab"])[aria-selected="true"] {{
+  background: none !important; background-color: transparent !important;
   color: {INK} !important;
   box-shadow: inset 0 -2px 0 0 {ACCENT} !important;
 }}
-/* Streamlit's own selected-tab bar, which it paints in its default red. The
-   tab underneath already carries an accent underline, so left alone the two
-   stack into a red line over a blue one. Predates the trading pages; fixed
-   here because it is two lines and it is visibly wrong. */
+.stTabs [data-testid="stTab"] :is(p, div, span) {{ color: inherit !important; }}
+/* Streamlit's own selected-tab bar, which it paints in its default red. */
 .stTabs .react-aria-SelectionIndicator {{ background: {ACCENT} !important; }}
 ::selection {{ background: {ACCENT_GLOW}; color: {INK}; }}
+
+/* ---------- Checkboxes, toggles and the download button ---------- */
+/* Streamlit paints a checked box and a download button in its own red default.
+   Neither carries a `kind` attribute or a testid on the painted element, so
+   they are reached by structure: the only filled element inside a checkbox is
+   its box, and a download button is the only button inside its container.
+   Same family as the form-submit button and the tab indicator — controls the
+   theme had simply never been pointed at. */
+[data-testid="stCheckbox"] div[class]:not([data-testid]),
+[data-testid="stToggle"] div[class]:not([data-testid]) {{
+  background-color: {ACCENT} !important;
+  border-color: {ACCENT} !important;
+}}
+[data-testid="stCheckbox"] label {{ color: {INK_2} !important; }}
+[data-testid="stCheckbox"] :is(p, span) {{ color: {INK_2} !important; }}
+
+{MAIN} [data-testid="stDownloadButton"] > button {{
+  background: {SURFACE_3} !important;
+  border: 1px solid {BORDER} !important;
+  color: {INK} !important;
+  border-radius: {RADIUS_SM} !important;
+  font-weight: 600 !important;
+}}
+{MAIN} [data-testid="stDownloadButton"] > button:hover {{
+  border-color: {ACCENT} !important; color: {INK} !important;
+}}
+{MAIN} [data-testid="stDownloadButton"] :is(p, span, div) {{ color: inherit !important; }}
 
 /* ---------- Expanders ---------- */
 /* Untouched, an open expander paints a white header and body — the journal's

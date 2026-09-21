@@ -397,3 +397,57 @@ def format_duration(minutes: float | None, lang: str = "en") -> str:
         return f"{minutes / 60:.1f} h"
     days = minutes / (60 * 24)
     return f"{days:.1f} j" if lang == "fr" else f"{days:.1f} d"
+
+
+# =============================================================================
+# DOWNSAMPLING
+# =============================================================================
+
+def downsample(points, max_points: int = 300, value_key: str = "equity") -> list[dict]:
+    """
+    Thin a curve to at most `max_points`, keeping the shape that matters.
+
+    A phone cannot draw five thousand points and should not download them. But
+    *how* a curve is thinned decides whether the picture stays true, and the
+    obvious method is wrong here: taking every nth point skips whatever falls
+    between the samples, and on an equity curve the thing most likely to fall
+    between them is the single deepest trough. The drawdown a trader is looking
+    at would render shallower on the phone than on the desktop, which is the
+    same figure disagreeing with itself across two screens.
+
+    So each bucket contributes its first, lowest, highest and last point, in
+    time order. The extremes survive by construction, so the depth of every
+    drawdown and the height of every peak are preserved exactly; only the
+    uneventful stretches between them are thinned.
+
+    Returns the points themselves, not copies — callers serialise them.
+    """
+    points = list(points or [])
+    if max_points < 4 or len(points) <= max_points:
+        return points
+
+    # Four points per bucket in the worst case, so aim for a quarter as many
+    # buckets as the budget allows.
+    buckets = max(1, max_points // 4)
+    size = len(points) / buckets
+
+    kept: list[dict] = []
+    seen: set[int] = set()
+    for i in range(buckets):
+        start = int(i * size)
+        end = int((i + 1) * size) if i < buckets - 1 else len(points)
+        chunk = points[start:end]
+        if not chunk:
+            continue
+        lowest = min(chunk, key=lambda p: p[value_key])
+        highest = max(chunk, key=lambda p: p[value_key])
+        for point in (chunk[0], lowest, highest, chunk[-1]):
+            if id(point) not in seen:
+                seen.add(id(point))
+                kept.append(point)
+
+    # The buckets were walked in order but each contributed up to four points
+    # out of order, so sort once at the end rather than per bucket.
+    order = {id(p): i for i, p in enumerate(points)}
+    kept.sort(key=lambda p: order[id(p)])
+    return kept

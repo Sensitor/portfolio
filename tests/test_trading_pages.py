@@ -202,10 +202,24 @@ def seed(trades, email=EMAIL) -> None:
         store.save_trades(email, trades)
 
 
+def session_for_user(email=EMAIL) -> str:
+    """
+    A real session token.
+
+    Setting `user_email` in session state is no longer enough to be signed in:
+    identity is resolved from the token the app issued. Seeding the state
+    directly would make every page here render its sign-in wall, and the
+    harness would report that as a pass — it only watches for exceptions.
+    """
+    from sensitor.core.auth import Auth
+    return Auth(Store()).sign_in(email).token
+
+
 def run_page(page: str, *, lang="en", email=EMAIL, period="ALL", account=None):
     app = AppTest.from_file(APP, default_timeout=240)
     app.session_state["authenticated"] = bool(email)
     app.session_state["user_email"] = email
+    app.session_state["session_token"] = session_for_user(email) if email else ""
     app.session_state["user_tier"] = "pro"
     app.session_state["language"] = lang
     app.session_state["user_profile"] = "balanced"
@@ -218,6 +232,24 @@ def run_page(page: str, *, lang="en", email=EMAIL, period="ALL", account=None):
     return app
 
 
+# Words that mean the page rendered its sign-in wall rather than its content.
+# Checked because the harness otherwise only watches for exceptions, and a page
+# that quietly refuses to show anything raises nothing at all — which is how the
+# whole trading section could break on an auth change and still report green.
+_SIGN_IN_WALL = ("Sign in to keep a journal", "Connectez-vous pour tenir un journal")
+
+
+def _rendered_content(app, expect_signed_in: bool) -> str | None:
+    """None when the page looks right, otherwise why it does not."""
+    text = " ".join(str(m.value or "") for m in app.markdown)
+    walled = any(phrase in text for phrase in _SIGN_IN_WALL)
+    if expect_signed_in and walled:
+        return "rendered the sign-in wall while signed in"
+    if not expect_signed_in and not walled:
+        return "did not ask an anonymous visitor to sign in"
+    return None
+
+
 def check(label, *, lang="en", email=EMAIL, period="ALL", account=None,
           pages=PAGES, failures=None) -> int:
     count = 0
@@ -228,6 +260,11 @@ def check(label, *, lang="en", email=EMAIL, period="ALL", account=None,
         if app.exception:
             failures.append((label, page, str(app.exception[0].value)[:500]))
             print(f"  FAIL  {short:11s} {label}")
+            continue
+        wrong = _rendered_content(app, expect_signed_in=bool(email))
+        if wrong:
+            failures.append((label, page, wrong))
+            print(f"  FAIL  {short:11s} {label} — {wrong}")
         else:
             print(f"  ok    {short:11s} {label}")
     return count

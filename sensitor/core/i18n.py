@@ -535,6 +535,108 @@ STRINGS: dict[str, dict[str, str]] = {
     "currency": {"en": "Currency", "fr": "Devise"},
     "time_label": {"en": "time", "fr": "heure"},
 
+    # ── Weekly trading review ───────────────────────────────────────────────
+    "weekly_review": {"en": "Weekly Trading Review", "fr": "Bilan Hebdomadaire de Trading"},
+    "copilot_nothing_title": {
+        "en": "Nothing crossed a threshold",
+        "fr": "Aucun seuil n'a été franchi",
+    },
+    "copilot_nothing_body": {
+        "en": "No figure in this view is outside the range the product flags, and no behavioural comparison has two groups large enough to report. That is a statement about this data, not a verdict on your trading.",
+        "fr": "Aucun chiffre de cette vue n'est hors de la plage que le produit signale, et aucune comparaison comportementale n'a deux groupes assez grands pour être rapportée. C'est un constat sur ces données, pas un verdict sur votre trading.",
+    },
+    "copilot_scope_note": {
+        "en": "Each item is a figure crossing a stated threshold, or a comparison between two groups of your own trades. Unlike the portfolio Copilot, none proposes a change: a portfolio can be replayed under different weights, a trading book cannot — the trades taken under a different rule would have been different trades.",
+        "fr": "Chaque élément est un chiffre franchissant un seuil indiqué, ou une comparaison entre deux groupes de vos propres trades. Contrairement au Copilote de portefeuille, aucun ne propose de changement : un portefeuille peut être rejoué sous d'autres pondérations, un carnet de trading non — les trades pris sous une autre règle auraient été d'autres trades.",
+    },
+    "generate_review": {"en": "Generate the review", "fr": "Générer le bilan"},
+    "review_week": {"en": "Week", "fr": "Semaine"},
+    "review_sections": {"en": "Sections", "fr": "Sections"},
+    "download_review": {"en": "Download the review", "fr": "Télécharger le bilan"},
+    "review_ready": {
+        "en": "Your review is ready. Open it and press Ctrl+P (Cmd+P) to save it as a PDF.",
+        "fr": "Votre bilan est prêt. Ouvrez-le et appuyez sur Ctrl+P (Cmd+P) pour l'enregistrer en PDF.",
+    },
+    "review_no_trades": {
+        "en": "No trades closed in this week. Nothing to review — which is itself a fact worth recording.",
+        "fr": "Aucun trade clôturé cette semaine. Rien à analyser — ce qui est en soi un fait à consigner.",
+    },
+    "review_daily_note": {
+        "en": "Net profit and loss per trading day, after commission and swap. Days with no closed trade are absent rather than drawn at zero.",
+        "fr": "Profit et perte nets par jour de trading, après commission et swap. Les jours sans trade clôturé sont absents plutôt que tracés à zéro.",
+    },
+    "review_sample_note": {
+        "en": "Each bar carries the number of trades behind it. Over one week most groups hold very few, and a group of two says nothing about a setup — it says what those two trades did.",
+        "fr": "Chaque barre porte le nombre de trades qui la compose. Sur une semaine, la plupart des groupes en contiennent très peu, et un groupe de deux ne dit rien d'un setup — il dit ce qu'ont fait ces deux trades.",
+    },
+    "review_no_patterns": {
+        "en": "No comparison this week has two groups large enough to be worth reporting. That is a statement about the sample, not a clean bill of health.",
+        "fr": "Aucune comparaison cette semaine n'a deux groupes assez grands pour mériter d'être signalée. C'est un constat sur l'échantillon, pas un satisfecit.",
+    },
+    "review_no_baseline": {
+        "en": "Not enough history before this week to compare against. A baseline needs at least two prior weeks of closed trades.",
+        "fr": "Pas assez d'historique avant cette semaine pour établir une comparaison. Une référence exige au moins deux semaines antérieures de trades clôturés.",
+    },
+    "review_this_week": {"en": "This week", "fr": "Cette semaine"},
+    "review_your_usual": {"en": "Your usual", "fr": "Votre habitude"},
+    "review_baseline_note": {
+        "en": "The baseline is your own history before this week: {n} trades over {weeks} weeks. Per-week figures are that total divided by the weeks you traded, not by calendar weeks.",
+        "fr": "La référence est votre propre historique avant cette semaine : {n} trades sur {weeks} semaines. Les chiffres hebdomadaires sont ce total divisé par les semaines tradées, non par les semaines calendaires.",
+    },
+
+    # ── Authentication ──────────────────────────────────────────────────────
+    "sign_in": {"en": "Sign in", "fr": "Connexion"},
+    "sign_out": {"en": "Sign out", "fr": "Se déconnecter"},
+    "sign_out_all": {"en": "Sign out everywhere", "fr": "Déconnecter partout"},
+    "signed_in_as": {"en": "Signed in as", "fr": "Connecté en tant que"},
+    "create_account": {"en": "Create an account", "fr": "Créer un compte"},
+    "choose_password": {"en": "Password", "fr": "Mot de passe"},
+    "repeat_password": {"en": "Repeat password", "fr": "Confirmez le mot de passe"},
+    "current_password": {"en": "Current password", "fr": "Mot de passe actuel"},
+    "change_password": {"en": "Change password", "fr": "Changer le mot de passe"},
+    "password_changed": {
+        "en": "Password changed. Every other session has been signed out.",
+        "fr": "Mot de passe modifié. Toutes les autres sessions ont été déconnectées.",
+    },
+    "single_user_intro": {
+        "en": "Enter your email to open your data. If you have a Pro subscription, its features unlock automatically.",
+        "fr": "Saisissez votre email pour ouvrir vos données. Si vous avez un abonnement Pro, ses fonctionnalités se débloquent automatiquement.",
+    },
+    "auth_mode_single": {
+        "en": "Single-user mode. Your email is a label for your data, not a login — anyone who can reach this app can open any of it. That is the right setup on your own machine. Before putting this somewhere other people can reach, set SENSITOR_AUTH=multi, which requires a password and expires sessions.",
+        "fr": "Mode mono-utilisateur. Votre email est une étiquette pour vos données, pas un identifiant — quiconque atteint cette application peut ouvrir n'importe quelles données. C'est la bonne configuration sur votre propre machine. Avant de la déployer là où d'autres peuvent y accéder, définissez SENSITOR_AUTH=multi, qui exige un mot de passe et fait expirer les sessions.",
+    },
+    "auth_mode_multi": {
+        "en": "Multi-user mode. Accounts are protected by a password, sessions expire, and no account can reach another's data.",
+        "fr": "Mode multi-utilisateur. Les comptes sont protégés par mot de passe, les sessions expirent, et aucun compte ne peut atteindre les données d'un autre.",
+    },
+    "auth_invalid_email": {
+        "en": "That does not look like an email address.",
+        "fr": "Cela ne ressemble pas à une adresse email.",
+    },
+    "auth_invalid_credentials": {
+        "en": "That email and password do not match an account.",
+        "fr": "Cet email et ce mot de passe ne correspondent à aucun compte.",
+    },
+    "auth_already_registered": {
+        "en": "An account already exists for that address. Sign in instead.",
+        "fr": "Un compte existe déjà pour cette adresse. Connectez-vous plutôt.",
+    },
+    "auth_weak_password": {"en": "That password is too weak.",
+                           "fr": "Ce mot de passe est trop faible."},
+    "auth_locked": {
+        "en": "Too many failed attempts. Locked until",
+        "fr": "Trop de tentatives échouées. Bloqué jusqu'à",
+    },
+    "auth_not_multi_user": {
+        "en": "Passwords are only used in multi-user mode.",
+        "fr": "Les mots de passe ne sont utilisés qu'en mode multi-utilisateur.",
+    },
+    "auth_passwords_differ": {
+        "en": "The two passwords do not match.",
+        "fr": "Les deux mots de passe ne correspondent pas.",
+    },
+
     # ── Trading: broker synchronisation ─────────────────────────────────────
     "sync_broker": {"en": "Import from MetaTrader 5", "fr": "Importer depuis MetaTrader 5"},
     "sync_now": {"en": "Sync now", "fr": "Synchroniser"},

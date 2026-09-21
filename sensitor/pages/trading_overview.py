@@ -59,6 +59,7 @@ def render_trading_overview(ctx=None) -> None:
     currency = tctx.currency
 
     _kpi_rows(tctx, metrics, lang, currency)
+    _copilot_block(tctx, lang)
     _equity_block(tctx, metrics, lang, currency)
     _breakdown_block(tctx, lang, currency)
     _recent_block(tctx, lang, currency)
@@ -195,6 +196,39 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
 
     if metrics["r_coverage"] < 1:
         note(tr("r_coverage_note", lang))
+
+
+# =============================================================================
+# COPILOT
+# =============================================================================
+
+def _copilot_block(tctx, lang) -> None:
+    """
+    What crossed a threshold, and what the behaviour lines up with.
+
+    Two kinds of thing in one list, each keeping its own framing: an item is a
+    single figure crossing a stated threshold, a finding is a comparison between
+    two groups of trades that says so. Neither proposes a change — unlike the
+    portfolio Copilot, which can offer a weight vector and simulate it. A
+    trading book has no equivalent, because the trades taken under a different
+    rule would have been different trades, and inventing that counterfactual is
+    the one thing this page must not do.
+    """
+    from ..ai import trading_copilot as TC
+
+    items = TC.combined(tctx.trades, lang=lang, limit=5)
+    section(tr("things_to_review", lang).upper(), f"{len(items)}" if items else "")
+
+    if not items:
+        alert("good", tr("copilot_nothing_title", lang),
+              tr("copilot_nothing_body", lang))
+        note(tr("copilot_scope_note", lang))
+        return
+
+    for item in items:
+        alert(item["level"], item["title"][lang], item["why"][lang],
+              footnote=item["footnote"][lang])
+    note(tr("copilot_scope_note", lang))
 
 
 # =============================================================================

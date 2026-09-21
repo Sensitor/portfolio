@@ -85,6 +85,9 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "trades": [("raw", "TEXT")],
     "trading_accounts": [("last_synced_at", "TEXT"),
                          ("last_sync_trades", "INTEGER")],
+    "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
+              ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
+              ("locked_until", "TEXT")],
 }
 
 
@@ -111,6 +114,11 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     version = conn.execute("PRAGMA user_version").fetchone()[0]
     if version < 2:
         _to_v2(conn)
+    # Version 3 adds credentials and sessions. Both arrive as new columns and a
+    # new table, which `_add_missing_columns` and `executescript` have already
+    # applied — no rebuild, so there is nothing further to do here. The version
+    # is still stamped, so a database that has been through this is
+    # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
 

@@ -5,3 +5,8 @@ __pycache__/
 # never committed. Override the location with SENSITOR_DB_PATH.
 sensitor_data.db
 *.db-journal
+
+# Node — the mobile client's dependencies are installed, never committed.
+node_modules/
+mobile/node_modules/
+package-lock.json

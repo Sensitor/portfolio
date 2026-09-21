@@ -106,9 +106,50 @@ def get_store():
         return None
 
 
+def get_auth():
+    """
+    The authentication service, over the shared store.
+
+    Cheap to build — it holds no state of its own — so it is constructed per
+    call rather than cached. Caching it would be caching a thing whose only
+    field is the store that is already cached.
+    """
+    from ..core.auth import Auth
+    store = get_store()
+    return Auth(store) if store is not None else None
+
+
 def current_user_email() -> str:
-    """Whoever is signed in, normalised. Empty string when nobody is."""
-    return (st.session_state.get("user_email") or "").strip().lower()
+    """
+    Whoever is signed in, verified. Empty string when nobody is.
+
+    Resolved from the session token, never from the email in session state. The
+    email is what the person typed; the token is what the app issued after
+    checking it. Reading the typed value here is the whole vulnerability: with
+    the data layer scoped by user, an unverified email *is* the authorisation.
+
+    The resolved address is mirrored back into `user_email` for the legacy
+    pages, which still read it directly — but it is written by this function
+    from a verified session, never by a widget.
+    """
+    auth = get_auth()
+    if auth is None:
+        return ""
+
+    token = st.session_state.get("session_token")
+    email = auth.resolve(token) if token else None
+
+    if not email:
+        # A token that no longer resolves — expired, revoked, or from a database
+        # that has since been replaced — must not leave a stale identity behind.
+        if st.session_state.get("user_email"):
+            st.session_state.user_email = ""
+            st.session_state.authenticated = False
+        return ""
+
+    st.session_state.user_email = email
+    st.session_state.authenticated = True
+    return email
 
 
 def require_store_and_user(lang: str):

@@ -138,13 +138,16 @@ cycle in any import order. Verified by importing `performance` before
 
 | Suite | Covers |
 |---|---|
-| `tests/test_database.py` | 86 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
+| `tests/test_api.py` | 170 checks with `streamlit` poisoned: that the API computes nothing (its modules are parsed for arithmetic and numeric imports), that its numbers equal the engine's, that every protected route refuses an absent or invented token, that no endpoint names a user, that a second account reaches none of the first's data, both sign-in flows, single-user mode's refusal to issue sessions, undefined surviving as `null`, and pagination |
+| `tests/test_auth.py` | 95 checks with `streamlit` poisoned: scrypt hashing, salting and rehash-on-sign-in, token fingerprints, both auth modes, throttling and lockout across a restart, session expiry and revocation, password change revoking every other session, and what an attacker holding the database file cannot do |
+| `tests/test_database.py` | 89 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
 | `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
 | `tests/test_investment_engine.py` | 44 checks with `streamlit` poisoned: layering, reference-data integrity, the analyzer's callback contract and its behaviour on a failed download, core helpers, the analytics facade |
-| `tests/test_trading_engine.py` | 124 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal |
+| `tests/test_trading_engine.py` | 173 checks with `streamlit` poisoned: P&L and R arithmetic on hand-built trades, direction and session parsing, validation, metrics, curves and streaks, stop discipline, risk, breakdowns, the psychology framing, the journal, the weekly review's window and document, and the trading Copilot's framing |
 | `tests/test_mt5_connector.py` | 128 checks with `streamlit` poisoned and a mocked terminal: balance-operation filtering, the 0.0 stop sentinel, deal folding, scaling in and out, partial closes, the implied point value, stops from orders, server-time conversion, the connector's lifecycle and failure modes, the merge rules, an end-to-end sync against a real store, and id namespacing across accounts |
 | `tests/test_trading_pages.py` | 82 render checks — 5 pages across a full book (both languages), every period window, an account filter, a book with no stops, a book with no losses, four trades, open positions only, no self-reported fields, trades with data problems, an empty journal, and no signed-in user; plus cross-user isolation asserted through the store |
 | `tests/visual_preview.py` | renders the real pages against a synthetic market universe for visual inspection |
+| `mobile/tests/integration.ts` | 38 checks from the TypeScript client against a live uvicorn process: sign-in, the aggregate payload, ETag caching, incremental sync, undefined arriving as null, findings passed through verbatim, and an unreachable server flagged as offline rather than as a failure |
 | ad-hoc | legacy page renders (7 pages × 2 languages) |
 
 `test_investment_engine.py` only became possible in Phase 2. Before the
@@ -196,9 +199,9 @@ sensitor/
 | 4 | Trading journal — **done** | additive |
 | 5 | MT5 connector — **done** | additive |
 | 6 | Database models for multi-user — **done** | **breaking inside the package** |
-| 7 | Multi-user | additive |
-| 8 | FastAPI | additive |
-| 9 | Mobile-ready backend | additive |
+| 7 | Multi-user — **done** | additive |
+| 8 | FastAPI — **done** | additive |
+| 9 | Mobile-ready backend — **done** | additive |
 
 A phase is not started until the previous one leaves the 159 render checks and
 the legacy page renders passing.
@@ -496,3 +499,303 @@ rather than from a list written down beside it, and asserts that every public
 method leads with `user_email` or `email` and that neither is optional. The seven
 unscoped methods survived four phases of review; a list maintained by hand would
 have let the eighth through too.
+
+---
+
+## 13. Authentication (Phase 7)
+
+Phase 6 made the data layer enforce ownership of whatever identity was claimed.
+This is the layer that decides whether the claim is true.
+
+### What was wrong
+
+Typing any address into the Account page's text box set `authenticated = True`
+and `user_email` to whatever was typed. Every page then read that value and the
+store faithfully scoped its queries to it. The scoping was correct and
+worthless: an unverified email *is* the authorisation when the data layer trusts
+it.
+
+`current_user_email()` now resolves a session token against the store. The email
+in session state is written **by that function**, from a verified session, and
+never by a widget.
+
+### Two modes, one code path
+
+| | |
+|---|---|
+| **single** (default) | the app is one person's, on their own machine. The email is a filing label; there is nobody to verify against, and demanding a password to open your own spreadsheet is theatre |
+| **multi** (`SENSITOR_AUTH=multi`) | accounts have passwords, sign-in verifies, failures throttle, sessions expire |
+
+Both modes issue a session and run the same code. A second, simpler path for the
+common case is a path that does not get exercised and therefore does not get
+fixed — this way the plumbing multi-user depends on is the plumbing that runs on
+every single-user sign-in too.
+
+An unrecognised value of `SENSITOR_AUTH` falls back to **single**, not multi: a
+typo must not silently claim protection the deployment does not have.
+
+### The mode is stated, not assumed
+
+The Account page says which mode it is in, and in single mode it says plainly
+that the email is not a login and what to set before putting the app somewhere
+other people can reach. An access-control mode nobody can see is how a
+deployment ends up open with a text box for a login and no way to notice.
+
+### Choices in `core/security.py`
+
+**scrypt from the standard library** — memory-hard, so a stolen database cannot
+be attacked as cheaply as one hashed with SHA-256, and no new dependency for
+someone installing this on their own machine.
+
+**The hash carries its own parameters** (`scrypt$n$r$p$salt$key`). Raising the
+cost later must not invalidate every existing password: old hashes keep
+verifying at their old cost and are upgraded on the next successful sign-in,
+which is the only moment the plaintext is in hand.
+
+**Session tokens are stored as a SHA-256 fingerprint.** A leaked database yields
+no usable session. Fast hashing is right for a token and wrong for a password —
+32 random bytes have no dictionary behind them.
+
+**Every comparison is `hmac.compare_digest`.** A bearer credential compared with
+`==` leaks its prefix to anyone willing to measure.
+
+**An unknown account and a wrong password return the same reason.**
+Distinguishing them tells an attacker which addresses are registered, which is
+worth more to them than it is to a user who mistyped.
+
+**A password change revokes every session.** A password is usually changed
+because someone fears it is known; a change that leaves their session alive has
+solved nothing.
+
+### The harness had to change, and that is the point
+
+The render harnesses seeded `user_email` directly. Once identity came from a
+token, every persistence page rendered its sign-in wall — and the harness
+reported green, because it only watched for exceptions. A page that quietly
+refuses to show anything raises nothing at all.
+
+Both harnesses now sign in through `Auth`, and the trading harness asserts that
+a signed-in run renders content and an anonymous one renders the wall. Verified
+by breaking the token deliberately and confirming the suite fails.
+
+### One more DOM-migration casualty
+
+The app's original stylesheet styled tabs as a gradient pill. Streamlit moved
+tabs from BaseWeb to react-aria, which stopped its `[data-baseweb="tab-list"]`
+and `[data-baseweb="tab"]` rules from matching while its generic
+`[aria-selected="true"]` rule kept firing — leaving an orphaned gradient pill
+with no container, on every tab in the app. Found because the new sign-in form
+uses tabs. Fixed for all of them.
+
+---
+
+## 14. The HTTP API (Phase 8)
+
+`sensitor/api/` — 22 endpoints over the same engine. The operating manual is
+`docs/API.md`; what follows is the boundary and why it is drawn there.
+
+### It computes nothing
+
+There is no metric under `sensitor/api/`. Every number comes from
+`sensitor.trading` and `sensitor.investment`, reached through the same `Store`
+and the same `Auth` the Streamlit pages use. The trading routes build a
+`TradingContext` — not the same *kind* of object as the pages use, the same
+class, from the same store.
+
+A metric implemented twice diverges, and the copy that diverges is the one with
+fewer readers: the phone and the app would quietly disagree about a trader's
+expectancy, and only one of them would be wrong in a way anyone noticed.
+
+The test asserts it structurally. Every module under `sensitor/api/` is parsed
+for arithmetic — the only `BinOp` permitted is inside a subscript, which is
+pagination — and for imports of numpy, pandas, scipy, statistics and math. The
+positive half is checked too: twelve served figures are compared against the
+engine called directly.
+
+### The caller comes from the token, and there is no other way
+
+`deps.current_user` is the only route a request has to an identity. No endpoint
+takes a user as a path parameter, a query parameter or a body field, so none
+*can* be asked for someone else's data — the guarantee is structural rather than
+a check that might be forgotten on the next endpoint. The test reads it off the
+OpenAPI document, so it reflects what is served rather than what the source
+appears to say.
+
+An id belonging to another account returns 404 with the same message as an id
+that does not exist. Distinguishing them confirms existence.
+
+### Single-user mode does not cross to HTTP
+
+The desktop app treats an email as a filing label: type it and your data opens.
+Defensible for a text box on your own machine; indefensible for an endpoint
+anyone can route a packet to. So the API refuses to issue a session in
+single-user mode unless `SENSITOR_API_TOKEN` is configured and presented — a
+deliberate single-tenant key, which is what a phone on your own network needs.
+With it unset the endpoint returns 503 and says why, and `/meta` reports
+`issues_sessions: false` so a client can explain the failure.
+
+This is the one place the API deliberately behaves *differently* from the app,
+and the reason is that the threat model is different.
+
+### FastAPI is not a dependency of the app
+
+`sensitor/api/__init__.py` imports nothing, for the same reason
+`integrations/__init__.py` does not import the MT5 connector: someone running
+the Streamlit app need not have FastAPI installed. The API process, in turn,
+needs no Streamlit — the whole engine already imports cleanly without it, which
+Phase 2 established and every engine suite since has asserted by poisoning the
+module.
+
+### CORS is off unless configured
+
+`SENSITOR_CORS_ORIGINS`, comma-separated. Not defaulted to `*`: credentials
+travel on these requests, and a wildcard that arrived by default rather than by
+decision is how a browser on any site ends up able to call the API with a user's
+token.
+
+---
+
+## 15. The mobile surface (Phase 9)
+
+`sensitor/api/routers/mobile.py` and `mobile/src/api/`. The manual is
+`docs/MOBILE.md`.
+
+### What was built, and what was not
+
+The backend and a typed client, both verified end to end — the client runs
+against a real uvicorn process, not a mock. **The React Native screens were
+not built**, deliberately: there is no simulator in this environment, and every
+visual decision in this project was made by rendering the thing and looking at
+it. Ten bugs in the trading pages were found that way and none by a test.
+Shipping screens nobody could look at would break the practice that found them.
+
+### Three endpoints, three reasons
+
+**`/mobile/overview`** — a home screen in one request rather than six. On a
+mobile network each round trip costs more than the bytes it carries, and six
+requests can each land on a different moment; one `TradingContext` cannot, so
+the whole screen describes the same set of trades.
+
+**`/mobile/trades?since=`** — only what changed, filtered on `updated_at` rather
+than `closed_at`, because a trade annotated today is a change the client needs
+even though it closed in March.
+
+**`/mobile/version`** — a tiny poll for deciding whether to fetch at all.
+
+Measured on 900 trades: 60,119 bytes over six requests becomes 24,535 over one,
+12,283 gzipped becomes 6,029, and an unchanged reopen transfers nothing.
+
+### Downsampling belongs in the engine
+
+`trading.analytics.downsample` keeps each bucket's first, lowest, highest and
+last point rather than sampling at a stride. The reason is specific: on an
+equity curve the point most likely to fall between strided samples is the
+deepest trough, so the phone would draw a shallower drawdown than the desktop —
+one figure disagreeing with itself across two screens. Extremes survive by
+construction.
+
+It lives in the engine and not the router because the router is not allowed to
+compute anything, and because the Streamlit charts have the same problem.
+
+### Two bugs the live server found that the test client did not
+
+**`/mobile/overview` was larger than the six requests it replaced.** The
+engine's curve points carry a trade id, a symbol and a per-trade P&L alongside
+the two numbers a chart plots, and serialising them whole cost more than the
+round trips saved. The `response_model` is what projects them down — measuring
+the payload is what revealed it.
+
+**A malformed sync cursor returned the entire journal.** A `+` in a query string
+decodes to a space, so an ISO timestamp with a UTC offset arrives as
+`…12:00:00 00:00`. The stored timestamps keep their `+`, and `'+' > ' '`, so the
+string comparison matched *every* row — the endpoint silently served the whole
+history, which is the exact download it exists to avoid. It is now repaired when
+unambiguous and rejected with 422 when not.
+
+Both were invisible to the FastAPI test client and to typechecking. Neither
+would have been found without running the client against a live process.
+
+### The client's job is the other half of the server's
+
+`strictNullChecks` plus `| null` on every undefinable figure means
+`metrics.profit_factor.toFixed(2)` does not compile. The dangerous line is the
+one that does: `(metrics.profit_factor ?? 0).toFixed(2)` prints `0.00` when the
+truth is "there were no losing trades". `format.ts` exists so no screen has to
+make that choice.
+
+The client also clears its ETag cache on sign-out. A cached overview belongs to
+whoever was signed in when it was fetched; the server is built to make
+cross-user reads impossible, and the client keeping one would undo that locally.
+
+---
+
+## 16. The weekly review and the trading Copilot
+
+The two pieces of the brief that outlived the nine phases.
+
+### Document primitives moved to `core/document.py`
+
+The palette, the formatters, the inline-SVG charts and the print stylesheet were
+inside `investment/report.py`. The weekly review needs all of them, and the
+alternative — a second hand-written SVG renderer — would drift, with the
+drifting copy being whichever had fewer readers. Two client-facing documents
+that slowly stop looking like the same product is the one thing a deliverable
+cannot afford.
+
+`investment/report.py` imports them by name and its sections are unchanged;
+it went from 695 lines to 388.
+
+### `trading/report.py` — the weekly review
+
+Six sections: the week, every trade, where it came from, how it was risked,
+what the data lines up with, and the week against the trader's own baseline.
+
+Four decisions carry it:
+
+**The window is half-open and selected by close.** A Sunday 23:59 close is in
+the week and a Monday 00:00 close is in the next; an inclusive end would put a
+midnight close in both. And a position opened Friday and closed Tuesday
+produced its result in the following week, so a review — which is about
+results — belongs to that one.
+
+**A short week says so before its numbers.** Under ten closed trades the
+document leads with the fact that most of what follows describes those trades
+and not a method. Burying that under the figures is how a review teaches
+over-interpretation of noise, which is the mistake it exists to prevent.
+
+**The baseline is the trader's own history.** A −1.2R week means nothing
+against zero and a great deal against a usual week of +0.4R. That comparison is
+what makes a single week legible, so it is a section rather than a footnote.
+
+**The psychology section passes the engine's sentences through verbatim.** Each
+already names itself a correlation and carries its sample size; a document that
+paraphrased them would be the one place that safeguard did not reach.
+
+### `ai/trading_copilot.py` — and what it deliberately cannot do
+
+The portfolio Copilot pairs an observation with a **simulatable change**: a
+weight vector is a complete description of a portfolio, and the past can be
+replayed under it.
+
+A trading book has no equivalent. There is no "what if I had risked less" that
+can be replayed, because the trades taken under a different rule would have been
+different trades. So every item here carries `proposed_change: None`, and the
+test asserts that no item's text contains a counterfactual — no "would have",
+no "you should". Inventing one would be the single most dishonest thing this
+codebase could do, precisely because it would be the most useful-sounding.
+
+`combined()` merges threshold items with `psychology.findings()`. The two mean
+different things — an item is one figure crossing a stated line, a finding is a
+comparison between two groups — and each keeps its own framing in the merged
+list.
+
+### Found by rendering the document
+
+| Seen | Was |
+|---|---|
+| daily P&L bars reading "+142893.0%" | `svg_diverging_bars` formats as a percentage; it was built for contribution deltas and the review passes it money |
+| four KPI cards stacked full-width | a CSS class that does not exist — `kpi-row` instead of `kpi-grid` |
+| "reak of Structure (7)" | an SVG has no overflow to clip against, so a long label is not truncated, it is drawn outside the picture. Labels are now fitted — and the *count* is what survives the shortening, never the thing that falls off |
+| red checkboxes, a white download button | two more controls the theme had never been pointed at |
+
+The first three were invisible to every test and to the type checker.

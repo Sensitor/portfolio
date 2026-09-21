@@ -145,12 +145,15 @@ class Store:
                 "SELECT COUNT(*) AS n FROM trading_accounts WHERE user_email = ?", email),
             "trades": self._count(
                 "SELECT COUNT(*) AS n FROM trades WHERE user_email = ?", email),
+            "sessions": self._count(
+                "SELECT COUNT(*) AS n FROM sessions WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
             conn.execute(
                 "DELETE FROM snapshots WHERE portfolio_id IN "
                 "(SELECT id FROM portfolios WHERE user_email = ?)", (email,))
+            conn.execute("DELETE FROM sessions WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM trades WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM trading_accounts WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM portfolios WHERE user_email = ?", (email,))
@@ -180,6 +183,127 @@ class Store:
             "trades": [t.to_dict() for t in self.list_trades(email)],
             "schema_version": SCHEMA_VERSION,
         }
+
+    # ── Credentials ──────────────────────────────────────────────────────────
+
+    def set_password_hash(self, email: str, password_hash: str | None) -> None:
+        """
+        Store a credential. `None` removes it, leaving an account with no
+        password — which is a real state, not a missing one.
+        """
+        email = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, email)
+            conn.execute(
+                "UPDATE users SET password_hash = ?, updated_at = ?, "
+                "failed_logins = 0, locked_until = NULL WHERE email = ?",
+                (password_hash, stamp, email),
+            )
+
+    def credential(self, email: str) -> dict | None:
+        """
+        What sign-in needs, and nothing else.
+
+        A narrow read rather than `get_user`: the password hash should travel to
+        as few places as possible, and a method that returns it should be
+        obvious at the call site.
+        """
+        rows = self._read(
+            "SELECT email, password_hash, failed_logins, locked_until "
+            "FROM users WHERE email = ?", (_email(email),))
+        return dict(rows[0]) if rows else None
+
+    def record_login_success(self, email: str) -> None:
+        with self._write() as conn:
+            conn.execute(
+                "UPDATE users SET last_login_at = ?, failed_logins = 0, "
+                "locked_until = NULL, updated_at = ? WHERE email = ?",
+                (_now(), _now(), _email(email)),
+            )
+
+    def record_login_failure(self, email: str, *,
+                             locked_until: str | None = None) -> int:
+        """Count a failed attempt and return the new total."""
+        email = _email(email)
+        with self._write() as conn:
+            conn.execute(
+                "UPDATE users SET failed_logins = failed_logins + 1, "
+                "locked_until = COALESCE(?, locked_until), updated_at = ? "
+                "WHERE email = ?",
+                (locked_until, _now(), email),
+            )
+        return self._count(
+            "SELECT failed_logins AS n FROM users WHERE email = ?", email)
+
+    # ── Sessions ─────────────────────────────────────────────────────────────
+
+    def create_session(self, email: str, fingerprint: str, *,
+                       expires_at: str, label: str | None = None) -> None:
+        email = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, email)
+            conn.execute(
+                """INSERT INTO sessions
+                     (fingerprint, user_email, created_at, expires_at,
+                      last_seen_at, label)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(fingerprint) DO UPDATE SET
+                     expires_at = excluded.expires_at,
+                     last_seen_at = excluded.last_seen_at""",
+                (fingerprint, email, stamp, expires_at, stamp, label),
+            )
+
+    def session(self, fingerprint: str) -> dict | None:
+        """
+        A session row, or None when it does not exist or has expired.
+
+        Expiry is applied in the query. A caller that fetched the row and
+        checked the date itself would be one forgotten comparison away from
+        honouring a session forever, and the comparison would have to be
+        repeated at every call site.
+        """
+        rows = self._read(
+            "SELECT * FROM sessions WHERE fingerprint = ? AND expires_at > ?",
+            (fingerprint or "", _now()),
+        )
+        return dict(rows[0]) if rows else None
+
+    def touch_session(self, fingerprint: str, *, expires_at: str | None = None) -> None:
+        """Mark a session as seen, and optionally slide its expiry forward."""
+        with self._write() as conn:
+            if expires_at:
+                conn.execute(
+                    "UPDATE sessions SET last_seen_at = ?, expires_at = ? "
+                    "WHERE fingerprint = ?", (_now(), expires_at, fingerprint))
+            else:
+                conn.execute(
+                    "UPDATE sessions SET last_seen_at = ? WHERE fingerprint = ?",
+                    (_now(), fingerprint))
+
+    def revoke_session(self, fingerprint: str) -> None:
+        with self._write() as conn:
+            conn.execute("DELETE FROM sessions WHERE fingerprint = ?", (fingerprint,))
+
+    def revoke_sessions(self, user_email: str) -> int:
+        """Sign a user out everywhere. What a password change must do."""
+        with self._write() as conn:
+            cursor = conn.execute("DELETE FROM sessions WHERE user_email = ?",
+                                  (_email(user_email),))
+            return cursor.rowcount
+
+    def list_sessions(self, user_email: str) -> list[dict]:
+        return [dict(r) for r in self._read(
+            "SELECT * FROM sessions WHERE user_email = ? AND expires_at > ? "
+            "ORDER BY created_at DESC",
+            (_email(user_email), _now()))]
+
+    def purge_expired_sessions(self) -> int:
+        with self._write() as conn:
+            cursor = conn.execute("DELETE FROM sessions WHERE expires_at <= ?",
+                                  (_now(),))
+            return cursor.rowcount
 
     def _count(self, sql: str, *params) -> int:
         rows = self._read(sql, tuple(params))
@@ -471,12 +595,19 @@ class Store:
         return len(rows)
 
     def list_trades(self, user_email: str, *, account_id: str | None = None,
-                    symbol: str | None = None, limit: int | None = None) -> list:
+                    symbol: str | None = None, limit: int | None = None,
+                    updated_since: str | None = None) -> list:
         """
         Trades for a user, newest close first.
 
         Open trades have a null `closed_at` and sort last under `DESC`; that is
         deliberate — a list of results should lead with results.
+
+        `updated_since` is what makes an incremental sync possible: a client
+        that already holds the journal asks only for what has changed since it
+        last looked. It filters on `updated_at`, not `closed_at`, because a
+        trade annotated today is a change the client needs even though it closed
+        in March.
         """
         sql = "SELECT * FROM trades WHERE user_email = ?"
         params: list = [_email(user_email)]
@@ -486,6 +617,9 @@ class Store:
         if symbol:
             sql += " AND symbol = ?"
             params.append(symbol)
+        if updated_since:
+            sql += " AND updated_at > ?"
+            params.append(str(updated_since))
         sql += " ORDER BY closed_at DESC, opened_at DESC"
         if limit:
             sql += " LIMIT ?"
@@ -524,6 +658,30 @@ class Store:
             params.append(str(account_id))
         rows = self._read(sql, tuple(params))
         return int(rows[0]["n"]) if rows else 0
+
+    def trades_version(self, user_email: str) -> str:
+        """
+        A short string that changes whenever this user's journal changes.
+
+        The API turns it into an `ETag`, so a phone reopening the app gets a 304
+        and re-downloads nothing. Built from the row count and the newest
+        `updated_at`: a save bumps the timestamp, a delete bumps the count, and
+        the pair moves for either.
+
+        Hashed here rather than in the route, because the route layer is not
+        allowed to compute anything — and because a caller should not have to
+        know what the version is made of to compare two of them.
+        """
+        import hashlib
+
+        rows = self._read(
+            "SELECT COUNT(*) AS n, COALESCE(MAX(updated_at), '') AS newest "
+            "FROM trades WHERE user_email = ?", (_email(user_email),))
+        if not rows:
+            return "empty"
+        digest = hashlib.sha256(
+            f"{rows[0]['n']}:{rows[0]['newest']}".encode()).hexdigest()
+        return digest[:16]
 
     def trade_symbols(self, user_email: str) -> list[str]:
         rows = self._read(

@@ -5,3 +5,8 @@ yfinance>=0.2.28
 plotly>=5.14.0
 scipy>=1.10.0
 python-dateutil>=2.8.0
+
+# Optional — the HTTP API only (Phase 8). The Streamlit app does not need these,
+# and the API process does not need Streamlit.
+# fastapi>=0.110
+# uvicorn>=0.27
