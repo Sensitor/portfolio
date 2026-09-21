@@ -138,6 +138,7 @@ cycle in any import order. Verified by importing `performance` before
 
 | Suite | Covers |
 |---|---|
+| `tests/test_api.py` | 121 checks with `streamlit` poisoned: that the API computes nothing (its modules are parsed for arithmetic and numeric imports), that its numbers equal the engine's, that every protected route refuses an absent or invented token, that no endpoint names a user, that a second account reaches none of the first's data, both sign-in flows, single-user mode's refusal to issue sessions, undefined surviving as `null`, and pagination |
 | `tests/test_auth.py` | 95 checks with `streamlit` poisoned: scrypt hashing, salting and rehash-on-sign-in, token fingerprints, both auth modes, throttling and lockout across a restart, session expiry and revocation, password change revoking every other session, and what an attacker holding the database file cannot do |
 | `tests/test_database.py` | 89 checks: cross-user isolation on every read, write and delete; a scope check derived from the `Store` class itself; the user lifecycle, export and cascade; the constraints that are there and the ones deliberately absent; and the version 2 migration against a populated database built from the previous schema |
 | `tests/test_sensitor_pages.py` | 164 render checks — 12 pages × 5 portfolio shapes × 2 languages, plus no portfolio, short history, real-portfolio mode, 3 risk profiles, and the save / snapshot / history / delete flow driven through its own buttons |
@@ -198,7 +199,7 @@ sensitor/
 | 5 | MT5 connector — **done** | additive |
 | 6 | Database models for multi-user — **done** | **breaking inside the package** |
 | 7 | Multi-user — **done** | additive |
-| 8 | FastAPI | additive |
+| 8 | FastAPI — **done** | additive |
 | 9 | Mobile-ready backend | additive |
 
 A phase is not started until the previous one leaves the 159 render checks and
@@ -584,3 +585,69 @@ and `[data-baseweb="tab"]` rules from matching while its generic
 `[aria-selected="true"]` rule kept firing — leaving an orphaned gradient pill
 with no container, on every tab in the app. Found because the new sign-in form
 uses tabs. Fixed for all of them.
+
+---
+
+## 14. The HTTP API (Phase 8)
+
+`sensitor/api/` — 22 endpoints over the same engine. The operating manual is
+`docs/API.md`; what follows is the boundary and why it is drawn there.
+
+### It computes nothing
+
+There is no metric under `sensitor/api/`. Every number comes from
+`sensitor.trading` and `sensitor.investment`, reached through the same `Store`
+and the same `Auth` the Streamlit pages use. The trading routes build a
+`TradingContext` — not the same *kind* of object as the pages use, the same
+class, from the same store.
+
+A metric implemented twice diverges, and the copy that diverges is the one with
+fewer readers: the phone and the app would quietly disagree about a trader's
+expectancy, and only one of them would be wrong in a way anyone noticed.
+
+The test asserts it structurally. Every module under `sensitor/api/` is parsed
+for arithmetic — the only `BinOp` permitted is inside a subscript, which is
+pagination — and for imports of numpy, pandas, scipy, statistics and math. The
+positive half is checked too: twelve served figures are compared against the
+engine called directly.
+
+### The caller comes from the token, and there is no other way
+
+`deps.current_user` is the only route a request has to an identity. No endpoint
+takes a user as a path parameter, a query parameter or a body field, so none
+*can* be asked for someone else's data — the guarantee is structural rather than
+a check that might be forgotten on the next endpoint. The test reads it off the
+OpenAPI document, so it reflects what is served rather than what the source
+appears to say.
+
+An id belonging to another account returns 404 with the same message as an id
+that does not exist. Distinguishing them confirms existence.
+
+### Single-user mode does not cross to HTTP
+
+The desktop app treats an email as a filing label: type it and your data opens.
+Defensible for a text box on your own machine; indefensible for an endpoint
+anyone can route a packet to. So the API refuses to issue a session in
+single-user mode unless `SENSITOR_API_TOKEN` is configured and presented — a
+deliberate single-tenant key, which is what a phone on your own network needs.
+With it unset the endpoint returns 503 and says why, and `/meta` reports
+`issues_sessions: false` so a client can explain the failure.
+
+This is the one place the API deliberately behaves *differently* from the app,
+and the reason is that the threat model is different.
+
+### FastAPI is not a dependency of the app
+
+`sensitor/api/__init__.py` imports nothing, for the same reason
+`integrations/__init__.py` does not import the MT5 connector: someone running
+the Streamlit app need not have FastAPI installed. The API process, in turn,
+needs no Streamlit — the whole engine already imports cleanly without it, which
+Phase 2 established and every engine suite since has asserted by poisoning the
+module.
+
+### CORS is off unless configured
+
+`SENSITOR_CORS_ORIGINS`, comma-separated. Not defaulted to `*`: credentials
+travel on these requests, and a wildcard that arrived by default rather than by
+decision is how a browser on any site ends up able to call the API with a user's
+token.
