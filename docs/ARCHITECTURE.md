@@ -655,19 +655,32 @@ token.
 
 ---
 
-## 15. The mobile surface (Phase 9)
+## 15. The mobile surface (Phase 9, and the app)
 
-`sensitor/api/routers/mobile.py` and `mobile/src/api/`. The manual is
-`docs/MOBILE.md`.
+`sensitor/api/routers/mobile.py`, `mobile/src/` and `mobile/app/`. The manual
+is `docs/MOBILE.md`.
 
-### What was built, and what was not
+### How the screens got looked at
 
-The backend and a typed client, both verified end to end — the client runs
-against a real uvicorn process, not a mock. **The React Native screens were
-not built**, deliberately: there is no simulator in this environment, and every
-visual decision in this project was made by rendering the thing and looking at
-it. Ten bugs in the trading pages were found that way and none by a test.
-Shipping screens nobody could look at would break the practice that found them.
+The backend and the typed client came first, both verified against a real
+uvicorn process rather than a mock. The screens waited, because there is no
+iOS simulator in this environment and every visual decision in this project
+was made by rendering the thing and looking at it.
+
+What unblocked them was `react-native-web`: the same components, in a browser,
+against the live API. Charts are drawn with `react-native-svg` for the same
+reason — one implementation on the device and in the preview.
+
+Six bugs came out of that, and none of them from a test: a currency **code**
+concatenated as a symbol (`USD158,777.59`); a caption calling the last 90
+trading days the whole window of 151; a `?? 0` printing "over the 0 and 0
+trades" for a comparison that carries no per-group counts; a discipline table
+showing the raw keys instead of the labelled scale; two meters drawing a
+different quantity from the number above them; and a sample count truncated out
+of a chart label, which is the one part of a label that must survive.
+
+A seventh was structural: `mobile/tsconfig.json` did not list `app/`, so the
+typecheck was green over a directory it never read.
 
 ### Three endpoints, three reasons
 

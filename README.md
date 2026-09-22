@@ -1,8 +1,8 @@
 # Sensitor
 
 Investment and trading analytics over one engine. A Streamlit application, an
-HTTP API and a typed mobile client — all reading the same calculations, so no
-two surfaces can disagree about what a number means.
+HTTP API and an iOS app — all reading the same calculations, so no two
+surfaces can disagree about what a number means.
 
 ---
 
@@ -19,6 +19,9 @@ MetaTrader 5, or entered by hand.
 
 **Documents.** A client portfolio report and a weekly trading review, each one
 self-contained HTML you print or send.
+
+**On a phone.** The five trading pages again, as an Expo app over the same
+endpoints.
 
 ---
 
@@ -38,10 +41,10 @@ Optional extras, each independent:
 ```bash
 pip install fastapi uvicorn     # the HTTP API
 pip install MetaTrader5         # the broker connector — Windows only
-cd mobile && npm install        # the TypeScript client
+cd mobile && npm install        # the mobile app and its client
 ```
 
-Neither extra is needed by the app, and the API process needs no Streamlit.
+None of these is needed by the app, and the API process needs no Streamlit.
 
 ---
 
@@ -143,9 +146,13 @@ deployment.
 
 ## Mobile
 
+An Expo app — five screens over the same engine, mirroring the five desktop
+trading pages.
+
 ```bash
 cd mobile
 npm install
+npx expo start                 # then scan the QR code with Expo Go
 npm run typecheck
 SENSITOR_API_URL=http://localhost:8000 npm run test:integration
 ```
@@ -159,10 +166,9 @@ Three endpoints are shaped for a handset. On 900 trades, a home screen goes
 from 60 KB over six requests to 24 KB over one, and an unchanged reopen
 transfers nothing.
 
-**The React Native screens are not built** — there is no simulator in the
-environment this was developed in, and every visual decision here was made by
-rendering the thing and looking at it.
-**[docs/MOBILE.md](docs/MOBILE.md)** says what they should be.
+On the phone, put the machine's LAN address in the app's Server field —
+`localhost` there means the phone. **[docs/MOBILE.md](docs/MOBILE.md)** — the
+screens, the client, and the three stages from Expo Go to the App Store.
 
 ---
 
@@ -182,7 +188,11 @@ sensitor/
 ├── api/           app · deps · schemas · routers/
 ├── ui/            themes · components · charts
 └── pages/         17 page renderers
-mobile/src/api/    the TypeScript client
+mobile/
+├── src/api/       the TypeScript client
+├── src/components/ primitives · charts · the screen frame
+├── src/state/     session · the fetch hooks
+└── app/           expo-router: sign-in and the five tabs
 docs/              ARCHITECTURE · API · MOBILE · MT5_SYNC
 ```
 

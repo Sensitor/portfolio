@@ -23,8 +23,9 @@
  */
 
 import type {
-  BreakdownRow, CurvePoint, DayPnL, Finding, Me, Meta, Overview, Period,
-  Portfolio, Session, Trade, TradeDelta, TradingAccount, TradingMetrics,
+  BreakdownRow, CurvePoint, DayPnL, Dimension, Finding, Me, Meta, Overview,
+  Period, Portfolio, PsychologySummary, RiskSummary, Session, TradeDelta,
+  TradesPage, TradingAccount, TradingMetrics,
 } from './types';
 
 export class ApiError extends Error {
@@ -274,7 +275,7 @@ export class SensitorClient {
     return this.request<DayPnL[]>('/trading/daily', { query });
   }
 
-  breakdown(dimension: string, query: TradingQuery = {}): Promise<BreakdownRow[]> {
+  breakdown(dimension: Dimension, query: TradingQuery = {}): Promise<BreakdownRow[]> {
     return this.request<BreakdownRow[]>(`/trading/breakdown/${dimension}`, { query });
   }
 
@@ -282,14 +283,18 @@ export class SensitorClient {
     return this.request<Finding[]>('/trading/findings', { query });
   }
 
-  risk(query: TradingQuery = {}): Promise<Record<string, unknown>> {
-    return this.request<Record<string, unknown>>('/trading/risk', { query });
+  risk(query: TradingQuery = {}): Promise<RiskSummary> {
+    return this.request<RiskSummary>('/trading/risk', { query });
   }
 
-  trades(query: TradingQuery & { limit?: number; offset?: number } = {}): Promise<{
-    trades: Trade[]; total: number; limit: number; offset: number;
-  }> {
-    return this.request('/trading/trades', { query });
+  psychology(query: TradingQuery = {}): Promise<PsychologySummary> {
+    return this.request<PsychologySummary>('/trading/psychology', { query });
+  }
+
+  trades(query: TradingQuery & {
+    limit?: number; offset?: number; closed_only?: boolean;
+  } = {}): Promise<TradesPage> {
+    return this.request<TradesPage>('/trading/trades', { query });
   }
 
   accounts(): Promise<TradingAccount[]> {
