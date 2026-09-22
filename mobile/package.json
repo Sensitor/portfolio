@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "description": "The Sensitor API client, and the Expo app that consumes it.",
-  "main": "src/api/index.ts",
+  "main": "expo-router/entry",
   "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test:integration": "tsx tests/integration.ts"
   },
@@ -12,5 +15,23 @@
     "@types/node": "^22.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0"
+  },
+  "//": "Every version below is the one Expo SDK 57 bundles, read from expo/bundledNativeModules.json — not a caret range. Caret ranges installed react-native 0.87 against an SDK built for 0.86, and the web bundle failed on a subpath 0.87 stopped exporting. An Expo app's dependency versions belong to the SDK, not to npm's idea of compatible.",
+  "dependencies": {
+    "@expo/metro-runtime": "~57.0.16",
+    "expo": "~57.0.24",
+    "expo-constants": "~57.0.19",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.22",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "~0.21.0"
   }
 }

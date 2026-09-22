@@ -180,6 +180,172 @@ export interface TradeDelta {
   complete: boolean;
 }
 
+/**
+ * The risk summary.
+ *
+ * Every sub-object is optional, and so is nearly every field inside one. That
+ * is not defensive typing — it mirrors the engine, which returns `{}` for a
+ * section it cannot compute rather than a shape full of zeros. `drift` needs
+ * ten trades with a stop before it means anything; `streaks` needs ten trades
+ * at all. A screen that types these as present will render "0 concurrent
+ * positions" for a book the engine declined to measure.
+ */
+export interface RiskProfile {
+  n: number;
+  n_with_stop?: number;
+  coverage?: Undefinable;
+  no_stop_count?: number;
+  mean_risk?: Undefinable;
+  median_risk?: Undefinable;
+  min_risk?: Undefinable;
+  max_risk?: Undefinable;
+  risk_spread?: Undefinable;
+  /** Coefficient of variation. null below the sample threshold — not zero. */
+  consistency?: Undefinable;
+  largest_vs_median?: Undefinable;
+}
+
+export interface RiskDrift {
+  start_median?: number;
+  end_median?: number;
+  change?: number;
+  direction?: 'up' | 'down' | 'stable' | string;
+  n_points?: number;
+  from?: string;
+  to?: string;
+}
+
+export interface StopDiscipline {
+  n_with_r?: number;
+  n_losses?: number;
+  n_beyond_stop?: number;
+  share_beyond_stop?: Undefinable;
+  worst_loss_r?: Undefinable;
+  avg_loss_r?: Undefinable;
+  /** Always "gross" — see the API docs. Costs alone push a clean stop past -1R. */
+  measured_on?: string;
+  beyond_stop_trades?: string[];
+}
+
+export interface Exposure {
+  max_concurrent?: number;
+  max_concurrent_at?: string;
+  max_concurrent_symbols?: string[];
+  max_simultaneous_risk?: Undefinable;
+  max_simultaneous_risk_at?: string;
+}
+
+export interface Activity {
+  n_days?: number;
+  mean_per_day?: number;
+  median_per_day?: number;
+  max_per_day?: number;
+  busiest_day?: string;
+  counts_by_day?: Record<string, number>;
+}
+
+export interface StreakContext {
+  observed_max_losses?: number;
+  expected_max_losses?: number;
+  unusual?: boolean;
+  win_rate?: Undefinable;
+  n?: number;
+}
+
+export interface RiskSummary {
+  profile: RiskProfile;
+  drift: RiskDrift;
+  stops: StopDiscipline;
+  exposure: Exposure;
+  activity: Activity;
+  streaks: StreakContext;
+}
+
+/**
+ * Behavioural comparisons.
+ *
+ * Every one of these compares two groups of the caller's own trades and
+ * carries both sample sizes. `interpretation` is the literal string
+ * `"correlation"` in the engine, and a screen renders the word rather than
+ * deciding for itself what the comparison means.
+ */
+export interface GroupOutcome {
+  n: number;
+  net_pnl?: Undefinable;
+  avg_pnl?: Undefinable;
+  win_rate?: Undefinable;
+  avg_r?: Undefinable;
+  n_with_r?: number;
+  avg_risk?: Undefinable;
+  n_with_risk?: number;
+}
+
+export interface Comparison {
+  label: string;
+  labels?: Record<string, string>;
+  display?: string;
+  phase?: string;
+  group: GroupOutcome;
+  rest: GroupOutcome;
+  avg_pnl_delta: Undefinable;
+  win_rate_delta: Undefinable;
+  avg_r_delta: Undefinable;
+  interpretation: 'correlation';
+}
+
+export interface MistakeCount {
+  key: string;
+  label: string;
+  count: number;
+  share: number;
+}
+
+/** After a run of losses, or of wins. `{}` when either group is too small. */
+export interface StreakBehaviour {
+  streak_length?: number;
+  n_after?: number;
+  n_after_with_risk?: number;
+  n_other_with_risk?: number;
+  median_risk_after?: Undefinable;
+  median_risk_other?: Undefinable;
+  risk_ratio?: Undefinable;
+  outcome_after?: GroupOutcome;
+  outcome_other?: GroupOutcome;
+  interpretation?: 'correlation';
+}
+
+export interface DayStartBehaviour {
+  n_bad_start_days?: number;
+  n_good_start_days?: number;
+  median_trades_bad_start?: number;
+  median_trades_good_start?: number;
+  interpretation?: 'correlation';
+  /** What stands in for "a bad day" — stated, because it is a proxy. */
+  proxy?: string;
+}
+
+export interface PsychologySummary {
+  emotions_before: Comparison[];
+  discipline: Comparison[];
+  mistakes: Comparison[];
+  mistake_frequency: MistakeCount[];
+  after_losses: StreakBehaviour;
+  after_wins: StreakBehaviour;
+  activity_after_losses: DayStartBehaviour;
+}
+
+export interface TradesPage {
+  trades: Trade[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+/** The dimensions `/trading/breakdown/{dimension}` accepts. */
+export type Dimension =
+  | 'symbol' | 'setup' | 'combination' | 'session' | 'weekday' | 'hour'
+  | 'month' | 'timeframe' | 'direction' | 'regime' | 'risk_band';
+
 export interface Portfolio {
   id: number;
   name: string;
