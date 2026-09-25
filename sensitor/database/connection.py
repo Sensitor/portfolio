@@ -116,8 +116,15 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
         _to_v2(conn)
     # Version 3 adds credentials and sessions. Both arrive as new columns and a
     # new table, which `_add_missing_columns` and `executescript` have already
-    # applied — no rebuild, so there is nothing further to do here. The version
-    # is still stamped, so a database that has been through this is
+    # applied — no rebuild, so there is nothing further to do here.
+    #
+    # Version 4 adds `workspace`, the portfolio being worked on right now. It is
+    # a new table and nothing else, so `executescript` has already created it and
+    # no existing row is touched. An older database simply gains an empty
+    # workspace, which restores to "nothing saved yet" — the correct answer for
+    # someone who has never had one.
+    #
+    # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 

@@ -812,3 +812,126 @@ list.
 | red checkboxes, a white download button | two more controls the theme had never been pointed at |
 
 The first three were invisible to every test and to the type checker.
+
+---
+
+## 17. Euronext Paris, and one portfolio currency
+
+`sensitor/investment/currency.py`, `assets.EURONEXT_PARIS`, and the conversion
+step inside `PortfolioAnalyzer.fetch_data`. The manual is `docs/EURONEXT.md`.
+
+### The problem adding a foreign exchange creates
+
+Every instrument in the catalogue used to be quoted in dollars, so "the
+portfolio returned 14%" needed no qualification. The moment LVMH sits next to
+Apple it does: their price series are in different money, and `pct_change()`
+over the pair computes a return no investor could have earned. The euro/dollar
+rate moved by roughly a fifth between 2021 and 2023 — larger than most of the
+risk figures this app reports, so this is not a rounding concern.
+
+The user chooses a base currency; every price is converted into it **before**
+any return is derived.
+
+### Why the conversion is on prices and not on returns
+
+A local return and an exchange-rate move compound:
+
+```
+(1 + r_local) × (1 + r_fx) − 1      not      r_local + r_fx
+```
+
+Converting the price level and differencing afterwards gets the cross term for
+free. Adjusting a return afterwards is where it goes missing, and it goes
+missing quietly — the figures stay plausible. `tests/test_currency.py` asserts
+the two are different numerically rather than describing the difference in a
+comment, because a comment cannot fail.
+
+### Where the conversion lives
+
+In `fetch_data`, at the one point every price passes through. That placement is
+the whole design: there is no second path into `self.data`, so there is no way
+to add a feature that skips it. The only other place that downloads prices —
+`stress_test_scenarios`, which fetches its own crisis windows — converts too,
+and sources the rates **of its own window**. Pricing a 2008 scenario at today's
+euro would report a loss nobody had.
+
+### What happens when a rate is missing
+
+The asset is **dropped**, named, and reported in red on every page. It is not
+passed through in its own currency, because the weighting step would then add
+euros to dollars and produce a portfolio return that nothing downstream could
+detect as meaningless. A portfolio visibly missing its French half is a worse
+experience and a better outcome.
+
+Rates are forward-filled across days an exchange was shut and a currency market
+was not, and never back-filled: a made-up rate before the first quote rewrites
+the start of the window. Coverage below 95% is refused rather than filled.
+
+### Two traps the module exists to hold
+
+**London quotes in pence.** A `.L` price of 2,450 is £24.50. Treated as pounds
+it overstates the position a hundredfold and nothing about the result looks
+wrong. `GBp` is carried as its own quote unit with its divisor attached, so the
+division happens in one place.
+
+**A bare ticker is not a company.** Nobody types `MC.PA`; they type "LVMH", or
+"capital b", or the old name of a company that has since renamed. Before the
+alias table, the search box matched display names only, found nothing, and
+offered to add a ticker called `CAPITAL B` — which downloads nothing and
+explains nothing. Resolution is exact, never fuzzy: a near miss that silently
+resolves to the wrong company puts a share in the portfolio the person never
+chose, and every figure afterwards is about that share.
+
+---
+
+## 18. The working portfolio, kept across restarts
+
+`workspace` (schema v4), `Store.save_workspace` / `load_workspace`, and
+`sensitor/pages/_workspace.py`.
+
+### The asymmetry this removes
+
+The trading journal never lost anything: a trade is a row in SQLite the moment
+it exists. The investment half did not work that way. The allocation being
+edited lived in `st.session_state` — memory belonging to one browser session in
+one process — so closing the tab, redeploying, or rebooting threw it away.
+Saving existed, but it was a button you had to remember to press, and the
+portfolio you forgot to save was gone.
+
+One row per person, replaced in place. It is a scratchpad, not history:
+`portfolios` still holds named allocations and their snapshots.
+
+### Persisted by signature, not by hooking the edits
+
+Streamlit reruns the whole script on every keystroke and slider drag. Writing on
+each rerun means thousands of pointless transactions; writing at each edit site
+means finding all eleven places that mutate the allocation and never missing a
+twelfth. Instead a signature of the current state is compared against the last
+one written — one dictionary comparison per rerun, derived from the state rather
+than maintained alongside it, so it cannot fall out of date.
+
+The write happens in a `finally` around the whole script run. `main()` returns
+from six branches and half the interactive paths end in `st.rerun()`, which
+raises; anything written at "the end of main" would be written on some runs and
+not others.
+
+### The guard that makes it safe
+
+`persist` refuses to write until `restore` has run for that address. Without it,
+the first run after a restart compares an empty session against a full row and
+saves the empty one over it — persistence that deletes exactly what it was built
+to keep. `tests/test_workspace.py` asserts that case directly, because it is the
+one failure that would be worse than not having the feature.
+
+Restore is keyed by email rather than by a boolean, so signing out and back in
+as somebody else restores *their* workspace instead of leaving the previous
+person's allocation on screen. Sign-out clears the session copy and leaves the
+row alone: it belongs to the person who signed out, and they get it back.
+
+### Prices are not restored
+
+Only the allocation is written down. The prices are re-fetched on the first run
+after a restore, which is also what guarantees a portfolio restored from a row
+written last month is valued at today's market rather than at the market as it
+was before the reboot. A failed fetch leaves the allocation on screen and says
+so, rather than refusing to open.

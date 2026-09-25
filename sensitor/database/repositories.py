@@ -27,8 +27,9 @@ from dataclasses import asdict
 
 from .connection import DEFAULT_PATH, connect, now as _now
 from .models import (
-    SCHEMA_VERSION, TRADE_COLUMNS, Portfolio, Snapshot, TradingAccount, _jsonable,
-    _to_account, _to_portfolio, _to_snapshot, row_to_trade, trade_to_row,
+    SCHEMA_VERSION, TRADE_COLUMNS, Portfolio, Snapshot, TradingAccount, Workspace,
+    _jsonable, _to_account, _to_portfolio, _to_snapshot, _to_workspace,
+    row_to_trade, trade_to_row,
 )
 
 
@@ -133,7 +134,8 @@ class Store:
         """
         email = _email(email)
         if not email:
-            return {"portfolios": 0, "snapshots": 0, "accounts": 0, "trades": 0}
+            return {"portfolios": 0, "snapshots": 0, "accounts": 0, "trades": 0,
+                    "workspace": 0}
 
         counts = {
             "portfolios": self._count(
@@ -147,6 +149,8 @@ class Store:
                 "SELECT COUNT(*) AS n FROM trades WHERE user_email = ?", email),
             "sessions": self._count(
                 "SELECT COUNT(*) AS n FROM sessions WHERE user_email = ?", email),
+            "workspace": self._count(
+                "SELECT COUNT(*) AS n FROM workspace WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -157,6 +161,7 @@ class Store:
             conn.execute("DELETE FROM trades WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM trading_accounts WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM portfolios WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM workspace WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -179,6 +184,8 @@ class Store:
                 }
                 for portfolio in self.list_portfolios(email)
             ],
+            "workspace": (lambda w: asdict(w) if w else None)(
+                self.load_workspace(email)),
             "accounts": [asdict(a) for a in self.list_accounts(email)],
             "trades": [t.to_dict() for t in self.list_trades(email)],
             "schema_version": SCHEMA_VERSION,
@@ -308,6 +315,70 @@ class Store:
     def _count(self, sql: str, *params) -> int:
         rows = self._read(sql, tuple(params))
         return int(rows[0]["n"]) if rows else 0
+
+    # ── The working portfolio ────────────────────────────────────────────────
+
+    def save_workspace(self, user_email: str, holdings: dict, *,
+                       mode: str = "simulation", base_currency: str = "USD",
+                       profile: str = "balanced", period: str | None = None,
+                       quantities: dict | None = None,
+                       total_value: float | None = None,
+                       portfolio_id: int | None = None,
+                       portfolio_name: str | None = None) -> None:
+        """
+        Write down what someone is working on, so a restart does not lose it.
+
+        One row per person, replaced in place. Called on every real change to the
+        allocation rather than behind a button: the whole point is that there is
+        nothing to remember to press. Empty holdings are stored as an empty
+        workspace rather than rejected — clearing the portfolio is a change worth
+        persisting too, and the alternative is that emptying it silently restores
+        the old one on the next visit.
+        """
+        user_email = _email(user_email)
+        if not user_email:
+            return
+
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            conn.execute(
+                """INSERT INTO workspace
+                     (user_email, holdings, mode, base_currency, profile, period,
+                      quantities, total_value, portfolio_id, portfolio_name, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(user_email) DO UPDATE SET
+                     holdings = excluded.holdings,
+                     mode = excluded.mode,
+                     base_currency = excluded.base_currency,
+                     profile = excluded.profile,
+                     period = excluded.period,
+                     quantities = excluded.quantities,
+                     total_value = excluded.total_value,
+                     portfolio_id = excluded.portfolio_id,
+                     portfolio_name = excluded.portfolio_name,
+                     updated_at = excluded.updated_at""",
+                (user_email, json.dumps(_jsonable(holdings or {})), mode,
+                 (base_currency or "USD").upper(), profile, period,
+                 json.dumps(_jsonable(quantities or {})),
+                 float(total_value) if total_value is not None else None,
+                 int(portfolio_id) if portfolio_id is not None else None,
+                 portfolio_name, _now()),
+            )
+
+    def load_workspace(self, user_email: str) -> Workspace | None:
+        """What this person was last working on, or None if they never have."""
+        user_email = _email(user_email)
+        if not user_email:
+            return None
+        rows = self._read("SELECT * FROM workspace WHERE user_email = ?", (user_email,))
+        return _to_workspace(rows[0]) if rows else None
+
+    def clear_workspace(self, user_email: str) -> None:
+        user_email = _email(user_email)
+        if not user_email:
+            return
+        with self._write() as conn:
+            conn.execute("DELETE FROM workspace WHERE user_email = ?", (user_email,))
 
     # ── Portfolios ───────────────────────────────────────────────────────────
 

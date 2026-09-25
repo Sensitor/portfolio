@@ -24,7 +24,9 @@ warnings.filterwarnings('ignore')
 from sensitor.core import config as core_config
 from sensitor.core.i18n import LEGACY_STRINGS
 from sensitor.investment import assets
+from sensitor.investment.currency import BASE_CURRENCIES, currency_symbol, mixed_currencies
 from sensitor.investment.portfolio import UltimatePortfolioAnalyzer
+from sensitor.pages import _workspace
 from sensitor.ui import themes as sensitor_design
 from sensitor.investment.context import build_context
 from sensitor.core.i18n import tr as s_tr
@@ -627,6 +629,11 @@ def init_session_state():
         'weights': {},
         'user_profile': "balanced",
         'analysis_mode': "simulation",       # "simulation" or "real"
+        # What the portfolio is denominated in. Every price is converted into it
+        # before a return is computed, so a book holding LVMH and Apple reports
+        # what one investor actually earned rather than two currencies added
+        # together. See sensitor/investment/currency.py.
+        'base_currency': "USD",
         'real_portfolio_holdings': {},        # {ticker: quantity}
         'real_portfolio_total_value': None,   # float — computed after price fetch
         'real_portfolio_prices': {},          # {ticker: current_price}
@@ -1369,6 +1376,57 @@ def _fetch_with_progress(analyzer):
         bar.empty()
 
 
+def _base_currency() -> str:
+    return st.session_state.get("base_currency", "USD")
+
+
+def _new_analyzer(tickers, weights, **kwargs):
+    """
+    Build an analyzer over the last two years, in the chosen base currency.
+
+    One constructor for all four call sites. Before this there were four, and
+    adding the currency argument to three of them would have left the fourth
+    silently computing a portfolio in mixed money.
+    """
+    return UltimatePortfolioAnalyzer(
+        tickers,
+        weights,
+        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
+        base_currency=_base_currency(),
+        **kwargs,
+    )
+
+
+def _currency_notice(analyzer, lang, *, verbose=False):
+    """
+    The one currency message that belongs above every page.
+
+    An asset dropped for want of an exchange rate changes every figure on every
+    page, so it is repeated on all of them. The conversion captions are not
+    repeated — `pages/_shared.currency_notice` renders those once, under the
+    overview's own header.
+
+    `verbose` is accepted and ignored, so a caller that asks for the captions
+    gets the error rather than a crash.
+    """
+    report = getattr(analyzer, "currency_report", None) or {}
+    base = getattr(analyzer, "base_currency", "USD")
+    dropped = report.get("dropped") or {}
+    if not dropped:
+        return
+
+    names = ", ".join(sorted(dropped))
+    st.error(
+        f"Removed from the portfolio — no exchange rate against {base} could be "
+        f"loaded for {names}. They are excluded rather than added in their own "
+        f"currency, which would make every figure below meaningless."
+        if lang == "en" else
+        f"Retiré du portefeuille — aucun taux de change contre {base} n'a pu être "
+        f"chargé pour {names}. Ces lignes sont exclues plutôt qu'ajoutées dans leur "
+        f"propre devise, ce qui rendrait tous les chiffres ci-dessous dénués de sens."
+    )
+
+
 def _sidebar(lang):
     """Render sidebar navigation and user info."""
     with st.sidebar:
@@ -1429,6 +1487,37 @@ def _sidebar(lang):
             else:
                 st.session_state.page = "overview"
             st.rerun()
+
+        # ── Base currency ────────────────────────────────────────────────────
+        # Not a display preference. Prices are converted into this before any
+        # return is computed, so changing it changes the numbers — a euro
+        # investor holding US assets earned something different from a dollar
+        # investor holding the same ones. The analysis is dropped on a change
+        # rather than relabelled, because relabelling would put a euro sign in
+        # front of a dollar return.
+        currency_label = "Portfolio currency" if lang == 'en' else "Devise du portefeuille"
+        current_base = st.session_state.get("base_currency", "USD")
+        base_options = list(BASE_CURRENCIES)
+        new_base = st.selectbox(
+            currency_label,
+            base_options,
+            index=base_options.index(current_base) if current_base in base_options else 0,
+            format_func=lambda code: f"{code} · {currency_symbol(code).strip() or code}",
+        )
+        if new_base != current_base:
+            st.session_state.base_currency = new_base
+            st.session_state.current_portfolio = None
+            st.rerun()
+
+        held = mixed_currencies(st.session_state.get("selected_tickers") or [],
+                                assets.QUOTE_CURRENCY)
+        if len(held) > 1:
+            others = ", ".join(c for c in held if c != new_base)
+            st.caption(
+                f"Converted from {others} at the daily rate."
+                if lang == 'en' else
+                f"Converti depuis {others} au taux du jour."
+            )
 
         st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
@@ -1574,6 +1663,11 @@ def _sensitor_context(lang):
         geo_map=GEOGRAPHY_MAPPING,
         is_real=is_real,
         current_value=real_value,
+        # The symbol every figure on every Sensitor page is printed with. Read
+        # from the analyzer, not from the session: the analyzer is what actually
+        # converted the prices, so if the two ever disagree the money on screen
+        # follows the money in the maths.
+        currency=currency_symbol(getattr(analyzer, "base_currency", "USD")),
     )
 
 
@@ -1619,12 +1713,56 @@ def _account_page(lang, tier):
 
         if auth.multi_user:
             _change_password(auth, email, lang)
+        _storage_location(lang)
         return
 
     if auth.multi_user:
         _multi_user_sign_in(auth, lang)
     else:
         _single_user_sign_in(auth, lang)
+
+
+def _storage_location(lang):
+    """
+    Where the data actually is.
+
+    Stated because "does my portfolio survive a reboot" has a file path for an
+    answer, and the default path is relative to whatever directory the app was
+    launched from — so running `streamlit run` from two places gives two
+    databases and one of them looks empty. Somebody who can see the path can
+    tell which one they are looking at.
+    """
+    import os
+    from sensitor.database.connection import DEFAULT_PATH
+
+    path = os.path.abspath(os.getenv("SENSITOR_DB_PATH", DEFAULT_PATH))
+    configured = bool(os.getenv("SENSITOR_DB_PATH"))
+    exists = os.path.exists(path)
+    size = f"{os.path.getsize(path) / 1024:.0f} KB" if exists else "—"
+
+    with st.expander("Data & storage" if lang == "en" else "Données et stockage"):
+        st.caption(
+            f"**{path}** · {size}"
+            if lang == "en" else
+            f"**{path}** · {size}"
+        )
+        if not configured:
+            st.warning(
+                "SENSITOR_DB_PATH is not set, so this path depends on the directory "
+                "the app was started from. Set it to an absolute path — otherwise "
+                "launching from somewhere else opens a different, empty database."
+                if lang == "en" else
+                "SENSITOR_DB_PATH n'est pas défini : ce chemin dépend du dossier depuis "
+                "lequel l'app a été lancée. Définissez-le en absolu — sinon, un lancement "
+                "depuis un autre dossier ouvre une autre base, vide."
+            )
+        st.caption(
+            "Your trades, your saved portfolios and the portfolio you are currently "
+            "working on all live in this file. Nothing in this app sends it anywhere."
+            if lang == "en" else
+            "Vos trades, vos portefeuilles enregistrés et le portefeuille en cours "
+            "vivent tous dans ce fichier. Rien dans cette application ne l'envoie ailleurs."
+        )
 
 
 def _signed_in_email() -> str:
@@ -1637,6 +1775,11 @@ def _clear_session():
     st.session_state.user_email = ""
     st.session_state.authenticated = False
     st.session_state.user_tier = "free"
+    # The allocation on screen belongs to whoever just signed out. Their row
+    # stays in the database and comes back when they return; what is dropped
+    # here is the copy in memory, so the next person to use this browser does
+    # not inherit a portfolio that is not theirs.
+    _workspace.forget()
 
 
 def _apply(result, lang):
@@ -1718,12 +1861,62 @@ def _change_password(auth, email, lang):
                     _auth_error(result, lang)
 
 
+def _workspace_store_and_user():
+    """The store and the verified address, or (None, "") when nobody is signed in."""
+    from sensitor.pages._shared import current_user_email, get_store
+    store = get_store()
+    if store is None:
+        return None, ""
+    return store, current_user_email()
+
+
+def _restore_workspace(lang):
+    """
+    Put back the portfolio this person was last working on, and price it.
+
+    The allocation comes out of SQLite; the prices do not. Re-fetching them is
+    not a shortcut avoided — it is the point: a portfolio restored from a row
+    written last month should be valued at today's market, not at the market as
+    it was before the reboot.
+
+    A failure here is reported and then dropped. The allocation is still on
+    screen and the Analyse button still works, which is a better outcome than an
+    app that will not open because a ticker was delisted while it was closed.
+    """
+    store, email = _workspace_store_and_user()
+    _workspace.restore(store, email)
+
+    if not _workspace.take_resume_flag():
+        return
+    tickers = st.session_state.get("selected_tickers") or []
+    if not tickers or st.session_state.current_portfolio is not None:
+        return
+
+    with st.spinner(t("loading", lang)):
+        analyzer = _new_analyzer(
+            list(tickers),
+            dict(st.session_state.weights),
+            user_profile=st.session_state.user_profile,
+        )
+        if _fetch_with_progress(analyzer):
+            st.session_state.current_portfolio = analyzer
+        else:
+            st.warning(
+                "Your portfolio was restored but its prices could not be loaded. "
+                "Open Build and run the analysis again."
+                if lang == 'en' else
+                "Votre portefeuille a été restauré mais ses prix n'ont pas pu être "
+                "chargés. Ouvrez Construire et relancez l'analyse."
+            )
+
+
 def main():
     init_session_state()
     lang = st.session_state.language
     tier = st.session_state.user_tier
     limits = TIER_LIMITS[tier]
 
+    _restore_workspace(lang)
     _sidebar(lang)
 
     page = st.session_state.page
@@ -1737,6 +1930,11 @@ def main():
 
     if page in SENSITOR_PAGES:
         ctx = _sensitor_context(lang)
+        if ctx is not None:
+            # Only the failure. A dropped asset changes every figure on every
+            # page, so it belongs above all of them; the captions are rendered
+            # by the overview itself, under its own header.
+            _currency_notice(ctx.analyzer, lang, verbose=False)
         SENSITOR_PAGES[page](ctx)
         if ctx is not None:
             st.session_state.sensitor_period = ctx.period
@@ -2289,13 +2487,28 @@ def main():
             )
             if search:
                 all_assets = {}
-                for cat, assets in POPULAR_ASSETS.items():
-                    for name, ticker in assets.items():
+                for cat, cat_assets in POPULAR_ASSETS.items():
+                    for name, ticker in cat_assets.items():
                         all_assets[f"{name} ({ticker})"] = ticker
 
                 matches = {k: v for k, v in all_assets.items() if search.lower() in k.lower()}
+
+                # A company name, a French mnemonic, or the old name of a
+                # company that has since renamed. Without this, typing "lvmh"
+                # matched nothing and the app offered to add a ticker called
+                # LVMH — which is not a symbol, downloads nothing, and gives no
+                # clue why.
+                resolved = assets.resolve_symbol(search)
+                if resolved and resolved not in matches.values():
+                    info = assets.ASSET_INFO.get(resolved, {})
+                    label = f"{info.get('name', resolved)} ({resolved})"
+                    matches = {label: resolved, **matches}
+
                 if not matches:
-                    st.caption("No matches found. You can still type a ticker directly (e.g. NFLX).")
+                    st.caption("No matches found. You can still type a ticker directly (e.g. NFLX)."
+                               if lang == 'en' else
+                               "Aucun résultat. Vous pouvez saisir un symbole directement "
+                               "(ex. NFLX, ou MC.PA pour Euronext Paris).")
                     direct_ticker = search.upper().strip()
                     col1, col2 = st.columns([4, 1])
                     with col1:
@@ -2322,10 +2535,13 @@ def main():
                                 st.rerun()
 
         with tabs[1]:
-            for category, assets in POPULAR_ASSETS.items():
+            # `cat_assets`, not `assets`: the module of that name is imported
+            # at the top and a loop variable was shadowing it inside this
+            # function.
+            for category, cat_assets in POPULAR_ASSETS.items():
                 st.markdown(f"**{category}**")
                 cols = st.columns(4)
-                for i, (name, ticker) in enumerate(assets.items()):
+                for i, (name, ticker) in enumerate(cat_assets.items()):
                     with cols[i % 4]:
                         in_port = ticker in st.session_state.selected_tickers
                         btn_label = f"{ticker}" + (" ✓" if in_port else "")
@@ -2371,11 +2587,10 @@ def main():
 
             if st.button(t("analyse_btn", lang), type="primary", use_container_width=False):
                 with st.spinner(t("loading", lang)):
-                    analyzer = UltimatePortfolioAnalyzer(
+                    analyzer = _new_analyzer(
                         st.session_state.selected_tickers,
                         st.session_state.weights,
-                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
-                        user_profile=st.session_state.user_profile
+                        user_profile=st.session_state.user_profile,
                     )
                     if _fetch_with_progress(analyzer):
                         st.session_state.current_portfolio = analyzer
@@ -2462,11 +2677,10 @@ def main():
                     for tk, w in model_data['allocation'].items():
                         st.session_state[f"ws_{tk}"] = round(w * 100, 1)
                     with st.spinner("Loading..." if lang == 'en' else "Chargement..."):
-                        analyzer = UltimatePortfolioAnalyzer(
+                        analyzer = _new_analyzer(
                             list(model_data['allocation'].keys()),
                             model_data['allocation'],
-                            (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
-                            user_profile=model_data['profile']
+                            user_profile=model_data['profile'],
                         )
                         if _fetch_with_progress(analyzer):
                             st.session_state.current_portfolio = analyzer
@@ -2498,8 +2712,8 @@ def main():
         with add_col1:
             # Search from POPULAR_ASSETS + direct ticker entry
             all_assets_flat = {}
-            for cat, assets in POPULAR_ASSETS.items():
-                for name, ticker in assets.items():
+            for cat, cat_assets in POPULAR_ASSETS.items():
+                for name, ticker in cat_assets.items():
                     all_assets_flat[f"{name} ({ticker})"] = ticker
             rp_search = st.text_input(
                 t("ticker", lang),
@@ -2524,6 +2738,13 @@ def main():
         # Search results
         if rp_search:
             matches = {k: v for k, v in all_assets_flat.items() if rp_search.lower() in k.lower()}
+            # Same resolver as the simulation search: a real holding in LVMH is
+            # typed as "LVMH" here too.
+            rp_resolved = assets.resolve_symbol(rp_search)
+            if rp_resolved and rp_resolved not in matches.values():
+                rp_info = assets.ASSET_INFO.get(rp_resolved, {})
+                matches = {f"{rp_info.get('name', rp_resolved)} ({rp_resolved})": rp_resolved,
+                           **matches}
             if matches:
                 for display, ticker in list(matches.items())[:6]:
                     mc1, mc2 = st.columns([5, 1])
@@ -2637,10 +2858,9 @@ def main():
                     st.session_state.weights = real_weights
 
                     # Create analyzer with real weights
-                    analyzer = UltimatePortfolioAnalyzer(
+                    analyzer = _new_analyzer(
                         available_tickers,
                         real_weights,
-                        (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
                         initial_value=total_value,
                         user_profile=st.session_state.user_profile,
                     )
@@ -2717,11 +2937,16 @@ def main():
                     st.markdown("---")
                     apply_label = "Apply Optimisation" if lang == 'en' else "Appliquer l'Optimisation"
                     if st.button(apply_label, use_container_width=False):
+                        # `analyzer.start_date` rather than the shared two-year
+                        # window: an optimisation is applied to the same history
+                        # it was computed over, or the result is not the one that
+                        # was shown.
                         new_a = UltimatePortfolioAnalyzer(
                             list(optimal['weights'].keys()),
                             optimal['weights'],
                             analyzer.start_date,
-                            user_profile=st.session_state.user_profile
+                            user_profile=st.session_state.user_profile,
+                            base_currency=_base_currency(),
                         )
                         if _fetch_with_progress(new_a):
                             st.session_state.current_portfolio = new_a
@@ -2732,5 +2957,27 @@ def main():
                             st.rerun()
 
 
+def run():
+    """
+    One script run, with the working portfolio written down afterwards.
+
+    The `finally` is what makes the persistence reliable. `main()` returns from
+    six different branches and half the interactive paths end in `st.rerun()`,
+    which raises — so anything written at "the end of main" would be written on
+    some runs and not others. A `finally` runs on all of them, and on a rerun it
+    runs *after* the new state was set, which is exactly the state worth keeping.
+    """
+    try:
+        main()
+    finally:
+        try:
+            store, email = _workspace_store_and_user()
+            _workspace.persist(store, email)
+        except Exception:                                # noqa: BLE001
+            # Persisting is a convenience. It must never be the reason a page
+            # fails to render.
+            pass
+
+
 if __name__ == "__main__":
-    main()
+    run()

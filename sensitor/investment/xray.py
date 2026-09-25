@@ -294,7 +294,12 @@ def resolve_profile(ticker: str, asset_info: dict, sector_map: dict, geo_map: di
         "asset_class": {asset_class or "Equity": 1.0},
         "sector": {raw_sector or UNCLASSIFIED: 1.0},
         "geography": {_GEO_NORMALISE.get(raw_geo, raw_geo or UNCLASSIFIED): 1.0},
-        "market_cap": {"Large Cap": 1.0},
+        # Every single name used to be booked as large cap, which was true while
+        # the catalogue was mega-cap US tickers and stopped being true the day
+        # Euronext Growth arrived. A holding that declares its bucket is taken at
+        # its word; one that does not keeps the old default rather than becoming
+        # unclassified, so nothing that already resolved stops resolving.
+        "market_cap": {info.get("cap_bucket") or "Large Cap": 1.0},
         "style": {_STOCK_STYLE.get(ticker, "Blend"): 1.0},
     }
 
