@@ -108,17 +108,38 @@ describing it.
   quote would rewrite the start of the window, so a rate that does not cover at
   least 95% of the price history is refused instead.
 
-### Two traps this handles
+### Three traps this handles
 
 **London is quoted in pence.** A `.L` price of 2,450 is £24.50. Treated as
 pounds it overstates the position a hundredfold, and nothing about the resulting
 portfolio looks wrong. The quote unit `GBp` carries its own divisor and is
 converted to pounds before any rate is applied.
 
+**Yahoo dates a Paris share in Paris time.** A daily bar arrives stamped at
+midnight in the exchange's own timezone: `Europe/Paris` for `MC.PA`,
+`America/New_York` for `AAPL`, `UTC` for `BTC-USD`. Two things go wrong if that
+is left alone. Multiplying a timezone-aware price series by a naive rate series
+raises outright — a portfolio of LVMH and bitcoin did exactly that. And joining
+two aware series with different offsets matches almost nothing, because the same
+trading day carries two different stamps. Every series is put onto naive,
+midnight-normalised **local** dates before any join. Local, not UTC: converting
+a Paris session stamped `00:00+01:00` to UTC moves it to the previous day and
+slides the French half of a portfolio one day against the American half, which
+is worse than the crash because it does not raise.
+
 **A euro-quoted US tracker is still dollar risk.** `ESE.PA` prices the S&P 500
 in euros, and the app converts nothing because it is already in euros — but the
 underlying earnings are in dollars. The currency exposure is unhedged, not
 absent. The catalogue entry says so; the arithmetic cannot know.
+
+### Valuing a real portfolio
+
+The one place the app multiplies a price by a quantity and adds the results up.
+Ten LVMH shares at €700 plus a tenth of a bitcoin at $95,000 summed raw gives
+16,500 of nothing, and every weight derived from that total is wrong in a way no
+chart reveals. Spot prices are converted into the base currency before anything
+is multiplied, and a holding whose rate cannot be sourced is left out of the
+valuation and named — for the same reason it is dropped from a return series.
 
 ### Stress tests convert too, at the rates of their own window
 

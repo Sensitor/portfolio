@@ -196,6 +196,48 @@ def pairs_needed(tickers, base: str, overrides: dict | None = None) -> dict[str,
 MIN_COVERAGE = 0.95
 
 
+def naive_dates(obj):
+    """
+    Put a Series or DataFrame onto naive, midnight-normalised dates.
+
+    Every join in this module and in the analyzer goes through here first, and
+    that is not tidiness — it is the difference between working and raising.
+
+    Yahoo returns **timezone-aware** timestamps, and the offset depends on the
+    instrument: a Paris share comes back in Europe/Paris, a US share in
+    America/New_York, a crypto pair in UTC. Two consequences, both of which
+    reached production:
+
+    * Multiplying a tz-aware price series by a tz-naive rate series raises
+      `Cannot join tz-naive with tz-aware DatetimeIndex`. A portfolio of LVMH
+      and bitcoin crashed on exactly that.
+    * Even between two tz-aware series, different offsets mean the same trading
+      day carries different timestamps, so a join intersects on almost nothing
+      and the frame comes back full of holes.
+
+    Dropping the clock and keeping the date fixes both, and loses nothing: this
+    app works in daily closes, where the time of day is an artefact of the
+    exchange, not information.
+    """
+    if obj is None or len(obj) == 0:
+        return obj
+    out = obj.copy()
+    index = pd.DatetimeIndex(out.index)
+    if index.tz is not None:
+        # `tz_localize(None)` — drop the offset and keep the local wall time —
+        # not `tz_convert(None)`, which would move to UTC first.
+        #
+        # A daily bar is stamped at midnight in the exchange's own timezone, so
+        # the local date *is* the trading date. Converting to UTC turns a Paris
+        # session stamped 00:00+01:00 into 23:00 the previous day, and the whole
+        # French half of a portfolio slides back by one day against the American
+        # half. That is worse than the crash this function was written to fix,
+        # because it does not raise.
+        index = index.tz_localize(None)
+    out.index = index.normalize()
+    return out[~out.index.duplicated(keep="last")].sort_index()
+
+
 def align_rate(rate: pd.Series, index: pd.Index) -> pd.Series | None:
     """
     Put an FX series onto a price series' dates.
@@ -210,12 +252,7 @@ def align_rate(rate: pd.Series, index: pd.Index) -> pd.Series | None:
     if rate is None or len(rate) == 0 or index is None or len(index) == 0:
         return None
 
-    series = rate.copy()
-    series.index = pd.DatetimeIndex(series.index)
-    if series.index.tz is not None:
-        series.index = series.index.tz_localize(None)
-    series.index = series.index.normalize()
-    series = series[~series.index.duplicated(keep="last")].sort_index()
+    series = naive_dates(rate)
 
     target = pd.DatetimeIndex(index)
     if target.tz is not None:
@@ -249,6 +286,11 @@ def convert_prices(prices: pd.DataFrame, base: str, rates: dict,
               "pence": []}
     if prices is None or prices.empty:
         return prices, report
+
+    # The rates arriving here are naive-dated; the prices may not be. Normalise
+    # once, at the top, so the multiplication below cannot be the place where a
+    # timezone mismatch surfaces.
+    prices = naive_dates(prices)
 
     out = {}
     for column in prices.columns:

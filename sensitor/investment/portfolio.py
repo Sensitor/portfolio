@@ -46,13 +46,107 @@ def _download_prices(ticker: str, start: str):
     return history["Close"].rename(ticker)
 
 
-def _download_fx(pair: str, start: str):
-    """Daily closes for one Yahoo FX symbol, e.g. `EURUSD=X`."""
-    history = yf.Ticker(pair).history(start=start)
+def _download_fx(pair: str, start: str | None):
+    """
+    Daily closes for one Yahoo FX symbol, e.g. `EURUSD=X`.
+
+    `start=None` asks for a spot rate rather than a history, which is what
+    valuing a portfolio at today's prices needs. The length floor only applies
+    to a history: a spot lookup that returns one row has returned what it was
+    asked for.
+    """
+    if start is None:
+        history = yf.Ticker(pair).history(period="5d")
+        floor = 1
+    else:
+        history = yf.Ticker(pair).history(start=start)
+        floor = 6
     if history is None or history.empty or "Close" not in history:
         return None
     close = history["Close"].dropna()
-    return close if len(close) > 5 else None
+    return close if len(close) >= floor else None
+
+
+def _download_recent(ticker: str):
+    """The last few closes for one ticker, for a spot valuation."""
+    history = yf.Ticker(ticker).history(period="5d")
+    if history is None or history.empty or "Close" not in history:
+        return None
+    close = history["Close"].dropna()
+    return close if len(close) else None
+
+
+def latest_prices(tickers, base_currency="USD", *, price_loader=None, fx_loader=None,
+                  on_error=None):
+    """
+    The most recent close for each ticker, expressed in one currency.
+
+    This exists because valuing a real portfolio is the one place the app
+    multiplies a price by a quantity and adds the results up, and adding a euro
+    price to a dollar price produces a total that is not money. Ten LVMH shares
+    at €700 and a tenth of a bitcoin at $95,000 summed raw gives 16,500 of
+    nothing, and every weight derived from it is wrong in a way no chart reveals.
+
+    A holding whose rate cannot be sourced is left out and named, for the same
+    reason it is dropped from a return series: a total that silently mixes
+    currencies is worse than a total that admits a gap.
+
+    Returns `({ticker: price_in_base}, report)`.
+    """
+    price_loader = price_loader or _download_recent
+    fx_loader = fx_loader or _download_fx
+    base = (base_currency or "USD").upper()
+
+    report = {"base": base, "converted": {}, "dropped": {}, "missing": []}
+    raw = {}
+    for ticker in tickers:
+        try:
+            series = price_loader(ticker)
+        except Exception:                                # noqa: BLE001
+            series = None
+        if series is None or len(series) == 0:
+            report["missing"].append(ticker)
+            if on_error:
+                on_error(ticker, "no recent price")
+            continue
+        raw[ticker] = float(series.iloc[-1])
+
+    if not raw:
+        return {}, report
+
+    rates: dict[str, float] = {}
+    for quote in FX.pairs_needed(raw, base, QUOTE_CURRENCY):
+        for symbol, invert in FX.fx_candidates(quote, base):
+            try:
+                series = fx_loader(symbol, None)
+            except Exception:                            # noqa: BLE001
+                series = None
+            if series is None or len(series) == 0:
+                continue
+            value = float(series.iloc[-1])
+            if value <= 0:
+                continue
+            rates[quote] = (1.0 / value) if invert else value
+            break
+
+    out = {}
+    for ticker, price in raw.items():
+        quote = FX.quote_currency(ticker, QUOTE_CURRENCY)
+        settled, divisor = FX.settlement_currency(quote)
+        price = price / divisor                          # pence, and the like
+        if settled.upper() == base:
+            out[ticker] = price
+            continue
+        rate = rates.get(quote, rates.get(settled))
+        if rate is None:
+            report["dropped"][ticker] = settled
+            if on_error:
+                on_error(ticker, f"no {settled}/{base} rate for today's price")
+            continue
+        out[ticker] = price * rate
+        report["converted"][ticker] = settled
+
+    return out, report
 
 
 def _common_window(prices, *, on_error=None):
@@ -167,7 +261,12 @@ class PortfolioAnalyzer:
                     if on_error:
                         on_error(ticker, "no price history returned")
                     continue
-                all_data.append(series.to_frame(ticker))
+                # Onto naive dates *before* the concat below. Yahoo dates a
+                # Paris share in Europe/Paris, a US share in America/New_York
+                # and a crypto pair in UTC, so concatenating them raw unions
+                # three different stamps for the same trading day and produces a
+                # frame that is mostly holes.
+                all_data.append(FX.naive_dates(series).to_frame(ticker))
                 if progress:
                     progress((i + 1) / total, f"Loading {ticker}...")
             except Exception as e:
@@ -667,7 +766,7 @@ class PortfolioAnalyzer:
                 available = [t for t in self.tickers if t in prices.columns]
                 if not available:
                     continue
-                prices = prices[available].dropna(how="all")
+                prices = FX.naive_dates(prices[available].dropna(how="all"))
                 if len(prices) < 5:
                     continue
 
