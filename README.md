@@ -278,7 +278,7 @@ than a list maintained by hand.
 
 ```bash
 python tests/test_investment_engine.py    #  44 checks — engine, no Streamlit
-python tests/test_currency.py             #  83 checks — FX conversion, no network
+python tests/test_currency.py             # 107 checks — FX, timezones, no network
 python tests/test_trading_engine.py       # 173 checks — engine, review, copilot
 python tests/test_mt5_connector.py        # 131 checks — mocked terminal
 python tests/test_database.py             #  96 checks — isolation, migrations

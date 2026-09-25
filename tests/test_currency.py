@@ -30,7 +30,9 @@ import pandas as pd  # noqa: E402
 
 from sensitor.investment import assets  # noqa: E402
 from sensitor.investment import currency as FX  # noqa: E402
-from sensitor.investment.portfolio import PortfolioAnalyzer  # noqa: E402
+from sensitor.investment.portfolio import (  # noqa: E402
+    PortfolioAnalyzer, latest_prices,
+)
 
 FAILURES: list[str] = []
 
@@ -157,6 +159,156 @@ def test_alignment() -> None:
 # =============================================================================
 # THE CONVERSION ITSELF
 # =============================================================================
+
+def test_timezones() -> None:
+    """
+    The gap that reached production.
+
+    Yahoo dates a Paris share in Europe/Paris, a US share in America/New_York
+    and a crypto pair in UTC. Every fixture in this file was naive, because a
+    `pd.bdate_range` is — so the suite was green while a portfolio of LVMH,
+    bitcoin and Apple raised `Cannot join tz-naive with tz-aware DatetimeIndex`
+    the moment a rate was applied.
+
+    These fixtures carry real timezones.
+    """
+    print("\nTimezones, as Yahoo actually sends them")
+
+    paris = ramp(700, 0.0004, seed=30)
+    paris.index = paris.index.tz_localize("Europe/Paris")
+    newyork = ramp(180, 0.0006, seed=31)
+    newyork.index = newyork.index.tz_localize("America/New_York")
+    crypto = ramp(42000, 0.0012, seed=32)
+    crypto.index = crypto.index.tz_localize("UTC")
+    rate = pd.Series(np.linspace(1.05, 1.25, len(DAYS)), index=DAYS)   # naive
+
+    check("a tz-aware index normalises to naive dates",
+          FX.naive_dates(paris).index.tz is None)
+    check("and keeps every row", len(FX.naive_dates(paris)) == len(paris))
+    check("a naive index passes through unchanged",
+          FX.naive_dates(rate).index.tz is None and len(FX.naive_dates(rate)) == len(rate))
+
+    # The multiplication that raised.
+    frame = pd.DataFrame({"MC.PA": paris})
+    out, report = FX.convert_prices(frame, "USD", {"EUR": rate}, assets.QUOTE_CURRENCY)
+    check("a tz-aware price times a naive rate no longer raises",
+          "MC.PA" in out.columns and out["MC.PA"].notna().all())
+    check("and the conversion is still right",
+          close(out["MC.PA"].iloc[10], paris.iloc[10] * rate.iloc[10], 1e-6))
+
+    # Three timezones in one portfolio — the user's actual book.
+    price_loader, fx_loader = loaders(
+        {"MC.PA": paris, "AAPL": newyork, "BTC-USD": crypto},
+        {"EURUSD=X": rate})
+    analyzer = PortfolioAnalyzer(
+        ["MC.PA", "AAPL", "BTC-USD"],
+        {"MC.PA": 0.4, "AAPL": 0.35, "BTC-USD": 0.25},
+        base_currency="EUR")
+    ok = analyzer.fetch_data(price_loader=price_loader, fx_loader=fx_loader)
+
+    check("a three-timezone portfolio loads", ok)
+    check("and keeps all three holdings",
+          sorted(analyzer.tickers) == ["AAPL", "BTC-USD", "MC.PA"],
+          str(analyzer.tickers))
+    check("the frame is not mostly holes",
+          len(analyzer.returns) >= len(DAYS) - 3,
+          f"{len(analyzer.returns)} rows from {len(DAYS)} days")
+    check("every holding has a full column",
+          analyzer.data.notna().all().all())
+    check("and the dollar lines were the ones converted",
+          set(analyzer.currency_report["converted"]) == {"AAPL", "BTC-USD"},
+          str(analyzer.currency_report["converted"]))
+    check("nothing was dropped", analyzer.currency_report["dropped"] == {})
+
+    # A tz-aware rate against tz-aware prices, which is what Yahoo returns for
+    # both in reality.
+    aware_rate = rate.copy()
+    aware_rate.index = aware_rate.index.tz_localize("UTC")
+    price_loader2, fx_loader2 = loaders(
+        {"MC.PA": paris, "AAPL": newyork}, {"EURUSD=X": aware_rate})
+    both_aware = PortfolioAnalyzer(["MC.PA", "AAPL"], {"MC.PA": 0.5, "AAPL": 0.5},
+                                   base_currency="USD")
+    check("two tz-aware series convert against each other",
+          both_aware.fetch_data(price_loader=price_loader2, fx_loader=fx_loader2))
+    check("and the euro line moved",
+          both_aware.currency_report["converted"] == {"MC.PA": "EUR"})
+
+
+def test_the_reported_portfolio() -> None:
+    """
+    The exact book that crashed: Capital B, LVMH, bitcoin, Solana, Injective.
+
+    Two euro-quoted Paris lines against three dollar-quoted crypto pairs, each
+    arriving from Yahoo in its own timezone. Kept as its own test because it is
+    the case a person actually built and the one the suite did not have.
+    """
+    print("\nThe portfolio that was reported")
+
+    paris_index = DAYS.tz_localize("Europe/Paris")
+    utc_index = DAYS.tz_localize("UTC")
+
+    def at(series, index):
+        out = series.copy()
+        out.index = index
+        return out
+
+    prices = {
+        "ALTBG.PA": at(ramp(2.4, 0.0018, seed=40), paris_index),
+        "MC.PA": at(ramp(700, 0.0004, seed=41), paris_index),
+        "BTC-USD": at(ramp(42000, 0.0012, seed=42), utc_index),
+        "SOL-USD": at(ramp(95, 0.0016, seed=43), utc_index),
+        "INJ-USD": at(ramp(24, 0.0014, seed=44), utc_index),
+    }
+    rate = pd.Series(np.linspace(1.05, 1.18, len(DAYS)), index=utc_index)
+
+    weights = {"ALTBG.PA": 0.2, "MC.PA": 0.2, "BTC-USD": 0.2,
+               "SOL-USD": 0.2, "INJ-USD": 0.2}
+    price_loader, fx_loader = loaders(prices, {"EURUSD=X": rate})
+
+    analyzer = PortfolioAnalyzer(list(weights), weights, base_currency="EUR")
+    ok = analyzer.fetch_data(price_loader=price_loader, fx_loader=fx_loader)
+
+    check("it loads instead of raising", ok)
+    check("all five holdings survive", len(analyzer.tickers) == 5, str(analyzer.tickers))
+    check("the three dollar lines were converted",
+          set(analyzer.currency_report["converted"]) == {"BTC-USD", "SOL-USD", "INJ-USD"},
+          str(analyzer.currency_report["converted"]))
+    check("the two Paris lines were left alone",
+          set(analyzer.currency_report["unconverted"]) == {"ALTBG.PA", "MC.PA"})
+    check("and the returns are usable",
+          len(analyzer.portfolio_returns) >= len(DAYS) - 3,
+          str(len(analyzer.portfolio_returns)))
+
+    # The silent half: valuing the same book at today's prices.
+    def spot(ticker):
+        return prices[ticker]
+
+    def spot_fx(pair, start):
+        return rate if pair == "EURUSD=X" else None
+
+    valued, report = latest_prices(list(weights), "EUR",
+                                   price_loader=spot, fx_loader=spot_fx)
+    check("every holding is valued", len(valued) == 5, str(sorted(valued)))
+    check("the euro lines keep their own price",
+          close(valued["MC.PA"], float(prices["MC.PA"].iloc[-1]), 1e-9))
+    check("the dollar lines are divided into euros",
+          close(valued["BTC-USD"],
+                float(prices["BTC-USD"].iloc[-1]) / float(rate.iloc[-1]), 1e-6),
+          f"{valued['BTC-USD']:.2f}")
+    check("and the conversion is reported",
+          set(report["converted"]) == {"BTC-USD", "SOL-USD", "INJ-USD"})
+
+    # Without a rate the dollar lines must be left out, not summed in.
+    def no_fx(pair, start):
+        return None
+
+    partial, partial_report = latest_prices(list(weights), "EUR",
+                                            price_loader=spot, fx_loader=no_fx)
+    check("with no rate, only the euro lines are valued",
+          sorted(partial) == ["ALTBG.PA", "MC.PA"], str(sorted(partial)))
+    check("and the rest is named rather than silently added",
+          set(partial_report["dropped"]) == {"BTC-USD", "SOL-USD", "INJ-USD"})
+
 
 def test_convert_prices() -> None:
     print("\nConverting prices")
@@ -453,6 +605,8 @@ def main() -> int:
     test_quote_currency()
     test_pairs()
     test_alignment()
+    test_timezones()
+    test_the_reported_portfolio()
     test_convert_prices()
     test_compounding()
     test_analyzer_unchanged_for_dollars()

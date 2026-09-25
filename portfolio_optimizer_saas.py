@@ -12,7 +12,11 @@ See docs/ARCHITECTURE.md for the full layout and the migration table.
 """
 
 import streamlit as st
-import yfinance as yf
+# yfinance is no longer imported here. The last direct download in this file
+# was the real-portfolio valuation, which now goes through
+# `investment.portfolio.latest_prices` so the prices arrive already in one
+# currency. The UI layer fetching its own market data is how the currency
+# rule got bypassed in the first place.
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import warnings
@@ -25,7 +29,7 @@ from sensitor.core import config as core_config
 from sensitor.core.i18n import LEGACY_STRINGS
 from sensitor.investment import assets
 from sensitor.investment.currency import BASE_CURRENCIES, currency_symbol, mixed_currencies
-from sensitor.investment.portfolio import UltimatePortfolioAnalyzer
+from sensitor.investment.portfolio import UltimatePortfolioAnalyzer, latest_prices
 from sensitor.pages import _workspace
 from sensitor.ui import themes as sensitor_design
 from sensitor.investment.context import build_context
@@ -2817,23 +2821,43 @@ def main():
             # ── Fetch prices & analyse
             if st.button(t("fetch_prices", lang), type="primary", use_container_width=False):
                 tickers_list = list(holdings.keys())
-                prices = {}
                 progress_bar = st.progress(0)
                 status = st.empty()
+                status.text(t("loading", lang))
 
-                for i, ticker in enumerate(tickers_list):
-                    try:
-                        status.text(f"Loading {ticker}...")
-                        tk = yf.Ticker(ticker)
-                        hist = tk.history(period="5d")
-                        if not hist.empty:
-                            prices[ticker] = hist['Close'].iloc[-1]
-                    except Exception as e:
-                        st.warning(f"{ticker}: {str(e)[:50]}")
-                    progress_bar.progress((i + 1) / len(tickers_list))
+                # Converted before anything is multiplied by a quantity. This
+                # screen is the one place the app turns prices into a total, and
+                # adding a euro price to a dollar price gives a number that is
+                # not money — along with weights derived from it that no chart
+                # on any later page would reveal as wrong.
+                base = _base_currency()
+                prices, price_report = latest_prices(
+                    tickers_list, base,
+                    on_error=lambda tk, msg: st.warning(f"{tk}: {msg}"))
 
+                progress_bar.progress(1.0)
                 status.empty()
                 progress_bar.empty()
+
+                if price_report.get("dropped"):
+                    names = ", ".join(sorted(price_report["dropped"]))
+                    st.error(
+                        f"Left out of the valuation — no exchange rate against {base} "
+                        f"could be loaded for {names}. Including them would add one "
+                        f"currency to another and give a total that is not money."
+                        if lang == 'en' else
+                        f"Exclu de la valorisation — aucun taux de change contre {base} "
+                        f"n'a pu être chargé pour {names}. Les inclure reviendrait à "
+                        f"additionner deux devises et à donner un total qui n'est pas "
+                        f"une somme d'argent."
+                    )
+                if price_report.get("converted"):
+                    names = ", ".join(sorted(price_report["converted"]))
+                    st.caption(
+                        f"Converted to {base} at today's rate: {names}."
+                        if lang == 'en' else
+                        f"Converti en {base} au taux du jour : {names}."
+                    )
 
                 if not prices:
                     st.error(t("fetch_error", lang))

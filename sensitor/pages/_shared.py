@@ -12,6 +12,7 @@ from __future__ import annotations
 import streamlit as st
 
 from ..integrations import market_data as market
+from ..investment import currency as FX
 from ..ui.components import empty_state, note
 from ..core.i18n import tr
 
@@ -63,25 +64,81 @@ def benchmark_selector(ctx, key: str, default: str = market.DEFAULT_BENCHMARK) -
         tr("benchmark", ctx.lang), labels, index=index, key=key,
         label_visibility="collapsed",
     )
-    return tickers[labels.index(chosen)]
+    ticker = tickers[labels.index(chosen)]
+
+    # Said where the choice is made. Every benchmark here is dollar-quoted, so
+    # against a euro portfolio the comparison line is converted — and a reader
+    # checking it against the index they see quoted elsewhere should know that
+    # before they conclude the app is wrong.
+    base = (getattr(ctx.analyzer, "base_currency", None) or "USD").upper()
+    if FX.settlement_currency(FX.quote_currency(ticker))[0].upper() != base:
+        st.caption(
+            f"Converted to {base} — compared like for like with the portfolio."
+            if ctx.lang == "en" else
+            f"Converti en {base} — comparé à la même échelle que le portefeuille."
+        )
+    return ticker
 
 
 def load_benchmark(ctx, ticker: str):
     """
-    Fetch and align a benchmark to the portfolio's window.
+    Fetch and align a benchmark to the portfolio's window, in its currency.
 
     Returns (portfolio_returns, benchmark_returns) aligned on shared dates, or
     (None, None) when the data is unavailable — callers render portfolio-only
     figures in that case rather than failing.
+
+    The benchmark is converted into the portfolio's base currency for the same
+    reason the holdings are. Every benchmark in the list is dollar-quoted; a
+    euro-denominated portfolio compared against a dollar S&P 500 is being
+    measured against a line that includes a currency move the portfolio's own
+    figures already account for, and the alpha, beta and tracking error that
+    come out of that comparison are all about the euro rather than about the
+    portfolio.
+
+    A benchmark whose rate cannot be sourced is treated as unavailable rather
+    than compared unconverted: a portfolio-only page is a smaller loss than a
+    confident comparison against the wrong thing.
     """
     portfolio = ctx.portfolio_returns
     if portfolio is None or len(portfolio) < 20:
         return None, None
     start = portfolio.index[0].strftime("%Y-%m-%d")
-    raw = market.fetch_returns(ticker, start)
-    if raw is None:
+
+    base = (getattr(ctx.analyzer, "base_currency", None) or "USD").upper()
+    quote = FX.quote_currency(ticker)
+    if FX.settlement_currency(quote)[0].upper() == base:
+        raw = market.fetch_returns(ticker, start)
+        if raw is None:
+            return None, None
+        return market.align(portfolio, raw)
+
+    # Converted on the price level, then differenced — the same ordering the
+    # analyzer uses, and for the same reason: a return and a rate compound.
+    prices = market.fetch_prices(ticker, start)
+    if prices is None:
+        return None, None
+    rate = _benchmark_rate(quote, base, start)
+    if rate is None:
+        return None, None
+    converted, report = FX.convert_prices(
+        prices.to_frame(ticker), base, {quote: rate})
+    if ticker not in converted.columns:
+        return None, None
+    raw = converted[ticker].pct_change().dropna()
+    if len(raw) < 20:
         return None, None
     return market.align(portfolio, raw)
+
+
+def _benchmark_rate(quote: str, base: str, start: str):
+    """The exchange rate series a benchmark needs, oriented for multiplication."""
+    for symbol, invert in FX.fx_candidates(quote, base):
+        series = market.fetch_prices(symbol, start)
+        if series is None or len(series) == 0:
+            continue
+        return (1.0 / series) if invert else series
+    return None
 
 
 def single_asset_note(ctx) -> None:

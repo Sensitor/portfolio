@@ -52,7 +52,14 @@ def _session_for(email: str) -> str:
 class FakeAnalyzer:
     """Minimal stand-in exposing exactly what `Context` reads off the real one."""
 
-    def __init__(self, returns_df: pd.DataFrame, weights: dict, initial_value=100_000):
+    def __init__(self, returns_df: pd.DataFrame, weights: dict, initial_value=100_000,
+                 base_currency="USD"):
+        # The pages read the base currency off the analyzer to decide whether a
+        # dollar-quoted benchmark needs converting, so the stand-in has to carry
+        # one too.
+        self.base_currency = base_currency
+        self.currency_report = {}
+        self.window_report = {}
         self.tickers = list(returns_df.columns)
         self.weights = dict(weights)
         self.returns = returns_df
@@ -62,7 +69,8 @@ class FakeAnalyzer:
         self.portfolio_values = initial_value * (1 + self.portfolio_returns).cumprod()
 
 
-def make_portfolio(tickers_weights: dict, days: int = 760, seed: int = 11) -> FakeAnalyzer:
+def make_portfolio(tickers_weights: dict, days: int = 760, seed: int = 11,
+                   base_currency: str = "USD") -> FakeAnalyzer:
     rng = np.random.default_rng(seed)
     index = pd.bdate_range("2022-06-01", periods=days)
     vols = {"SPY": 0.010, "QQQ": 0.013, "NVDA": 0.030, "GLD": 0.008,
@@ -75,7 +83,8 @@ def make_portfolio(tickers_weights: dict, days: int = 760, seed: int = 11) -> Fa
         idiosyncratic = rng.normal(0.0003, vol, days)
         beta = 0.2 if ticker in ("GLD", "AGG", "TLT") else 0.8
         data[ticker] = beta * market + (1 - beta) * idiosyncratic
-    return FakeAnalyzer(pd.DataFrame(data, index=index), tickers_weights)
+    return FakeAnalyzer(pd.DataFrame(data, index=index), tickers_weights,
+                        base_currency=base_currency)
 
 
 SCENARIOS = {
@@ -158,6 +167,21 @@ def main() -> int:
             print(f"  FAIL  {page:12s} real mode")
         else:
             print(f"  ok    {page:12s} real mode")
+
+    # Edge case: a euro-denominated portfolio. Every benchmark in the list is
+    # dollar-quoted, so this is the path that converts one — including the
+    # branch where the rate cannot be sourced and the page must fall back to
+    # portfolio-only figures rather than raise.
+    in_euros = make_portfolio({"MC.PA": 0.4, "AAPL": 0.35, "BTC-USD": 0.25},
+                              base_currency="EUR")
+    for page in PAGES:
+        checks += 1
+        app = run_page(page, in_euros, lang="fr")
+        if app.exception:
+            failures.append(("euro base", page, str(app.exception[0].value)[:400]))
+            print(f"  FAIL  {page:12s} euro base")
+        else:
+            print(f"  ok    {page:12s} euro base")
 
     # Edge case: every risk profile, since the health score reads tolerance from it.
     profiles = make_portfolio({"SPY": 0.5, "NVDA": 0.3, "GLD": 0.2})

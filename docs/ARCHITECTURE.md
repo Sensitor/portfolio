@@ -874,6 +874,24 @@ it overstates the position a hundredfold and nothing about the result looks
 wrong. `GBp` is carried as its own quote unit with its divisor attached, so the
 division happens in one place.
 
+**A price series knows what time zone it is in, and they disagree.** Yahoo
+stamps a daily bar at midnight in the exchange's own zone — `Europe/Paris`,
+`America/New_York`, `UTC` for crypto. Multiplying an aware price series by a
+naive rate series raises; joining two aware series with different offsets
+matches almost nothing. Everything is put onto naive, midnight-normalised local
+dates before any join, at download time rather than at the join, so there is one
+place it can be got wrong. **Local, not UTC:** `tz_convert` would move a Paris
+session stamped `00:00+01:00` to the previous day and slide the French half of a
+portfolio against the American half — a silent error where the crash was a loud
+one. Every fixture in the suite was naive, which is why this reached a user
+before it reached a test; the suite now carries aware fixtures in three zones.
+
+**Valuing a real portfolio adds prices together.** It is the one place a price
+is multiplied by a quantity and summed, so it is the one place mixing currencies
+produces a total rather than a series — and a total looks like money whatever
+went into it. `latest_prices` converts spot prices into the base currency first
+and leaves out, by name, any holding whose rate it cannot source.
+
 **A bare ticker is not a company.** Nobody types `MC.PA`; they type "LVMH", or
 "capital b", or the old name of a company that has since renamed. Before the
 alias table, the search box matched display names only, found nothing, and
