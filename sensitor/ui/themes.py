@@ -555,6 +555,33 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
   box-shadow: 0 0 0 3px {ACCENT_SOFT} !important;
 }}
 
+/* ---------- Sliders ---------- */
+/* Streamlit's slider ships red, and red means "lost money" on every other
+   surface in this app. A weight slider is not a loss, and a row of scarlet
+   tracks above an allocation reads as one. The filled portion and the thumb
+   take the accent; the empty track stays a hairline. */
+[data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"],
+[data-testid="stSlider"] div[role="slider"] {{
+  background: {ACCENT} !important;
+  border-color: {ACCENT} !important;
+  box-shadow: 0 0 0 3px rgba(57,135,229,0.18) !important;
+}}
+/* The track is painted by the two inner divs of the BaseWeb slider: the first
+   is the filled run, the second the remainder. Targeting them by position is
+   ugly and is what the markup offers — there is no semantic hook here. */
+[data-testid="stSlider"] [data-baseweb="slider"] > div > div:first-child {{
+  background: {ACCENT} !important;
+}}
+[data-testid="stSlider"] [data-baseweb="slider"] > div > div:nth-child(2) {{
+  background: rgba(154,168,191,0.18) !important;
+}}
+[data-testid="stSlider"] [data-testid="stThumbValue"],
+[data-testid="stSlider"] [data-testid="stTickBar"],
+[data-testid="stSlider"] [data-testid="stTickBarMin"],
+[data-testid="stSlider"] [data-testid="stTickBarMax"] {{
+  color: {INK_MUTED} !important;
+}}
+
 /* ---------- Main buttons ---------- */
 /* A form's submit button is `kind="primaryFormSubmit"`, not `primary`, and so
    fell through to Streamlit's own red default — a scarlet "Save trade" in the

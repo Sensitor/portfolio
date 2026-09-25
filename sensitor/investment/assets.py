@@ -641,3 +641,588 @@ MODEL_PORTFOLIOS = {
         "expected_volatility": 0.10,
     },
 }
+
+
+# =============================================================================
+# EURONEXT PARIS
+# =============================================================================
+#
+# Written as a compact table and expanded below rather than as thirty full
+# `ASSET_INFO` literals. Same data, one screen instead of six hundred lines, and
+# the fields every entry shares — geography France, asset class Stock, the
+# euro — cannot drift between rows because they are written once.
+#
+# **Every symbol here is a Yahoo symbol and none of them could be checked
+# against Yahoo from the environment this was written in**, which has no route
+# to any market data host. They follow Yahoo's documented convention for
+# Euronext Paris (the Euronext mnemonic plus `.PA`), and the app reports by name
+# any symbol that fails to download — so a wrong one is visible immediately
+# rather than silently absent. `docs/EURONEXT.md` says how to check one.
+
+_PARIS_STOCKS = {
+    # ── Luxury and consumer ──────────────────────────────────────────────────
+    "MC.PA": {
+        "name": "LVMH", "sector": "Consumer", "risk": "Medium-High", "liquidity": 88,
+        "en": "The world's largest luxury group: Louis Vuitton, Dior, Moët & Chandon, "
+              "Hennessy, Sephora and Tiffany. Earnings are driven by leather goods and "
+              "by Chinese demand, which is what makes the share cyclical despite the brands.",
+        "fr": "Premier groupe de luxe mondial : Louis Vuitton, Dior, Moët & Chandon, "
+              "Hennessy, Sephora et Tiffany. Les résultats dépendent de la maroquinerie "
+              "et de la demande chinoise — c'est ce qui rend le titre cyclique malgré les marques.",
+        "use_en": "Core French holding. Pricing power, but a concentrated bet on luxury demand.",
+        "use_fr": "Position cœur française. Pouvoir de fixation des prix, mais pari concentré sur le luxe.",
+        "yield": "~2%", "cap": "large",
+    },
+    "RMS.PA": {
+        "name": "Hermès International", "sector": "Consumer", "risk": "Medium", "liquidity": 78,
+        "en": "Ultra-luxury, and the most profitable house in the sector. Production is "
+              "deliberately capped below demand, which is why its margins and its share "
+              "price behave unlike the rest of luxury.",
+        "fr": "Ultra-luxe, et la maison la plus rentable du secteur. La production est "
+              "volontairement maintenue sous la demande — d'où des marges et un cours "
+              "qui ne se comportent pas comme le reste du luxe.",
+        "use_en": "Defensive luxury. Rarely cheap; the premium is the business model.",
+        "use_fr": "Luxe défensif. Rarement bon marché ; la prime est le modèle économique.",
+        "yield": "~0.6%", "cap": "large",
+    },
+    "KER.PA": {
+        "name": "Kering", "sector": "Consumer", "risk": "High", "liquidity": 72,
+        "en": "Gucci, Saint Laurent, Bottega Veneta, Balenciaga. Far more concentrated on "
+              "Gucci than LVMH is on any one brand, which makes it the high-beta way to "
+              "hold European luxury.",
+        "fr": "Gucci, Saint Laurent, Bottega Veneta, Balenciaga. Bien plus concentré sur "
+              "Gucci que LVMH ne l'est sur une seule marque : c'est la façon la plus "
+              "volatile de détenir du luxe européen.",
+        "use_en": "Satellite position. Correlates with LVMH — holding both is one bet, not two.",
+        "use_fr": "Position satellite. Corrèle avec LVMH — détenir les deux est un seul pari.",
+        "yield": "~4%", "cap": "large",
+    },
+    "OR.PA": {
+        "name": "L'Oréal", "sector": "Consumer", "risk": "Medium", "liquidity": 85,
+        "en": "The world's largest cosmetics group, from mass market to luxury beauty and "
+              "dermatological skincare. Consumer staple behaviour with a luxury tail.",
+        "fr": "Premier groupe cosmétique mondial, du grand public à la beauté de luxe et "
+              "à la dermocosmétique. Comportement de bien de consommation, avec une part luxe.",
+        "use_en": "Defensive consumer core. Lower drawdowns than the luxury names.",
+        "use_fr": "Cœur consommation défensif. Baisses moins profondes que les valeurs du luxe.",
+        "yield": "~1.7%", "cap": "large",
+    },
+    "RI.PA": {
+        "name": "Pernod Ricard", "sector": "Consumer", "risk": "Medium", "liquidity": 70,
+        "en": "Second-largest spirits group worldwide: Absolut, Jameson, Martell, Ricard. "
+              "Exposed to the same Chinese and US demand cycle as luxury.",
+        "fr": "Deuxième groupe mondial de spiritueux : Absolut, Jameson, Martell, Ricard. "
+              "Exposé au même cycle de demande chinoise et américaine que le luxe.",
+        "use_en": "Consumer staple with a discretionary cycle underneath.",
+        "use_fr": "Bien de consommation courante avec un cycle discrétionnaire en dessous.",
+        "yield": "~4%", "cap": "large",
+    },
+    "BN.PA": {
+        "name": "Danone", "sector": "Consumer", "risk": "Low-Medium", "liquidity": 72,
+        "en": "Dairy, plant-based, bottled water and specialised nutrition. One of the more "
+              "defensive names on the index — slow growth, stable demand.",
+        "fr": "Produits laitiers, végétal, eaux et nutrition spécialisée. L'une des valeurs "
+              "les plus défensives de l'indice — croissance lente, demande stable.",
+        "use_en": "Defensive ballast in a French equity sleeve.",
+        "use_fr": "Lest défensif dans une poche actions françaises.",
+        "yield": "~3%", "cap": "large",
+    },
+    "CA.PA": {
+        "name": "Carrefour", "sector": "Consumer", "risk": "Medium", "liquidity": 62,
+        "en": "European food retailer, thin margins and high volumes. Behaves as an "
+              "inflation and consumer-spending proxy rather than as a growth share.",
+        "fr": "Distributeur alimentaire européen, marges faibles et volumes élevés. "
+              "Se comporte comme un indicateur d'inflation et de consommation, pas comme une valeur de croissance.",
+        "use_en": "Value/income position. Low correlation with the luxury block.",
+        "use_fr": "Position value/rendement. Faible corrélation avec le bloc luxe.",
+        "yield": "~5%", "cap": "mid",
+    },
+    "EL.PA": {
+        "name": "EssilorLuxottica", "sector": "Healthcare", "risk": "Medium", "liquidity": 75,
+        "en": "Lenses and frames in one company — Varilux, Ray-Ban, Oakley — plus optical "
+              "retail. Sits between healthcare and consumer, and is the dominant player in both halves.",
+        "fr": "Verres et montures dans une seule entreprise — Varilux, Ray-Ban, Oakley — "
+              "plus la distribution optique. Entre santé et consommation, et dominant des deux côtés.",
+        "use_en": "Quality compounder. Demographics do the work.",
+        "use_fr": "Valeur de qualité. La démographie fait le travail.",
+        "yield": "~1.5%", "cap": "large",
+    },
+
+    # ── Industrials and defence ──────────────────────────────────────────────
+    "AIR.PA": {
+        "name": "Airbus", "sector": "Industrials", "risk": "Medium-High", "liquidity": 84,
+        "en": "Half of the commercial aircraft duopoly, plus helicopters, defence and space. "
+              "The order book runs years ahead, so the risk is delivery and supply chain, not demand.",
+        "fr": "Une moitié du duopole de l'aviation commerciale, plus hélicoptères, défense et "
+              "espace. Le carnet de commandes court sur des années : le risque est la livraison "
+              "et la chaîne d'approvisionnement, pas la demande.",
+        "use_en": "Industrial core. A long-cycle holding, not a trade.",
+        "use_fr": "Cœur industriel. Position de cycle long, pas un trade.",
+        "yield": "~1.5%", "cap": "large",
+    },
+    "SAF.PA": {
+        "name": "Safran", "sector": "Industrials", "risk": "Medium-High", "liquidity": 78,
+        "en": "Aircraft engines through the CFM joint venture, landing gear and interiors. "
+              "Most of the profit is the aftermarket — servicing engines already flying — "
+              "which makes it less cyclical than the order book suggests.",
+        "fr": "Moteurs d'avions via la coentreprise CFM, trains d'atterrissage et intérieurs. "
+              "L'essentiel du bénéfice vient de l'après-vente — l'entretien des moteurs déjà "
+              "en vol — ce qui le rend moins cyclique que le carnet ne le laisse penser.",
+        "use_en": "Aerospace with a recurring revenue base.",
+        "use_fr": "Aéronautique avec une base de revenus récurrents.",
+        "yield": "~1%", "cap": "large",
+    },
+    "HO.PA": {
+        "name": "Thales", "sector": "Industrials", "risk": "Medium", "liquidity": 70,
+        "en": "Defence electronics, avionics, radar, secure communications and cyber. "
+              "Revenue is largely governmental, which is what decouples it from the consumer cycle.",
+        "fr": "Électronique de défense, avionique, radars, communications sécurisées et cyber. "
+              "Chiffre d'affaires largement étatique — c'est ce qui le découple du cycle de consommation.",
+        "use_en": "Defence exposure. Moves on budgets and geopolitics, not on rates.",
+        "use_fr": "Exposition défense. Bouge avec les budgets et la géopolitique, pas les taux.",
+        "yield": "~2%", "cap": "large",
+    },
+    "SU.PA": {
+        "name": "Schneider Electric", "sector": "Industrials", "risk": "Medium", "liquidity": 84,
+        "en": "Electrical distribution, industrial automation and energy management. The "
+              "data-centre build-out is a direct revenue driver, so it trades partly as an AI proxy.",
+        "fr": "Distribution électrique, automatisation industrielle et gestion de l'énergie. "
+              "La construction de centres de données est un moteur direct : le titre suit en partie l'IA.",
+        "use_en": "Electrification theme, with an industrial balance sheet.",
+        "use_fr": "Thème électrification, avec un bilan industriel.",
+        "yield": "~1.7%", "cap": "large",
+    },
+    "LR.PA": {
+        "name": "Legrand", "sector": "Industrials", "risk": "Medium", "liquidity": 68,
+        "en": "Wiring devices, cable management and data-centre power infrastructure. "
+              "Steady, acquisitive, and geared to construction rather than to consumers.",
+        "fr": "Appareillage électrique, cheminements de câbles et infrastructure électrique "
+              "des centres de données. Régulier, acquéreur, adossé à la construction plutôt qu'au consommateur.",
+        "use_en": "Industrial compounder. Correlates with Schneider.",
+        "use_fr": "Valeur industrielle régulière. Corrèle avec Schneider.",
+        "yield": "~2%", "cap": "large",
+    },
+    "DG.PA": {
+        "name": "Vinci", "sector": "Industrials", "risk": "Medium", "liquidity": 78,
+        "en": "Motorway and airport concessions plus a large construction arm. The "
+              "concessions are inflation-linked toll revenue, which is why it behaves "
+              "more like infrastructure than like a builder.",
+        "fr": "Concessions autoroutières et aéroportuaires, plus une importante activité "
+              "de construction. Les concessions sont des péages indexés sur l'inflation : "
+              "le titre se comporte davantage comme une infrastructure que comme un constructeur.",
+        "use_en": "Infrastructure and inflation-linked cash flow.",
+        "use_fr": "Infrastructure et flux de trésorerie indexés sur l'inflation.",
+        "yield": "~4%", "cap": "large",
+    },
+    "SGO.PA": {
+        "name": "Saint-Gobain", "sector": "Industrials", "risk": "Medium-High", "liquidity": 72,
+        "en": "Building materials and light construction products, increasingly positioned "
+              "on renovation and insulation. Cyclical with construction and with rates.",
+        "fr": "Matériaux de construction et produits d'aménagement, de plus en plus positionné "
+              "sur la rénovation et l'isolation. Cyclique avec la construction et les taux.",
+        "use_en": "Cyclical value. Rate-sensitive.",
+        "use_fr": "Value cyclique. Sensible aux taux.",
+        "yield": "~3%", "cap": "large",
+    },
+    "ML.PA": {
+        "name": "Michelin", "sector": "Industrials", "risk": "Medium", "liquidity": 70,
+        "en": "Tyres, where the replacement market — not new vehicles — is the bulk of "
+              "the profit. That makes it materially less cyclical than the car makers.",
+        "fr": "Pneumatiques, où le marché du remplacement — et non les véhicules neufs — "
+              "fait l'essentiel du bénéfice. Nettement moins cyclique que les constructeurs.",
+        "use_en": "Industrial with a consumable revenue base.",
+        "use_fr": "Industriel avec une base de revenus consommables.",
+        "yield": "~4%", "cap": "large",
+    },
+    "AI.PA": {
+        "name": "Air Liquide", "sector": "Materials", "risk": "Low-Medium", "liquidity": 82,
+        "en": "Industrial gases — oxygen, nitrogen, hydrogen — sold on long contracts with "
+              "on-site plants. Among the most predictable revenue streams on the index.",
+        "fr": "Gaz industriels — oxygène, azote, hydrogène — vendus sur contrats longs avec "
+              "des unités sur site. L'un des chiffres d'affaires les plus prévisibles de l'indice.",
+        "use_en": "Defensive industrial. Low-beta ballast.",
+        "use_fr": "Industriel défensif. Lest à faible bêta.",
+        "yield": "~2%", "cap": "large",
+    },
+
+    # ── Energy and utilities ─────────────────────────────────────────────────
+    "TTE.PA": {
+        "name": "TotalEnergies", "sector": "Energy", "risk": "Medium-High", "liquidity": 90,
+        "en": "Integrated oil and gas major, with a growing electricity and renewables arm. "
+              "Cash flow tracks the oil price, and the dividend is the reason most holders hold it.",
+        "fr": "Major pétrolière et gazière intégrée, avec une activité électricité et "
+              "renouvelables en croissance. Les flux suivent le prix du pétrole, et le "
+              "dividende est la raison pour laquelle la plupart la détiennent.",
+        "use_en": "Energy and income. Hedges an inflation shock the rest of a portfolio suffers.",
+        "use_fr": "Énergie et rendement. Couvre un choc inflationniste que le reste du portefeuille subit.",
+        "yield": "~5%", "cap": "large",
+    },
+    "ENGI.PA": {
+        "name": "Engie", "sector": "Utilities", "risk": "Medium", "liquidity": 72,
+        "en": "Utility: regulated networks, renewables and energy services. Regulated "
+              "revenue makes it defensive; leverage makes it rate-sensitive.",
+        "fr": "Services aux collectivités : réseaux régulés, renouvelables et services "
+              "énergétiques. Le régulé le rend défensif ; l'endettement le rend sensible aux taux.",
+        "use_en": "Income and low beta, with rate risk attached.",
+        "use_fr": "Rendement et faible bêta, avec un risque de taux attaché.",
+        "yield": "~7%", "cap": "large",
+    },
+    "VIE.PA": {
+        "name": "Veolia", "sector": "Utilities", "risk": "Medium", "liquidity": 68,
+        "en": "Water, waste and energy services, largely under long municipal contracts. "
+              "Revenue is indexed, which is a real inflation pass-through rather than a claimed one.",
+        "fr": "Eau, déchets et services énergétiques, largement sous contrats municipaux "
+              "longs. Le chiffre d'affaires est indexé — une vraie répercussion de l'inflation.",
+        "use_en": "Defensive utility with contractual inflation linkage.",
+        "use_fr": "Service public défensif avec indexation contractuelle sur l'inflation.",
+        "yield": "~4%", "cap": "large",
+    },
+
+    # ── Health ───────────────────────────────────────────────────────────────
+    "SAN.PA": {
+        "name": "Sanofi", "sector": "Healthcare", "risk": "Medium", "liquidity": 85,
+        "en": "Pharmaceutical group built around immunology and vaccines. The concentration "
+              "risk is patent expiry on its lead products, not the demand for them.",
+        "fr": "Groupe pharmaceutique centré sur l'immunologie et les vaccins. Le risque de "
+              "concentration porte sur l'expiration des brevets de ses produits phares, pas sur la demande.",
+        "use_en": "Defensive healthcare. Uncorrelated with the industrial block.",
+        "use_fr": "Santé défensive. Décorrélée du bloc industriel.",
+        "yield": "~4%", "cap": "large",
+    },
+
+    # ── Financials ───────────────────────────────────────────────────────────
+    "BNP.PA": {
+        "name": "BNP Paribas", "sector": "Financials", "risk": "Medium-High", "liquidity": 86,
+        "en": "The largest French bank by assets and a eurozone universal bank. Earnings "
+              "rise with rates and fall with credit losses, and it carries the sector's tail risk.",
+        "fr": "Première banque française par les actifs et banque universelle de la zone euro. "
+              "Les résultats montent avec les taux et baissent avec le coût du risque ; "
+              "elle porte le risque extrême du secteur.",
+        "use_en": "Rate-sensitive value. A hedge against the duration in a bond sleeve.",
+        "use_fr": "Value sensible aux taux. Couvre la duration d'une poche obligataire.",
+        "yield": "~7%", "cap": "large",
+    },
+    "GLE.PA": {
+        "name": "Société Générale", "sector": "Financials", "risk": "High", "liquidity": 76,
+        "en": "French universal bank with a large markets business. Historically the most "
+              "volatile of the three listed French banks.",
+        "fr": "Banque universelle française avec une forte activité de marché. "
+              "Historiquement la plus volatile des trois banques françaises cotées.",
+        "use_en": "High-beta financial. Correlates tightly with BNP and Crédit Agricole.",
+        "use_fr": "Financière à bêta élevé. Corrèle fortement avec BNP et Crédit Agricole.",
+        "yield": "~6%", "cap": "mid",
+    },
+    "ACA.PA": {
+        "name": "Crédit Agricole S.A.", "sector": "Financials", "risk": "Medium-High", "liquidity": 74,
+        "en": "The listed vehicle of the Crédit Agricole mutual group, weighted toward "
+              "retail banking, insurance and asset management rather than trading.",
+        "fr": "Véhicule coté du groupe mutualiste Crédit Agricole, orienté banque de détail, "
+              "assurance et gestion d'actifs plutôt que marché.",
+        "use_en": "Income financial, less market-sensitive than its peers.",
+        "use_fr": "Financière de rendement, moins sensible aux marchés que ses pairs.",
+        "yield": "~7%", "cap": "large",
+    },
+
+    # ── Technology ───────────────────────────────────────────────────────────
+    "STMPA.PA": {
+        "name": "STMicroelectronics", "sector": "Technology", "risk": "High", "liquidity": 76,
+        "en": "Franco-Italian semiconductor maker: automotive chips, power and analogue, "
+              "industrial microcontrollers. Deeply cyclical, and the cycle is inventory, not demand.",
+        "fr": "Fabricant de semi-conducteurs franco-italien : puces automobiles, puissance "
+              "et analogique, microcontrôleurs industriels. Très cyclique — et le cycle "
+              "porte sur les stocks, pas sur la demande.",
+        "use_en": "European semiconductor exposure. Expect equity-like drawdowns, doubled.",
+        "use_fr": "Exposition aux semi-conducteurs européens. Attendez-vous à des baisses doubles de celles des actions.",
+        "yield": "~1%", "cap": "large",
+    },
+    "CAP.PA": {
+        "name": "Capgemini", "sector": "Technology", "risk": "Medium-High", "liquidity": 72,
+        "en": "IT services and consulting. Revenue is headcount times day rate, so it tracks "
+              "corporate IT budgets — an early-cycle indicator rather than a growth story.",
+        "fr": "Services informatiques et conseil. Le chiffre d'affaires est un effectif "
+              "multiplié par un taux journalier : il suit les budgets IT des entreprises — "
+              "un indicateur de début de cycle plus qu'une histoire de croissance.",
+        "use_en": "Cyclical technology services.",
+        "use_fr": "Services technologiques cycliques.",
+        "yield": "~2%", "cap": "large",
+    },
+    "DSY.PA": {
+        "name": "Dassault Systèmes", "sector": "Technology", "risk": "Medium", "liquidity": 74,
+        "en": "3D design and product lifecycle software — CATIA, SOLIDWORKS, Medidata. "
+              "Licence and subscription revenue, so it behaves like a software company, "
+              "not like the industrials it serves.",
+        "fr": "Logiciels de conception 3D et de cycle de vie produit — CATIA, SOLIDWORKS, "
+              "Medidata. Revenus de licences et d'abonnements : se comporte comme un "
+              "éditeur, pas comme les industriels qu'il sert.",
+        "use_en": "European software. Rare on this index, and priced accordingly.",
+        "use_fr": "Logiciel européen. Rare sur cet indice, et valorisé en conséquence.",
+        "yield": "~0.5%", "cap": "large",
+    },
+    "ORA.PA": {
+        "name": "Orange", "sector": "Telecom", "risk": "Low-Medium", "liquidity": 72,
+        "en": "Incumbent French telecom operator. Low growth, heavy capital spending, and "
+              "held almost entirely for the dividend.",
+        "fr": "Opérateur télécom historique français. Croissance faible, investissements "
+              "lourds, détenu presque uniquement pour le dividende.",
+        "use_en": "Bond proxy. Behaves like duration, and falls like it when rates rise.",
+        "use_fr": "Substitut obligataire. Se comporte comme de la duration — et baisse comme elle quand les taux montent.",
+        "yield": "~7%", "cap": "large",
+    },
+
+    # ── Automotive ───────────────────────────────────────────────────────────
+    "STLAP.PA": {
+        "name": "Stellantis", "sector": "Automotive", "risk": "High", "liquidity": 80,
+        "en": "Peugeot, Citroën, Fiat, Jeep, Opel and ten more marques in one group. Listed "
+              "in Paris, Milan and New York — the Paris line is this one. Deeply cyclical, "
+              "and priced on a single year's margin.",
+        "fr": "Peugeot, Citroën, Fiat, Jeep, Opel et dix autres marques dans un seul groupe. "
+              "Coté à Paris, Milan et New York — la ligne parisienne est celle-ci. Très "
+              "cyclique, et valorisé sur la marge d'une seule année.",
+        "use_en": "Deep-cyclical value. Sized small, or not at all.",
+        "use_fr": "Value très cyclique. À dimensionner petit, ou pas du tout.",
+        "yield": "~8%", "cap": "large",
+    },
+    "RNO.PA": {
+        "name": "Renault", "sector": "Automotive", "risk": "High", "liquidity": 70,
+        "en": "French car maker, with a large stake in Nissan and an electric-vehicle arm "
+              "carved out separately. More leveraged to a European volume recovery than Stellantis.",
+        "fr": "Constructeur automobile français, avec une participation importante dans "
+              "Nissan et une activité électrique filialisée. Plus exposé qu'un Stellantis "
+              "à une reprise des volumes européens.",
+        "use_en": "High-beta cyclical. Correlated with Stellantis.",
+        "use_fr": "Cyclique à bêta élevé. Corrélé à Stellantis.",
+        "yield": "~5%", "cap": "mid",
+    },
+
+    # ── Euronext Growth ──────────────────────────────────────────────────────
+    "ALTBG.PA": {
+        "name": "Capital B (ex-The Blockchain Group)", "sector": "Crypto",
+        "risk": "Very High", "liquidity": 30,
+        "en": "A bitcoin treasury company listed on Euronext Growth Paris, formerly The "
+              "Blockchain Group. The share is a leveraged claim on bitcoin: the balance "
+              "sheet holds BTC, and issuance funds more of it. Expect the drawdowns of "
+              "bitcoin, amplified by the financing and by a small-cap order book — this "
+              "is not a CAC 40 share and it does not trade like one.",
+        "fr": "Société de trésorerie bitcoin cotée sur Euronext Growth Paris, anciennement "
+              "The Blockchain Group. Le titre est une créance à effet de levier sur le "
+              "bitcoin : le bilan détient du BTC, et les émissions en financent davantage. "
+              "Attendez-vous aux baisses du bitcoin, amplifiées par le financement et par "
+              "un carnet d'ordres de petite capitalisation — ce n'est pas une valeur du "
+              "CAC 40 et elle ne se négocie pas comme telle.",
+        "use_en": "Speculative satellite only. Its liquidity score is low on purpose: a "
+                  "position you cannot exit in a falling market is not the size you think it is.",
+        "use_fr": "Satellite spéculatif uniquement. Son score de liquidité est bas "
+                  "volontairement : une position dont on ne peut pas sortir dans un marché "
+                  "en baisse n'a pas la taille qu'on croit.",
+        "yield": "0%", "cap": "small",
+    },
+}
+
+# Broad-market trackers a French investor is likely to hold, quoted in euros on
+# Euronext Paris. Same symbol caveat as the shares above.
+_PARIS_ETFS = {
+    "CW8.PA": {
+        "name": "Amundi MSCI World UCITS ETF", "sector": "Diversified",
+        "risk": "Medium", "liquidity": 88, "geography": "Global", "asset_class": "ETF",
+        "en": "Developed-market world equity in one line, quoted in euros. The default "
+              "core holding for a French investor, and PEA-eligible in its synthetic form.",
+        "fr": "Actions mondiales des marchés développés en une ligne, cotée en euros. "
+              "La position cœur par défaut pour un investisseur français, éligible au PEA "
+              "dans sa version synthétique.",
+        "use_en": "Portfolio core. 40–80% for most people.",
+        "use_fr": "Cœur de portefeuille. 40–80% pour la plupart des profils.",
+        "yield": "accumulating", "cap": "—",
+    },
+    "ESE.PA": {
+        "name": "BNP Paribas Easy S&P 500 UCITS ETF", "sector": "Diversified",
+        "risk": "Medium", "liquidity": 84, "geography": "USA", "asset_class": "ETF",
+        "en": "S&P 500 exposure quoted in euros. Note what that does and does not do: the "
+              "price is in euros, the underlying earnings are in dollars, so the currency "
+              "risk is still there — it is unhedged, not absent.",
+        "fr": "Exposition au S&P 500 cotée en euros. Attention à ce que cela fait et ne "
+              "fait pas : le prix est en euros, les bénéfices sous-jacents en dollars — "
+              "le risque de change est toujours là, il est non couvert, pas supprimé.",
+        "use_en": "US equity sleeve without a dollar account.",
+        "use_fr": "Poche actions américaines sans compte en dollars.",
+        "yield": "accumulating", "cap": "—",
+    },
+    "PAEEM.PA": {
+        "name": "Amundi MSCI Emerging Markets UCITS ETF", "sector": "Emerging Markets",
+        "risk": "High", "liquidity": 76, "geography": "Emerging Markets", "asset_class": "ETF",
+        "en": "Emerging-market equity in euros. Higher volatility and a different cycle "
+              "from the developed world, which is the reason to hold it.",
+        "fr": "Actions des marchés émergents en euros. Volatilité plus élevée et cycle "
+              "différent du monde développé — c'est la raison de la détenir.",
+        "use_en": "Diversifier. 5–15% alongside a world core.",
+        "use_fr": "Diversification. 5–15% à côté d'un cœur monde.",
+        "yield": "accumulating", "cap": "—",
+    },
+}
+
+_CAP_LABEL = {
+    "large": {"en": "Large cap", "fr": "Grande capitalisation"},
+    "mid": {"en": "Mid cap", "fr": "Moyenne capitalisation"},
+    "small": {"en": "Small cap — Euronext Growth", "fr": "Petite capitalisation — Euronext Growth"},
+    "—": {"en": "—", "fr": "—"},
+}
+
+# The bucket the X-ray aggregates on, as opposed to the label a reader sees.
+# Separate because the look-through needs a closed vocabulary and the card needs
+# a sentence: parsing "Small cap — Euronext Growth" back into a bucket is how a
+# label edit silently becomes a misclassification.
+_CAP_BUCKET = {"large": "Large Cap", "mid": "Mid Cap", "small": "Small Cap", "—": None}
+
+
+def _expand_paris(table: dict, *, default_geography: str, default_class: str) -> dict:
+    """Blow a compact row up into the full `ASSET_INFO` shape."""
+    out = {}
+    for ticker, row in table.items():
+        out[ticker] = {
+            "name": row["name"],
+            "description": row["en"],
+            "description_fr": row["fr"],
+            "sector": row["sector"],
+            "geography": row.get("geography", default_geography),
+            "asset_class": row.get("asset_class", default_class),
+            "utility": row["use_en"],
+            "utility_fr": row["use_fr"],
+            "typical_use": row["use_en"],
+            "typical_use_fr": row["use_fr"],
+            "risk_level": row["risk"],
+            "liquidity": row["liquidity"],
+            "dividend_yield": row["yield"],
+            "market_cap": _CAP_LABEL.get(row.get("cap", "—"), _CAP_LABEL["—"])["en"],
+            "cap_bucket": _CAP_BUCKET.get(row.get("cap", "—")),
+            # Every line here is quoted in euros. Held explicitly rather than
+            # inferred from the `.PA` suffix so a relisting cannot silently
+            # change what currency the app thinks a position is in.
+            "currency": "EUR",
+            "exchange": "Euronext Paris",
+        }
+    return out
+
+
+EURONEXT_PARIS = {
+    **_expand_paris(_PARIS_STOCKS, default_geography="France", default_class="Stock"),
+    **_expand_paris(_PARIS_ETFS, default_geography="Global", default_class="ETF"),
+}
+
+ASSET_INFO.update(EURONEXT_PARIS)
+SECTOR_MAPPING.update({t: info["sector"] for t, info in EURONEXT_PARIS.items()})
+GEOGRAPHY_MAPPING.update({t: info["geography"] for t, info in EURONEXT_PARIS.items()})
+
+# The quote currency of everything the app knows about, for the conversion layer.
+# Only the exceptions are listed; `investment.currency.quote_currency` derives the
+# rest from the exchange suffix.
+QUOTE_CURRENCY = {ticker: info["currency"] for ticker, info in EURONEXT_PARIS.items()}
+
+POPULAR_ASSETS["Paris — CAC 40"] = {
+    info["name"].split(" (")[0]: ticker
+    for ticker, info in EURONEXT_PARIS.items()
+    if info["asset_class"] == "Stock" and ticker != "ALTBG.PA"
+}
+POPULAR_ASSETS["Paris — ETFs & Growth"] = {
+    **{info["name"].split(" UCITS")[0]: ticker
+       for ticker, info in EURONEXT_PARIS.items() if info["asset_class"] == "ETF"},
+    "Capital B": "ALTBG.PA",
+}
+
+
+# =============================================================================
+# FINDING A SYMBOL FROM WHAT SOMEBODY TYPED
+# =============================================================================
+#
+# Nobody types `MC.PA`. They type "LVMH", or "lvmh", or "MC". The search box used
+# to match the catalogue's display names only, so "capital b" found nothing and
+# offered to add a ticker called `CAPITAL B` — which then failed to download with
+# no explanation. These aliases are what turn a company name into the symbol
+# Yahoo actually answers to.
+
+_ALIASES: dict[str, str] = {
+    # Names, including the ones people actually say
+    "lvmh": "MC.PA", "louis vuitton": "MC.PA", "vuitton": "MC.PA", "moet": "MC.PA",
+    "hermes": "RMS.PA", "hermès": "RMS.PA",
+    "kering": "KER.PA", "gucci": "KER.PA",
+    "loreal": "OR.PA", "l'oreal": "OR.PA", "l'oréal": "OR.PA", "oreal": "OR.PA",
+    "pernod": "RI.PA", "pernod ricard": "RI.PA", "ricard": "RI.PA",
+    "danone": "BN.PA",
+    "carrefour": "CA.PA",
+    "essilor": "EL.PA", "essilorluxottica": "EL.PA", "luxottica": "EL.PA",
+    "airbus": "AIR.PA",
+    "safran": "SAF.PA",
+    "thales": "HO.PA",
+    "schneider": "SU.PA", "schneider electric": "SU.PA",
+    "legrand": "LR.PA",
+    "vinci": "DG.PA",
+    "saint gobain": "SGO.PA", "saint-gobain": "SGO.PA", "gobain": "SGO.PA",
+    "michelin": "ML.PA",
+    "air liquide": "AI.PA", "airliquide": "AI.PA", "liquide": "AI.PA",
+    "total": "TTE.PA", "totalenergies": "TTE.PA", "total energies": "TTE.PA",
+    "engie": "ENGI.PA", "gdf": "ENGI.PA",
+    "veolia": "VIE.PA",
+    "sanofi": "SAN.PA",
+    "bnp": "BNP.PA", "bnp paribas": "BNP.PA", "paribas": "BNP.PA",
+    "societe generale": "GLE.PA", "société générale": "GLE.PA", "socgen": "GLE.PA",
+    "credit agricole": "ACA.PA", "crédit agricole": "ACA.PA", "casa": "ACA.PA",
+    "st": "STMPA.PA", "stmicro": "STMPA.PA", "stmicroelectronics": "STMPA.PA",
+    "capgemini": "CAP.PA", "cap gemini": "CAP.PA",
+    "dassault": "DSY.PA", "dassault systemes": "DSY.PA", "dassault systèmes": "DSY.PA",
+    "orange": "ORA.PA", "france telecom": "ORA.PA",
+    "stellantis": "STLAP.PA", "peugeot": "STLAP.PA", "psa": "STLAP.PA", "citroen": "STLAP.PA",
+    "renault": "RNO.PA",
+    "capital b": "ALTBG.PA", "capitalb": "ALTBG.PA",
+    "the blockchain group": "ALTBG.PA", "blockchain group": "ALTBG.PA",
+    "msci world": "CW8.PA", "world": "CW8.PA",
+    "sp500 eur": "ESE.PA", "s&p 500 eur": "ESE.PA",
+    "emergents": "PAEEM.PA", "emerging": "PAEEM.PA",
+}
+
+# Bare Euronext mnemonics, so typing "MC" or "ALTBG" resolves. Kept separate
+# from the name aliases because these must only match a whole word: "or" is the
+# mnemonic for L'Oréal and also a French word and an English one, and matching
+# it inside a phrase would be worse than not matching it at all.
+_MNEMONICS = {ticker.split(".")[0].lower(): ticker for ticker in EURONEXT_PARIS}
+
+
+def resolve_symbol(text: str) -> str | None:
+    """
+    The Yahoo symbol for what somebody typed, or None.
+
+    Exact matches only — no fuzzy matching. A near-miss that silently resolves to
+    the wrong company is worse than no match, because the portfolio would then
+    contain a share the person never chose and every figure would be about it.
+    """
+    if not text:
+        return None
+    key = text.strip().lower()
+    if not key:
+        return None
+
+    upper = text.strip().upper()
+    if upper in EURONEXT_PARIS:
+        return upper
+    if key in _ALIASES:
+        return _ALIASES[key]
+    if key in _MNEMONICS:
+        return _MNEMONICS[key]
+    return None
+
+
+def search_paris(text: str, limit: int = 8) -> list[tuple[str, str]]:
+    """
+    Euronext names containing `text`, as `(display, ticker)`.
+
+    Substring matching is fine *here* because the result is a list the person
+    picks from, not a symbol chosen on their behalf.
+    """
+    if not text or not text.strip():
+        return []
+    needle = text.strip().lower()
+    hits = []
+    for ticker, info in EURONEXT_PARIS.items():
+        haystack = f"{info['name']} {ticker}".lower()
+        if needle in haystack or needle in ticker.split(".")[0].lower():
+            hits.append((f"{info['name']} ({ticker})", ticker))
+        if len(hits) >= limit:
+            break
+    return hits

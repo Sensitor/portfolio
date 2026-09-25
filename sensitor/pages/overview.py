@@ -21,7 +21,10 @@ from ..ui.themes import (
 )
 from ..core.i18n import define, tr
 from ..integrations.market_data import benchmark_label
-from ._shared import benchmark_selector, guard, load_benchmark, period_selector, single_asset_note
+from ._shared import (
+    benchmark_selector, currency_notice, guard, load_benchmark, period_selector,
+    single_asset_note,
+)
 
 
 def render_overview(ctx) -> None:
@@ -34,6 +37,10 @@ def render_overview(ctx) -> None:
     )
     if not guard(ctx, lang):
         return
+
+    # Said once, on the page carrying the headline figures, and under the header
+    # rather than above it.
+    currency_notice(ctx.analyzer, lang)
 
     # ── Controls ─────────────────────────────────────────────────────────────
     left, right = st.columns([3, 1.4])

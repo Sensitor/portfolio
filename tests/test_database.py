@@ -118,6 +118,22 @@ def test_isolation():
     check("last_synced_at is scoped",
           store.last_synced_at(BOB, "acct-1") is None)
 
+    store.save_workspace(ALICE, {"MC.PA": 1.0}, base_currency="EUR")
+    check("a working portfolio is not visible to another user",
+          store.load_workspace(BOB) is None)
+    check("but its owner gets it back",
+          store.load_workspace(ALICE).holdings == {"MC.PA": 1.0})
+    check("with the base currency it was saved in",
+          store.load_workspace(ALICE).base_currency == "EUR")
+    store.save_workspace(BOB, {"QQQ": 1.0})
+    check("and one user's workspace does not overwrite another's",
+          store.load_workspace(ALICE).holdings == {"MC.PA": 1.0}
+          and store.load_workspace(BOB).holdings == {"QQQ": 1.0})
+    store.clear_workspace(BOB)
+    check("clearing one leaves the other alone",
+          store.load_workspace(BOB) is None
+          and store.load_workspace(ALICE) is not None)
+
     # ── Writes ───────────────────────────────────────────────────────────────
     check("a portfolio cannot be renamed by another user",
           store.rename_portfolio(BOB, alice_pf, "Hijacked") is False)
@@ -238,6 +254,7 @@ def test_user_lifecycle():
     store.add_snapshot(ALICE, pf, total_value=1.0, weights={}, metrics={})
     store.upsert_account(ALICE, "acct-1", "Live")
     store.save_trades(ALICE, [a_trade(), a_trade("t2", "XAUUSD", -50.0)])
+    store.save_workspace(ALICE, {"MC.PA": 0.6, "AAPL": 0.4}, base_currency="EUR")
     store.save_portfolio(BOB, "Bob's", {"QQQ": 1.0})
     store.save_trades(BOB, [a_trade("b1")])
 
@@ -252,6 +269,8 @@ def test_user_lifecycle():
           len(export["portfolios"][0]["snapshots"]) == 1)
     check("and the accounts", len(export["accounts"]) == 1)
     check("and the trades", len(export["trades"]) == 2)
+    check("and the working portfolio",
+          export["workspace"]["holdings"] == {"MC.PA": 0.6, "AAPL": 0.4})
     check("and says which schema it came from",
           export["schema_version"] == SCHEMA_VERSION)
     check("an export is JSON-serialisable", bool(json.dumps(export, default=str)))
@@ -261,10 +280,11 @@ def test_user_lifecycle():
     counts = store.delete_user(ALICE)
     check("deletion reports what it removed",
           counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
-                     "trades": 2, "sessions": 0},
+                     "trades": 2, "sessions": 0, "workspace": 1},
           f"got {counts}")
     check("the user is gone", store.get_user(ALICE) is None)
     check("the portfolios are gone", store.list_portfolios(ALICE) == [])
+    check("the working portfolio is gone", store.load_workspace(ALICE) is None)
     check("the snapshots are gone", store.list_snapshots(ALICE, pf) == [])
     check("the trades are gone", store.count_trades(ALICE) == 0)
     check("the accounts are gone", store.list_accounts(ALICE) == [])

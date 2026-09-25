@@ -30,20 +30,110 @@ import pandas as pd
 import yfinance as yf
 from scipy.optimize import minimize
 
-from .assets import ASSET_INFO, GEOGRAPHY_MAPPING, SECTOR_MAPPING
+from . import currency as FX
+from .assets import ASSET_INFO, GEOGRAPHY_MAPPING, QUOTE_CURRENCY, SECTOR_MAPPING
+
+
+# The two network calls this module makes, named so a test can replace them.
+# Everything else here is arithmetic, and arithmetic that can only be exercised
+# through a live Yahoo connection is arithmetic nobody checks.
+
+def _download_prices(ticker: str, start: str):
+    """Daily closes for one ticker, as a Series named after it."""
+    history = yf.Ticker(ticker).history(start=start)
+    if history is None or history.empty or "Close" not in history:
+        return None
+    return history["Close"].rename(ticker)
+
+
+def _download_fx(pair: str, start: str):
+    """Daily closes for one Yahoo FX symbol, e.g. `EURUSD=X`."""
+    history = yf.Ticker(pair).history(start=start)
+    if history is None or history.empty or "Close" not in history:
+        return None
+    close = history["Close"].dropna()
+    return close if len(close) > 5 else None
+
+
+def _common_window(prices, *, on_error=None):
+    """
+    Cut a price frame to the span in which every column actually traded.
+
+    A covariance over a period when one asset did not exist is not a small
+    approximation — there is nothing to covary with. The alternative the code
+    used before was to back-fill, which silently supplied a constant price and
+    therefore a run of zero returns.
+
+    Returns the trimmed frame and a report naming the asset that set the start,
+    so a page can say *why* the window is shorter than the one that was asked
+    for rather than showing a date range nobody chose.
+    """
+    report = {"start": None, "limited_by": None, "n_rows": 0, "dropped": [],
+              "shortened": False}
+    if prices is None or prices.empty:
+        return prices, report
+
+    # `.loc[start:]` on an unsorted index raises rather than slicing. Concat
+    # produces a sorted union today; sorting here means it stays correct if a
+    # loader ever hands back something else.
+    prices = prices.sort_index()
+
+    starts = {}
+    for column in prices.columns:
+        first = prices[column].first_valid_index()
+        if first is None:
+            report["dropped"].append(str(column))
+            continue
+        starts[column] = first
+
+    usable = [c for c in prices.columns if c in starts]
+    if not usable:
+        return prices.iloc[:, :0], report
+
+    latest = max(starts[c] for c in usable)
+    earliest = min(starts[c] for c in usable)
+    report["limited_by"] = str(max(usable, key=lambda c: starts[c]))
+    report["start"] = latest
+    # Whether anything was actually given up. When every holding starts on the
+    # same day this is False, and the page stays quiet — a note saying "X has
+    # the shortest history" is false when every history is the same length, and
+    # a caveat that fires on every portfolio is one nobody reads on the
+    # portfolio it was written for.
+    report["shortened"] = latest > earliest
+
+    trimmed = prices.loc[latest:, usable]
+    # A column can still be blank after the cut if its only quotes were before
+    # it — a delisting, or a symbol that answered with a stub.
+    keep = [c for c in trimmed.columns if trimmed[c].notna().sum() >= 5]
+    for column in trimmed.columns:
+        if column not in keep:
+            report["dropped"].append(str(column))
+            if on_error:
+                on_error(str(column), "no usable price history in the shared window")
+    trimmed = trimmed[keep].ffill()
+    report["n_rows"] = len(trimmed)
+    return trimmed, report
+
 
 class PortfolioAnalyzer:
-    def __init__(self, tickers, weights, start_date='2021-01-01', initial_value=100000, user_profile="balanced"):
+    def __init__(self, tickers, weights, start_date='2021-01-01', initial_value=100000,
+                 user_profile="balanced", base_currency="USD"):
         self.tickers = tickers
         self.weights = weights
         self.start_date = start_date
         self.initial_value = initial_value
         self.user_profile = user_profile
+        # What the portfolio is denominated in. Every price is converted into it
+        # before a single return is computed — see `investment.currency`.
+        self.base_currency = (base_currency or "USD").upper()
         self.data = None
-        
-    def fetch_data(self, *, progress=None, on_error=None):
+        self.currency_report = {}
+        self.window_report = {}
+
+    def fetch_data(self, *, progress=None, on_error=None,
+                   price_loader=None, fx_loader=None):
         """
-        Download prices and derive the return and value series.
+        Download prices, convert them into the base currency, and derive returns.
 
         `progress(fraction, label)` and `on_error(ticker, message)` are optional
         callbacks. They exist so this method can report what it is doing without
@@ -53,9 +143,18 @@ class PortfolioAnalyzer:
         `st.progress` and `st.warning` directly, which meant the entire analyzer
         needed a Streamlit runtime to run at all.
 
+        `price_loader` and `fx_loader` default to Yahoo and exist so the currency
+        handling can be tested without a network.
+
         Tickers that fail to download are skipped and their weight redistributed
-        across the survivors, so one dead symbol does not lose the portfolio.
+        across the survivors, so one dead symbol does not lose the portfolio. A
+        ticker whose exchange rate cannot be sourced is dropped the same way and
+        for the same reason: leaving it in would add euros to dollars, and the
+        portfolio return would be a number with no meaning.
         """
+        price_loader = price_loader or _download_prices
+        fx_loader = fx_loader or _download_fx
+
         all_data = []
         total = len(self.tickers) or 1
 
@@ -63,15 +162,18 @@ class PortfolioAnalyzer:
             try:
                 if progress:
                     progress(i / total, f"Loading {ticker}...")
-                data = yf.Ticker(ticker).history(start=self.start_date)
-                data = data[['Close']].rename(columns={'Close': ticker})
-                all_data.append(data)
+                series = price_loader(ticker, self.start_date)
+                if series is None or len(series) == 0:
+                    if on_error:
+                        on_error(ticker, "no price history returned")
+                    continue
+                all_data.append(series.to_frame(ticker))
                 if progress:
                     progress((i + 1) / total, f"Loading {ticker}...")
             except Exception as e:
                 if on_error:
                     on_error(ticker, str(e)[:80])
-        
+
         if not all_data:
             return False
 
@@ -80,7 +182,30 @@ class PortfolioAnalyzer:
         available = [t for t in self.tickers if t in self.data.columns]
         if not available:
             return False
-        self.data = self.data[available].ffill().bfill()
+
+        # Forward-fill only. Paris and New York keep different holidays, so a
+        # gap *inside* an asset's life is ordinary and the last close is the
+        # honest answer for it.
+        #
+        # Back-filling is not. It invents a flat price for every day before an
+        # asset was listed, and a flat price is a zero return: a share that
+        # floated a year ago would be credited with a year of perfect calm,
+        # understating its volatility, its drawdown and its correlation with
+        # everything else. The portfolio would look better diversified than it
+        # is, which is the direction that costs money. So the frame is cut to
+        # the window every holding actually traded in instead.
+        self.data = self.data[available].ffill()
+        self.data, self.window_report = _common_window(self.data, on_error=on_error)
+        available = [t for t in available if t in self.data.columns]
+        if not available or len(self.data) < 5:
+            return False
+
+        # ── Into one currency, before anything is differenced ────────────────
+        self.data, self.currency_report = self._to_base_currency(
+            self.data, fx_loader=fx_loader, on_error=on_error)
+        available = [t for t in available if t in self.data.columns]
+        if not available:
+            return False
 
         # Sync tickers and weights to available data
         self.tickers = available
@@ -92,6 +217,39 @@ class PortfolioAnalyzer:
         self.portfolio_returns = self.returns @ weights_array
         self.portfolio_values = self.initial_value * (1 + self.portfolio_returns).cumprod()
         return True
+
+    def _to_base_currency(self, prices, *, fx_loader, on_error=None):
+        """
+        Convert a price frame into `self.base_currency`.
+
+        A portfolio already wholly in its base currency asks for no rates and
+        takes no network call, so the common case costs nothing — and, more
+        importantly, behaves exactly as it did before currencies existed here.
+        """
+        needed = FX.pairs_needed(prices.columns, self.base_currency, QUOTE_CURRENCY)
+        rates = {}
+        for quote in needed:
+            for symbol, invert in FX.fx_candidates(quote, self.base_currency):
+                try:
+                    series = fx_loader(symbol, self.start_date)
+                except Exception:
+                    series = None
+                if series is None or len(series) == 0:
+                    continue
+                # `invert` carries Yahoo's quoting convention so no caller has to
+                # remember which way round `EURUSD=X` reads.
+                rates[quote] = (1.0 / series) if invert else series
+                break
+            else:
+                if on_error:
+                    on_error(quote, f"no exchange rate against {self.base_currency}")
+
+        converted, report = FX.convert_prices(
+            prices, self.base_currency, rates, QUOTE_CURRENCY)
+        for column, quote in report.get("dropped", {}).items():
+            if on_error:
+                on_error(column, f"dropped: no {quote}/{self.base_currency} rate")
+        return converted, report
     
     def calculate_robustness_index(self):
         """
@@ -461,8 +619,19 @@ class PortfolioAnalyzer:
         
         return suggestions
     
-    def stress_test_scenarios(self):
-        """Simulate historical crisis scenarios using independent yfinance downloads."""
+    def stress_test_scenarios(self, *, fx_loader=None):
+        """
+        Simulate historical crisis scenarios using independent yfinance downloads.
+
+        Independent of `fetch_data`, and therefore converted independently: each
+        window needs the exchange rates *of that window*, not today's. A 2008
+        scenario priced at the 2024 euro would report a loss nobody had.
+
+        A window whose rates cannot be sourced is skipped rather than reported
+        unconverted — a stress result is a single number people act on, and a
+        wrong one is worse than a missing one.
+        """
+        fx_loader = fx_loader or _download_fx
         scenarios = {
             "2008 Crisis": {
                 "start": "2008-09-01", "end": "2009-03-01",
@@ -501,6 +670,26 @@ class PortfolioAnalyzer:
                 prices = prices[available].dropna(how="all")
                 if len(prices) < 5:
                     continue
+
+                # Rates for this window, not for today.
+                needed = FX.pairs_needed(available, self.base_currency, QUOTE_CURRENCY)
+                rates = {}
+                for quote in needed:
+                    for symbol, invert in FX.fx_candidates(quote, self.base_currency):
+                        try:
+                            series = fx_loader(symbol, scenario["start"])
+                        except Exception:
+                            series = None
+                        if series is None or len(series) == 0:
+                            continue
+                        rates[quote] = (1.0 / series) if invert else series
+                        break
+                prices, _ = FX.convert_prices(prices, self.base_currency, rates,
+                                              QUOTE_CURRENCY)
+                available = [t for t in available if t in prices.columns]
+                if not available or len(prices) < 5:
+                    continue
+
                 weights_arr = np.array([self.weights[t] for t in available])
                 weights_arr /= weights_arr.sum()  # renormalise for missing tickers
                 rets = prices.pct_change().dropna()

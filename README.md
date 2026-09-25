@@ -11,7 +11,8 @@ surfaces can disagree about what a number means.
 **Investment.** Twelve pages over a portfolio: performance against a benchmark,
 risk decomposed by holding, a fund look-through X-ray, eight historical stress
 windows, mean-variance optimisation, Monte Carlo, and a Copilot that pairs an
-observation with a change you can simulate.
+observation with a change you can simulate. US and crypto tickers, plus
+Euronext Paris — the CAC 40, euro-quoted trackers, and Euronext Growth.
 
 **Trading.** Five pages over a journal: what the book made, where it came from,
 how it was risked, and what the behaviour lines up with. Imports from
@@ -52,7 +53,7 @@ None of these is needed by the app, and the API process needs no Streamlit.
 
 | Variable | Default | |
 |---|---|---|
-| `SENSITOR_DB_PATH` | `sensitor_data.db` | where the SQLite file lives |
+| `SENSITOR_DB_PATH` | `sensitor_data.db` | where the SQLite file lives — **set this to an absolute path** |
 | `SENSITOR_AUTH` | `single` | `multi` for real accounts |
 | `SENSITOR_API_TOKEN` | *(unset)* | single-user API key; without it the API issues no sessions |
 | `SENSITOR_CORS_ORIGINS` | *(unset)* | comma-separated; never defaults to `*` |
@@ -93,12 +94,31 @@ transaction, copying only columns both shapes share, and the migration refuses
 to finish if `foreign_key_check` or `integrity_check` reports a problem. The
 rebuild is tested against a populated database built from the previous schema.
 
+The default path is relative to whatever directory you launch from, so
+`streamlit run` from two different places gives you two different databases and
+one of them looks empty. On a machine you actually use, set it absolutely:
+
+```bash
+export SENSITOR_DB_PATH="$HOME/.sensitor/sensitor.db"
+```
+
 ```python
 from sensitor.database import Store
 store = Store()
 store.export_user("you@example.com")   # everything, as JSON-able data
 store.delete_user("you@example.com")   # and it is gone, counted and reported
 ```
+
+### The portfolio you are working on is saved too
+
+Not only the ones you press Save on. The allocation being edited — tickers,
+weights, mode, currency — is written to a `workspace` row whenever it changes,
+and restored the next time you sign in. Closing the tab, redeploying or
+rebooting no longer loses it, which is the property the trading journal always
+had and the investment side did not.
+
+`portfolios` still holds named allocations and their snapshot history; the
+workspace is a scratchpad, one row per person.
 
 ---
 
@@ -180,6 +200,7 @@ sensitor/
 ├── core/          config · exceptions · i18n · security · auth · document
 ├── investment/    analytics · performance · risk · factors · optimize · montecarlo
 │                  stress · xray · health · simulate · context · report
+│                  assets · currency
 ├── trading/       models · setups · analytics · performance · risk · psychology
 │                  journal · context · report
 ├── integrations/  market_data · mt5 · sync
@@ -193,7 +214,7 @@ mobile/
 ├── src/components/ primitives · charts · the screen frame
 ├── src/state/     session · the fetch hooks
 └── app/           expo-router: sign-in and the five tabs
-docs/              ARCHITECTURE · API · MOBILE · MT5_SYNC
+docs/              ARCHITECTURE · API · EURONEXT · MOBILE · MT5_SYNC
 ```
 
 **The rule the layout enforces: business logic never imports Streamlit.**
@@ -211,6 +232,20 @@ history, and the decisions behind each boundary.
 
 These are not style preferences. Each one exists because the alternative
 produces a confident, wrong number that a person would act on.
+
+**A missing price is never invented.** Prices are forward-filled across a
+holiday and never back-filled across a listing. Back-filling supplies a constant
+price for the days before an asset existed, and a constant price is a run of
+zero returns: a share that floated last year would be credited with a year of
+perfect calm, understating its volatility, its drawdown and its correlation with
+everything else — the direction that makes a portfolio look better diversified
+than it is. The analysis runs over the span every holding actually traded in,
+and the page says which holding set the start.
+
+**Two currencies are never added together.** Prices are converted into one base
+currency before a single return is computed, because a return and an exchange
+rate compound rather than add. An asset whose rate cannot be sourced is removed
+and named, not passed through in its own money.
 
 **Undefined is never zero.** A profit factor with no losing trades has no
 denominator; an R multiple on a trade with no stop has no amount risked; a
@@ -243,11 +278,13 @@ than a list maintained by hand.
 
 ```bash
 python tests/test_investment_engine.py    #  44 checks — engine, no Streamlit
+python tests/test_currency.py             #  83 checks — FX conversion, no network
 python tests/test_trading_engine.py       # 173 checks — engine, review, copilot
 python tests/test_mt5_connector.py        # 131 checks — mocked terminal
-python tests/test_database.py             #  89 checks — isolation, migrations
+python tests/test_database.py             #  96 checks — isolation, migrations
 python tests/test_auth.py                 #  95 checks — crypto, sessions, lockout
 python tests/test_api.py                  # 170 checks — HTTP, isolation, no maths
+python tests/test_workspace.py            #  20 checks — survives a restart
 python tests/test_sensitor_pages.py       # 164 render checks
 python tests/test_trading_pages.py        #  82 render checks
 cd mobile && npm run test:integration     #  38 checks against a live server

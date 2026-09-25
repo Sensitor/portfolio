@@ -193,3 +193,51 @@ def snapshot_metrics(ctx) -> dict:
         "n_assets": len(ctx.tickers),
         "period": ctx.period,
     }
+
+
+def currency_notice(analyzer, lang: str) -> None:
+    """
+    What the exchange rates and the shared window did to this portfolio.
+
+    Rendered under a page's own header rather than above it. The first version
+    printed from the router, before any page had drawn anything, which put a
+    grey line of caveat above the product name — legible, and visibly not part
+    of the page it was describing.
+
+    Only the captions live here. The *failure* — an asset dropped for want of a
+    rate — stays in the router, because it changes every number on every page
+    and belongs above all of them.
+    """
+    report = getattr(analyzer, "currency_report", None) or {}
+    base = getattr(analyzer, "base_currency", "USD")
+    converted = report.get("converted") or {}
+
+    if converted:
+        names = ", ".join(sorted(converted))
+        currencies = ", ".join(sorted(set(converted.values())))
+        st.caption(
+            f"Converted to {base} at the daily rate: {names} ({currencies}). "
+            f"Returns include the currency move."
+            if lang == "en" else
+            f"Converti en {base} au taux du jour : {names} ({currencies}). "
+            f"Les rendements incluent le mouvement de change."
+        )
+
+    window = getattr(analyzer, "window_report", None) or {}
+    limited_by = window.get("limited_by")
+    start = window.get("start")
+    if window.get("shortened") and limited_by and start is not None:
+        try:
+            since = start.strftime("%d %b %Y")
+        except Exception:                               # noqa: BLE001
+            since = str(start)[:10]
+        st.caption(
+            f"Measured from {since} — the first date every holding traded. "
+            f"{limited_by} has the shortest history, and a correlation over a period "
+            f"when an asset did not exist is not a weaker figure, it is not a figure."
+            if lang == "en" else
+            f"Mesuré depuis le {since} — la première date où toutes les lignes cotaient. "
+            f"{limited_by} a l'historique le plus court, et une corrélation sur une "
+            f"période où un actif n'existait pas n'est pas un chiffre moins fiable, "
+            f"ce n'est pas un chiffre."
+        )

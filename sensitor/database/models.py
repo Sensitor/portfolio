@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 TABLES: dict[str, str] = {
     "users": """
@@ -80,6 +80,45 @@ CREATE TABLE IF NOT EXISTS portfolios (
     created_at  TEXT NOT NULL,
     updated_at  TEXT NOT NULL,
     UNIQUE(user_email, name)
+)""",
+
+    # The portfolio being worked on right now — not a saved one.
+    #
+    # Everything else in the investment half was rebuilt from scratch each
+    # session: the tickers and weights lived in `st.session_state` and died with
+    # the process, so closing the browser, restarting the app or rebooting the
+    # machine meant typing the allocation in again. Saving existed, but it was
+    # something you had to remember to do, and a portfolio you forgot to save
+    # was simply gone. The trading journal never had that problem because a
+    # trade is a row the moment it exists. This table gives the investment side
+    # the same property.
+    #
+    # One row per person, so there is nothing to choose between on restore and
+    # no way to accumulate stale drafts. It is a scratchpad, not history:
+    # `portfolios` is still where a named allocation and its snapshots live.
+    "workspace": """
+CREATE TABLE IF NOT EXISTS workspace (
+    user_email    TEXT PRIMARY KEY REFERENCES users(email)
+                  ON DELETE CASCADE ON UPDATE CASCADE,
+    holdings      TEXT NOT NULL,           -- JSON {ticker: weight}
+    mode          TEXT NOT NULL DEFAULT 'simulation',
+    base_currency TEXT NOT NULL DEFAULT 'USD',
+    profile       TEXT NOT NULL DEFAULT 'balanced',
+    period        TEXT,
+
+    -- Set in real-portfolio mode: the quantities held and what the book was
+    -- worth when it was last priced. Quantities are the input; the value is
+    -- restored only so the app has something to show before prices return.
+    quantities    TEXT,                    -- JSON {ticker: quantity}
+    total_value   REAL,
+
+    -- The saved portfolio this was loaded from, when it was loaded from one.
+    -- Nullable, and deliberately not a foreign key: deleting the saved
+    -- portfolio must not delete the working copy out from under someone.
+    portfolio_id  INTEGER,
+    portfolio_name TEXT,
+
+    updated_at    TEXT NOT NULL
 )""",
 
     # Snapshots carry no user column: they reach their owner through the
@@ -198,7 +237,7 @@ SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES
 
 # Tables that reference `users` and must be rebuilt together when that
 # relationship changes. Order matters: a child is rebuilt after its parent.
-USER_OWNED = ("portfolios", "trading_accounts", "trades", "sessions")
+USER_OWNED = ("portfolios", "workspace", "trading_accounts", "trades", "sessions")
 
 
 # Columns written by the trade upsert, in order. Kept as a list so the INSERT,
@@ -244,6 +283,26 @@ class Snapshot:
     metrics: dict
 
 
+@dataclass
+class Workspace:
+    """The allocation someone was last working on, restored on their next visit."""
+    user_email: str
+    holdings: dict
+    mode: str
+    base_currency: str
+    profile: str
+    period: str | None
+    quantities: dict
+    total_value: float | None
+    portfolio_id: int | None
+    portfolio_name: str | None
+    updated_at: str
+
+    @property
+    def is_empty(self) -> bool:
+        return not self.holdings
+
+
 # =============================================================================
 # ROW MAPPING
 # =============================================================================
@@ -259,6 +318,22 @@ def _to_portfolio(row: sqlite3.Row) -> Portfolio:
         notes=row["notes"],
         client_name=row["client_name"],
         created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
+def _to_workspace(row: sqlite3.Row) -> Workspace:
+    return Workspace(
+        user_email=row["user_email"],
+        holdings=json.loads(row["holdings"]),
+        mode=row["mode"],
+        base_currency=row["base_currency"],
+        profile=row["profile"],
+        period=row["period"],
+        quantities=json.loads(row["quantities"]) if row["quantities"] else {},
+        total_value=row["total_value"],
+        portfolio_id=row["portfolio_id"],
+        portfolio_name=row["portfolio_name"],
         updated_at=row["updated_at"],
     )
 
