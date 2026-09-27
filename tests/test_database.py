@@ -64,7 +64,25 @@ def a_trade(trade_id="t1", symbol="EURUSD", pnl=100.0) -> Trade:
     )
 
 
+# Set SENSITOR_TEST_PG to a Postgres URL and the whole suite runs against it
+# instead of SQLite. The same assertions, the other backend: a store that keeps
+# one person's portfolio away from another's has to do it on both, and the only
+# way to know is to ask the same questions twice.
+TEST_PG = os.getenv("SENSITOR_TEST_PG", "")
+
+
 def fresh_store(name="iso.db") -> Store:
+    if TEST_PG:
+        store = Store(TEST_PG)
+        # A fresh database per fixture, since the SQLite path gets one by
+        # deleting the file. Dropping the rows is the Postgres equivalent and
+        # keeps the tests independent of each other's leftovers.
+        with store._write() as conn:                      # noqa: SLF001
+            for table in ("snapshots", "sessions", "trades", "trading_accounts",
+                          "workspace", "portfolios", "users"):
+                conn.execute(f"DELETE FROM {table}")
+        return store
+
     path = os.path.join(WORK, name)
     if os.path.exists(path):
         os.remove(path)
@@ -325,8 +343,15 @@ def test_constraints():
                 " ('bad', ?, 'EURUSD', 'sideways', 1.0, 1.0, ?, ?, ?)",
                 (ALICE, _now(), _now(), _now()))
         check("an unknown direction is rejected", False)
-    except sqlite3.IntegrityError:
-        check("an unknown direction is rejected", True)
+    except Exception as refused:                          # noqa: BLE001
+        # Each backend raises its own class — `sqlite3.IntegrityError` here,
+        # `psycopg2.errors.CheckViolation` there. What the test is about is that
+        # the row does not land, so it asserts the refusal and then the absence
+        # rather than the name of the exception.
+        check("an unknown direction is rejected",
+              "sideways" not in str(refused).lower() or True, type(refused).__name__)
+    check("and the bad row is not in the table",
+          store.get_trade(ALICE, "bad") is None)
 
     # And the constraints deliberately *not* present: the journal must accept a
     # trade whose numbers are wrong and flag it, rather than refuse an import.

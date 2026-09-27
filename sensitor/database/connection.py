@@ -33,12 +33,41 @@ tested against a database built from the previous schema and populated.
 from __future__ import annotations
 
 import os
+import re
 import sqlite3
 from datetime import datetime, timezone
 
-from .models import SCHEMA, SCHEMA_VERSION, TABLES, USER_OWNED
+from . import postgres as pg
+from .models import INDEXES, SCHEMA, SCHEMA_VERSION, TABLES, USER_OWNED
 
-DEFAULT_PATH = os.getenv("SENSITOR_DB_PATH", "sensitor_data.db")
+# `SENSITOR_DB_URL` wins over `SENSITOR_DB_PATH`. Two variables rather than one
+# because they mean different things and a deployment that sets both should get
+# the durable one: on a host with no persistent disk — Streamlit Cloud, most
+# notably — the path is a file that will be deleted, and picking it over a
+# working database URL because it happened to be set is how data goes missing
+# quietly.
+FALLBACK_PATH = "sensitor_data.db"
+
+
+def target() -> str:
+    """
+    Where to connect, read **now** rather than at import.
+
+    Streamlit Cloud hands a deployment its configuration through `st.secrets`,
+    which the app mirrors into the environment on its first run — after this
+    module has already been imported. A module-level constant would therefore
+    freeze the wrong answer, open the ephemeral SQLite file anyway, and lose
+    data on a deployment that had been configured correctly.
+    """
+    return (os.getenv("SENSITOR_DB_URL")
+            or os.getenv("SENSITOR_DB_PATH")
+            or FALLBACK_PATH)
+
+
+# Kept for callers that still name it. It is the value at import time, which is
+# right for a script and wrong for the Streamlit app — `Store()` calls `target()`
+# instead of defaulting to this.
+DEFAULT_PATH = target()
 
 
 def now() -> str:
@@ -46,14 +75,31 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def connect(path: str = DEFAULT_PATH) -> sqlite3.Connection:
+def describe(where: str | None = None) -> str:
+    """Where the data lives, with any password removed, for showing a person."""
+    where = where or target()
+    if pg.is_url(where):
+        cleaned = re.sub(r"://[^@/]*@", "://…@", str(where))
+        return f"PostgreSQL · {cleaned.split('?')[0]}"
+    return f"SQLite · {os.path.abspath(where)}"
+
+
+def connect(path: str | None = None):
     """
     Open the database, apply the schema, and bring it up to the current version.
+
+    Two backends, one contract: whatever comes back answers to `execute`,
+    `executemany`, `commit`, `rollback` and `close`, and hands out rows
+    addressable by name. `Store` is written against that and nothing else.
 
     `check_same_thread=False` because Streamlit serves reruns from a thread pool;
     the caller is responsible for serialising access, which `Store` does with a
     lock.
     """
+    path = path or target()
+    if pg.is_url(path):
+        return _connect_postgres(path)
+
     directory = os.path.dirname(os.path.abspath(path))
     if directory:
         os.makedirs(directory, exist_ok=True)
@@ -75,6 +121,47 @@ def connect(path: str = DEFAULT_PATH) -> sqlite3.Connection:
     return conn
 
 
+def _connect_postgres(url: str):
+    """
+    Open a Postgres database and bring it to the current schema.
+
+    There is no rebuild machinery here and that is not an omission. The SQLite
+    migrations exist to carry databases written before a constraint changed;
+    this backend ships with the constraints already in place, so every Postgres
+    database starts at the current version. Added columns are still applied, so
+    a database created by *this* code and then upgraded keeps working.
+    """
+    conn = pg.Connection(url)
+    existing = pg.table_names(conn)
+    fresh = not (existing - {"schema_meta"})
+
+    for name, statement in TABLES.items():
+        conn.execute(pg.to_pg_ddl(statement))
+    for statement in _index_statements():
+        conn.execute(statement)
+
+    if not fresh:
+        _add_missing_columns_pg(conn)
+    pg.set_version(conn, SCHEMA_VERSION)
+    conn.commit()
+    return conn
+
+
+def _index_statements() -> list[str]:
+    return [s.strip() for s in INDEXES.split(";") if s.strip()]
+
+
+def _add_missing_columns_pg(conn) -> None:
+    existing = pg.table_names(conn)
+    for table, cols in _ADDED_COLUMNS.items():
+        if table not in existing:
+            continue
+        present = set(pg.columns(conn, table))
+        for name, declaration in cols:
+            if name not in present:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {declaration}")
+
+
 # =============================================================================
 # MIGRATIONS
 # =============================================================================
@@ -85,6 +172,7 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "trades": [("raw", "TEXT")],
     "trading_accounts": [("last_synced_at", "TEXT"),
                          ("last_sync_trades", "INTEGER")],
+    "workspace": [("manual_prices", "TEXT")],
     "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
               ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
               ("locked_until", "TEXT")],

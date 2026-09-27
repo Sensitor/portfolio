@@ -53,7 +53,8 @@ None of these is needed by the app, and the API process needs no Streamlit.
 
 | Variable | Default | |
 |---|---|---|
-| `SENSITOR_DB_PATH` | `sensitor_data.db` | where the SQLite file lives — **set this to an absolute path** |
+| `SENSITOR_DB_URL` | *(unset)* | a PostgreSQL URL — **required on any host with no persistent disk** |
+| `SENSITOR_DB_PATH` | `sensitor_data.db` | where the SQLite file lives — set it to an absolute path |
 | `SENSITOR_AUTH` | `single` | `multi` for real accounts |
 | `SENSITOR_API_TOKEN` | *(unset)* | single-user API key; without it the API issues no sessions |
 | `SENSITOR_CORS_ORIGINS` | *(unset)* | comma-separated; never defaults to `*` |
@@ -84,9 +85,19 @@ SQLite, created and migrated on first open. Nothing to set up.
 The file holds personal financial data. It stays on whatever machine runs the
 app, it is gitignored, and nothing in this codebase sends it anywhere.
 
-**Streamlit Cloud's filesystem is ephemeral** — the database is wiped on every
-restart, redeploy and sleep. Point `SENSITOR_DB_PATH` at a persistent volume
-before treating saved data as safe.
+**Streamlit Cloud's filesystem is ephemeral** — the container has no persistent
+disk, so the SQLite file is deleted on every restart, redeploy and sleep. It
+does not corrupt and it does not warn: you sign in and the portfolio is not
+there. Set `SENSITOR_DB_URL` to a free PostgreSQL database instead, or deploy
+somewhere with a volume. The Account page says which of the two you are on and
+turns red when the answer is "this will be lost".
+
+**[docs/DEPLOY.md](docs/DEPLOY.md)** — five minutes, no card.
+
+Both backends are the same store: `Store` issues one set of SQL and
+`database/postgres.py` supplies a `sqlite3`-shaped connection over psycopg2.
+Two backends that drift apart are two answers to "is this portfolio mine", so
+the database suite runs the same 97 assertions against each.
 
 Migrations run automatically and are versioned by `PRAGMA user_version`. Added
 columns are applied in place; changed constraints rebuild the table, inside a
@@ -204,7 +215,7 @@ sensitor/
 ├── trading/       models · setups · analytics · performance · risk · psychology
 │                  journal · context · report
 ├── integrations/  market_data · mt5 · sync
-├── database/      connection · models · repositories
+├── database/      connection · postgres · models · repositories
 ├── ai/            copilot · signals · trading_copilot
 ├── api/           app · deps · schemas · routers/
 ├── ui/            themes · components · charts
@@ -214,7 +225,7 @@ mobile/
 ├── src/components/ primitives · charts · the screen frame
 ├── src/state/     session · the fetch hooks
 └── app/           expo-router: sign-in and the five tabs
-docs/              ARCHITECTURE · API · EURONEXT · MOBILE · MT5_SYNC
+docs/              ARCHITECTURE · API · DEPLOY · EURONEXT · MOBILE · MT5_SYNC
 ```
 
 **The rule the layout enforces: business logic never imports Streamlit.**
@@ -281,7 +292,8 @@ python tests/test_investment_engine.py    #  44 checks — engine, no Streamlit
 python tests/test_currency.py             # 107 checks — FX, timezones, no network
 python tests/test_trading_engine.py       # 173 checks — engine, review, copilot
 python tests/test_mt5_connector.py        # 131 checks — mocked terminal
-python tests/test_database.py             #  96 checks — isolation, migrations
+python tests/test_database.py             #  97 checks — isolation, migrations
+SENSITOR_TEST_PG=postgresql://… python tests/test_database.py   # the same, on Postgres
 python tests/test_auth.py                 #  95 checks — crypto, sessions, lockout
 python tests/test_api.py                  # 170 checks — HTTP, isolation, no maths
 python tests/test_workspace.py            #  20 checks — survives a restart

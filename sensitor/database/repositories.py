@@ -25,7 +25,7 @@ import threading
 from contextlib import contextmanager
 from dataclasses import asdict
 
-from .connection import DEFAULT_PATH, connect, now as _now
+from .connection import connect, describe, now as _now, target
 from .models import (
     SCHEMA_VERSION, TRADE_COLUMNS, Portfolio, Snapshot, TradingAccount, Workspace,
     _jsonable, _to_account, _to_portfolio, _to_snapshot, _to_workspace,
@@ -52,8 +52,9 @@ class Store:
     and SQLite connections are not safe to share across threads without it.
     """
 
-    def __init__(self, path: str = DEFAULT_PATH):
-        self.path = path
+    def __init__(self, path: str | None = None):
+        # Resolved here, not at import: see `connection.target`.
+        self.path = path or target()
         self._lock = threading.Lock()
         self._conn = connect(path)
 
@@ -323,6 +324,7 @@ class Store:
                        profile: str = "balanced", period: str | None = None,
                        quantities: dict | None = None,
                        total_value: float | None = None,
+                       manual_prices: dict | None = None,
                        portfolio_id: int | None = None,
                        portfolio_name: str | None = None) -> None:
         """
@@ -344,8 +346,9 @@ class Store:
             conn.execute(
                 """INSERT INTO workspace
                      (user_email, holdings, mode, base_currency, profile, period,
-                      quantities, total_value, portfolio_id, portfolio_name, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                      quantities, total_value, manual_prices,
+                      portfolio_id, portfolio_name, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(user_email) DO UPDATE SET
                      holdings = excluded.holdings,
                      mode = excluded.mode,
@@ -354,6 +357,7 @@ class Store:
                      period = excluded.period,
                      quantities = excluded.quantities,
                      total_value = excluded.total_value,
+                     manual_prices = excluded.manual_prices,
                      portfolio_id = excluded.portfolio_id,
                      portfolio_name = excluded.portfolio_name,
                      updated_at = excluded.updated_at""",
@@ -361,6 +365,7 @@ class Store:
                  (base_currency or "USD").upper(), profile, period,
                  json.dumps(_jsonable(quantities or {})),
                  float(total_value) if total_value is not None else None,
+                 json.dumps(_jsonable(manual_prices or {})),
                  int(portfolio_id) if portfolio_id is not None else None,
                  portfolio_name, _now()),
             )
@@ -413,11 +418,17 @@ class Store:
                      currency = excluded.currency,
                      notes = excluded.notes,
                      client_name = excluded.client_name,
-                     updated_at = excluded.updated_at""",
+                     updated_at = excluded.updated_at
+                   RETURNING id""",
                 (user_email, name, payload, mode, currency, notes, client_name, now, now),
             )
-            if cursor.lastrowid:
-                return int(cursor.lastrowid)
+            # `RETURNING id` rather than `lastrowid`: Postgres has no such
+            # attribute, and SQLite has supported RETURNING since 3.35 — so one
+            # statement now works on both instead of the call site branching on
+            # which database it is talking to.
+            returned = cursor.fetchone()
+            if returned is not None:
+                return int(returned[0])
         row = self._read(
             "SELECT id FROM portfolios WHERE user_email = ? AND name = ?",
             (user_email, name),
@@ -507,12 +518,14 @@ class Store:
         with self._write() as conn:
             cursor = conn.execute(
                 """INSERT INTO snapshots (portfolio_id, taken_at, total_value, weights, metrics)
-                   VALUES (?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?)
+                   RETURNING id""",
                 (int(portfolio_id), _now(),
                  float(total_value) if total_value is not None else None,
                  json.dumps(weights), json.dumps(_jsonable(metrics))),
             )
-            return int(cursor.lastrowid)
+            returned = cursor.fetchone()
+            return int(returned[0]) if returned is not None else -1
 
     def list_snapshots(self, user_email: str, portfolio_id: int,
                        limit: int = 100) -> list[Snapshot]:

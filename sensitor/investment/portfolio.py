@@ -31,19 +31,48 @@ import yfinance as yf
 from scipy.optimize import minimize
 
 from . import currency as FX
-from .assets import ASSET_INFO, GEOGRAPHY_MAPPING, QUOTE_CURRENCY, SECTOR_MAPPING
+from .assets import (
+    ASSET_INFO, GEOGRAPHY_MAPPING, QUOTE_CURRENCY, SECTOR_MAPPING,
+    candidates as ASSET_CANDIDATES,
+)
 
 
 # The two network calls this module makes, named so a test can replace them.
 # Everything else here is arithmetic, and arithmetic that can only be exercised
 # through a live Yahoo connection is arithmetic nobody checks.
 
-def _download_prices(ticker: str, start: str):
-    """Daily closes for one ticker, as a Series named after it."""
-    history = yf.Ticker(ticker).history(start=start)
+def _one_history(symbol: str, start: str | None):
+    """Daily closes for one exact Yahoo symbol, or None."""
+    history = (yf.Ticker(symbol).history(start=start) if start
+               else yf.Ticker(symbol).history(period="5d"))
     if history is None or history.empty or "Close" not in history:
         return None
-    return history["Close"].rename(ticker)
+    close = history["Close"].dropna()
+    return close if len(close) else None
+
+
+def _download_prices(ticker: str, start: str):
+    """
+    Daily closes for one ticker, as a Series named after it.
+
+    Tries the catalogue's own spelling first and then any alternative listed for
+    it. A share that renamed, moved market, or is carried under a different
+    suffix answers to a symbol the catalogue does not know, and the failure a
+    person sees is "no price" with nothing to act on. The first spelling that
+    returns a history wins, so a wrong guess costs a request rather than a wrong
+    price.
+    """
+    for symbol in ASSET_CANDIDATES(ticker):
+        try:
+            close = _one_history(symbol, start)
+        except Exception:                                # noqa: BLE001
+            continue
+        if close is not None:
+            # Named after the ticker the portfolio asked for, not after the
+            # spelling that answered: every weight, mapping and label above this
+            # is keyed on the former.
+            return close.rename(ticker)
+    return None
 
 
 def _download_fx(pair: str, start: str | None):
@@ -69,15 +98,18 @@ def _download_fx(pair: str, start: str | None):
 
 def _download_recent(ticker: str):
     """The last few closes for one ticker, for a spot valuation."""
-    history = yf.Ticker(ticker).history(period="5d")
-    if history is None or history.empty or "Close" not in history:
-        return None
-    close = history["Close"].dropna()
-    return close if len(close) else None
+    for symbol in ASSET_CANDIDATES(ticker):
+        try:
+            close = _one_history(symbol, None)
+        except Exception:                                # noqa: BLE001
+            continue
+        if close is not None:
+            return close
+    return None
 
 
 def latest_prices(tickers, base_currency="USD", *, price_loader=None, fx_loader=None,
-                  on_error=None):
+                  manual=None, on_error=None):
     """
     The most recent close for each ticker, expressed in one currency.
 
@@ -97,25 +129,51 @@ def latest_prices(tickers, base_currency="USD", *, price_loader=None, fx_loader=
     fx_loader = fx_loader or _download_fx
     base = (base_currency or "USD").upper()
 
-    report = {"base": base, "converted": {}, "dropped": {}, "missing": []}
-    raw = {}
+    # `previous` carries the close before the latest one, in the same currency,
+    # so a screen can show what changed today. It is the number a wealth tracker
+    # leads with and the one this app had no way to compute.
+    report = {"base": base, "converted": {}, "dropped": {}, "missing": [],
+              "manual": {}, "previous": {}}
+    manual = manual or {}
+    raw, prior, quotes = {}, {}, {}
     for ticker in tickers:
         try:
             series = price_loader(ticker)
         except Exception:                                # noqa: BLE001
             series = None
-        if series is None or len(series) == 0:
-            report["missing"].append(ticker)
-            if on_error:
-                on_error(ticker, "no recent price")
+        if series is not None and len(series):
+            raw[ticker] = float(series.iloc[-1])
+            if len(series) > 1:
+                prior[ticker] = float(series.iloc[-2])
             continue
-        raw[ticker] = float(series.iloc[-1])
+
+        # Nothing from the provider. A price typed in by hand is what makes a
+        # flat, an unlisted company or a share no feed carries valuable at all —
+        # and it is marked as manual so the screen can say which figures are
+        # somebody's estimate rather than a market quote.
+        entry = manual.get(ticker)
+        if isinstance(entry, dict) and entry.get("price") is not None:
+            raw[ticker] = float(entry["price"])
+            quotes[ticker] = str(entry.get("currency") or base).upper()
+            report["manual"][ticker] = entry.get("at")
+            continue
+
+        report["missing"].append(ticker)
+        if on_error:
+            on_error(ticker, "no recent price")
 
     if not raw:
         return {}, report
 
+    # A manual entry names its own currency, so it is added to the lookup the
+    # conversion step reads rather than being inferred from the ticker suffix —
+    # somebody valuing a flat in euros under a made-up symbol should not have it
+    # read as dollars.
+    lookup = dict(QUOTE_CURRENCY)
+    lookup.update(quotes)
+
     rates: dict[str, float] = {}
-    for quote in FX.pairs_needed(raw, base, QUOTE_CURRENCY):
+    for quote in FX.pairs_needed(raw, base, lookup):
         for symbol, invert in FX.fx_candidates(quote, base):
             try:
                 series = fx_loader(symbol, None)
@@ -131,11 +189,13 @@ def latest_prices(tickers, base_currency="USD", *, price_loader=None, fx_loader=
 
     out = {}
     for ticker, price in raw.items():
-        quote = FX.quote_currency(ticker, QUOTE_CURRENCY)
+        quote = FX.quote_currency(ticker, lookup)
         settled, divisor = FX.settlement_currency(quote)
         price = price / divisor                          # pence, and the like
         if settled.upper() == base:
             out[ticker] = price
+            if ticker in prior:
+                report["previous"][ticker] = prior[ticker] / divisor
             continue
         rate = rates.get(quote, rates.get(settled))
         if rate is None:
@@ -144,6 +204,12 @@ def latest_prices(tickers, base_currency="USD", *, price_loader=None, fx_loader=
                 on_error(ticker, f"no {settled}/{base} rate for today's price")
             continue
         out[ticker] = price * rate
+        # The previous close goes through today's rate, not yesterday's. That
+        # makes the change a price change rather than a price-and-currency
+        # change, which is what somebody asking "what did my portfolio do
+        # today" means — and it is stated on the screen that shows it.
+        if ticker in prior:
+            report["previous"][ticker] = (prior[ticker] / divisor) * rate
         report["converted"][ticker] = settled
 
     return out, report

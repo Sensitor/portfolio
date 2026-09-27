@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 TABLES: dict[str, str] = {
     "users": """
@@ -111,6 +111,13 @@ CREATE TABLE IF NOT EXISTS workspace (
     -- restored only so the app has something to show before prices return.
     quantities    TEXT,                    -- JSON {ticker: quantity}
     total_value   REAL,
+
+    -- Prices typed in by hand, for holdings no data provider covers: a flat,
+    -- an unlisted company, a small cap whose symbol nobody carries. Stored as
+    -- JSON {ticker: {"price": float, "currency": "EUR", "at": iso}} so the
+    -- valuation can say how old a manual figure is instead of presenting it
+    -- with the same confidence as a live one.
+    manual_prices TEXT,
 
     -- The saved portfolio this was loaded from, when it was loaded from one.
     -- Nullable, and deliberately not a foreign key: deleting the saved
@@ -294,6 +301,7 @@ class Workspace:
     period: str | None
     quantities: dict
     total_value: float | None
+    manual_prices: dict
     portfolio_id: int | None
     portfolio_name: str | None
     updated_at: str
@@ -322,6 +330,20 @@ def _to_portfolio(row: sqlite3.Row) -> Portfolio:
     )
 
 
+def _has(row, column: str):
+    """
+    A column's value, or None when the row predates it.
+
+    A database that has been migrated has the column; one being read during the
+    migration that adds it may not, and `row["x"]` raises on both backends for a
+    column that is not there.
+    """
+    try:
+        return row[column]
+    except (IndexError, KeyError):
+        return None
+
+
 def _to_workspace(row: sqlite3.Row) -> Workspace:
     return Workspace(
         user_email=row["user_email"],
@@ -332,6 +354,8 @@ def _to_workspace(row: sqlite3.Row) -> Workspace:
         period=row["period"],
         quantities=json.loads(row["quantities"]) if row["quantities"] else {},
         total_value=row["total_value"],
+        manual_prices=(json.loads(row["manual_prices"])
+                       if _has(row, "manual_prices") else {}),
         portfolio_id=row["portfolio_id"],
         portfolio_name=row["portfolio_name"],
         updated_at=row["updated_at"],

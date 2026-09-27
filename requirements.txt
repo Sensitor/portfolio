@@ -6,6 +6,13 @@ plotly>=5.14.0
 scipy>=1.10.0
 python-dateutil>=2.8.0
 
+# PostgreSQL. Needed only when SENSITOR_DB_URL points at one — but listed here
+# rather than commented out, because the deployment that needs it most is
+# Streamlit Cloud, whose disk is wiped on every restart, and an optional
+# dependency you have to remember to uncomment is one you discover you needed
+# after losing data.
+psycopg2-binary>=2.9
+
 # Optional — the HTTP API only (Phase 8). The Streamlit app does not need these,
 # and the API process does not need Streamlit.
 # fastapi>=0.110
