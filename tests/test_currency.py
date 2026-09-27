@@ -298,6 +298,30 @@ def test_the_reported_portfolio() -> None:
     check("and the conversion is reported",
           set(report["converted"]) == {"BTC-USD", "SOL-USD", "INJ-USD"})
 
+    # A holding no feed covers, valued by hand. This is the Capital B case if
+    # none of its symbol spellings answer, and it is the only way an unlisted
+    # asset is worth anything to this app at all.
+    def nothing(ticker):
+        return None
+
+    by_hand, hand_report = latest_prices(
+        ["ALTBG.PA", "MC.PA"], "EUR",
+        price_loader=nothing, fx_loader=spot_fx,
+        manual={"ALTBG.PA": {"price": 2.40, "currency": "EUR", "at": "2026-09-27"}})
+    check("a hand-typed price is used when the provider has none",
+          close(by_hand.get("ALTBG.PA"), 2.40, 1e-9), str(by_hand))
+    check("and is flagged as manual rather than passed off as a quote",
+          "ALTBG.PA" in hand_report["manual"])
+    check("a holding with neither a price nor an entry is reported missing",
+          hand_report["missing"] == ["MC.PA"], str(hand_report["missing"]))
+
+    # A manual price in a currency of its own is converted like any other.
+    dollars, _ = latest_prices(
+        ["FLAT"], "EUR", price_loader=nothing, fx_loader=spot_fx,
+        manual={"FLAT": {"price": 1000.0, "currency": "USD"}})
+    check("a manual price names its own currency and is converted",
+          close(dollars["FLAT"], 1000.0 / float(rate.iloc[-1]), 1e-6), str(dollars))
+
     # Without a rate the dollar lines must be left out, not summed in.
     def no_fx(pair, start):
         return None

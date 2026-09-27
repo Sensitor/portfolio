@@ -11,7 +11,44 @@ from a test, a script or the future API with no Streamlit runtime present.
 See docs/ARCHITECTURE.md for the full layout and the migration table.
 """
 
+import os
+
 import streamlit as st
+
+
+def _mirror_secrets() -> None:
+    """
+    Copy `st.secrets` into the environment, before anything reads it.
+
+    Streamlit Cloud has no way to set environment variables: a deployment is
+    configured through the Secrets box, which lands in `st.secrets` and nowhere
+    else. Every module below this one reads `os.getenv`, because they have to
+    run from a test, a script and the API with no Streamlit present.
+
+    So the two are bridged here, at the top of the only file that is allowed to
+    know about both — and an existing environment variable always wins, so
+    running locally with a real environment is never overridden by a secrets
+    file that happens to be lying around.
+    """
+    known = (
+        "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
+        "SENSITOR_API_TOKEN", "SENSITOR_CORS_ORIGINS",
+        "PRO_EMAILS", "STRIPE_PAYMENT_LINK",
+    )
+    try:
+        available = st.secrets
+    except Exception:                                    # noqa: BLE001
+        return                                           # no secrets file, fine
+    for key in known:
+        try:
+            if key in available and not os.getenv(key):
+                os.environ[key] = str(available[key])
+        except Exception:                                # noqa: BLE001
+            continue
+
+
+_mirror_secrets()
+
 # yfinance is no longer imported here. The last direct download in this file
 # was the real-portfolio valuation, which now goes through
 # `investment.portfolio.latest_prices` so the prices arrive already in one
@@ -95,8 +132,8 @@ st.markdown("""
         100% { background-position: 400px 0; }
     }
     @keyframes glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
-        50%       { box-shadow: 0 0 40px rgba(99,102,241,0.6); }
+        0%, 100% { box-shadow: 0 0 20px rgba(144,133,233,0.3); }
+        50%       { box-shadow: 0 0 40px rgba(144,133,233,0.6); }
     }
 
     /* ── App background ── */
@@ -130,7 +167,7 @@ st.markdown("""
     /* ── Sidebar ── */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0d1526 0%, #111827 100%) !important;
-        border-right: 1px solid rgba(0,212,255,0.12) !important;
+        border-right: 1px solid rgba(57,135,229,0.12) !important;
     }
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
@@ -152,16 +189,16 @@ st.markdown("""
         text-align: left !important;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(99,102,241,0.2) !important;
-        border-color: rgba(99,102,241,0.5) !important;
+        background: rgba(144,133,233,0.2) !important;
+        border-color: rgba(144,133,233,0.5) !important;
         color: #e2e8f0 !important;
         transform: translateX(3px) !important;
     }
     [data-testid="stSidebar"] .stButton > [data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        background: linear-gradient(135deg, #9085E9, #9085E9) !important;
         border-color: transparent !important;
         color: white !important;
-        box-shadow: 0 2px 12px rgba(99,102,241,0.4) !important;
+        box-shadow: 0 2px 12px rgba(144,133,233,0.4) !important;
     }
     [data-testid="stSidebar"] .stSelectbox > div > div {
         background: rgba(255,255,255,0.07) !important;
@@ -171,7 +208,7 @@ st.markdown("""
 
     /* ── Main buttons ── */
     .stButton > button {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+        background: linear-gradient(135deg, #9085E9 0%, #7c3aed 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
@@ -179,12 +216,12 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 0.9rem !important;
         letter-spacing: 0.01em !important;
-        box-shadow: 0 4px 16px rgba(79,70,229,0.35) !important;
+        box-shadow: 0 4px 16px rgba(144,133,233,0.35) !important;
         transition: all 0.2s ease !important;
     }
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(79,70,229,0.5) !important;
+        box-shadow: 0 8px 24px rgba(144,133,233,0.5) !important;
     }
     .stButton > button[kind="secondary"] {
         background: rgba(255,255,255,0.06) !important;
@@ -205,7 +242,7 @@ st.markdown("""
         border-radius: 20px;
         padding: 32px 36px;
         margin: 16px 0;
-        box-shadow: 0 8px 40px rgba(79,70,229,0.3);
+        box-shadow: 0 8px 40px rgba(144,133,233,0.3);
         animation: fadeUp 0.5s ease-out;
         position: relative;
         overflow: hidden;
@@ -223,7 +260,7 @@ st.markdown("""
         position: absolute;
         bottom: -20%; left: -5%;
         width: 180px; height: 180px;
-        background: radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(144,133,233,0.10) 0%, transparent 70%);
         border-radius: 50%;
     }
     .score-num {
@@ -273,14 +310,14 @@ st.markdown("""
     /* ── Dark metric cards ── */
     .metric-card {
         background: #1e293b;
-        border: 1px solid rgba(0,212,255,0.12);
+        border: 1px solid rgba(57,135,229,0.12);
         border-radius: 16px;
         padding: 22px 26px;
         transition: all 0.25s ease;
     }
     .metric-card:hover {
-        border-color: rgba(0,212,255,0.35);
-        box-shadow: 0 4px 24px rgba(0,212,255,0.10);
+        border-color: rgba(57,135,229,0.35);
+        box-shadow: 0 4px 24px rgba(57,135,229,0.10);
         transform: translateY(-2px);
     }
     .metric-label {
@@ -302,12 +339,12 @@ st.markdown("""
     /* ── Recommendation cards ── */
     .rec-card {
         background: #1e293b;
-        border-left: 4px solid #6366f1;
+        border-left: 4px solid #9085E9;
         padding: 18px 22px;
         margin: 10px 0;
         border-radius: 12px;
         border: 1px solid rgba(255,255,255,0.06);
-        border-left: 4px solid #6366f1;
+        border-left: 4px solid #9085E9;
         animation: slideRight 0.4s ease-out;
         transition: all 0.2s ease;
     }
@@ -321,21 +358,21 @@ st.markdown("""
     .rec-card.critical { border-left-color: #ef4444 !important; }
     .rec-card.warning  { border-left-color: #f59e0b !important; }
     .rec-card.success  { border-left-color: #10b981 !important; }
-    .rec-card.info     { border-left-color: #6366f1 !important; }
+    .rec-card.info     { border-left-color: #9085E9 !important; }
 
     /* ── Asset cards ── */
     .asset-card {
         background: #1e293b;
-        border: 1px solid rgba(99,102,241,0.12);
+        border: 1px solid rgba(144,133,233,0.12);
         border-radius: 14px;
         padding: 20px 24px;
         margin: 6px 0;
         transition: all 0.25s ease;
     }
     .asset-card:hover {
-        border-color: rgba(99,102,241,0.4);
+        border-color: rgba(144,133,233,0.4);
         background: #1a2540;
-        box-shadow: 0 4px 24px rgba(99,102,241,0.15);
+        box-shadow: 0 4px 24px rgba(144,133,233,0.15);
     }
     .asset-card p, .asset-card span, .asset-card div {
         color: #94a3b8 !important;
@@ -376,35 +413,35 @@ st.markdown("""
     /* ── Model portfolio cards ── */
     .model-card {
         background: #1e293b;
-        border: 1px solid rgba(99,102,241,0.15);
+        border: 1px solid rgba(144,133,233,0.15);
         border-radius: 16px;
         padding: 24px 28px;
         margin: 10px 0;
         transition: all 0.25s ease;
     }
     .model-card:hover {
-        border-color: rgba(99,102,241,0.4);
+        border-color: rgba(144,133,233,0.4);
         background: #1a2540;
-        box-shadow: 0 8px 32px rgba(99,102,241,0.18);
+        box-shadow: 0 8px 32px rgba(144,133,233,0.18);
         transform: translateY(-3px);
     }
 
     /* ── Upgrade card ── */
     .upgrade-card {
-        background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(124,58,237,0.15));
-        border: 1px solid rgba(99,102,241,0.35);
+        background: linear-gradient(135deg, rgba(144,133,233,0.15), rgba(124,58,237,0.15));
+        border: 1px solid rgba(144,133,233,0.35);
         border-radius: 16px;
         padding: 28px 32px;
         text-align: center;
         margin: 16px 0;
     }
-    .upgrade-card h3 { color: #a5b4fc !important; margin: 0 0 8px 0; }
-    .upgrade-card p  { color: #818cf8 !important; font-size: 0.9rem; }
+    .upgrade-card h3 { color: #9AA8BF !important; margin: 0 0 8px 0; }
+    .upgrade-card p  { color: #9085E9 !important; font-size: 0.9rem; }
 
     /* ── Paywall block ── */
     .paywall-block {
-        background: rgba(79,70,229,0.08);
-        border: 1px dashed rgba(99,102,241,0.3);
+        background: rgba(144,133,233,0.08);
+        border: 1px dashed rgba(144,133,233,0.3);
         border-radius: 14px;
         padding: 32px;
         text-align: center;
@@ -428,7 +465,7 @@ st.markdown("""
 
     /* ── Progress bars ── */
     .stProgress > div > div {
-        background: linear-gradient(90deg, #00d4ff 0%, #4f46e5 100%) !important;
+        background: linear-gradient(90deg, #3987E5 0%, #9085E9 100%) !important;
     }
 
     /* ── Tabs ── */
@@ -446,7 +483,7 @@ st.markdown("""
         transition: all 0.2s !important;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0ea5e9, #4f46e5) !important;
+        background: linear-gradient(135deg, #0ea5e9, #9085E9) !important;
         color: white !important;
         box-shadow: 0 2px 12px rgba(14,165,233,0.4) !important;
     }
@@ -454,13 +491,13 @@ st.markdown("""
     /* ── Expanders ── */
     .streamlit-expanderHeader {
         background: #161b22 !important;
-        border: 1px solid rgba(0,212,255,0.12) !important;
+        border: 1px solid rgba(57,135,229,0.12) !important;
         border-radius: 10px !important;
         color: #cbd5e1 !important;
     }
     .streamlit-expanderHeader:hover {
         background: #1c2333 !important;
-        border-color: rgba(0,212,255,0.3) !important;
+        border-color: rgba(57,135,229,0.3) !important;
     }
     details[open] .streamlit-expanderHeader {
         border-bottom-left-radius: 0 !important;
@@ -470,7 +507,7 @@ st.markdown("""
     /* ── KPI fintech cards ── */
     .kpi-card {
         background: linear-gradient(145deg, #1e293b, #263348);
-        border: 1px solid rgba(0,212,255,0.12);
+        border: 1px solid rgba(57,135,229,0.12);
         border-radius: 18px;
         padding: 22px 24px 18px;
         position: relative;
@@ -478,8 +515,8 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     .kpi-card:hover {
-        border-color: rgba(0,212,255,0.35);
-        box-shadow: 0 8px 32px rgba(0,212,255,0.10);
+        border-color: rgba(57,135,229,0.35);
+        box-shadow: 0 8px 32px rgba(57,135,229,0.10);
         transform: translateY(-3px);
     }
     .kpi-card::before {
@@ -487,7 +524,7 @@ st.markdown("""
         position: absolute;
         top: -20px; right: -20px;
         width: 90px; height: 90px;
-        background: radial-gradient(circle, rgba(0,212,255,0.07) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(57,135,229,0.07) 0%, transparent 70%);
         border-radius: 50%;
     }
     .kpi-icon  { font-size: 1.3rem; margin-bottom: 10px; }
@@ -500,21 +537,21 @@ st.markdown("""
         letter-spacing: -0.03em; margin-bottom: 6px;
     }
     .kpi-sub   { font-size: 0.75rem; color: #475569; line-height: 1.4; }
-    .kpi-positive { color: #00ff9c; }
-    .kpi-negative { color: #ff4d4d; }
-    .kpi-neutral  { color: #00d4ff; }
-    .kpi-warning  { color: #ffb020; }
+    .kpi-positive { color: #16B979; }
+    .kpi-negative { color: #E2504F; }
+    .kpi-neutral  { color: #3987E5; }
+    .kpi-warning  { color: #E8A317; }
 
     /* ── Section headers ── */
     .section-header {
         display: flex; align-items: center; gap: 12px;
         margin: 32px 0 18px; padding-bottom: 12px;
-        border-bottom: 1px solid rgba(0,212,255,0.1);
+        border-bottom: 1px solid rgba(57,135,229,0.1);
     }
     .section-icon {
         width: 34px; height: 34px;
-        background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(99,102,241,0.12));
-        border: 1px solid rgba(0,212,255,0.18);
+        background: linear-gradient(135deg, rgba(57,135,229,0.12), rgba(144,133,233,0.12));
+        border: 1px solid rgba(57,135,229,0.18);
         border-radius: 9px;
         display: flex; align-items: center; justify-content: center;
         font-size: 1rem;
@@ -524,36 +561,36 @@ st.markdown("""
 
     /* ── Tooltip hint boxes ── */
     .tooltip-hint {
-        background: rgba(0,212,255,0.05);
-        border: 1px solid rgba(0,212,255,0.12);
+        background: rgba(57,135,229,0.05);
+        border: 1px solid rgba(57,135,229,0.12);
         border-radius: 10px; padding: 10px 14px;
         font-size: 0.80rem; color: #64748b; line-height: 1.55;
     }
-    .tooltip-hint strong { color: #00d4ff; }
+    .tooltip-hint strong { color: #3987E5; }
 
     /* ── Fintech gradient divider ── */
     .ft-divider {
         height: 1px;
-        background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.25) 40%,
-                    rgba(99,102,241,0.25) 60%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(57,135,229,0.25) 40%,
+                    rgba(144,133,233,0.25) 60%, transparent 100%);
         margin: 28px 0; border: none;
     }
 
     /* ── Inputs ── */
     .stTextInput > div > div > input {
         background: #131c30 !important;
-        border: 1px solid rgba(99,102,241,0.2) !important;
+        border: 1px solid rgba(144,133,233,0.2) !important;
         border-radius: 10px !important;
         color: #f1f5f9 !important;
         font-family: 'Inter', sans-serif !important;
     }
     .stTextInput > div > div > input:focus {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+        border-color: #9085E9 !important;
+        box-shadow: 0 0 0 3px rgba(144,133,233,0.15) !important;
     }
     .stSelectbox > div > div {
         background: #131c30 !important;
-        border: 1px solid rgba(99,102,241,0.2) !important;
+        border: 1px solid rgba(144,133,233,0.2) !important;
         border-radius: 10px !important;
         color: #f1f5f9 !important;
     }
@@ -582,7 +619,7 @@ st.markdown("""
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #060818; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+    ::-webkit-scrollbar-thumb:hover { background: #9085E9; }
 
     #MainMenu { visibility: hidden; }
     footer     { visibility: hidden; }
@@ -757,13 +794,13 @@ def render_kpi_cards(metrics, lang="en"):
 def render_health_gauge(score, lang="en"):
     """Plotly gauge chart for portfolio health score (0–100)."""
     if score >= 80:
-        bar_color = "#00ff9c"
+        bar_color = "#16B979"
     elif score >= 60:
-        bar_color = "#00d4ff"
+        bar_color = "#3987E5"
     elif score >= 40:
-        bar_color = "#ffb020"
+        bar_color = "#E8A317"
     else:
-        bar_color = "#ff4d4d"
+        bar_color = "#E2504F"
 
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -786,7 +823,7 @@ def render_health_gauge(score, lang="en"):
             steps=[
                 dict(range=[0,  40], color='rgba(255,77,77,0.10)'),
                 dict(range=[40, 60], color='rgba(255,176,32,0.10)'),
-                dict(range=[60, 80], color='rgba(0,212,255,0.10)'),
+                dict(range=[60, 80], color='rgba(57,135,229,0.10)'),
                 dict(range=[80,100], color='rgba(0,255,156,0.10)'),
             ],
             threshold=dict(
@@ -896,12 +933,12 @@ def render_robustness_score(robustness, lang="en"):
     interp_display = interpretation if lang == 'en' else interp_fr.get(interpretation, interpretation)
 
     score_color_map = {
-        "#10b981": "normal", "#6366f1": "normal", "#f59e0b": "inverse", "#ef4444": "inverse"
+        "#10b981": "normal", "#9085E9": "normal", "#f59e0b": "inverse", "#ef4444": "inverse"
     }
 
     st.markdown(f"""<div style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);
 border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:28px 32px;margin:12px 0;
-box-shadow:0 8px 40px rgba(79,70,229,0.25);position:relative;overflow:hidden;">
+box-shadow:0 8px 40px rgba(144,133,233,0.25);position:relative;overflow:hidden;">
 <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
 color:rgba(255,255,255,0.5);margin-bottom:6px;">{label}</div>
 <div style="font-size:4.5rem;font-weight:900;color:white;line-height:1;letter-spacing:-0.04em;">
@@ -956,7 +993,7 @@ def render_improvement_suggestions(suggestions, lang="en"):
         badge_colors = {
             'CRITICAL': '#ef4444',
             'HIGH': '#f59e0b',
-            'MEDIUM': '#6366f1',
+            'MEDIUM': '#9085E9',
             'INFO': '#10b981'
         }
         badge_color = badge_colors.get(sug['priority'], '#64748b')
@@ -974,7 +1011,7 @@ def render_improvement_suggestions(suggestions, lang="en"):
             </div>
             <p><strong>{issue_label}:</strong> {sug['issue']}</p>
             <p><strong>{sol_label}:</strong> {sug['solution']}</p>
-            {f"<p style='color:#818cf8;font-weight:600;margin-top:10px;font-size:0.85rem;'>{impact_label}: {sug['impact']}</p>" if sug.get("impact") else ""}
+            {f"<p style='color:#9085E9;font-weight:600;margin-top:10px;font-size:0.85rem;'>{impact_label}: {sug['impact']}</p>" if sug.get("impact") else ""}
         </div>
         """, unsafe_allow_html=True)
 
@@ -1004,7 +1041,7 @@ def render_asset_card(ticker, lang="en", show_weight=None):
     typical_use = info.get(f"typical_use_{lang}", info.get("typical_use", "N/A"))
 
     risk_colors = {
-        "Low": "#10b981", "Low-Medium": "#22d3ee", "Medium": "#6366f1",
+        "Low": "#10b981", "Low-Medium": "#22d3ee", "Medium": "#9085E9",
         "Medium-High": "#f59e0b", "High": "#f97316", "Very High": "#ef4444",
         "Unknown": "#94a3b8",
     }
@@ -1039,7 +1076,7 @@ def render_asset_card(ticker, lang="en", show_weight=None):
 
     weight_html = ""
     if show_weight is not None:
-        weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#4f46e5;margin-left:8px;'>{show_weight*100:.1f}%</span>"
+        weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#9085E9;margin-left:8px;'>{show_weight*100:.1f}%</span>"
 
     with st.expander(f"{ticker}  —  {info['name']}"):
         role_label = "Portfolio role" if lang == 'en' else "Rôle dans le portefeuille"
@@ -1067,10 +1104,10 @@ def render_asset_card(ticker, lang="en", show_weight=None):
             <div><span style="color:#4b5563;font-weight:500;">{cap_label}</span><br/>
                  <span style="color:#e2e8f0;font-weight:600;">{info.get('market_cap', 'N/A')}</span></div>
           </div>
-          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(99,102,241,0.12);">
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(144,133,233,0.12);">
             <div style="font-size:0.75rem;color:#4b5563;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">{liq_label}</div>
             <div class="progress-bar-bg" style="margin-bottom:10px;">
-              <div class="progress-bar-fill" style="width:{liq}%;background:#6366f1;"></div>
+              <div class="progress-bar-fill" style="width:{liq}%;background:#9085E9;"></div>
             </div>
             <div style="font-size:0.82rem;color:#64748b;line-height:1.6;">
               <span style="color:#94a3b8;font-weight:600;">{role_label}:</span> {utility}<br/>
@@ -1097,7 +1134,7 @@ def render_enhanced_charts(analyzer, lang="en"):
         font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
         margin=dict(l=10, r=10, t=48, b=10),
         hovermode='x unified',
-        hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
+        hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(57,135,229,0.3)',
                         font=dict(color='#f1f5f9', size=12)),
     )
     AXIS_STYLE = dict(
@@ -1116,9 +1153,9 @@ def render_enhanced_charts(analyzer, lang="en"):
             y=analyzer.portfolio_values.values,
             mode='lines',
             name='Portfolio' if lang == 'en' else 'Portefeuille',
-            line=dict(color='#00d4ff', width=2.5),
+            line=dict(color='#3987E5', width=2.5),
             fill='tozeroy',
-            fillcolor='rgba(0,212,255,0.06)',
+            fillcolor='rgba(57,135,229,0.06)',
             hovertemplate='<b>%{x|%b %d, %Y}</b><br>$%{y:,.0f}<extra></extra>',
         ))
         fig.update_layout(
@@ -1141,7 +1178,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             y=drawdown.values * 100,
             mode='lines',
             name='Drawdown',
-            line=dict(color='#ff4d4d', width=2),
+            line=dict(color='#E2504F', width=2),
             fill='tozeroy',
             fillcolor='rgba(255,77,77,0.08)',
             hovertemplate='<b>%{x|%b %d, %Y}</b><br>%{y:.1f}%<extra></extra>',
@@ -1158,8 +1195,8 @@ def render_enhanced_charts(analyzer, lang="en"):
         st.plotly_chart(fig, use_container_width=True)
 
     with tabs[2]:
-        palette = ['#00d4ff','#4f46e5','#00ff9c','#ffb020','#ff4d4d',
-                   '#818cf8','#34d399','#fbbf24','#a5b4fc','#6ee7b7']
+        palette = ['#3987E5','#9085E9','#16B979','#E8A317','#E2504F',
+                   '#9085E9','#34d399','#fbbf24','#9AA8BF','#6ee7b7']
         alloc_title = "Portfolio Allocation" if lang == 'en' else "Allocation du Portefeuille"
         fig = go.Figure(data=[go.Pie(
             labels=list(analyzer.weights.keys()),
@@ -1177,7 +1214,7 @@ def render_enhanced_charts(analyzer, lang="en"):
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(family='Inter, sans-serif', color='#94a3b8'),
             height=440, margin=dict(l=10, r=10, t=48, b=10),
-            hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
+            hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(57,135,229,0.3)',
                             font=dict(color='#f1f5f9', size=12)),
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -1190,13 +1227,13 @@ def render_enhanced_charts(analyzer, lang="en"):
 
         sorted_geo = dict(sorted(geo_alloc.items(), key=lambda x: x[1], reverse=True))
         geo_title = "Geographic Allocation" if lang == 'en' else "Allocation Géographique"
-        bar_colors = ['#00d4ff' if i == 0 else '#4f46e5' if i == 1 else '#818cf8'
+        bar_colors = ['#3987E5' if i == 0 else '#9085E9' if i == 1 else '#9085E9'
                       for i in range(len(sorted_geo))]
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_geo.keys()),
             y=[v*100 for v in sorted_geo.values()],
             marker=dict(color=bar_colors, opacity=0.9,
-                        line=dict(color='rgba(0,212,255,0.3)', width=1)),
+                        line=dict(color='rgba(57,135,229,0.3)', width=1)),
             text=[f"{v*100:.1f}%" for v in sorted_geo.values()],
             textposition='outside',
             textfont=dict(color='#94a3b8', size=11),
@@ -1218,8 +1255,8 @@ def render_enhanced_charts(analyzer, lang="en"):
 
         sorted_sec = dict(sorted(sector_alloc.items(), key=lambda x: x[1], reverse=True))
         sec_title = "Sector Allocation" if lang == 'en' else "Allocation Sectorielle"
-        sec_colors = ['#00ff9c', '#00d4ff', '#4f46e5', '#ffb020', '#ff4d4d',
-                      '#818cf8', '#34d399', '#fbbf24', '#a5b4fc', '#6ee7b7']
+        sec_colors = ['#16B979', '#3987E5', '#9085E9', '#E8A317', '#E2504F',
+                      '#9085E9', '#34d399', '#fbbf24', '#9AA8BF', '#6ee7b7']
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_sec.keys()),
             y=[v*100 for v in sorted_sec.values()],
@@ -1264,9 +1301,9 @@ def render_upgrade_prompt(lang="en"):
     )
     btn_html = (
         f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:14px;'
-        f'padding:10px 28px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;'
+        f'padding:10px 28px;background:linear-gradient(135deg,#9085E9,#9085E9);color:white;'
         f'border-radius:9px;font-weight:600;font-size:0.9rem;text-decoration:none;'
-        f'box-shadow:0 2px 8px rgba(79,70,229,0.3);">{title} — ${price}/mo</a>'
+        f'box-shadow:0 2px 8px rgba(144,133,233,0.3);">{title} — ${price}/mo</a>'
     ) if link else (
         f'<div style="margin-top:14px;font-size:0.82rem;color:#7c3aed;">Contact us to upgrade</div>'
     )
@@ -1321,25 +1358,25 @@ def render_stress_test_results(stress_results, lang="en"):
         resil_pct  = resilience * 100
 
         if resil_pct >= 80:
-            resil_color = "#00ff9c"
+            resil_color = "#16B979"
             badge = "🟢"
         elif resil_pct >= 50:
-            resil_color = "#ffb020"
+            resil_color = "#E8A317"
             badge = "🟡"
         else:
-            resil_color = "#ff4d4d"
+            resil_color = "#E2504F"
             badge = "🔴"
 
         with col:
             st.markdown(
-                f"<div style='background:#1e293b;border:1px solid rgba(0,212,255,0.15);"
+                f"<div style='background:#1e293b;border:1px solid rgba(57,135,229,0.15);"
                 f"border-radius:14px;padding:18px 20px;height:100%;'>"
                 f"<div style='font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
                 f"text-transform:uppercase;color:#475569;margin-bottom:6px;'>{scenario}</div>"
                 f"<div style='font-size:0.78rem;color:#64748b;margin-bottom:14px;'>"
                 f"{result['description']}</div>"
                 f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{loss_lbl}</div>"
-                f"<div style='font-size:1.6rem;font-weight:800;color:#ff4d4d;line-height:1;"
+                f"<div style='font-size:1.6rem;font-weight:800;color:#E2504F;line-height:1;"
                 f"margin-bottom:10px;'>{port_loss:+.1f}%</div>"
                 f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{mkt_lbl}</div>"
                 f"<div style='font-size:1rem;font-weight:600;color:#64748b;"
@@ -1384,6 +1421,81 @@ def _base_currency() -> str:
     return st.session_state.get("base_currency", "USD")
 
 
+def _manual_price_editor(tickers, lang) -> None:
+    """
+    Type a price for anything no data provider covers.
+
+    The reason this exists is narrow and the reason it stays is broad. Narrow:
+    Capital B is on Euronext Growth and the feed may carry it under a symbol
+    nobody guesses, so without this the holding is worth nothing to the app.
+    Broad: a flat, a life-insurance contract, an unlisted company and a physical
+    gold bar have no ticker at all, and a tool meant to replace a wealth
+    tracker has to be able to hold them.
+
+    A manual figure is never mixed in silently — the valuation reports which
+    lines came from here, and the screens say they are an estimate.
+    """
+    from datetime import date
+
+    stored = dict(st.session_state.get("manual_prices") or {})
+    report = st.session_state.get("last_price_report") or {}
+    unpriced = [t for t in tickers if t in (report.get("missing") or [])]
+
+    label = ("Prices entered by hand" if lang == "en"
+             else "Prix saisis à la main")
+    hint = ("For holdings no provider covers — an unlisted share, a flat, a "
+            "contract. Leave a price at zero to remove it."
+            if lang == "en" else
+            "Pour les lignes qu'aucun fournisseur ne couvre — action non cotée, "
+            "bien immobilier, contrat. Laissez un prix à zéro pour le retirer.")
+
+    with st.expander(label, expanded=bool(unpriced)):
+        st.caption(hint)
+        if unpriced:
+            st.warning(
+                f"No price was found for: {', '.join(sorted(unpriced))}. Enter one "
+                f"below, or the holding is left out of the total."
+                if lang == "en" else
+                f"Aucun cours trouvé pour : {', '.join(sorted(unpriced))}. Saisissez-en "
+                f"un ci-dessous, sinon la ligne est exclue du total."
+            )
+
+        changed = False
+        for ticker in tickers:
+            entry = stored.get(ticker) or {}
+            columns = st.columns([2, 2, 2])
+            with columns[0]:
+                st.markdown(f"**{ticker}**")
+            with columns[1]:
+                price = st.number_input(
+                    "Price" if lang == "en" else "Prix",
+                    min_value=0.0, value=float(entry.get("price") or 0.0),
+                    step=0.01, format="%.4f", key=f"mp_price_{ticker}",
+                    label_visibility="collapsed" if ticker != tickers[0] else "visible",
+                )
+            with columns[2]:
+                options = list(BASE_CURRENCIES)
+                current = str(entry.get("currency") or _base_currency()).upper()
+                currency = st.selectbox(
+                    "Currency" if lang == "en" else "Devise", options,
+                    index=options.index(current) if current in options else 0,
+                    key=f"mp_ccy_{ticker}",
+                    label_visibility="collapsed" if ticker != tickers[0] else "visible",
+                )
+            if price > 0:
+                new = {"price": float(price), "currency": currency,
+                       "at": date.today().isoformat()}
+                if stored.get(ticker) != new:
+                    stored[ticker] = new
+                    changed = True
+            elif ticker in stored:
+                stored.pop(ticker)
+                changed = True
+
+        if changed:
+            st.session_state["manual_prices"] = stored
+
+
 def _new_analyzer(tickers, weights, **kwargs):
     """
     Build an analyzer over the last two years, in the chosen base currency.
@@ -1398,6 +1510,36 @@ def _new_analyzer(tickers, weights, **kwargs):
         (datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d'),
         base_currency=_base_currency(),
         **kwargs,
+    )
+
+
+def _unanalysed_notice(lang) -> None:
+    """
+    Name the money the analysis does not cover.
+
+    A holding priced by hand has a value today and no history, so it cannot
+    have a volatility, a correlation or a drawdown — the analyzer drops it and
+    every figure on every page is about what is left. Which is correct, and
+    invisible unless it is said: a net worth of 68k and a risk report about 55k
+    of it, with nothing on screen accounting for the difference, is a page that
+    is quietly answering a different question than the one asked.
+    """
+    excluded = st.session_state.get("unanalysed_holdings") or {}
+    if not excluded:
+        return
+    symbol = currency_symbol(_base_currency())
+    total = sum(excluded.values())
+    names = ", ".join(sorted(excluded))
+    st.info(
+        f"The figures below cover your traded holdings only. {names} "
+        f"({symbol}{total:,.0f}) is valued but not analysed — a hand-entered "
+        f"price has no history, so it has no volatility, correlation or "
+        f"drawdown to report. Your total wealth is on the Real Portfolio page."
+        if lang == "en" else
+        f"Les chiffres ci-dessous ne couvrent que vos lignes cotées. {names} "
+        f"({symbol}{total:,.0f}) est valorisé mais pas analysé : un prix saisi "
+        f"à la main n'a pas d'historique, donc ni volatilité, ni corrélation, "
+        f"ni drawdown. Votre patrimoine total est sur la page Portefeuille réel."
     )
 
 
@@ -1736,36 +1878,62 @@ def _storage_location(lang):
     databases and one of them looks empty. Somebody who can see the path can
     tell which one they are looking at.
     """
-    import os
-    from sensitor.database.connection import DEFAULT_PATH
+    from sensitor.database import postgres as pg
+    from sensitor.database.connection import describe, target
 
-    path = os.path.abspath(os.getenv("SENSITOR_DB_PATH", DEFAULT_PATH))
-    configured = bool(os.getenv("SENSITOR_DB_PATH"))
-    exists = os.path.exists(path)
-    size = f"{os.path.getsize(path) / 1024:.0f} KB" if exists else "—"
+    where = target()
+    durable = pg.is_url(where)
+    # Streamlit Cloud mounts the repository under /mount/src and gives the
+    # container no persistent disk. Detecting it is what turns a general
+    # warning nobody reads into a specific one about this deployment.
+    ephemeral_host = os.path.abspath(".").startswith("/mount/src")
 
     with st.expander("Data & storage" if lang == "en" else "Données et stockage"):
-        st.caption(
-            f"**{path}** · {size}"
-            if lang == "en" else
-            f"**{path}** · {size}"
-        )
-        if not configured:
-            st.warning(
-                "SENSITOR_DB_PATH is not set, so this path depends on the directory "
-                "the app was started from. Set it to an absolute path — otherwise "
-                "launching from somewhere else opens a different, empty database."
+        st.caption(f"**{describe(where)}**")
+
+        if durable:
+            st.success(
+                "Stored in PostgreSQL. Your data survives restarts, redeploys and "
+                "sleeps, and is reachable from any device."
                 if lang == "en" else
-                "SENSITOR_DB_PATH n'est pas défini : ce chemin dépend du dossier depuis "
-                "lequel l'app a été lancée. Définissez-le en absolu — sinon, un lancement "
-                "depuis un autre dossier ouvre une autre base, vide."
+                "Stocké dans PostgreSQL. Vos données survivent aux redémarrages, aux "
+                "redéploiements et aux mises en veille, et sont accessibles depuis "
+                "n'importe quel appareil."
             )
+        elif ephemeral_host:
+            st.error(
+                "**This data will be lost.** You are running on a host with no "
+                "persistent disk, so this SQLite file is deleted on every restart, "
+                "redeploy and sleep. Create a free PostgreSQL database and put its "
+                "URL in `SENSITOR_DB_URL` — see docs/DEPLOY.md."
+                if lang == "en" else
+                "**Ces données seront perdues.** Vous tournez sur un hébergeur sans "
+                "disque persistant : ce fichier SQLite est supprimé à chaque "
+                "redémarrage, redéploiement et mise en veille. Créez une base "
+                "PostgreSQL gratuite et mettez son URL dans `SENSITOR_DB_URL` — "
+                "voir docs/DEPLOY.md."
+            )
+        else:
+            size = (f"{os.path.getsize(where) / 1024:.0f} KB"
+                    if os.path.exists(where) else "—")
+            st.caption(f"{size}")
+            if not os.getenv("SENSITOR_DB_PATH") and not os.getenv("SENSITOR_DB_URL"):
+                st.warning(
+                    "Neither SENSITOR_DB_URL nor SENSITOR_DB_PATH is set, so this "
+                    "path depends on the directory the app was started from. "
+                    "Launching from somewhere else opens a different, empty database."
+                    if lang == "en" else
+                    "Ni SENSITOR_DB_URL ni SENSITOR_DB_PATH n'est défini : ce chemin "
+                    "dépend du dossier depuis lequel l'app a été lancée. Un lancement "
+                    "depuis un autre dossier ouvre une autre base, vide."
+                )
+
         st.caption(
             "Your trades, your saved portfolios and the portfolio you are currently "
-            "working on all live in this file. Nothing in this app sends it anywhere."
+            "working on all live here. Nothing in this app sends them anywhere else."
             if lang == "en" else
             "Vos trades, vos portefeuilles enregistrés et le portefeuille en cours "
-            "vivent tous dans ce fichier. Rien dans cette application ne l'envoie ailleurs."
+            "vivent tous ici. Rien dans cette application ne les envoie ailleurs."
         )
 
 
@@ -1939,6 +2107,7 @@ def main():
             # page, so it belongs above all of them; the captions are rendered
             # by the overview itself, under its own header.
             _currency_notice(ctx.analyzer, lang, verbose=False)
+            _unanalysed_notice(lang)
         SENSITOR_PAGES[page](ctx)
         if ctx is not None:
             st.session_state.sensitor_period = ctx.period
@@ -1970,7 +2139,7 @@ def main():
             link = STRIPE_CONFIG['payment_link']
             btn = (
                 f'<a href="{link}" target="_blank" style="display:block;margin-top:14px;'
-                f'padding:10px 0;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;'
+                f'padding:10px 0;background:linear-gradient(135deg,#9085E9,#9085E9);color:white;'
                 f'border-radius:9px;font-weight:600;font-size:0.88rem;text-decoration:none;'
                 f'text-align:center;">Subscribe — ${price}/mo</a>'
             ) if link else (
@@ -1980,7 +2149,7 @@ def main():
             st.markdown(f"""
             <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:20px 22px;">
               <div style="font-weight:700;font-size:1rem;color:white;margin-bottom:4px;">Pro</div>
-              <div style="font-size:1.5rem;font-weight:800;color:white;">${price}<span style="font-size:0.9rem;color:#a5b4fc;font-weight:400;">/mo</span></div>
+              <div style="font-size:1.5rem;font-weight:800;color:white;">${price}<span style="font-size:0.9rem;color:#9AA8BF;font-weight:400;">/mo</span></div>
               <hr style="border-color:rgba(255,255,255,0.15);margin:12px 0;">
               <div style="font-size:0.85rem;color:#c7d2fe;">Up to 50 assets per portfolio</div>
               <div style="font-size:0.85rem;color:#c7d2fe;margin-top:4px;">Portfolio optimisation (Markowitz)</div>
@@ -2097,11 +2266,17 @@ def main():
                 prices = st.session_state.real_portfolio_prices
                 holdings = st.session_state.real_portfolio_holdings
 
-                # Compute per-asset values
+                # Every holding that has a price, not only the ones the
+                # analyzer could build a history for. This screen answers "what
+                # am I worth", and a flat or a hand-priced share is part of that
+                # answer even though it has no volatility to report. The lines
+                # the analysis could not cover are marked in the table.
                 asset_values = {}
-                for tk in analyzer.tickers:
-                    if tk in prices and tk in holdings:
-                        asset_values[tk] = prices[tk] * holdings[tk]
+                for tk, quantity in holdings.items():
+                    if tk in prices:
+                        asset_values[tk] = prices[tk] * quantity
+                analysed_only = set(analyzer.tickers)
+                total_val = sum(asset_values.values()) or total_val
 
                 # Find top asset
                 top_ticker = max(asset_values, key=asset_values.get) if asset_values else "—"
@@ -2112,88 +2287,114 @@ def main():
                 # Health/robustness score
                 health_score = robustness['total']
 
-                section_header(
-                    "💰",
-                    t("real_portfolio", lang),
-                    "Live portfolio value from your actual holdings" if lang == 'en'
-                    else "Valeur en temps réel de vos positions",
+                # Rebuilt on the design system the rest of the product uses.
+                # The old version hard-coded a dollar sign into every figure,
+                # which put "$" in front of a euro portfolio, and painted its
+                # own palette that matched nothing else on screen.
+                from sensitor.ui.components import (
+                    data_table as _table, metric_card as _card,
+                    money as _money, note as _note, pct as _pct,
+                    section as _section, spacer as _spacer,
                 )
+                from sensitor.ui.themes import ACCENT as _ACCENT, CRITICAL as _CRITICAL
+                from sensitor.investment.currency import currency_symbol as _sym
+
+                base_ccy = _base_currency()
+                symbol = _sym(base_ccy)
+                report = st.session_state.get("last_price_report") or {}
+                previous = report.get("previous") or {}
+                manual_lines = set(report.get("manual") or {})
+
+                # What the book was worth at the previous close, over the lines
+                # that have one. Compared against the same lines' value now, so
+                # a holding with no prior close cannot make the day look flat.
+                comparable = [tk for tk in asset_values if tk in previous]
+                now_value = sum(asset_values[tk] for tk in comparable)
+                then_value = sum(previous[tk] * holdings.get(tk, 0) for tk in comparable)
+                day_change = ((now_value / then_value - 1)
+                              if then_value > 0 and comparable else None)
+
+                _section(t("real_portfolio", lang).upper(),
+                         "Live portfolio value from your actual holdings"
+                         if lang == 'en' else
+                         "Valeur en temps réel de vos positions")
 
                 vc1, vc2, vc3, vc4 = st.columns(4)
                 with vc1:
-                    st.markdown(f"""
-                    <div class="kpi-card">
-                      <div class="kpi-label">{t("total_value", lang)}</div>
-                      <div class="kpi-value" style="color:#00d4ff;">${total_val:,.2f}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    _card(t("total_value", lang), _money(total_val, symbol, 2),
+                          delta=day_change,
+                          delta_label=("today" if lang == 'en' else "aujourd'hui"),
+                          caption=(f"{len(comparable)}/{len(asset_values)} "
+                                   + ("lines priced twice" if lang == 'en'
+                                      else "lignes avec un cours précédent")
+                                   if day_change is not None else
+                                   ("no previous close" if lang == 'en'
+                                    else "pas de cours précédent")))
                 with vc2:
-                    st.markdown(f"""
-                    <div class="kpi-card">
-                      <div class="kpi-label">{t("num_assets", lang)}</div>
-                      <div class="kpi-value" style="color:#a5b4fc;">{n_assets}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    _card(t("num_assets", lang), f"{n_assets}",
+                          caption=(f"{len(manual_lines)} priced by hand"
+                                   if lang == 'en' else
+                                   f"{len(manual_lines)} valorisées à la main")
+                                  if manual_lines else "")
                 with vc3:
-                    st.markdown(f"""
-                    <div class="kpi-card">
-                      <div class="kpi-label">{t("top_asset", lang)}</div>
-                      <div class="kpi-value" style="color:#10b981;font-size:1.3rem;">{top_name}</div>
-                      <div style="font-size:0.75rem;color:#475569;margin-top:2px;">{top_pct:.1f}%</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    _card(t("top_asset", lang), top_name, compact=True,
+                          bar=min(top_pct / 100.0, 1.0),
+                          bar_color=_CRITICAL if top_pct >= 40 else _ACCENT,
+                          caption=f"{top_pct:.1f}% "
+                                  + ("of the book" if lang == 'en' else "du portefeuille"))
                 with vc4:
-                    h_color = "#10b981" if health_score >= 70 else "#f59e0b" if health_score >= 40 else "#ff4d4d"
-                    st.markdown(f"""
-                    <div class="kpi-card">
-                      <div class="kpi-label">{t("portfolio_health", lang)}</div>
-                      <div class="kpi-value" style="color:{h_color};">{health_score:.0f}/100</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    _card(t("portfolio_health", lang), f"{health_score:.0f}",
+                          bar=health_score / 100.0,
+                          status=("good" if health_score >= 70
+                                  else "warning" if health_score >= 40 else "critical"),
+                          caption="/ 100")
 
-                ft_divider()
+                if day_change is not None and len(comparable) < len(asset_values):
+                    _note(
+                        "The day's change covers only the lines with a previous "
+                        "close. Hand-entered prices have none, so they are held "
+                        "flat rather than counted as unchanged."
+                        if lang == 'en' else
+                        "La variation du jour ne couvre que les lignes ayant un "
+                        "cours précédent. Les prix saisis à la main n'en ont pas : "
+                        "ils sont écartés plutôt que comptés comme stables."
+                    )
 
-                # ── Holdings detail table
-                section_header(
-                    "📋",
-                    t("real_holdings", lang),
-                    "Breakdown of each position" if lang == 'en' else "Détail de chaque position",
-                )
+                _spacer(14)
+                _section(t("real_holdings", lang).upper(),
+                         "Breakdown of each position" if lang == 'en'
+                         else "Détail de chaque position")
 
-                # Table header
-                hdr_cols = st.columns([2, 1.5, 1.5, 1.5, 1])
-                with hdr_cols[0]:
-                    st.markdown(f"**{t('ticker', lang)}**")
-                with hdr_cols[1]:
-                    st.markdown(f"**{t('quantity', lang)}**")
-                with hdr_cols[2]:
-                    st.markdown(f"**{t('price', lang)}**")
-                with hdr_cols[3]:
-                    st.markdown(f"**{t('value', lang)}**")
-                with hdr_cols[4]:
-                    st.markdown(f"**{t('weight_pct', lang)}**")
-
-                for tk in analyzer.tickers:
-                    if tk not in asset_values:
-                        continue
+                rows = []
+                for tk in sorted(asset_values, key=lambda k: -asset_values[k]):
                     qty = holdings.get(tk, 0)
                     price = prices.get(tk, 0)
                     val = asset_values[tk]
                     wt = (val / total_val * 100) if total_val > 0 else 0
-                    tk_info = ASSET_INFO.get(tk, {})
-                    tk_name = tk_info.get("name", tk)
+                    name = ASSET_INFO.get(tk, {}).get("name", tk)
+                    label = f"{tk} — {name}" if name != tk else tk
+                    if tk in manual_lines:
+                        label += ("  · manual" if lang == 'en' else "  · saisi")
+                    if tk not in analysed_only:
+                        label += ("  · not analysed" if lang == 'en'
+                                  else "  · non analysé")
+                    move = ((price / previous[tk] - 1)
+                            if tk in previous and previous[tk] else None)
+                    rows.append([
+                        label,
+                        f"{qty:,.4f}",
+                        _money(price, symbol, 2),
+                        _pct(move, 1, sign=True) if move is not None else "—",
+                        _money(val, symbol, 2),
+                        f"{wt:.1f}%",
+                    ])
 
-                    row_cols = st.columns([2, 1.5, 1.5, 1.5, 1])
-                    with row_cols[0]:
-                        st.markdown(f"**{tk}** — {tk_name}" if tk_name != tk else f"**{tk}**")
-                    with row_cols[1]:
-                        st.write(f"{qty:,.4f}")
-                    with row_cols[2]:
-                        st.write(f"${price:,.2f}")
-                    with row_cols[3]:
-                        st.write(f"${val:,.2f}")
-                    with row_cols[4]:
-                        st.write(f"{wt:.1f}%")
+                _table(
+                    [t("ticker", lang), t("quantity", lang), t("price", lang),
+                     ("Today" if lang == 'en' else "Aujourd'hui"),
+                     t("value", lang), t("weight_pct", lang)],
+                    rows, align="lrrrrr",
+                )
 
                 ft_divider()
 
@@ -2220,15 +2421,15 @@ def main():
                     font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
                     margin=dict(l=10, r=10, t=48, b=10),
                     hovermode='x unified',
-                    hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(0,212,255,0.3)',
-                                    font=dict(color='#f1f5f9', size=12)),
+                    hoverlabel=dict(bgcolor='#141C2B', bordercolor='rgba(57,135,229,0.35)',
+                                    font=dict(color='#EDF2F9', size=12)),
                 )
                 AXIS_STYLE = dict(
                     showgrid=True,
                     gridcolor='rgba(255,255,255,0.04)',
                     gridwidth=1,
                     linecolor='rgba(255,255,255,0.06)',
-                    tickfont=dict(size=11, color='#475569'),
+                    tickfont=dict(size=11, color='#6B7A93'),
                     zerolinecolor='rgba(255,255,255,0.05)',
                 )
 
@@ -2238,17 +2439,21 @@ def main():
                     y=normalized_values.values,
                     mode='lines',
                     name=t("total_value", lang),
-                    line=dict(color='#00d4ff', width=2.5),
+                    line=dict(color=_ACCENT, width=2.5),
                     fill='tozeroy',
-                    fillcolor='rgba(0,212,255,0.06)',
-                    hovertemplate='<b>%{x|%b %d, %Y}</b><br>$%{y:,.0f}<extra></extra>',
+                    fillcolor='rgba(57,135,229,0.10)',
+                    # The currency the portfolio is actually denominated in.
+                    # This read "$" on a euro book, on the one chart a person
+                    # looks at to see what they are worth.
+                    hovertemplate=('<b>%{x|%b %d, %Y}</b><br>'
+                                   + symbol + '%{y:,.0f}<extra></extra>'),
                 ))
                 fig.update_layout(
                     title=dict(
                         text="Portfolio Value" if lang == 'en' else "Valeur du Portefeuille",
-                        font=dict(size=14, color='#e2e8f0', family='Inter'),
+                        font=dict(size=14, color='#EDF2F9', family='Inter'),
                     ),
-                    yaxis=dict(tickprefix="$", **AXIS_STYLE),
+                    yaxis=dict(tickprefix=symbol, **AXIS_STYLE),
                     xaxis=AXIS_STYLE,
                     **CHART_LAYOUT,
                 )
@@ -2277,8 +2482,8 @@ def main():
 
                 with syn_c1:
                     st.markdown(f"**{t('asset_class_breakdown', lang)}**")
-                    palette = ['#00d4ff','#4f46e5','#00ff9c','#ffb020','#ff4d4d',
-                               '#818cf8','#34d399','#fbbf24']
+                    palette = ['#3987E5','#9085E9','#16B979','#E8A317','#E2504F',
+                               '#9085E9','#34d399','#fbbf24']
                     fig_ac = go.Figure(data=[go.Pie(
                         labels=list(class_alloc.keys()),
                         values=[v * 100 for v in class_alloc.values()],
@@ -2300,9 +2505,9 @@ def main():
                     # Dominant asset
                     st.markdown(f"**{t('dominant_asset', lang)}**")
                     st.markdown(
-                        f"<div style='background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12);"
+                        f"<div style='background:rgba(57,135,229,0.06);border:1px solid rgba(57,135,229,0.12);"
                         f"border-radius:10px;padding:12px 16px;margin-bottom:12px;'>"
-                        f"<div style='font-size:1.1rem;font-weight:700;color:#00d4ff;'>"
+                        f"<div style='font-size:1.1rem;font-weight:700;color:#3987E5;'>"
                         f"{top_name} ({top_ticker})</div>"
                         f"<div style='font-size:0.82rem;color:#64748b;'>{top_pct:.1f}% "
                         f"{'of portfolio' if lang == 'en' else 'du portefeuille'}</div>"
@@ -2324,7 +2529,7 @@ def main():
                         div_color = "#ff8c00"
                     else:
                         div_level = t("very_low_div", lang)
-                        div_color = "#ff4d4d"
+                        div_color = "#E2504F"
 
                     st.markdown(f"**{t('diversification', lang)}**")
                     st.markdown(
@@ -2356,7 +2561,7 @@ def main():
                         risk_color = "#ff8c00"
                     else:
                         risk_label = "High" if lang == 'en' else "Élevé"
-                        risk_color = "#ff4d4d"
+                        risk_color = "#E2504F"
 
                     st.markdown(f"**{t('overall_risk', lang)}**")
                     st.markdown(
@@ -2405,7 +2610,7 @@ def main():
             import re as _re
             summary_html = _re.sub(r'\*\*(.+?)\*\*', r'<strong style="color:#e2e8f0;">\1</strong>', summary_text)
             st.markdown(f"""
-            <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);
+            <div style="background:rgba(57,135,229,0.04);border:1px solid rgba(57,135,229,0.12);
                  border-radius:14px;padding:20px 24px;line-height:1.9;color:#94a3b8;font-size:0.93rem;">
               {summary_html}
             </div>
@@ -2597,6 +2802,24 @@ def main():
                         user_profile=st.session_state.user_profile,
                     )
                     if _fetch_with_progress(analyzer):
+                        # A holding can be *valued* without being *analysable*:
+                        # a hand-typed price gives a figure for today and no
+                        # history, so the analyzer drops it. Left alone, its
+                        # money stayed in `initial_value` and was attributed
+                        # across the survivors — the analysed book came out
+                        # larger than the holdings that were actually in it.
+                        analysed = sum(asset_values[t] for t in analyzer.tickers
+                                       if t in asset_values)
+                        excluded = {t: v for t, v in asset_values.items()
+                                    if t not in analyzer.tickers}
+                        if excluded and analysed > 0:
+                            analyzer.initial_value = analysed
+                            analyzer.portfolio_values = (
+                                analysed * (1 + analyzer.portfolio_returns).cumprod())
+                        st.session_state.real_portfolio_total_value = (
+                            analysed if excluded else total_value)
+                        st.session_state["unanalysed_holdings"] = excluded
+
                         st.session_state.current_portfolio = analyzer
                         st.success(t("analysis_done", lang))
                         st.session_state.page = "overview"
@@ -2635,18 +2858,18 @@ def main():
 
             if tier == 'pro':
                 alloc_html = "".join(
-                    f"<span style='display:inline-block;background:rgba(99,102,241,0.15);border-radius:8px;"
-                    f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#a5b4fc;"
-                    f"margin:3px;border:1px solid rgba(99,102,241,0.2);'>{tk} {w*100:.0f}%</span>"
+                    f"<span style='display:inline-block;background:rgba(144,133,233,0.15);border-radius:8px;"
+                    f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#9AA8BF;"
+                    f"margin:3px;border:1px solid rgba(144,133,233,0.2);'>{tk} {w*100:.0f}%</span>"
                     for tk, w in model_data['allocation'].items()
                 )
             else:
                 n = len(model_data['allocation'])
                 locked_label = "assets" if lang == 'en' else "actifs"
                 alloc_html = (
-                    f"<span style='display:inline-block;background:rgba(99,102,241,0.08);border-radius:8px;"
+                    f"<span style='display:inline-block;background:rgba(144,133,233,0.08);border-radius:8px;"
                     f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#64748b;"
-                    f"margin:3px;border:1px solid rgba(99,102,241,0.15);filter:blur(0px);'>"
+                    f"margin:3px;border:1px solid rgba(144,133,233,0.15);filter:blur(0px);'>"
                     f"🔒 {n} {locked_label} — Pro</span>"
                 )
             ret_label = t("expected_return", lang)
@@ -2819,6 +3042,8 @@ def main():
             st.markdown("---")
 
             # ── Fetch prices & analyse
+            _manual_price_editor(list(holdings.keys()), lang)
+
             if st.button(t("fetch_prices", lang), type="primary", use_container_width=False):
                 tickers_list = list(holdings.keys())
                 progress_bar = st.progress(0)
@@ -2833,12 +3058,23 @@ def main():
                 base = _base_currency()
                 prices, price_report = latest_prices(
                     tickers_list, base,
-                    on_error=lambda tk, msg: st.warning(f"{tk}: {msg}"))
+                    manual=st.session_state.get("manual_prices") or {},
+                    on_error=lambda tk, msg: None)
+                st.session_state["last_price_report"] = price_report
 
                 progress_bar.progress(1.0)
                 status.empty()
                 progress_bar.empty()
 
+                if price_report.get("manual"):
+                    names = ", ".join(sorted(price_report["manual"]))
+                    st.info(
+                        f"Valued from a price you entered: {names}. These are your "
+                        f"estimate, not a market quote."
+                        if lang == 'en' else
+                        f"Valorisé à partir d'un prix que vous avez saisi : {names}. "
+                        f"Ce sont vos estimations, pas des cours de marché."
+                    )
                 if price_report.get("dropped"):
                     names = ", ".join(sorted(price_report["dropped"]))
                     st.error(
@@ -2889,6 +3125,24 @@ def main():
                         user_profile=st.session_state.user_profile,
                     )
                     if _fetch_with_progress(analyzer):
+                        # A holding can be *valued* without being *analysable*:
+                        # a hand-typed price gives a figure for today and no
+                        # history, so the analyzer drops it. Left alone, its
+                        # money stayed in `initial_value` and was attributed
+                        # across the survivors — the analysed book came out
+                        # larger than the holdings that were actually in it.
+                        analysed = sum(asset_values[t] for t in analyzer.tickers
+                                       if t in asset_values)
+                        excluded = {t: v for t, v in asset_values.items()
+                                    if t not in analyzer.tickers}
+                        if excluded and analysed > 0:
+                            analyzer.initial_value = analysed
+                            analyzer.portfolio_values = (
+                                analysed * (1 + analyzer.portfolio_returns).cumprod())
+                        st.session_state.real_portfolio_total_value = (
+                            analysed if excluded else total_value)
+                        st.session_state["unanalysed_holdings"] = excluded
+
                         st.session_state.current_portfolio = analyzer
                         st.success(t("analysis_done", lang))
                         st.session_state.page = "overview"

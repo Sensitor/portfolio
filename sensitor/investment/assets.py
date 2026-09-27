@@ -1184,6 +1184,35 @@ _ALIASES: dict[str, str] = {
 _MNEMONICS = {ticker.split(".")[0].lower(): ticker for ticker in EURONEXT_PARIS}
 
 
+# Alternative Yahoo spellings to try when the catalogue symbol returns nothing.
+#
+# A ticker that moved market, changed its mnemonic on a rename, or is carried
+# under a different suffix answers to a symbol the catalogue does not list.
+# Capital B is the case that prompted this: it renamed from The Blockchain
+# Group, it sits on Euronext Growth rather than the regulated market, and the
+# environment this was written in cannot reach Yahoo to find out which spelling
+# actually answers.
+#
+# The alternatives are tried in order and the first one that returns a history
+# wins, so a wrong guess costs a failed request rather than a wrong price.
+SYMBOL_ALTERNATIVES: dict[str, tuple[str, ...]] = {
+    "ALTBG.PA": ("ALTBG.PA", "ALTBG.NX", "ALCPB.PA", "ALTBG.F", "ALTBG.DE"),
+    "STLAP.PA": ("STLAP.PA", "STLA.PA", "STLAM.MI"),
+    "STMPA.PA": ("STMPA.PA", "STM.PA", "STMMI.MI"),
+}
+
+
+def candidates(ticker: str) -> tuple[str, ...]:
+    """Every spelling worth trying for a ticker, the catalogue's own first."""
+    if not ticker:
+        return ()
+    symbol = ticker.strip().upper()
+    listed = SYMBOL_ALTERNATIVES.get(symbol)
+    if listed:
+        return listed
+    return (symbol,)
+
+
 def resolve_symbol(text: str) -> str | None:
     """
     The Yahoo symbol for what somebody typed, or None.

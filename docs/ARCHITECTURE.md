@@ -953,3 +953,87 @@ after a restore, which is also what guarantees a portfolio restored from a row
 written last month is valued at today's market rather than at the market as it
 was before the reboot. A failed fetch leaves the allocation on screen and says
 so, rather than refusing to open.
+
+
+---
+
+## 19. Two backends, one store
+
+`sensitor/database/postgres.py`, and the dispatch in `connection.connect`. The
+manual is `docs/DEPLOY.md`.
+
+### Why there are two
+
+SQLite is right on a laptop and wrong on Streamlit Cloud, whose container has
+no persistent disk: the file is deleted on every restart, redeploy and sleep.
+The persistence layer worked and the file it wrote to did not survive, which is
+the same thing as not having one. A user lost a portfolio to this before it was
+fixed.
+
+### What was *not* done
+
+No ORM, and no rewrite of the query layer. `Store` issues the same SQL it
+always did; the Postgres module supplies a connection object shaped like the
+`sqlite3` one — `execute`, `executemany`, `commit`, `rollback`, `close`, cursors
+with `fetchall`/`fetchone`, rows addressable by name **and** by position.
+
+That shape is the whole design. Two backends that drift apart are two answers to
+"is this portfolio mine", and the isolation guarantee rests on there being one
+answer. So nothing above `connect()` knows which database it is talking to, and
+**the database suite runs the same 97 assertions against both** — SQLite by
+default, PostgreSQL when `SENSITOR_TEST_PG` is set. Verified against a real
+PostgreSQL 16, not a mock.
+
+### The differences, in full
+
+* **Placeholders.** `?` becomes `%s`, skipping quoted stretches.
+* **Auto-increment.** `INTEGER PRIMARY KEY AUTOINCREMENT` becomes `SERIAL`.
+* **`INSERT OR IGNORE`** becomes a trailing `ON CONFLICT DO NOTHING`.
+* **`lastrowid`** does not exist. Both call sites now ask for `RETURNING id`,
+  which SQLite has supported since 3.35 — so the call sites are identical
+  rather than branching.
+* **The schema version** lives in `PRAGMA user_version` on one and a one-row
+  table on the other.
+* **Pragmas are answered, not refused.** `foreign_keys` reads back 1 because
+  Postgres always enforces them; `integrity_check` answers "ok";
+  `table_info` is served from `information_schema`. Raising instead would have
+  pushed a backend branch into the migration code and into the tests.
+
+`INSERT ... ON CONFLICT ... DO UPDATE SET ... excluded.x` needs no translation:
+SQLite borrowed the syntax from Postgres.
+
+### Configuration reaches the app through secrets
+
+Streamlit Cloud cannot set environment variables — a deployment is configured
+through a Secrets box that lands in `st.secrets` and nowhere else. Every module
+below the entry point reads `os.getenv`, because they have to run from a test, a
+script and the API with no Streamlit present. The entry point bridges the two,
+and an existing environment variable always wins.
+
+That also forced `connection.target()` to read the environment **at call time**
+rather than at import. A module-level constant would freeze the answer before
+the secrets were mirrored, open the ephemeral file anyway, and lose data on a
+deployment that had been configured correctly.
+
+---
+
+## 20. Prices for things no feed carries
+
+Two additions, from one report: Capital B had no price.
+
+**Alternative symbols.** A share that renamed, moved market, or sits on a
+growth segment answers to a spelling the catalogue does not list.
+`assets.candidates()` gives the orderings worth trying and the downloader takes
+the first that returns a history, naming the result after the ticker the
+portfolio asked for. A wrong guess costs a request, not a wrong price.
+
+**Hand-typed prices.** A flat, a life-insurance contract, an unlisted company
+and a gold bar have no ticker at all, and a tool meant to replace a wealth
+tracker has to hold them. `workspace.manual_prices` stores
+`{ticker: {price, currency, at}}`, the valuation uses one only when the provider
+returns nothing, and every screen that shows a hand-priced line says so. A
+manual entry names its own currency and is converted like any other, so a flat
+valued in euros inside a dollar portfolio is not read as dollars.
+
+The day's change skips them rather than counting them as unchanged: a price
+that has not been re-typed is not a price that did not move.

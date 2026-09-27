@@ -133,6 +133,33 @@ def test_a_restart_keeps_the_portfolio() -> None:
     check("and the profile", second.session_state["user_profile"] == "aggressive")
 
 
+def test_manual_prices_survive() -> None:
+    """
+    A hand-typed price is worth nothing if it has to be typed again.
+
+    This is what makes an unlisted holding — or one whose symbol no feed
+    carries — usable at all, so it has to come back with the allocation.
+    """
+    print("\nHand-typed prices come back")
+
+    app = run(ALICE, analyzer=FakeAnalyzer(PARIS))
+    app.session_state["manual_prices"] = {
+        "ALTBG.PA": {"price": 2.4, "currency": "EUR", "at": "2026-09-27"}}
+    app.run()
+
+    saved = store().load_workspace(ALICE)
+    check("the price was written down",
+          saved is not None and "ALTBG.PA" in (saved.manual_prices or {}),
+          str(saved.manual_prices if saved else None))
+
+    back = run(ALICE, analyzer=FakeAnalyzer(PARIS))
+    restored = back.session_state.get("manual_prices") or {}
+    check("and comes back on the next visit",
+          restored.get("ALTBG.PA", {}).get("price") == 2.4, str(restored))
+    check("with the currency it was entered in",
+          restored.get("ALTBG.PA", {}).get("currency") == "EUR")
+
+
 def test_an_empty_session_does_not_erase_the_row() -> None:
     """
     The failure this guards against is the one that would make the feature
@@ -216,6 +243,7 @@ def test_signed_out_writes_nothing() -> None:
 
 def main() -> int:
     test_a_restart_keeps_the_portfolio()
+    test_manual_prices_survive()
     test_an_empty_session_does_not_erase_the_row()
     test_a_change_is_persisted()
     test_one_persons_portfolio_is_not_anothers()

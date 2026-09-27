@@ -59,6 +59,7 @@ def signature() -> dict:
         "profile": st.session_state.get("user_profile", "balanced"),
         "period": st.session_state.get("sensitor_period", "MAX"),
         "quantities": {str(k): round(float(v), 6) for k, v in quantities.items()},
+        "manual_prices": st.session_state.get("manual_prices") or {},
         "total_value": st.session_state.get("real_portfolio_total_value"),
         "portfolio_id": (st.session_state.get("sensitor_loaded_portfolio") or {}).get("id"),
         "portfolio_name": (st.session_state.get("sensitor_loaded_portfolio") or {}).get("name"),
@@ -106,6 +107,8 @@ def restore(store, email: str) -> bool:
         st.session_state.real_portfolio_holdings = dict(saved.quantities)
     if saved.total_value is not None:
         st.session_state.real_portfolio_total_value = saved.total_value
+    if saved.manual_prices:
+        st.session_state["manual_prices"] = dict(saved.manual_prices)
     if saved.portfolio_id is not None:
         st.session_state["sensitor_loaded_portfolio"] = {
             "id": saved.portfolio_id,
@@ -159,6 +162,7 @@ def persist(store, email: str) -> None:
             period=current["period"],
             quantities=current["quantities"],
             total_value=current["total_value"],
+            manual_prices=current["manual_prices"],
             portfolio_id=current["portfolio_id"],
             portfolio_name=current["portfolio_name"],
         )
@@ -183,6 +187,8 @@ def forget() -> None:
     st.session_state.current_portfolio = None
     st.session_state.real_portfolio_holdings = {}
     st.session_state.real_portfolio_total_value = None
+    st.session_state.pop("manual_prices", None)
+    st.session_state.pop("last_price_report", None)
     st.session_state.pop("sensitor_loaded_portfolio", None)
     st.session_state.pop(RESTORED_FLAG, None)
     st.session_state.pop(SIGNATURE_KEY, None)
