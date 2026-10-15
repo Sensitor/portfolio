@@ -163,6 +163,13 @@ class Module:
     id: str
     title: str
     lessons: tuple[Lesson, ...]
+    summary: str = ""
+    number: int = 0                # 1-based chapter number within the course
+
+    @property
+    def duration_minutes(self) -> int | None:
+        durations = [l.duration_minutes for l in self.lessons]
+        return None if not durations or None in durations else sum(durations)
 
 
 @dataclass(frozen=True)
@@ -197,6 +204,9 @@ class Course:
 
     def lesson(self, lesson_id: str) -> Lesson | None:
         return next((l for l in self.lessons if l.id == lesson_id), None)
+
+    def module_of(self, lesson: Lesson) -> Module | None:
+        return next((m for m in self.modules if m.id == lesson.module_id), None)
 
     def neighbours(self, lesson_id: str) -> tuple[Lesson | None, Lesson | None]:
         lessons = self.lessons
@@ -622,7 +632,9 @@ class _Loader:
             if lessons:
                 modules.append(Module(id=str(raw.get("id", "")),
                                       title=str(raw.get("title", "")),
-                                      lessons=tuple(lessons)))
+                                      lessons=tuple(lessons),
+                                      summary=str(raw.get("summary", "")).strip(),
+                                      number=len(modules) + 1))
         for orphan in sorted(set(lesson_files) - used):
             self.problem(where, f"leçon lessons/{orphan}.md présente mais absente du plan du cours")
         if not modules:

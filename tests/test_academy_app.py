@@ -1,5 +1,6 @@
 """
-The Academy Streamlit app, run headless with `streamlit.testing`.
+The Sensitor platform app (Academy and the other spaces), run headless with
+`streamlit.testing`.
 
 Every page renders without an exception for a visitor and for a member; member
 lessons stay locked for a visitor; marking a lesson done and submitting a quiz
@@ -24,7 +25,8 @@ os.environ.pop("SENSITOR_ACADEMY_PREVIEW", None)
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
-APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "academy_app.py")
+APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sensitor_app.py")
+LEGACY_APP = os.path.join(os.path.dirname(APP), "academy_app.py")
 FAILURES: list[str] = []
 COUNT = 0
 
@@ -51,8 +53,8 @@ def token(email: str) -> str:
     return result.token if result else auth.sign_in(email, "un-mot-de-passe-solide").token
 
 
-def run(route: dict, tok: str | None = None) -> AppTest:
-    app = AppTest.from_file(APP, default_timeout=60)
+def run(route: dict, tok: str | None = None, *, entry: str = APP) -> AppTest:
+    app = AppTest.from_file(entry, default_timeout=60)
     app.session_state["ac_route"] = route
     if tok:
         app.session_state["session_token"] = tok
@@ -70,7 +72,16 @@ def error(app: AppTest) -> str:
 
 ROUTES = [
     {"page": "home"},
+    {"page": "academy"},
     {"page": "paths"},
+    {"page": "resource", "resource": "fiche-vocabulaire-execution"},
+    {"page": "resource", "resource": "checklist-avant-trade"},
+    {"page": "resource", "resource": "inexistante"},
+    {"page": "psychology"},
+    {"page": "market"},
+    {"page": "community"},
+    {"page": "tools"},
+    {"page": "page-inconnue"},
     {"page": "course", "course": "premiers-pas"},
     {"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"},
     {"page": "lesson", "course": "premiers-pas", "lesson": "ordres-et-couts"},
@@ -139,13 +150,36 @@ def main() -> int:
     force = [b for b in app.button if b.label == "Soumettre quand même"]
     check("unanswered questions ask for confirmation", len(force) == 1)
     force[0].click().run()
-    check("the review renders", not app.exception and "1 / 10" in text(app), error(app))
+    check("the review renders", not app.exception and "1<small> / 10</small>" in text(app), error(app))
     attempts = store().quiz_attempts("alice@example.com", "premiers-pas-validation")
     check("the attempt is stored", len(attempts) == 1 and attempts[0]["correct"] == 1)
     check("bob has none", store().quiz_attempts("bob@example.com") == [])
 
     dash = run({"page": "home"}, alice)
-    check("the dashboard reads the real progress", "1<small> / 6</small>" in text(dash))
+    check("the dashboard reads the real progress", "<b>1</b> / 6" in text(dash))
+
+    print("\nThe platform")
+    legacy = run({"page": "home"}, entry=LEGACY_APP)
+    check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
+    old = run({"page": "paths"})
+    check("the old « paths » page opens the Academy home",
+          "Construire une <em>méthode</em>" in text(old))
+    for page in ("psychology", "market", "community"):
+        app = run({"page": page})
+        body = text(app)
+        check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)
+        check(f"{page}: offers no input of any kind",
+              not app.text_input and not app.radio and not app.checkbox and not app.text_area)
+    tools = run({"page": "tools"})
+    check("tools: no link when the address is not configured",
+          "Lien non configuré" in text(tools))
+    sidebar = [b.label for b in run({"page": "home"}).sidebar.button]
+    from sensitor.platform import spaces
+    check("the sidebar lists every space, in registry order",
+          [l for l in sidebar if l in {s.label for s in spaces.SPACES}] == [s.label for s in spaces.SPACES],
+          str(sidebar))
+    unknown = run({"page": "page-inconnue"})
+    check("an unknown page falls back to the home page", "Comprendre le marché." in text(unknown))
 
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:

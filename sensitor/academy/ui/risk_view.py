@@ -13,7 +13,7 @@ from __future__ import annotations
 import streamlit as st
 
 from .. import risk as R
-from .components import esc, html, money, number, percent
+from ...platform.ui.components import esc, html, money, number, percent
 
 CURRENCIES = ("USD", "EUR", "GBP", "CHF")
 SPEC_NONE = "Ne pas calculer la taille"
@@ -24,9 +24,9 @@ SPEC_CUSTOM = "Saisir la spécification de mon courtier"
 def render(*, scope: str, compact: bool = False) -> None:
     k = f"risk_{scope}"
     with st.container(key=f"panel_{k}"):
-        html('<div class="ac-eyebrow">Calculateur pédagogique</div>'
-             '<h3 class="ac-h3" style="margin-top:.5rem">Budget de risque et taille de position</h3>'
-             '<p class="ac-sub">Estimation éducative. Elle ne remplace pas le calcul de votre '
+        html('<div class="sx-kicker">Calculateur pédagogique</div>'
+             '<h2 class="sx-h3">Budget de risque et taille de position</h2>'
+             '<p class="sx-body">Estimation éducative. Elle ne remplace pas le calcul de votre '
              'plateforme, qui seule connaît les conditions exactes de votre compte.</p>')
 
         c1, c2, c3 = st.columns(3)
@@ -81,12 +81,12 @@ def _spec(mode: str, k: str, currency: str) -> R.InstrumentSpec | None:
                        "d'EURUSD n'est de 10 $ par lot que dans ce cas. Choisissez « USD » "
                        "ou saisissez la spécification de votre courtier.")
             return None
-        html('<p class="ac-note">Convention du marché des changes : 1 lot = 100 000 unités, '
+        html('<p class="sx-note">Convention du marché des changes : 1 lot = 100 000 unités, '
              '1 pip = 0,0001, pas de volume de 0,01 lot. Vérifiez la spécification de votre '
              'courtier, qui peut différer.</p>')
         return R.InstrumentSpec(contract_size=100_000, quote_to_account=1.0, lot_step=0.01,
                                 min_lot=0.01, pip_size=0.0001, label="EURUSD · USD")
-    html('<p class="ac-note">Recopiez les valeurs de la fiche de l\'instrument chez votre '
+    html('<p class="sx-note">Recopiez les valeurs de la fiche de l\'instrument chez votre '
          'courtier. Si l\'instrument est coté dans une autre devise que celle du compte, '
          'indiquez la valeur d\'une unité de cette devise dans la devise du compte.</p>')
     c1, c2, c3, c4 = st.columns(4)
@@ -103,16 +103,16 @@ def _spec(mode: str, k: str, currency: str) -> R.InstrumentSpec | None:
         pip = st.number_input("Taille du pip (0 = aucun)", min_value=0.0, value=0.0,
                               step=0.0001, format="%.5f", key=f"{k}_pip")
     if contract <= 0:
-        html('<p class="ac-note">Indiquez le nombre d\'unités par lot pour calculer la taille.</p>')
+        html('<p class="sx-note">Indiquez le nombre d\'unités par lot pour calculer la taille.</p>')
         return None
     return R.InstrumentSpec(contract_size=contract, quote_to_account=rate,
                             lot_step=step or None, min_lot=step or None, pip_size=pip or None)
 
 
 def _cell(label: str, value: str, detail: str = "", emph: bool = False) -> str:
-    detail_html = f'<div class="detail">{detail}</div>' if detail else ""
-    return (f'<div class="ac-figure-cell{" emph" if emph else ""}"><div class="label">{esc(label)}'
-            f'</div><div class="value">{value}</div>{detail_html}</div>')
+    detail_html = f'<div class="d">{detail}</div>' if detail else ""
+    return (f'<div{" class=emph" if emph else ""}><div class="l">{esc(label)}'
+            f'</div><div class="v">{value}</div>{detail_html}</div>')
 
 
 def _figures(plan: R.RiskPlan, currency: str, spec: R.InstrumentSpec | None) -> None:
@@ -132,22 +132,22 @@ def _figures(plan: R.RiskPlan, currency: str, spec: R.InstrumentSpec | None) -> 
                            f"calcul brut : {number(position.raw_lots, 4)} lot"))
         cells.append(_cell("Risque effectif", money(position.effective_risk, currency),
                            "après arrondi vers le bas"))
-    html('<div class="ac-figures">' + "".join(cells) + "</div>")
+    html('<div class="sx-figures">' + "".join(cells) + "</div>")
 
     notes = list(plan.notes)
     if plan.position is None and spec is None:
         notes.insert(0, "Sans spécification d'instrument, la taille de position n'est pas "
                         "calculée : la valeur d'un mouvement de prix dépend du contrat.")
-    html('<ul class="ac-sub" style="margin:.7rem 0 0;padding-left:1.1rem">'
+    html('<ul class="sx-body" style="margin:.8rem 0 0;padding-left:1.1rem;font-size:14px">'
          + "".join(f"<li>{esc(n)}</li>" for n in notes)
          + "<li>Un stop peut être exécuté au-delà de son niveau en cas de gap ou de marché rapide.</li>"
          "</ul>")
 
 
 def _streaks(plan: R.RiskPlan, currency: str, k: str) -> None:
-    html('<div class="ac-rule"></div><div class="ac-eyebrow">Séries de pertes</div>'
-         '<h3 class="ac-h3" style="margin-top:.5rem">Ce que coûterait une série de pertes</h3>'
-         f'<p class="ac-sub">Avec un risque de {percent(plan.risk_pct, 2)} du capital restant '
+    html('<hr class="sx-hr"><div class="sx-kicker">Séries de pertes</div>'
+         '<h2 class="sx-h3">Ce que coûterait une série de pertes</h2>'
+         f'<p class="sx-body">Avec un risque de {percent(plan.risk_pct, 2)} du capital restant '
          'à chaque position, chaque perte touchant le stop.</p>')
     points = R.losing_streak(plan.equity, plan.risk_pct, 10)
     rows = "".join(
@@ -170,7 +170,7 @@ def _streaks(plan: R.RiskPlan, currency: str, k: str) -> None:
         probability = R.streak_probability(int(trades), streak, win / 100)
         cells.append(_cell(f"Série de {streak} pertes ou plus", percent(probability * 100),
                            f"au moins une fois sur {int(trades)} trades"))
-    html('<div class="ac-figures">' + "".join(cells) + "</div>")
-    html('<p class="ac-note" style="margin-top:.7rem">Hypothèse : trades indépendants et taux '
+    html('<div class="sx-figures">' + "".join(cells) + "</div>")
+    html('<p class="sx-note" style="margin-top:.7rem">Hypothèse : trades indépendants et taux '
          'de réussite constant. Dans la réalité, les pertes ont tendance à se regrouper, ce qui '
          'rend les longues séries plus probables encore.</p>')

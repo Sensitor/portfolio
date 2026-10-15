@@ -4,8 +4,11 @@ The education product: learning paths, lessons, explained quizzes, a numeric
 case study, a risk lab and a resource library. French interface.
 
 ```bash
-streamlit run academy_app.py
+streamlit run sensitor_app.py      # the platform; the Academy is its first space
 ```
+
+The Academy is one space of the Sensitor platform — shell, navigation, design
+system and brand are described in [PLATFORM.md](PLATFORM.md).
 
 This document records what exists, how it is put together, how content is
 written and published, and what is not built yet.
@@ -55,11 +58,12 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   access.py    who may read what (the only place that decides)
   views.py     plain-data shapes served by the API
   validate.py  python -m sensitor.academy.validate
-  ui/          the Streamlit front end (presentation only)
+  ui/          the Academy, Library, Lab and Progress pages (presentation only;
+               the shell, theme and components are in sensitor/platform/ui)
 
 sensitor/database/          + tables lesson_progress, quiz_attempts (schema v6)
 sensitor/api/routers/academy.py
-academy_app.py              Streamlit entry point
+sensitor_app.py             Streamlit entry point (academy_app.py runs it)
 ```
 
 **Why Streamlit for this milestone.** The repository already deploys a
@@ -109,7 +113,7 @@ database stores only what members do with the content.
    no explanation, a single-choice question with two right answers, a lesson
    file left out of the plan, a figure containing a script — and lists any
    published lesson missing objectives, a summary, a recap or a practice element.
-5. Preview drafts locally with `SENSITOR_ACADEMY_PREVIEW=1 streamlit run academy_app.py`.
+5. Preview drafts locally with `SENSITOR_ACADEMY_PREVIEW=1 streamlit run sensitor_app.py`.
 6. Set `status = "published"`, bump `version` for a substantial rewrite, and
    merge. The catalogue reloads when files change.
 
@@ -137,7 +141,7 @@ CMS. Nothing in the UI pretends otherwise.
 The Academy is a **second app from the same repository**:
 
 1. share.streamlit.io → *Create app* → same repository and branch →
-   main file **`academy_app.py`**.
+   main file **`sensitor_app.py`** (an existing `academy_app.py` deployment keeps working).
 2. *Advanced settings → Secrets*: paste the same `SENSITOR_DB_URL` and
    `SENSITOR_AUTH = "multi"` as the portfolio app. Both apps then share
    accounts and data, and progress survives restarts.
@@ -154,8 +158,8 @@ The Academy is a **second app from the same repository**:
   identity provider to be chosen.
 * **No password reset or email verification yet** — the existing auth has
   neither; both need an email service.
-* The logo is a vector redraw of the supplied image (`sensitor/academy/ui/brand.py`).
-  Replace the path there if an original vector file exists.
+* The logo is a vector trace of the supplied image; drop the official file in
+  `assets/brand/sensitor-mark-official.svg` to replace it everywhere.
 * Fonts load from Google Fonts; without network access the app falls back to
   system fonts.
 * On a phone, the lesson outline sits above the lesson rather than beside it.
@@ -168,6 +172,7 @@ The Academy is a **second app from the same repository**:
 ```bash
 python tests/test_academy.py       # 215 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  56 checks — HTTP access policy, isolation, no answer key
-python tests/test_academy_app.py   #  47 checks — every page renders, locking, writes per member
+python tests/test_academy_app.py   #  76 checks — every page and space renders, locking, writes per member
+python tests/test_platform.py      #  39 checks — spaces registry, renderers, brand asset
 python -m sensitor.academy.validate
 ```

@@ -10,12 +10,12 @@ import streamlit as st
 
 from .. import exercise as X
 from ..content import Exercise
-from .components import esc, html, md
+from ...platform.ui.components import esc, html, md
 
 LABELS = {X.CORRECT: "Juste", X.INCORRECT: "À revoir", X.UNANSWERED: "Sans réponse",
           X.INVALID: "Nombre illisible"}
-CLASSES = {X.CORRECT: "correct", X.INCORRECT: "incorrect", X.UNANSWERED: "unanswered",
-           X.INVALID: "unanswered"}
+CLASSES = {X.CORRECT: "correct", X.INCORRECT: "incorrect", X.UNANSWERED: "neutral",
+           X.INVALID: "neutral"}
 
 
 def render(exercise: Exercise, *, scope: str) -> None:
@@ -24,8 +24,8 @@ def render(exercise: Exercise, *, scope: str) -> None:
     run = state["run"]
 
     with st.container(key=f"panel_ex_{scope}_{exercise.id}"):
-        html(f'<div class="ac-eyebrow">Exercice pratique · {len(exercise.steps)} étapes</div>'
-             f'<h3 class="ac-h3" style="margin-top:.5rem">{esc(exercise.title)}</h3>')
+        html(f'<div class="sx-kicker">Exercice pratique · {len(exercise.steps)} étapes</div>'
+             f'<h2 class="sx-h3">{esc(exercise.title)}</h2>')
         md(exercise.context)
 
         for index, step in enumerate(exercise.steps, start=1):
@@ -51,8 +51,9 @@ def render(exercise: Exercise, *, scope: str) -> None:
             results = [X.check_step(s, st.session_state.get(f"{key}::{run}::{s.id}"))
                        for s in exercise.steps]
             right = sum(r.status == X.CORRECT for r in results)
-            html(f'<div class="ac-score"><span class="big">{right} / {len(results)}</span>'
-                 f'<span class="ac-sub">étapes justes</span></div>')
+            html(f'<div class="sx-result"><div class="big">{right}<small> / {len(results)}</small>'
+                 f'</div><div><div class="k {"pass" if right == len(results) else "fail"}">'
+                 f'Étapes justes</div><p>Chaque corrigé est affiché sous son étape.</p></div></div>')
             if exercise.conclusion:
                 md(exercise.conclusion)
             if st.button("Recommencer l'exercice", key=f"{key}::restart::{run}"):
@@ -69,5 +70,5 @@ def _solution(step, text: str | None, *, checked: bool, key: str) -> None:
     else:
         label, cls = "Corrigé", "neutral"
     with st.container(key=f"solution_{cls}_{key}"):
-        html(f'<div class="ac-callout-title">{label}</div>')
+        html(f'<div class="sx-callout-title">{label}</div>')
         md(step.solution)

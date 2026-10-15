@@ -1,35 +1,12 @@
 """
-Sensitor Academy — the education app.
+Kept so a deployment created with `academy_app.py` as its main file keeps
+working: the Academy is now one space of the Sensitor platform.
 
-    streamlit run academy_app.py
-
-A separate entry point from the portfolio app (`portfolio_optimizer_saas.py`),
-sharing its accounts and database: the same `SENSITOR_DB_URL` and
-`SENSITOR_AUTH` secrets configure both. See docs/ACADEMY.md.
+    streamlit run sensitor_app.py      # the entry point to use
 """
 
-from __future__ import annotations
-
 import os
-import sys
+import runpy
 
-import streamlit as st
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from sensitor.academy.ui.brand import logo_svg  # noqa: E402
-
-st.set_page_config(
-    page_title="Sensitor Academy",
-    page_icon=logo_svg(64, uid="favicon"),
-    layout="wide",
-    initial_sidebar_state="auto",
-)
-
-from sensitor.academy.ui import runtime  # noqa: E402
-
-runtime.mirror_secrets()
-
-from sensitor.academy.ui.app import main  # noqa: E402
-
-main()
+runpy.run_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sensitor_app.py"),
+               run_name="__main__")

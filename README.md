@@ -24,10 +24,12 @@ self-contained HTML you print or send.
 **On a phone.** The five trading pages again, as an Expo app over the same
 endpoints.
 
-**Academy.** `academy_app.py` — the education product, in French: learning
-paths, lessons with original diagrams, explained quizzes, a numeric case study,
-a risk lab and a resource library, with progress stored per member. Same
-accounts and database as the analytics app. See [docs/ACADEMY.md](docs/ACADEMY.md).
+**Sensitor platform.** `sensitor_app.py` — the education product, in French,
+as one platform with one account: the Academy (learning paths, lessons with
+original diagrams, explained quizzes, a numeric case study), the Library, the
+Trading Lab and Progress, plus the spaces in preparation. Same accounts and
+database as the analytics app. See [docs/PLATFORM.md](docs/PLATFORM.md) and
+[docs/ACADEMY.md](docs/ACADEMY.md).
 
 ---
 
@@ -306,7 +308,8 @@ python tests/test_sensitor_pages.py       # 164 render checks
 python tests/test_trading_pages.py        #  82 render checks
 python tests/test_academy.py              # 215 checks — Academy content, quiz, risk maths
 python tests/test_academy_api.py          #  56 checks — Academy over HTTP
-python tests/test_academy_app.py          #  47 checks — Academy pages, headless
+python tests/test_academy_app.py          #  76 checks — platform pages, headless
+python tests/test_platform.py             #  39 checks — spaces registry, brand
 python -m sensitor.academy.validate       # content check before publishing
 cd mobile && npm run test:integration     #  38 checks against a live server
 ```
@@ -324,9 +327,9 @@ that quietly refuses to show anything raises nothing at all.
 ## Deploying
 
 **Streamlit Cloud.** Point it at `portfolio_optimizer_saas.py`. Set the
-environment variables above; remember the filesystem is ephemeral. The Academy
-is a second app from the same repository with main file `academy_app.py` and the
-same secrets.
+environment variables above; remember the filesystem is ephemeral. The Sensitor
+platform is a second app from the same repository with main file
+`sensitor_app.py` and the same secrets.
 
 **A server.** Run the Streamlit app and, if you want the API, a separate
 uvicorn process against the same `SENSITOR_DB_PATH`. Put TLS in front of both.

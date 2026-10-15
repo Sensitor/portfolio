@@ -17,19 +17,23 @@ final_quiz = "premiers-pas-validation"
 [[module]]
 id = "comprendre"
 title = "Comprendre le marché"
+summary = "Qui achète, qui vend, comment se forme un prix, et ce que coûte réellement une transaction avant même de parler d'analyse."
 lessons = ["fonctionnement-marche", "ordres-et-couts"]
 
 [[module]]
 id = "lire"
 title = "Lire un graphique"
+summary = "Décrire un graphique à partir de ses swings, et séparer ce que l'on observe de ce que l'on suppose."
 lessons = ["structure-de-marche"]
 
 [[module]]
 id = "risque"
 title = "Maîtriser son risque"
+summary = "Fixer la perte acceptée avant d'entrer, en déduire la taille de position, puis l'appliquer sur un cas chiffré."
 lessons = ["budget-de-risque", "cas-pratique"]
 
 [[module]]
 id = "bilan"
 title = "Faire le point"
+summary = "Relier les notions du parcours et les vérifier avec un quiz de validation corrigé."
 lessons = ["recapitulatif"]

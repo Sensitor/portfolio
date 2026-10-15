@@ -48,7 +48,7 @@ def course_view(course: Course, progress: P.CourseProgress | None = None) -> dic
         "path_id": course.path_id, "version": course.version,
         "objectives": list(course.objectives),
         "prerequisites": list(course.prerequisites),
-        "modules": [{"id": m.id, "title": m.title,
+        "modules": [{"id": m.id, "number": m.number, "title": m.title, "summary": m.summary,
                      "lessons": [lesson_summary(l) for l in m.lessons]}
                     for m in course.modules],
         "progress": progress_view(progress) if progress else None,

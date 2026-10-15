@@ -1,6 +1,6 @@
 """
-Session plumbing for the Academy app: secrets, store, identity, catalogue and
-navigation.
+Session plumbing for the Sensitor platform: secrets, store, identity, the
+Academy catalogue and navigation.
 
 Identity follows the rule the portfolio app already enforces: the signed-in user
 is resolved from the session token on every run, never read from a widget. The
@@ -10,7 +10,7 @@ Navigation is held in session state and mirrored into the URL query string, so
 the address bar shows where you are and a shared link to a public lesson opens
 that lesson. A page reload starts a new Streamlit session and therefore signs
 the visitor out — the same limitation as the portfolio app, documented in
-docs/ACADEMY.md.
+docs/PLATFORM.md.
 """
 
 from __future__ import annotations
@@ -19,18 +19,22 @@ import os
 
 import streamlit as st
 
-from ..content import Catalog, cached_catalog
+from ...academy.content import Catalog, cached_catalog
+from .. import spaces
 
 SECRET_KEYS = (
     "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
-    "SENSITOR_ACADEMY_PREVIEW",
+    "SENSITOR_ACADEMY_PREVIEW", "SENSITOR_TOOLS_URL",
 )
 
 ROUTE_KEY = "ac_route"
 TOKEN_KEY = "session_token"
-PAGES = ("home", "paths", "course", "lesson", "quiz", "library", "lab",
-         "progress", "account")
 ROUTE_FIELDS = ("course", "lesson", "quiz", "resource")
+
+
+def tools_url() -> str:
+    """Address of the separate analytics app, when the deployment states one."""
+    return os.getenv("SENSITOR_TOOLS_URL", "").strip()
 
 
 def mirror_secrets() -> None:
@@ -118,21 +122,22 @@ def sign_out() -> None:
 def route() -> dict:
     if ROUTE_KEY not in st.session_state:
         params = st.query_params
-        page = params.get("page", "home")
-        initial = {"page": page if page in PAGES else "home"}
+        initial = {"page": spaces.resolve_page(params.get("page"))}
         for field in ROUTE_FIELDS:
             if params.get(field):
                 initial[field] = params.get(field)
         st.session_state[ROUTE_KEY] = initial
-    return st.session_state[ROUTE_KEY]
+    current = st.session_state[ROUTE_KEY]
+    current["page"] = spaces.resolve_page(current.get("page"))
+    return current
 
 
 def go(page: str, **fields) -> None:
     """Navigate. Call from a button handler or follow with `st.rerun()`."""
-    target = {"page": page, **{k: v for k, v in fields.items() if v}}
+    target = {"page": spaces.resolve_page(page), **{k: v for k, v in fields.items() if v}}
     st.session_state[ROUTE_KEY] = target
     st.query_params.clear()
-    if page != "home":
+    if target["page"] != "home":
         st.query_params.update(target)
     st.session_state["ac_scroll_top"] = True
 
