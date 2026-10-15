@@ -152,6 +152,10 @@ class Store:
                 "SELECT COUNT(*) AS n FROM sessions WHERE user_email = ?", email),
             "workspace": self._count(
                 "SELECT COUNT(*) AS n FROM workspace WHERE user_email = ?", email),
+            "lesson_progress": self._count(
+                "SELECT COUNT(*) AS n FROM lesson_progress WHERE user_email = ?", email),
+            "quiz_attempts": self._count(
+                "SELECT COUNT(*) AS n FROM quiz_attempts WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -163,6 +167,8 @@ class Store:
             conn.execute("DELETE FROM trading_accounts WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM portfolios WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM workspace WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM lesson_progress WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM quiz_attempts WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -189,8 +195,88 @@ class Store:
                 self.load_workspace(email)),
             "accounts": [asdict(a) for a in self.list_accounts(email)],
             "trades": [t.to_dict() for t in self.list_trades(email)],
+            "lesson_progress": self.completed_lessons(email),
+            "quiz_attempts": self.quiz_attempts(email, limit=100_000),
             "schema_version": SCHEMA_VERSION,
         }
+
+    # ── Academy ──────────────────────────────────────────────────────────────
+    #
+    # Every query below is scoped by `user_email`, like the rest of the store.
+    # There is no method that reads progress or attempts across users.
+
+    def mark_lesson_complete(self, user_email: str, course_id: str, lesson_id: str,
+                             *, version: int = 1) -> None:
+        user_email = _email(user_email)
+        if not user_email or not course_id or not lesson_id:
+            raise ValueError("user_email, course_id and lesson_id are all required")
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            conn.execute(
+                """INSERT INTO lesson_progress
+                     (user_email, course_id, lesson_id, lesson_version, completed_at)
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT(user_email, course_id, lesson_id) DO UPDATE SET
+                     lesson_version = excluded.lesson_version,
+                     completed_at = excluded.completed_at""",
+                (user_email, course_id, lesson_id, int(version), stamp),
+            )
+
+    def unmark_lesson(self, user_email: str, course_id: str, lesson_id: str) -> None:
+        with self._write() as conn:
+            conn.execute(
+                "DELETE FROM lesson_progress WHERE user_email = ? AND course_id = ? "
+                "AND lesson_id = ?", (_email(user_email), course_id, lesson_id))
+
+    def completed_lessons(self, user_email: str,
+                          course_id: str | None = None) -> list[dict]:
+        sql = ("SELECT course_id, lesson_id, lesson_version, completed_at "
+               "FROM lesson_progress WHERE user_email = ?")
+        params: tuple = (_email(user_email),)
+        if course_id:
+            sql += " AND course_id = ?"
+            params += (course_id,)
+        sql += " ORDER BY completed_at, lesson_id"
+        return [dict(r) for r in self._read(sql, params)]
+
+    def record_quiz_attempt(self, user_email: str, quiz_id: str, *, version: int,
+                            correct: int, total: int, passed: bool,
+                            responses: dict) -> int:
+        user_email = _email(user_email)
+        if not user_email or not quiz_id:
+            raise ValueError("user_email and quiz_id are required")
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            cursor = conn.execute(
+                """INSERT INTO quiz_attempts
+                     (user_email, quiz_id, quiz_version, correct, total, passed,
+                      responses, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                   RETURNING id""",
+                (user_email, quiz_id, int(version), int(correct), int(total),
+                 1 if passed else 0, json.dumps(responses, sort_keys=True), stamp),
+            )
+            return int(cursor.fetchone()[0])
+
+    def quiz_attempts(self, user_email: str, quiz_id: str | None = None, *,
+                      limit: int = 50) -> list[dict]:
+        """Newest first. `responses` is decoded; `passed` is a bool."""
+        sql = "SELECT * FROM quiz_attempts WHERE user_email = ?"
+        params: tuple = (_email(user_email),)
+        if quiz_id:
+            sql += " AND quiz_id = ?"
+            params += (quiz_id,)
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
+        params += (int(limit),)
+        rows = []
+        for row in self._read(sql, params):
+            item = dict(row)
+            item["responses"] = json.loads(item["responses"] or "{}")
+            item["passed"] = bool(item["passed"])
+            rows.append(item)
+        return rows
 
     # ── Credentials ──────────────────────────────────────────────────────────
 

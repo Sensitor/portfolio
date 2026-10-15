@@ -1,0 +1,58 @@
+id = "check-cas-pratique"
+title = "Et si le plan ne se déroule pas comme prévu ?"
+course = "premiers-pas"
+lesson = "cas-pratique"
+feedback = "immediate"
+pass_threshold = 0.5
+version = 1
+
+[[question]]
+id = "gap"
+prompt = "Dans le cas pratique (0,15 lot, stop à 1,0705), le marché ouvre le lendemain à 1,0690. Quelle est la perte approximative, hors coûts ?"
+kind = "single"
+lesson = "cas-pratique"
+explanation = "Entrée 1,0745, sortie vers 1,0690 : 55 pips × 10 $ × 0,15 lot = 82,50 $."
+
+[[question.option]]
+id = "gap-reel"
+text = "Environ 82,50 $"
+correct = true
+explanation = "Oui : le stop est exécuté au premier prix disponible, 15 pips plus bas que prévu."
+
+[[question.option]]
+id = "prevu"
+text = "60 $, comme prévu"
+explanation = "60 $ est la perte prévue au niveau du stop. Un gap la dépasse."
+
+[[question.option]]
+id = "zero"
+text = "Aucune, le stop n'a pas été touché"
+explanation = "Le prix est passé sous le stop : celui-ci est déclenché à l'ouverture."
+
+[[question]]
+id = "erreurs"
+prompt = "Lesquelles de ces pratiques sont des erreurs de gestion du risque ? Plusieurs réponses possibles."
+kind = "multiple"
+lesson = "cas-pratique"
+
+[[question.option]]
+id = "eloigner"
+text = "Éloigner le stop quand le prix s'en approche."
+correct = true
+explanation = "Oui : la perte possible dépasse alors le budget décidé avant l'entrée."
+
+[[question.option]]
+id = "saisie"
+text = "Envoyer 1 lot au lieu de 0,15 lot sans relire l'ordre."
+correct = true
+explanation = "Oui : le risque est multiplié par près de sept."
+
+[[question.option]]
+id = "arrondi"
+text = "Arrondir la taille de position vers le bas."
+explanation = "C'est la bonne pratique : le risque reste sous le budget."
+
+[[question.option]]
+id = "couts"
+text = "Calculer les coûts sur la taille réelle de la position."
+explanation = "C'est la bonne pratique : les coûts dépendent du volume réellement traité."

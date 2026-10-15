@@ -1,0 +1,73 @@
+id = "check-ordres-et-couts"
+title = "Vérifier sa compréhension"
+course = "premiers-pas"
+lesson = "ordres-et-couts"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "achat-repli"
+prompt = "EURUSD cote 1,0830. Vous voulez acheter uniquement si le prix redescend à 1,0800. Quel ordre utilisez-vous ?"
+kind = "single"
+lesson = "ordres-et-couts"
+
+[[question.option]]
+id = "limite"
+text = "Un ordre d'achat limite à 1,0800."
+correct = true
+explanation = "Oui. L'ordre limite d'achat se place sous le prix actuel et ne s'exécute qu'à 1,0800 ou moins cher."
+
+[[question.option]]
+id = "stop"
+text = "Un ordre d'achat stop à 1,0800."
+explanation = "Un ordre stop d'achat se place au-dessus du prix actuel : il sert à acheter si le prix monte jusqu'au niveau."
+
+[[question.option]]
+id = "marche"
+text = "Un ordre d'achat au marché."
+explanation = "Il serait exécuté tout de suite, vers 1,0830, et non au prix visé."
+
+[[question]]
+id = "gap"
+prompt = "Votre stop-loss de vente est à 1,0800. Le lundi, le marché ouvre directement à 1,0770. Que se passe-t-il le plus probablement ?"
+kind = "single"
+lesson = "ordres-et-couts"
+
+[[question.option]]
+id = "glisse"
+text = "Le stop est déclenché et exécuté vers 1,0770 : la perte dépasse celle prévue."
+correct = true
+explanation = "Oui. Une fois déclenché, le stop devient un ordre au marché, exécuté au premier prix disponible."
+
+[[question.option]]
+id = "exact"
+text = "Le stop est exécuté exactement à 1,0800."
+explanation = "Seul un stop garanti, proposé par certains courtiers contre une prime, assure ce prix."
+
+[[question.option]]
+id = "saute"
+text = "Le stop n'est pas exécuté, puisque le prix n'est jamais passé par 1,0800."
+explanation = "Le stop se déclenche dès que le prix atteint ou dépasse son niveau, même en sautant par-dessus."
+
+[[question]]
+id = "levier"
+prompt = "Vous gardez 1 lot d'EURUSD avec un stop à 20 pips, mais votre levier passe de 10:1 à 30:1. Que devient la perte si le stop est touché ?"
+kind = "single"
+lesson = "ordres-et-couts"
+
+[[question.option]]
+id = "inchangee"
+text = "Elle ne change pas : 200 $."
+correct = true
+explanation = "Exact. 20 pips × 10 $ par pip et par lot = 200 $, quel que soit le levier. Seule la marge immobilisée change."
+
+[[question.option]]
+id = "triplee"
+text = "Elle est multipliée par trois."
+explanation = "Le levier ne change pas la valeur d'un pip : la perte dépend de la taille et de la distance au stop."
+
+[[question.option]]
+id = "divisee"
+text = "Elle est divisée par trois."
+explanation = "C'est la marge requise qui est divisée par trois, pas la perte."

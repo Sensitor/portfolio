@@ -1,0 +1,81 @@
+id = "check-fonctionnement-marche"
+title = "Vérifier sa compréhension"
+course = "premiers-pas"
+lesson = "fonctionnement-marche"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "prix-achat"
+prompt = "EURUSD affiche un bid de 1,08500 et un ask de 1,08508. Vous achetez immédiatement au marché. À quel prix êtes-vous exécuté, hors glissement ?"
+kind = "single"
+lesson = "fonctionnement-marche"
+
+[[question.option]]
+id = "bid"
+text = "1,08500"
+explanation = "C'est le bid : le prix auquel quelqu'un accepte d'acheter, donc celui auquel vous pouvez vendre."
+
+[[question.option]]
+id = "ask"
+text = "1,08508"
+correct = true
+explanation = "Oui. Un achat au marché se fait à l'ask, le meilleur prix auquel un vendeur accepte de céder."
+
+[[question.option]]
+id = "milieu"
+text = "1,08504"
+explanation = "Le milieu de fourchette sert parfois de référence, mais personne ne vous propose ce prix : il n'est pas exécutable."
+
+[[question]]
+id = "spread"
+prompt = "Que représente le spread ?"
+kind = "single"
+lesson = "fonctionnement-marche"
+
+[[question.option]]
+id = "ecart"
+text = "L'écart entre l'ask et le bid, payé à chaque aller-retour."
+correct = true
+explanation = "Exact. Ouvrir puis refermer immédiatement une position coûte le spread, avant toute commission."
+
+[[question.option]]
+id = "commission"
+text = "La commission facturée par le courtier."
+explanation = "La commission est un coût distinct, qui s'ajoute éventuellement au spread."
+
+[[question.option]]
+id = "variation"
+text = "La variation du prix sur la journée."
+explanation = "Il s'agit de l'amplitude du mouvement, sans rapport avec l'écart entre prix acheteur et prix vendeur."
+
+[[question]]
+id = "spread-large"
+prompt = "Dans quelles situations le spread s'élargit-il souvent ? Plusieurs réponses possibles."
+kind = "multiple"
+lesson = "fonctionnement-marche"
+explanation = "Le spread s'élargit quand la liquidité se raréfie : moins d'ordres attendent près du prix."
+
+[[question.option]]
+id = "annonce"
+text = "Juste avant une annonce économique importante."
+correct = true
+explanation = "Oui : de nombreux intervenants retirent leurs ordres en attendant le chiffre."
+
+[[question.option]]
+id = "chevauchement"
+text = "Pendant les heures où plusieurs grandes places sont ouvertes en même temps."
+explanation = "Au contraire : c'est en général le moment où la liquidité est la plus forte."
+
+[[question.option]]
+id = "ferie"
+text = "Un jour férié sur une grande place financière."
+correct = true
+explanation = "Oui : une partie des intervenants est absente, le carnet est plus mince."
+
+[[question.option]]
+id = "nuit"
+text = "La nuit, en dehors des principales sessions."
+correct = true
+explanation = "Oui : moins d'intervenants actifs, donc moins d'ordres près du prix."

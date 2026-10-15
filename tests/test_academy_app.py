@@ -1,0 +1,157 @@
+"""
+The Academy Streamlit app, run headless with `streamlit.testing`.
+
+Every page renders without an exception for a visitor and for a member; member
+lessons stay locked for a visitor; marking a lesson done and submitting a quiz
+write rows under the signed-in member only; a forged session token grants
+nothing.
+
+Run with:  python tests/test_academy_app.py
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+os.environ["SENSITOR_DB_PATH"] = os.path.join(
+    tempfile.mkdtemp(prefix="sensitor-academy-app-"), "app.db")
+os.environ["SENSITOR_AUTH"] = "multi"
+os.environ.pop("SENSITOR_ACADEMY_PREVIEW", None)
+
+from streamlit.testing.v1 import AppTest  # noqa: E402
+
+APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "academy_app.py")
+FAILURES: list[str] = []
+COUNT = 0
+
+
+def check(name: str, condition: bool, detail: str = "") -> None:
+    global COUNT
+    COUNT += 1
+    if condition:
+        print(f"  ok    {name}")
+    else:
+        FAILURES.append(f"{name}: {detail}")
+        print(f"  FAIL  {name}  {detail}")
+
+
+def store():
+    from sensitor.database import Store
+    return Store(os.environ["SENSITOR_DB_PATH"])
+
+
+def token(email: str) -> str:
+    from sensitor.core.auth import Auth
+    auth = Auth(store(), mode="multi")
+    result = auth.sign_up(email, "un-mot-de-passe-solide")
+    return result.token if result else auth.sign_in(email, "un-mot-de-passe-solide").token
+
+
+def run(route: dict, tok: str | None = None) -> AppTest:
+    app = AppTest.from_file(APP, default_timeout=60)
+    app.session_state["ac_route"] = route
+    if tok:
+        app.session_state["session_token"] = tok
+    app.run()
+    return app
+
+
+def text(app: AppTest) -> str:
+    return "\n".join(m.value for m in app.markdown)
+
+
+def error(app: AppTest) -> str:
+    return str(app.exception[0].value)[:300] if app.exception else ""
+
+
+ROUTES = [
+    {"page": "home"},
+    {"page": "paths"},
+    {"page": "course", "course": "premiers-pas"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "ordres-et-couts"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "structure-de-marche"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "budget-de-risque"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "cas-pratique"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "recapitulatif"},
+    {"page": "quiz", "quiz": "premiers-pas-validation", "course": "premiers-pas"},
+    {"page": "library"},
+    {"page": "lab"},
+    {"page": "progress"},
+    {"page": "account"},
+    {"page": "course", "course": "inexistant"},
+    {"page": "lesson", "course": "premiers-pas", "lesson": "inexistante"},
+]
+
+
+def label(route: dict) -> str:
+    return "/".join(str(v) for v in route.values())
+
+
+def main() -> int:
+    alice = token("alice@example.com")
+
+    print("\nEvery page renders")
+    for route in ROUTES:
+        app = run(route)
+        check(f"visitor · {label(route)}", not app.exception, error(app))
+        app = run(route, alice)
+        check(f"member · {label(route)}", not app.exception, error(app))
+
+    print("\nAccess")
+    locked = run({"page": "lesson", "course": "premiers-pas", "lesson": "budget-de-risque"})
+    body = text(locked)
+    check("a member lesson is locked for a visitor", "Leçon réservée aux membres" in body)
+    check("…and its content is not rendered", "Commencer par ce que l'on accepte de perdre" not in body)
+    open_ = run({"page": "lesson", "course": "premiers-pas", "lesson": "budget-de-risque"}, alice)
+    check("a member reads it", "Commencer par ce que l'on accepte de perdre" in text(open_))
+    forged = run({"page": "lesson", "course": "premiers-pas", "lesson": "budget-de-risque"},
+                 "not-a-real-token")
+    check("a forged token is a visitor", "Leçon réservée aux membres" in text(forged))
+    public = run({"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"})
+    check("a public lesson reads without an account", "Le carnet d'ordres" in text(public))
+    check("dollar amounts are escaped, not LaTeX",
+          all("$" not in m.value or "\\$" in m.value or "&#36;" in m.value
+              for m in public.markdown if not m.value.startswith("<style")))
+
+    print("\nProgress is written under the member, and only the member")
+    app = run({"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"}, alice)
+    done = [b for b in app.button if b.label == "Marquer la leçon comme terminée"]
+    check("the completion button is offered", len(done) == 1)
+    done[0].click().run()
+    check("clicking it renders cleanly", not app.exception, error(app))
+    rows = store().completed_lessons("alice@example.com")
+    check("the completion is stored", [r["lesson_id"] for r in rows] == ["fonctionnement-marche"])
+    visitor = run({"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"})
+    check("a visitor gets no completion button",
+          not any(b.label == "Marquer la leçon comme terminée" for b in visitor.button))
+
+    print("\nA quiz attempt is graded and stored")
+    app = run({"page": "quiz", "quiz": "premiers-pas-validation", "course": "premiers-pas"}, alice)
+    first = app.radio[0]
+    first.set_value("bid").run()
+    submit = [b for b in app.button if b.label == "Soumettre mes réponses"]
+    submit[0].click().run()
+    force = [b for b in app.button if b.label == "Soumettre quand même"]
+    check("unanswered questions ask for confirmation", len(force) == 1)
+    force[0].click().run()
+    check("the review renders", not app.exception and "1 / 10" in text(app), error(app))
+    attempts = store().quiz_attempts("alice@example.com", "premiers-pas-validation")
+    check("the attempt is stored", len(attempts) == 1 and attempts[0]["correct"] == 1)
+    check("bob has none", store().quiz_attempts("bob@example.com") == [])
+
+    dash = run({"page": "home"}, alice)
+    check("the dashboard reads the real progress", "1<small> / 6</small>" in text(dash))
+
+    print(f"\n{COUNT} checks, {len(FAILURES)} failures")
+    for failure in FAILURES:
+        print(f"  - {failure}")
+    return 1 if FAILURES else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Entrée, stop et objectif</title>
+<desc id="d">Un achat à 1,0850 avec un stop à 1,0820, soit 30 pips de risque notés 1R, et un objectif à 1,0910, soit 60 pips ou 2R.</desc>
+<rect x="150" y="40" width="300" height="160" fill="#4e7461" opacity=".12"/>
+<rect x="150" y="200" width="300" height="80" fill="#a3564a" opacity=".13"/>
+<g stroke-width="1.6"><line x1="150" y1="40" x2="450" y2="40" stroke="#3f6553"/><line x1="150" y1="200" x2="450" y2="200" stroke="#1b2733" stroke-width="2.2"/><line x1="150" y1="280" x2="450" y2="280" stroke="#8a4a40"/><line x1="150" y1="120" x2="450" y2="120" stroke="#3f6553" stroke-dasharray="4 4" opacity=".6"/></g>
+<g font-size="13" text-anchor="end"><text x="138" y="44" fill="#3f6553" font-weight="700">Objectif 1,0910</text><text x="138" y="204" fill="#1b2733" font-weight="700">Entrée 1,0850</text><text x="138" y="284" fill="#8a4a40" font-weight="700">Stop 1,0820</text><text x="138" y="124" fill="#3f6553">1,0880</text></g>
+<g font-size="13"><text x="466" y="84" fill="#3f6553" font-weight="700">2R</text><text x="466" y="102" fill="#5b646b">60 pips</text><text x="466" y="164" fill="#3f6553" font-weight="700">1R</text><text x="466" y="244" fill="#8a4a40" font-weight="700">−1R</text><text x="466" y="262" fill="#5b646b">30 pips</text></g>
+<text x="300" y="164" font-size="12" fill="#3f6553" text-anchor="middle">gain potentiel</text>
+<text x="300" y="246" font-size="12" fill="#8a4a40" text-anchor="middle">perte prévue si le stop est touché</text>
+</svg>

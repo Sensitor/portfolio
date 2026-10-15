@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Position des ordres en attente</title>
+<desc id="d">Au-dessus du prix actuel : ordre d'achat stop et ordre de vente limite. En dessous : ordre d'achat limite et ordre de vente stop.</desc>
+<line x1="60" y1="30" x2="60" y2="270" stroke="#9aa3a8" stroke-width="1.2"/>
+<path d="M54 36 L60 24 L66 36" fill="none" stroke="#9aa3a8" stroke-width="1.2"/>
+<text x="72" y="30" font-size="11" fill="#7b8389" letter-spacing="1.2">PRIX</text>
+<line x1="60" y1="150" x2="600" y2="150" stroke="#1b2733" stroke-width="2"/>
+<text x="74" y="142" font-size="13" font-weight="700" fill="#1b2733">Prix actuel</text>
+<g stroke-width="1.4" stroke-dasharray="5 4">
+<line x1="60" y1="80" x2="600" y2="80" stroke="#284764"/>
+<line x1="60" y1="220" x2="600" y2="220" stroke="#284764"/>
+</g>
+<g font-size="13">
+<text x="90" y="72" fill="#284764" font-weight="700">Achat stop</text><text x="90" y="100" fill="#5b646b">acheter si le prix monte jusqu'ici</text>
+<text x="370" y="72" fill="#284764" font-weight="700">Vente limite</text><text x="370" y="100" fill="#5b646b">vendre plus cher qu'aujourd'hui</text>
+<text x="90" y="212" fill="#284764" font-weight="700">Achat limite</text><text x="90" y="240" fill="#5b646b">acheter moins cher qu'aujourd'hui</text>
+<text x="370" y="212" fill="#284764" font-weight="700">Vente stop</text><text x="370" y="240" fill="#5b646b">vendre si le prix baisse jusqu'ici</text>
+</g>
+<line x1="350" y1="60" x2="350" y2="250" stroke="#d9d5cb"/>
+</svg>

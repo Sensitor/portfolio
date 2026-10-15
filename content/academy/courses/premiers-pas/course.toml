@@ -1,0 +1,35 @@
+id = "premiers-pas"
+path = "bases-marches"
+title = "Premiers pas sur les marchés"
+summary = "Six leçons pour comprendre comment un prix se forme, ce que coûte réellement une transaction, comment décrire la structure d'un graphique et comment fixer le risque d'un trade avant de l'ouvrir."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Expliquer bid, ask, spread et liquidité avec vos propres mots.",
+  "Choisir le bon type d'ordre et connaître ses limites.",
+  "Décrire une tendance ou un range à partir des swings, sans confondre observation et prévision.",
+  "Calculer un budget de risque et une taille de position quand la spécification de l'instrument est connue.",
+]
+prerequisites = []
+final_quiz = "premiers-pas-validation"
+
+[[module]]
+id = "comprendre"
+title = "Comprendre le marché"
+lessons = ["fonctionnement-marche", "ordres-et-couts"]
+
+[[module]]
+id = "lire"
+title = "Lire un graphique"
+lessons = ["structure-de-marche"]
+
+[[module]]
+id = "risque"
+title = "Maîtriser son risque"
+lessons = ["budget-de-risque", "cas-pratique"]
+
+[[module]]
+id = "bilan"
+title = "Faire le point"
+lessons = ["recapitulatif"]

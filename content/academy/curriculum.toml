@@ -1,0 +1,85 @@
+# Le programme Sensitor Academy.
+#
+# `status = "published"` : le parcours est ouvert et ses cours sont lisibles.
+# `status = "planned"`   : annoncé dans le programme, sans contenu lisible.
+#                          Affiché comme « en préparation », jamais cliquable.
+
+[[path]]
+id = "bases-marches"
+number = 1
+title = "Les bases des marchés financiers"
+summary = "Comment se forme un prix, ce que coûte une transaction, les premiers éléments de structure et le calcul d'un budget de risque."
+status = "published"
+courses = ["premiers-pas"]
+
+[[path]]
+id = "structure-price-action"
+number = 2
+title = "Structure de marché et price action"
+summary = "Tendances, ranges, swings, supports et résistances, cassures de structure et lecture multi-unités de temps."
+status = "planned"
+topics = ["Tendance et range", "BOS, MSS / CHOCH", "Multi-timeframe", "Observation et interprétation"]
+
+[[path]]
+id = "liquidite-contexte"
+number = 3
+title = "Liquidité et contexte"
+summary = "Equal highs et equal lows, sweeps, fausses cassures, construction de scénarios et invalidation."
+status = "planned"
+topics = ["Concepts de liquidité", "Sweeps", "Scénarios et invalidation"]
+
+[[path]]
+id = "fvg-ob-ote"
+number = 4
+title = "FVG, Order Blocks et OTE"
+summary = "Définitions, critères de sélection, confluence, déclencheurs d'entrée et erreurs d'analyse fréquentes."
+status = "planned"
+topics = ["Fair Value Gaps", "Order Blocks", "Retracements et OTE"]
+
+[[path]]
+id = "risk-management"
+number = 5
+title = "Gestion du risque"
+summary = "Taille de position, espérance, séries de pertes, drawdown, risque de ruine, corrélations et contraintes des prop firms."
+status = "planned"
+topics = ["Espérance et échantillon", "Drawdown", "Risque de ruine", "Limites journalières"]
+
+[[path]]
+id = "psychologie"
+number = 6
+title = "Psychologie du trading"
+summary = "FOMO, revenge trading, suractivité, biais cognitifs, routines et journal émotionnel."
+status = "planned"
+topics = ["Biais cognitifs", "Processus et résultat", "Routines"]
+
+[[path]]
+id = "strategie-backtesting"
+number = 7
+title = "Construction de stratégie et backtesting"
+summary = "Règles explicites, tests historiques, biais rétrospectifs, taille d'échantillon et validation hors échantillon."
+status = "planned"
+topics = ["Règles explicites", "Biais", "Robustesse"]
+
+[[path]]
+id = "macro-actualite"
+number = 8
+title = "Macroéconomie et actualité"
+summary = "Inflation, emploi, banques centrales, attentes et publications, volatilité événementielle."
+status = "planned"
+topics = ["CPI, PPI, emploi", "Banques centrales", "Calendrier économique"]
+
+[[path]]
+id = "methode-sensitor"
+number = 9
+title = "La méthode Sensitor"
+summary = "Contexte, liquidité, confirmation structurelle, zone d'intérêt, confluence, invalidation et revue — y compris quand ne pas trader."
+status = "planned"
+topics = ["Setups valides et invalides", "Documenter sa thèse", "Évaluer la décision"]
+
+[[path]]
+id = "processus-professionnel"
+number = 10
+title = "Processus de trading discipliné"
+summary = "Plan personnel, préparation, revue de session, journal, limites de risque et amélioration continue."
+status = "planned"
+topics = ["Plan de trading", "Revue", "Amélioration continue"]

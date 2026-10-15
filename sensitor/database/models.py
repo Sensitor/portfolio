@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 TABLES: dict[str, str] = {
     "users": """
@@ -227,6 +227,44 @@ CREATE TABLE IF NOT EXISTS trades (
     updated_at       TEXT NOT NULL,
     PRIMARY KEY (user_email, id)
 )""",
+
+    # ── Academy ──────────────────────────────────────────────────────────────
+    # Course content lives in version-controlled files (content/academy/); what
+    # is stored here is what a member did with it. Ids are the stable string ids
+    # from those files, so renaming a lesson's title never orphans a row.
+    #
+    # One row per finished lesson. The version is recorded so a substantially
+    # rewritten lesson can later be offered for re-reading without guessing
+    # which edition someone read.
+    "lesson_progress": """
+CREATE TABLE IF NOT EXISTS lesson_progress (
+    user_email     TEXT NOT NULL REFERENCES users(email)
+                   ON DELETE CASCADE ON UPDATE CASCADE,
+    course_id      TEXT NOT NULL,
+    lesson_id      TEXT NOT NULL,
+    lesson_version INTEGER NOT NULL DEFAULT 1,
+    completed_at   TEXT NOT NULL,
+    PRIMARY KEY (user_email, course_id, lesson_id)
+)""",
+
+    # Every submitted attempt, kept: the history is what lets a member see that
+    # a concept they kept missing is now understood. Responses are stored as the
+    # option ids chosen, so a review can be rebuilt from the quiz file of the
+    # recorded version.
+    "quiz_attempts": """
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    quiz_id      TEXT NOT NULL,
+    quiz_version INTEGER NOT NULL DEFAULT 1,
+    correct      INTEGER NOT NULL CHECK (correct >= 0),
+    total        INTEGER NOT NULL CHECK (total > 0),
+    passed       INTEGER NOT NULL CHECK (passed IN (0, 1)),
+    responses    TEXT NOT NULL,            -- JSON {question_id: [option_id, ...]}
+    created_at   TEXT NOT NULL,
+    CHECK (correct <= total)
+)""",
 }
 
 INDEXES = """
@@ -238,6 +276,8 @@ CREATE INDEX IF NOT EXISTS idx_accounts_user ON trading_accounts(user_email);
 CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_email, closed_at);
 CREATE INDEX IF NOT EXISTS idx_trades_account ON trades(user_email, account_id);
 CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
+CREATE INDEX IF NOT EXISTS idx_progress_user ON lesson_progress(user_email, course_id);
+CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_id, created_at);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

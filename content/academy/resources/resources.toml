@@ -1,0 +1,25 @@
+# La bibliothèque. Une ressource n'est listée que si son fichier existe ici :
+# le chargeur refuse toute entrée qui pointe vers un fichier absent ou situé
+# hors de ce dossier.
+
+[[resource]]
+id = "fiche-vocabulaire-execution"
+title = "Le vocabulaire de l'exécution"
+description = "Bid, ask, spread, pip, lot, marge, swap, glissement et les trois familles d'ordres, définis sur une page."
+kind = "fiche"
+category = "Bases des marchés"
+level = "debutant"
+file = "fiche-vocabulaire-execution.md"
+access = "public"
+lessons = ["fonctionnement-marche", "ordres-et-couts", "recapitulatif"]
+
+[[resource]]
+id = "checklist-avant-trade"
+title = "Checklist avant chaque trade"
+description = "Les questions à se poser avant d'envoyer un ordre : scénario, invalidation, budget, taille, coûts et conditions de marché."
+kind = "checklist"
+category = "Gestion du risque"
+level = "debutant"
+file = "checklist-avant-trade.md"
+access = "member"
+lessons = ["budget-de-risque", "cas-pratique", "recapitulatif"]

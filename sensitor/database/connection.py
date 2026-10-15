@@ -212,6 +212,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # workspace, which restores to "nothing saved yet" — the correct answer for
     # someone who has never had one.
     #
+    # Version 6 adds the Academy tables, `lesson_progress` and `quiz_attempts`.
+    # New tables only — `executescript` has created them — so, as for version 4,
+    # no existing row is touched.
+    #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

@@ -298,7 +298,8 @@ def test_user_lifecycle():
     counts = store.delete_user(ALICE)
     check("deletion reports what it removed",
           counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
-                     "trades": 2, "sessions": 0, "workspace": 1},
+                     "trades": 2, "sessions": 0, "workspace": 1,
+                     "lesson_progress": 0, "quiz_attempts": 0},
           f"got {counts}")
     check("the user is gone", store.get_user(ALICE) is None)
     check("the portfolios are gone", store.list_portfolios(ALICE) == [])
