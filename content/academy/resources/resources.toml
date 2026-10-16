@@ -85,3 +85,15 @@ file = "routine-de-seance.md"
 pdf = "routine-de-seance.pdf"
 access = "member"
 lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie"]
+
+[[resource]]
+id = "fiche-backtest"
+title = "Tester une stratégie"
+description = "La règle en six parties, les formules d'un backtest, les biais et leurs parades, et la liste à vérifier avant d'annoncer un résultat : le parcours 7 sur une page."
+kind = "fiche"
+category = "Stratégie et backtesting"
+level = "avance"
+file = "fiche-backtest.md"
+pdf = "fiche-backtest.pdf"
+access = "member"
+lessons = ["regles-explicites", "backtest-manuel", "biais-backtest", "echantillon", "surajustement", "hors-echantillon", "cas-backtest", "recap-backtest"]

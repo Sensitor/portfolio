@@ -1,0 +1,39 @@
+id = "tester-une-strategie"
+path = "strategie-backtesting"
+title = "Tester une stratégie"
+summary = "Huit leçons pour passer d'une idée à une règle que l'on peut tester : écrire une stratégie sans ambiguïté, mener un backtest manuel honnête, éviter les biais qui le faussent, mesurer l'incertitude d'un résultat, se méfier du surajustement, valider hors échantillon, puis un cas complet chiffré sur 120 trades."
+level = "avance"
+status = "published"
+version = 1
+objectives = [
+  "Écrire une stratégie en règles assez précises pour que deux personnes prennent les mêmes trades.",
+  "Mener un backtest manuel sans biais d'anticipation ni sélection des exemples.",
+  "Calculer l'espérance nette d'une série et l'intervalle qui l'entoure.",
+  "Reconnaître le surajustement et valider une règle hors échantillon avant de l'utiliser.",
+]
+prerequisites = ["Gérer le risque dans la durée", "Zones d'intérêt et entrées", "Décider sous incertitude"]
+final_quiz = "backtest-validation"
+
+[[module]]
+id = "regles"
+title = "Écrire la règle"
+summary = "Ce qui fait d'une idée une stratégie testable : six parties, sans place pour l'interprétation."
+lessons = ["regles-explicites"]
+
+[[module]]
+id = "mesurer"
+title = "Mesurer honnêtement"
+summary = "Le protocole d'un backtest manuel, et les biais qui faussent le résultat sans que l'on s'en aperçoive."
+lessons = ["backtest-manuel", "biais-backtest"]
+
+[[module]]
+id = "juger"
+title = "Juger un résultat"
+summary = "Ce que vaut un résultat mesuré : la taille d'échantillon, le surajustement, la validation hors échantillon."
+lessons = ["echantillon", "surajustement", "hors-echantillon"]
+
+[[module]]
+id = "cas"
+title = "Un cas complet"
+summary = "Une stratégie des parcours 3 et 4 testée sur 120 trades puis hors échantillon, et la décision qui en découle, puis le quiz de validation."
+lessons = ["cas-backtest", "recap-backtest"]

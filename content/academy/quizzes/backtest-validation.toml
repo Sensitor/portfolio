@@ -1,0 +1,228 @@
+id = "backtest-validation"
+title = "Quiz de validation : Tester une stratégie"
+course = "tester-une-strategie"
+lesson = "recap-backtest"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "deux-lecteurs"
+prompt = "Deux traders appliquent la même règle et ne prennent pas les mêmes trades. Que faut-il en conclure ?"
+kind = "single"
+lesson = "regles-explicites"
+
+[[question.option]]
+id = "implicite"
+text = "La règle contient encore une part d'interprétation."
+correct = true
+explanation = "Elle échoue au test des deux lecteurs."
+
+[[question.option]]
+id = "normal"
+text = "C'est normal, chacun a son style."
+explanation = "Alors ce n'est plus la règle que l'on teste."
+
+[[question.option]]
+id = "meilleur"
+text = "Le meilleur des deux a raison."
+explanation = "Le résultat ne dit rien de la précision de la règle."
+
+[[question]]
+id = "version"
+prompt = "On modifie la règle au milieu d'un backtest. Que faire des trades déjà relevés ?"
+kind = "single"
+lesson = "regles-explicites"
+
+[[question.option]]
+id = "separer"
+text = "Les garder séparés : une version de la règle, un résultat."
+correct = true
+explanation = "Mélanger deux versions rend le chiffre ininterprétable."
+
+[[question.option]]
+id = "melanger"
+text = "Les additionner aux suivants."
+explanation = "On mesurerait un mélange de deux règles."
+
+[[question.option]]
+id = "effacer"
+text = "Les effacer sans les noter."
+explanation = "Ils documentent la première version."
+
+[[question]]
+id = "pf"
+prompt = "Gains bruts 13,5R, pertes brutes 13R. Profit factor ?"
+kind = "single"
+lesson = "backtest-manuel"
+
+[[question.option]]
+id = "104"
+text = "1,04"
+correct = true
+explanation = "13,5 ÷ 13."
+
+[[question.option]]
+id = "05"
+text = "0,5"
+explanation = "C'est le total, 13,5 − 13."
+
+[[question.option]]
+id = "096"
+text = "0,96"
+explanation = "C'est le rapport inverse."
+
+[[question]]
+id = "non-execute"
+prompt = "Un ordre limite désigné par la règle n'est jamais exécuté. Dans le relevé :"
+kind = "single"
+lesson = "backtest-manuel"
+
+[[question.option]]
+id = "noter"
+text = "On le note comme non exécuté."
+correct = true
+explanation = "Il fait partie de ce que la règle produit."
+
+[[question.option]]
+id = "ignorer"
+text = "On l'ignore, il n'y a pas eu de trade."
+explanation = "On perdrait une information sur la règle."
+
+[[question.option]]
+id = "gain"
+text = "On le compte comme un gain."
+explanation = "Il n'y a ni gain ni perte."
+
+[[question]]
+id = "swing"
+prompt = "Identifier un swing avant que ses bougies de confirmation n'existent est un biais :"
+kind = "single"
+lesson = "biais-backtest"
+
+[[question.option]]
+id = "anticipation"
+text = "d'anticipation."
+correct = true
+explanation = "L'information n'était pas encore disponible."
+
+[[question.option]]
+id = "selection"
+text = "de sélection."
+explanation = "La sélection concerne le choix des occurrences ou de la période."
+
+[[question.option]]
+id = "survivant"
+text = "du survivant."
+explanation = "Il concerne le choix des instruments."
+
+[[question]]
+id = "intervalle"
+prompt = "Écart type 1,2R, 40 trades, espérance +0,20R. Borne basse de l'intervalle à 95 % ?"
+kind = "single"
+lesson = "echantillon"
+
+[[question.option]]
+id = "moins017"
+text = "Environ −0,17R"
+correct = true
+explanation = "0,20 − 1,96 × 1,2 ÷ √40."
+
+[[question.option]]
+id = "008"
+text = "Environ +0,08R"
+explanation = "C'est la borne basse sur 400 trades."
+
+[[question.option]]
+id = "019"
+text = "Environ +0,19R"
+explanation = "C'est l'erreur type, pas la borne."
+
+[[question]]
+id = "trades"
+prompt = "Combien de trades faut-il, avec un écart type de 1,2R, pour une demi-largeur d'intervalle de 0,10R ?"
+kind = "single"
+lesson = "echantillon"
+
+[[question.option]]
+id = "554"
+text = "Environ 554"
+correct = true
+explanation = "(1,96 × 1,2 ÷ 0,10)²."
+
+[[question.option]]
+id = "24"
+text = "Environ 24"
+explanation = "C'est √n."
+
+[[question.option]]
+id = "120"
+text = "Environ 120"
+explanation = "C'est bien trop peu pour cette précision."
+
+[[question]]
+id = "cent"
+prompt = "100 combinaisons de paramètres sont testées et la meilleure est retenue. Que vaut son résultat ?"
+kind = "single"
+lesson = "surajustement"
+
+[[question.option]]
+id = "hasard"
+text = "Il doit probablement beaucoup au hasard : une variante sans avantage avait 99 % de chances de briller."
+correct = true
+explanation = "Le résultat mesure surtout l'ampleur de la recherche."
+
+[[question.option]]
+id = "fiable"
+text = "Il est fiable, puisqu'il a battu 99 concurrents."
+explanation = "C'est précisément ce qui le rend suspect."
+
+[[question.option]]
+id = "exact"
+text = "Il est exact, les calculs sont justes."
+explanation = "Les calculs peuvent être justes et la conclusion fausse."
+
+[[question]]
+id = "consomme"
+prompt = "Après avoir vu le résultat hors échantillon, on modifie la règle. Que devient l'échantillon de test ?"
+kind = "single"
+lesson = "hors-echantillon"
+
+[[question.option]]
+id = "construction"
+text = "Un échantillon de construction : il ne valide plus rien."
+correct = true
+explanation = "Il a servi à choisir la règle."
+
+[[question.option]]
+id = "test"
+text = "Il reste un échantillon de test."
+explanation = "On l'appellerait encore ainsi, à tort."
+
+[[question.option]]
+id = "double"
+text = "Il compte double."
+explanation = "Il ne compte plus comme validation."
+
+[[question]]
+id = "cas"
+prompt = "Une moyenne nette positive dont l'intervalle contient zéro, sur 120 trades :"
+kind = "single"
+lesson = "cas-backtest"
+
+[[question.option]]
+id = "pas-preuve"
+text = "n'est pas une preuve d'avantage, ni une preuve d'échec."
+correct = true
+explanation = "D'où la décision de continuer à mesurer."
+
+[[question.option]]
+id = "preuve"
+text = "prouve un avantage, puisque la moyenne est positive."
+explanation = "L'intervalle dit le contraire."
+
+[[question.option]]
+id = "echec"
+text = "prouve que la stratégie ne marche pas."
+explanation = "Elle n'est pas réfutée non plus."

@@ -1,0 +1,74 @@
+id = "check-surajustement"
+title = "Contrôle : le surajustement"
+course = "tester-une-strategie"
+lesson = "surajustement"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "variantes"
+prompt = "20 variantes sans aucun avantage, seuil de 5 %. Chance qu'au moins une paraisse significative ?"
+kind = "single"
+lesson = "surajustement"
+
+[[question.option]]
+id = "64"
+text = "Environ 64 %"
+correct = true
+explanation = "1 − 0,95^20."
+
+[[question.option]]
+id = "5"
+text = "5 %"
+explanation = "C'est la chance pour une seule variante."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Élevée, mais pas certaine."
+
+[[question]]
+id = "signe"
+prompt = "Lequel est un signe de surajustement ?"
+kind = "single"
+lesson = "surajustement"
+
+[[question.option]]
+id = "seuil"
+text = "La règle ne fonctionne qu'à une valeur précise d'un seuil, et s'effondre si on le déplace un peu."
+correct = true
+explanation = "Une règle robuste change peu quand on déplace un seuil."
+
+[[question.option]]
+id = "simple"
+text = "La règle a peu de paramètres."
+explanation = "C'est un garde-fou, pas un signe."
+
+[[question.option]]
+id = "perte"
+text = "La règle a des séries de pertes."
+explanation = "Toute règle en a."
+
+[[question]]
+id = "garde"
+prompt = "Lesquels sont des garde-fous contre le surajustement ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "surajustement"
+
+[[question.option]]
+id = "compter"
+text = "Compter et annoncer le nombre de variantes essayées."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "justifier"
+text = "Justifier chaque seuil avant le test."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "filtre"
+text = "Ajouter un filtre après chaque série de pertes du backtest."
+explanation = "C'est le mécanisme même du surajustement."

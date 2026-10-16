@@ -1,0 +1,63 @@
+id = "backtest-serie"
+title = "Chiffrer une série de vingt trades"
+context = """
+Un backtest manuel a relevé vingt occurrences, toutes exécutées. Résultats en R, avant coûts :
+
+| Rang | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Trades 1 à 10 | +2,0 | −1 | −1 | +1,5 | −1 | +2,5 | −1 | −1 | −1 | +2,0 |
+| Trades 11 à 20 | −1 | +1,8 | −1 | −1 | +2,2 | −1 | −1 | +1,5 | −1 | −1 |
+
+Coût moyen estimé : **0,05R par trade**. Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+Avant coûts, la série est presque à l'équilibre : +0,5R en vingt trades, un profit factor de 1,04. Les coûts la font passer sous zéro, à −0,025R par trade. Et sur vingt trades, aucun de ces chiffres ne permet encore de conclure, dans un sens comme dans l'autre : la leçon 4 le montre.
+"""
+
+[[step]]
+id = "gains"
+prompt = "Combien de trades sont gagnants ?"
+unit = "trades"
+answer = 7
+tolerance = 0
+solution = "+2,0, +1,5, +2,5, +2,0, +1,8, +2,2 et +1,5 : **7 gains** et 13 pertes."
+
+[[step]]
+id = "taux"
+prompt = "Quel est le taux de réussite ?"
+unit = "%"
+answer = 35
+tolerance = 0.01
+solution = "7 ÷ 20 = **35 %**."
+
+[[step]]
+id = "total"
+prompt = "Quel est le total des résultats avant coûts, en R ?"
+unit = "R"
+answer = 0.5
+tolerance = 0.001
+solution = "Gains : 2,0 + 1,5 + 2,5 + 2,0 + 1,8 + 2,2 + 1,5 = 13,5R. Pertes : 13 × 1 = 13R. Total : **+0,5R**."
+
+[[step]]
+id = "brute"
+prompt = "Quelle est l'espérance brute par trade, en R ?"
+unit = "R"
+answer = 0.025
+tolerance = 0.0005
+solution = "0,5 ÷ 20 = **+0,025R**."
+
+[[step]]
+id = "nette"
+prompt = "Quelle est l'espérance nette par trade, en R ?"
+unit = "R"
+answer = -0.025
+tolerance = 0.0005
+solution = "0,025 − 0,05 = **−0,025R** : les coûts rendent la série perdante."
+
+[[step]]
+id = "profit-factor"
+prompt = "Quel est le profit factor avant coûts ? (Deux décimales.)"
+unit = ""
+answer = 1.04
+tolerance = 0.005
+solution = "13,5 ÷ 13 = **1,04** : à peine plus de gains que de pertes."

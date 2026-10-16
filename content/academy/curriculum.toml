@@ -62,7 +62,8 @@ id = "strategie-backtesting"
 number = 7
 title = "Construction de stratégie et backtesting"
 summary = "Règles explicites, tests historiques, biais rétrospectifs, taille d'échantillon et validation hors échantillon."
-status = "planned"
+status = "published"
+courses = ["tester-une-strategie"]
 topics = ["Règles explicites", "Biais", "Robustesse"]
 
 [[path]]

@@ -430,6 +430,71 @@ def test_psychology_figures():
     check("validation quiz: covers every path 6 lesson", {q.lesson_id for q in final.questions} == taught)
 
 
+def test_backtest_figures():
+    """Path 7: the 20-trade series, intervals, multiple testing and the 120-trade case, recomputed."""
+    print("\nPath 7 figures")
+    from sensitor.academy import backtest as B
+    from sensitor.academy import expectancy as X
+    catalog = C.load_catalog()
+
+    ex = {s.id: s.answer for s in catalog.exercise("backtest-serie").steps}
+    series = [2.0, -1, -1, 1.5, -1, 2.5, -1, -1, -1, 2.0, -1, 1.8, -1, -1, 2.2, -1, -1, 1.5, -1, -1]
+    s20 = B.summarize(series, cost_r=0.05)
+    check("20 trades: 7 wins, 35 %", s20.wins == ex["gains"] and close(s20.win_rate * 100, ex["taux"], 1e-9))
+    check("20 trades: +0,5R total", close(sum(series), ex["total"], 1e-9))
+    check("20 trades: +0,025R gross, -0,025R net", close(s20.gross_expectancy, ex["brute"], 1e-9)
+          and close(s20.net_expectancy, ex["nette"], 1e-9))
+    check("20 trades: profit factor 1,04", abs(s20.profit_factor - ex["profit-factor"]) < 0.005)
+
+    iv = {s.id: s.answer for s in catalog.exercise("intervalle-esperance").steps}
+    check("interval: SE 0,19 on 40 trades", abs(B.standard_error(1.2, 40) - iv["se-40"]) < 0.005)
+    i40, i400 = B.mean_interval(0.20, 1.2, 40), B.mean_interval(0.20, 1.2, 400)
+    check("interval: -0,17 to 0,57 on 40", abs(i40.low - iv["bas-40"]) < 0.006 and abs(i40.high - iv["haut-40"]) < 0.006)
+    check("interval: SE 0,06 and +0,08 on 400", close(B.standard_error(1.2, 400), iv["se-400"], 1e-9)
+          and abs(i400.low - iv["bas-400"]) < 0.006)
+    check("interval: 554 trades for 0,10R", B.trades_needed(1.2, 0.10) == iv["trades-requis"])
+    figure = [(round(B.mean_interval(0.20, 1.2, n).low, 2), round(B.mean_interval(0.20, 1.2, n).high, 2))
+              for n in (40, 100, 400, 1000)]
+    check("lesson 4 figure: zero inside on 40 and 100, outside on 400 and 1 000",
+          [lo <= 0 for lo, _ in figure] == [True, True, False, False], str(figure))
+
+    chances = [round(B.false_discovery_chance(k) * 100, 1) for k in (1, 5, 10, 20, 50, 100)]
+    check("lesson 5: 5,0 / 22,6 / 40,1 / 64,2 / 92,3 / 99,4 %", chances == [5.0, 22.6, 40.1, 64.2, 92.3, 99.4], str(chances))
+    check("lesson 5: 4 x 5 x 5 = 100 combinations", 4 * 5 * 5 == 100)
+
+    is_iv, oos_iv = B.mean_interval(0.35, 1.3, 300), B.mean_interval(0.08, 1.3, 100)
+    check("lesson 6: in sample +0,20 to +0,50", round(is_iv.low, 2) == 0.20 and round(is_iv.high, 2) == 0.50)
+    check("lesson 6: out of sample -0,17 to +0,33", round(oos_iv.low, 2) == -0.17 and round(oos_iv.high, 2) == 0.33)
+    check("lesson 6: 77 % degradation", round(B.degradation(0.35, 0.08) * 100) == 77)
+
+    case = {s.id: s.answer for s in catalog.exercise("cas-backtest-120").steps}
+    built = B.summarize([1.9] * 52 + [-1] * 68, cost_r=0.07)
+    check("case: 43,3 %", abs(built.win_rate * 100 - case["taux"]) < 0.06)
+    check("case: +0,26R gross, +0,19R net", abs(built.gross_expectancy - case["brute"]) < 0.005
+          and abs(built.net_expectancy - case["nette"]) < 0.005)
+    check("case: profit factor 1,45", abs(built.profit_factor - case["profit-factor"]) < 0.006)
+    check("case: the deviation quoted is 1,44R", round(built.sd, 2) == 1.44)
+    net = B.mean_interval(built.net_expectancy, 1.44, 120)
+    check("case: interval -0,07 to +0,44, zero inside", abs(net.low - case["bas"]) < 0.006
+          and round(net.high, 2) == 0.44 and net.low < 0)
+    wr = X.win_rate_interval(52, 120)
+    check("case: win rate 35 % to 52 %", round(wr.low * 100) == 35 and round(wr.high * 100) == 52)
+    check("case: break-even 34,5 %", abs(X.breakeven_win_rate(1.9) * 100 - case["seuil"]) < 0.06)
+    oos = B.summarize([1.8] * 20 + [-1] * 30, cost_r=0.07)
+    check("case: +0,05R out of sample", close(oos.net_expectancy, case["oos"], 1e-9))
+    check("case: 73 % degradation", abs(B.degradation(built.net_expectancy, oos.net_expectancy) * 100
+                                        - case["degradation"]) < 0.6)
+
+    final = catalog.quiz("backtest-validation")
+    taught = {lesson.id for lesson in catalog.course("tester-une-strategie").lessons} - {"recap-backtest"}
+    check("validation quiz: covers every path 7 lesson", {q.lesson_id for q in final.questions} == taught)
+    for bad in (lambda: B.summarize([1.0]), lambda: B.summarize([1, -1], cost_r=-0.1),
+                lambda: B.trades_needed(0, 0.1), lambda: B.false_discovery_chance(0),
+                lambda: B.degradation(0, 0.1), lambda: B.standard_error(1, 1)):
+        check("backtest helpers refuse bad input", raises(bad, ValueError))
+    check("no loss, no profit factor", B.summarize([1, 2]).profit_factor is None)
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -975,6 +1040,7 @@ def main() -> int:
     test_liquidity_figures()
     test_zone_figures()
     test_psychology_figures()
+    test_backtest_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Les six parties d'une règle</title>
+<desc id="d">Six cases : contexte, déclencheur, entrée, invalidation, sortie, taille, chacune avec un exemple tiré des parcours précédents.</desc>
+<rect x="30" y="34" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="44" y="60" font-size="11" fill="#86672f" font-weight="700">1</text>
+<text x="60" y="60" font-size="13" font-weight="700" fill="#1b2733">Contexte</text>
+<text x="44" y="90" font-size="11.5" fill="#5b646b">ex. structure H4 haussière</text>
+<path d="M216 83 l10 0 m-4 -4 l4 4 l-4 4" stroke="#5b646b" fill="none"/>
+<rect x="230" y="34" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="244" y="60" font-size="11" fill="#86672f" font-weight="700">2</text>
+<text x="260" y="60" font-size="13" font-weight="700" fill="#1b2733">Déclencheur</text>
+<text x="244" y="90" font-size="11.5" fill="#5b646b">ex. sweep puis cassure M15</text>
+<path d="M416 83 l10 0 m-4 -4 l4 4 l-4 4" stroke="#5b646b" fill="none"/>
+<rect x="430" y="34" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="444" y="60" font-size="11" fill="#86672f" font-weight="700">3</text>
+<text x="460" y="60" font-size="13" font-weight="700" fill="#1b2733">Entrée</text>
+<text x="444" y="90" font-size="11.5" fill="#5b646b">ex. limite au milieu du FVG</text>
+<rect x="30" y="150" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="44" y="176" font-size="11" fill="#86672f" font-weight="700">4</text>
+<text x="60" y="176" font-size="13" font-weight="700" fill="#1b2733">Invalidation</text>
+<text x="44" y="206" font-size="11.5" fill="#5b646b">ex. 5 pips sous le sweep</text>
+<path d="M216 199 l10 0 m-4 -4 l4 4 l-4 4" stroke="#5b646b" fill="none"/>
+<rect x="230" y="150" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="244" y="176" font-size="11" fill="#86672f" font-weight="700">5</text>
+<text x="260" y="176" font-size="13" font-weight="700" fill="#1b2733">Sortie</text>
+<text x="244" y="206" font-size="11.5" fill="#5b646b">ex. objectif ou invalidation</text>
+<path d="M416 199 l10 0 m-4 -4 l4 4 l-4 4" stroke="#5b646b" fill="none"/>
+<rect x="430" y="150" width="184" height="98" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<text x="444" y="176" font-size="11" fill="#86672f" font-weight="700">6</text>
+<text x="460" y="176" font-size="13" font-weight="700" fill="#1b2733">Taille</text>
+<text x="444" y="206" font-size="11.5" fill="#5b646b">ex. 0,5 % du capital</text>
+<text x="30" y="282" font-size="11" fill="#7b8389">Une règle est explicite quand deux personnes qui la lisent prennent exactement les mêmes trades sur le même graphique.</text>
+</svg>

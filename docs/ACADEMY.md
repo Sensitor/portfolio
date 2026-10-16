@@ -19,13 +19,13 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 10 paths declared; **paths 1 to 6 published**, 4 marked « en préparation » and not clickable |
-| Courses | « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 25 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
-| Quizzes | 36 knowledge checks (immediate feedback) + 6 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
-| Exercises | 12 numeric exercises (EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs) with worked solutions |
+| Curriculum | 10 paths declared; **paths 1 to 7 published**, 3 marked « en préparation » and not clickable |
+| Courses | « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 29 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Quizzes | 43 knowledge checks (immediate feedback) + 7 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 15 numeric exercises (EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
 | Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
-| Library | 7 real resources, each as Markdown and as a typeset PDF |
+| Library | 8 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
@@ -57,6 +57,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   risk.py      every risk figure
   structure.py the swing and break rules (path 2), equal levels and sweeps (path 3)
   zones.py     FVGs, order blocks, retracements, OTE band, zone overlap (path 4)
+  backtest.py  series summary, interval of an expectancy, multiple testing, degradation (path 7)
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"
@@ -178,9 +179,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 548 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy.py       # 612 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  81 checks — HTTP access policy, isolation, no answer key, journal
-python tests/test_academy_app.py   # 196 checks — every page and space renders, locking, writes per member
+python tests/test_academy_app.py   # 216 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  61 checks — spaces registry, journal rules, renderers, brand asset
 python tests/test_accounts.py      #  39 checks — reset, verification, e-mail, export, v8 upgrade
 python -m sensitor.academy.validate
