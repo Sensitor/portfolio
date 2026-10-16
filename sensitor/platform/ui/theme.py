@@ -524,6 +524,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-figures .l { font: 500 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .stApp .sx-figures .v { font: 500 1.45rem var(--mono); color: var(--ink); margin-top: .4rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .stApp .sx-figures .d { font-size: 12.5px; color: var(--muted); margin-top: .2rem; }
+.stApp .sx-figures.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stApp .sx-figures.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stApp .sx-figures > div.emph { background-color: var(--ink); background-image: var(--iso); }
 .stApp .sx-figures > div.emph .l, .stApp .sx-figures > div.emph .d { color: var(--on-navy-muted); }
 .stApp .sx-figures > div.emph .v { color: #fff; }
@@ -675,6 +677,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   .stApp .sx-stats > div + div, .stApp .sx-figures-navy > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
   .stApp .sx-figures-navy > div + div { border-top-color: #2b3f52; }
   .stApp .sx-process { grid-template-columns: 1fr; gap: 1.2rem; }
+  .stApp .sx-figures.four, .stApp .sx-figures.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stApp .sx-process > div { padding-left: 3.8rem; min-height: 3rem; }
   .stApp .sx-process > div::before { display: none; }
   .stApp .sx-book { grid-template-columns: 4.8rem minmax(0, 1fr); gap: 0 1.1rem; }

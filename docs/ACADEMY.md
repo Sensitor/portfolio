@@ -19,13 +19,13 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 10 paths declared; **paths 1 and 2 published**, 8 marked « en préparation » and not clickable |
-| Courses | « Premiers pas sur les marchés » (6 lessons, ~1 h 34) and « Lire la structure du marché » (7 lessons, ~1 h 51), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 10 original SVG diagrams, KaTeX formulas |
-| Quizzes | 11 knowledge checks (immediate feedback) + 2 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
-| Exercises | 3 numeric exercises (EURUSD sizing, swing identification, GBPUSD structure case) with worked solutions |
-| Risk lab | risk amount, stop distance, reward-to-risk, position size (only with a contract spec), losing-streak table, streak probability |
-| Library | 3 real resources, each as Markdown and as a typeset PDF |
+| Curriculum | 10 paths declared; **paths 1, 2 and 5 published**, 7 marked « en préparation » and not clickable |
+| Courses | « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Gérer le risque dans la durée » (7 lessons), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 13 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Quizzes | 17 knowledge checks (immediate feedback) + 3 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 5 numeric exercises (EURUSD sizing, swings, GBPUSD structure case, drawdown series, prop-firm limits) with worked solutions |
+| Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
+| Library | 4 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
@@ -56,6 +56,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   exercise.py  French number parsing, step checking
   risk.py      every risk figure
   structure.py the swing and break rules taught in path 2
+  expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"
   access.py    who may read what (the only place that decides)
@@ -176,9 +177,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 282 checks — content, validation, quiz, risk, progress, store
-python tests/test_academy_api.py   #  60 checks — HTTP access policy, isolation, no answer key
-python tests/test_academy_app.py   # 109 checks — every page and space renders, locking, writes per member
+python tests/test_academy.py       # 360 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy_api.py   #  63 checks — HTTP access policy, isolation, no answer key
+python tests/test_academy_app.py   # 127 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  39 checks — spaces registry, renderers, brand asset
 python tests/test_accounts.py      #  38 checks — reset, verification, e-mail, export, v7 upgrade
 python -m sensitor.academy.validate

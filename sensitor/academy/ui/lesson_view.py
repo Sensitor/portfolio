@@ -38,6 +38,8 @@ def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> Non
                 exercise_view.render(exercise, scope=lesson.id)
         elif block.kind == "tool" and block.target == "risk-calculator":
             risk_view.render(scope=f"lesson_{lesson.id}", compact=True)
+        elif block.kind == "tool" and block.target == "ruin-simulator":
+            risk_view.render_ruin(scope=f"lesson_{lesson.id}")
 
 
 def render_objectives(lesson: Lesson) -> None:

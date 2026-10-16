@@ -68,7 +68,9 @@ def test_real_catalog():
           C.validate() == [], str(C.validate()))
 
     available = [p for p in catalog.paths if p.is_available]
-    check("paths 1 and 2 are open", [p.id for p in available] == ["bases-marches", "structure-price-action"],
+    check("the open paths are exactly those with published courses",
+          all(p.courses for p in available) and available[0].id == "bases-marches"
+          and all(not p.courses for p in catalog.paths if p not in available),
           str([p.id for p in available]))
     check("ten paths in the curriculum", len(catalog.paths) == 10)
     check("paths are in programme order",
@@ -227,6 +229,78 @@ def test_structure_figures():
     check("bars at the edges are never swings", T.swings([1, 9, 1], [5, 0, 5]) == [])
     check("equal highs are not a swing (strict rule)",
           not [s for s in T.swings([1, 2, 5, 5, 2, 1], [0] * 6) if s.kind == T.HIGH])
+
+
+def test_risk_path_figures():
+    """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
+    print("\nPath 5 figures")
+    from sensitor.academy import expectancy as X
+    check("40 % at 2R: +0.20R", close(X.expectancy_r(.4, 2), .2))
+    check("60 % at 0.5R loses 0.1R per trade (-1R over ten)", close(X.expectancy_r(.6, .5) * 10, -1))
+    check("35 % at 2.5R: +0.225R", close(X.expectancy_r(.35, 2.5), .225))
+    check("60 % at 0.8R: +0.08R", close(X.expectancy_r(.6, .8), .08))
+    check("50 % at 1.5R: +0.25R", close(X.expectancy_r(.5, 1.5), .25))
+    check("break-even 1R / 1.5R / 2R / 3R", [round(X.breakeven_win_rate(r) * 100) for r in (1, 1.5, 2, 3)]
+          == [50, 40, 33, 25])
+    check("profit factor 1.33", round(X.profit_factor(.4, 2), 2) == 1.33)
+    rows = {(10, 6): (31.3, 83.2), (20, 12): (38.7, 78.1), (50, 30): (46.2, 72.4),
+            (100, 60): (50.2, 69.1), (400, 240): (55.1, 64.7)}
+    for (n, w), (lo, hi) in rows.items():
+        i = X.win_rate_interval(w, n)
+        check(f"Wilson interval {w}/{n}", round(i.low * 100, 1) == lo and round(i.high * 100, 1) == hi,
+              f"{i.low:.4f} {i.high:.4f}")
+    table = {.45: [None, 1.9, 16.0, 31.2, 53.0], .40: [0.9, 20.7, 55.9, 72.0, 86.1],
+             .36: [11.0, 60.7, 88.1, 94.3, 98.0]}
+    for p, values in table.items():
+        for risk, want in zip((0.5, 1, 2, 3, 5), values):
+            got = X.ruin_probability(p, 1.5, risk, 200, 20) * 100
+            ok = got < 0.1 if want is None else round(got, 1) == want
+            check(f"ruin table {p:.0%} at {risk} %", ok, f"{got:.3f}")
+    check("ruin agrees with brute force on a small case",
+          close(X.ruin_probability(.5, 1, 10, 8, 25), _brute_ruin(.5, 1, 10, 8, 25), 1e-12))
+
+    path = X.equity_path(10000, [1, -1, 2, -1, -1, -1, 1.5, -1, -1, 2, 2, -1, 1], 1)
+    dd = X.max_drawdown(path)
+    ex = {s.id: s.answer for s in C.load_catalog().exercise("drawdown-serie").steps}
+    check("drawdown exercise: mean result", abs(2.5 / 13 - ex["esperance"]) <= 0.006)
+    check("drawdown exercise: peak", close(round(path[dd.peak], 2), ex["sommet"]) and dd.peak == 3)
+    check("drawdown exercise: trough", close(round(path[dd.trough], 2), ex["creux"]) and dd.trough == 9)
+    check("drawdown exercise: max drawdown", abs(dd.pct - ex["drawdown"]) <= 0.01)
+    check("drawdown exercise: recovery",
+          abs((path[dd.peak] / path[dd.trough] - 1) * 100 - ex["recuperation"]) <= 0.01)
+    check("drawdown exercise: final equity 10 241,31", close(round(path[-1], 2), 10241.31))
+    double = X.max_drawdown(X.equity_path(10000, [1, -1, 2, -1, -1, -1, 1.5, -1, -1, 2, 2, -1, 1], 2))
+    check("at 2 % the drawdown is about twice as deep", 1.8 < double.pct / dd.pct < 2.2, str(double.pct))
+    check("12 000 then 10 500: 12.5 %", close(X.max_drawdown([10000, 12000, 10500]).pct, 12.5))
+
+    lim = {s.id: s.answer for s in C.load_catalog().exercise("limites-prop").steps}
+    check("prop exercise: 5 losses at 1 %", X.losses_to_limit(5, 1) == lim["pertes-1pct"])
+    check("prop exercise: 10 losses at 0.5 %", X.losses_to_limit(5, .5) == lim["pertes-demi"])
+    check("prop exercise: 3 losses at 2 %", X.losses_to_limit(5, 2) == lim["pertes-2pct"])
+    check("prop exercise: 5 left before the maximum", (95000 - 90000) / 1000 == lim["reste-max"])
+    check("validation quiz: 3 losses at 1.5 % for a 4 % limit", X.losses_to_limit(4, 1.5) == 3)
+
+    q = X.final_equity_quantiles(.45, 1.5, 1, 200)
+    check("final equity quantiles are ordered", q[0.05] < q[0.5] < q[0.95])
+    for bad in (lambda: X.expectancy_r(1.5, 1), lambda: X.breakeven_win_rate(0),
+                lambda: X.win_rate_interval(5, 3), lambda: X.ruin_probability(.5, 1, 0, 10, 20),
+                lambda: X.max_drawdown([]), lambda: X.losses_to_limit(0, 1)):
+        check("path 5 helpers refuse bad input", raises(bad, ValueError))
+
+
+def _brute_ruin(p, reward, risk, n, threshold):
+    from itertools import product
+    total = 0.0
+    for outcome in product((True, False), repeat=n):
+        equity, prob = 1.0, 1.0
+        for won in outcome:
+            prob *= p if won else 1 - p
+        for won in outcome:
+            equity *= (1 + risk / 100 * reward) if won else (1 - risk / 100)
+            if equity <= 1 - threshold / 100 + 1e-12:
+                total += prob
+                break
+    return total
 
 
 def test_printable():
@@ -577,10 +651,9 @@ def test_progress_logic():
                        {"premiers-pas-validation"})
     check("course 1 finished: the next course starts", step.kind == "lesson"
           and step.course.id == "lire-la-structure" and step.lesson.id == "swings-definition")
-    second = catalog.course("lire-la-structure")
-    everything = {"premiers-pas": {l.id for l in course.lessons},
-                  "lire-la-structure": {l.id for l in second.lessons}}
-    step = P.next_step(catalog, everything, {"premiers-pas-validation", "structure-validation"})
+    courses = catalog.available_courses()
+    everything = {c.id: {l.id for l in c.lessons} for c in courses}
+    step = P.next_step(catalog, everything, {c.final_quiz_id for c in courses})
     check("everything done: explore", step.kind == "explore")
 
 
@@ -694,6 +767,7 @@ def main() -> int:
     test_real_catalog()
     test_lesson_figures_match_the_calculator()
     test_structure_figures()
+    test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()
     test_drafts()

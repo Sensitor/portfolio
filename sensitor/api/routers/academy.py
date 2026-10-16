@@ -248,3 +248,21 @@ def risk_plan(body: RiskPlanRequest) -> dict:
     except R.RiskInputError as exc:
         raise HTTPException(status_code=UNPROCESSABLE, detail=exc.errors) from exc
     return views.risk_plan_view(result)
+
+
+class ExpectancyRequest(BaseModel):
+    win_rate: float = Field(gt=0, lt=1)
+    reward_r: float = Field(gt=0, le=20)
+    risk_pct: float = Field(gt=0, lt=100)
+    trades: int = Field(ge=1, le=1000)
+    threshold_pct: float = Field(gt=0, lt=100)
+
+
+@router.post("/risk/expectancy")
+def risk_expectancy(body: ExpectancyRequest) -> dict:
+    """Expectancy, break-even, risk of ruin and final-equity range (exact, see path 5)."""
+    try:
+        return views.expectancy_view(body.win_rate, body.reward_r, body.risk_pct, body.trades,
+                                     body.threshold_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=UNPROCESSABLE, detail=str(exc)) from exc

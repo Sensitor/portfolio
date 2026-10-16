@@ -112,3 +112,19 @@ def resource_view(resource: Resource) -> dict:
 
 def risk_plan_view(plan: RiskPlan) -> dict:
     return asdict(plan)
+
+
+def expectancy_view(win_rate: float, reward_r: float, risk_pct: float, trades: int,
+                    threshold_pct: float) -> dict:
+    """Path 5 figures for one set of assumptions; raises ValueError on invalid input."""
+    from . import expectancy as E
+    quantiles = E.final_equity_quantiles(win_rate, reward_r, risk_pct, trades)
+    return {
+        "expectancy_r": E.expectancy_r(win_rate, reward_r),
+        "breakeven_win_rate": E.breakeven_win_rate(reward_r),
+        "profit_factor": E.profit_factor(win_rate, reward_r),
+        "ruin_probability": E.ruin_probability(win_rate, reward_r, risk_pct, trades, threshold_pct),
+        "final_equity": {"p05": quantiles[0.05], "p50": quantiles[0.5], "p95": quantiles[0.95]},
+        "assumptions": "independent trades, constant win rate and reward, fixed-fractional risk, "
+                       "threshold measured from the starting equity",
+    }

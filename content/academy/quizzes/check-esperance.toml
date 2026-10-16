@@ -1,0 +1,73 @@
+id = "check-esperance"
+title = "Contrôle : l'espérance"
+course = "risque-dans-la-duree"
+lesson = "esperance"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "calcul"
+prompt = "Taux de réussite de 40 %, gains moyens de 2R, pertes de 1R. Quelle est l'espérance par trade ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "plus-02"
+text = "+0,20R"
+correct = true
+explanation = "0,40 × 2 − 0,60 × 1 = 0,20R."
+
+[[question.option]]
+id = "plus-08"
+text = "+0,80R"
+explanation = "C'est la seule part des gains : il faut retirer les pertes, 0,60R."
+
+[[question.option]]
+id = "moins-02"
+text = "−0,20R"
+explanation = "Les gains (0,80R) dépassent les pertes (0,60R) : l'espérance est positive."
+
+[[question]]
+id = "seuil"
+prompt = "Avec un ratio gain / risque de 3R, quel est le taux de réussite minimal pour ne pas perdre, hors coûts ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "vingt-cinq"
+text = "25 %"
+correct = true
+explanation = "1 ÷ (1 + 3) = 25 %."
+
+[[question.option]]
+id = "trente-trois"
+text = "33 %"
+explanation = "C'est le seuil pour un ratio de 2R."
+
+[[question.option]]
+id = "cinquante"
+text = "50 %"
+explanation = "C'est le seuil pour un ratio de 1R."
+
+[[question]]
+id = "comparer"
+prompt = "Quelle approche a la meilleure espérance ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "trente-cinq"
+text = "35 % de réussite, gains moyens de 2,5R."
+correct = true
+explanation = "0,35 × 2,5 − 0,65 = +0,225R par trade."
+
+[[question.option]]
+id = "soixante"
+text = "60 % de réussite, gains moyens de 0,8R."
+explanation = "0,60 × 0,8 − 0,40 = +0,08R par trade : moins bien, malgré un taux plus élevé."
+
+[[question.option]]
+id = "egales"
+text = "Elles se valent."
+explanation = "Le calcul les départage nettement."

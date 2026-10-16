@@ -1,0 +1,73 @@
+id = "check-echantillon"
+title = "Contrôle : la taille d'échantillon"
+course = "risque-dans-la-duree"
+lesson = "taille-echantillon"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "vingt"
+prompt = "Une approche gagne 12 trades sur 20. Que peut-on en conclure ?"
+kind = "single"
+lesson = "taille-echantillon"
+
+[[question.option]]
+id = "peu"
+text = "Peu de chose : le vrai taux pourrait se situer entre environ 39 % et 78 %."
+correct = true
+explanation = "Oui : vingt trades laissent une marge d'erreur très large."
+
+[[question.option]]
+id = "soixante"
+text = "Que son taux de réussite est de 60 %."
+explanation = "C'est le taux observé, pas le vrai taux de l'approche."
+
+[[question.option]]
+id = "gagnante"
+text = "Qu'elle est gagnante."
+explanation = "Selon le ratio gain / risque, un vrai taux de 39 % pourrait la rendre perdante."
+
+[[question]]
+id = "plus"
+prompt = "Que se passe-t-il quand l'échantillon grandit, à taux observé égal ?"
+kind = "single"
+lesson = "taille-echantillon"
+
+[[question.option]]
+id = "resserre"
+text = "L'intervalle de confiance se resserre."
+correct = true
+explanation = "Oui : de 39-78 % sur 20 trades à 50-69 % sur 100, et 55-65 % sur 400."
+
+[[question.option]]
+id = "monte"
+text = "Le taux de réussite augmente."
+explanation = "La taille de l'échantillon ne change pas le taux, seulement la précision de son estimation."
+
+[[question.option]]
+id = "rien"
+text = "Rien ne change."
+explanation = "La précision de l'estimation change beaucoup."
+
+[[question]]
+id = "regles"
+prompt = "Un trader modifie ses règles tous les quinze trades. Quel est le problème ?"
+kind = "single"
+lesson = "taille-echantillon"
+
+[[question.option]]
+id = "zero"
+text = "Chaque changement remet l'échantillon à zéro : aucune version n'est jamais mesurée."
+correct = true
+explanation = "Oui : un échantillon n'a de sens que pour des règles constantes."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun : il améliore son approche en continu."
+explanation = "Sans échantillon suffisant, rien ne permet de savoir si un changement améliore quoi que ce soit."
+
+[[question.option]]
+id = "couts"
+text = "Il paie plus de commissions."
+explanation = "Le problème est statistique, pas de coûts."

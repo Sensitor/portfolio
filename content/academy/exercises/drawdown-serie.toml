@@ -1,0 +1,54 @@
+id = "drawdown-serie"
+title = "Mesurer le drawdown d'une série"
+context = """
+Un compte de **10 000 $** risque **1 % du capital restant** à chaque trade. Voici les résultats de treize trades consécutifs, en R :
+
+| Trade | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Résultat | +1 | −1 | +2 | −1 | −1 | −1 | +1,5 | −1 | −1 | +2 | +2 | −1 | +1 |
+
+Un résultat de +2 fait gagner 2 % du capital du moment, un résultat de −1 en fait perdre 1 %. Arrondissez les montants au centime. Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+La série finit gagnante, à 10 241,31 $, et pourtant elle a traversé une baisse de 3,47 % étalée sur six trades. Avec 2 % de risque par trade, la même série aurait creusé un drawdown d'environ deux fois plus profond.
+"""
+
+[[step]]
+id = "esperance"
+prompt = "Quel est le résultat moyen par trade de la série, en R ? (deux décimales)"
+unit = "R"
+answer = 0.19
+tolerance = 0.006
+solution = "Somme des résultats : 1 − 1 + 2 − 1 − 1 − 1 + 1,5 − 1 − 1 + 2 + 2 − 1 + 1 = 2,5R. Moyenne : 2,5 ÷ 13 = **0,19R**. Sur treize trades, ce chiffre est très incertain (leçon 2)."
+
+[[step]]
+id = "sommet"
+prompt = "Quel est le capital au sommet qui précède le drawdown maximal, en dollars ?"
+unit = "$"
+answer = 10198.98
+tolerance = 0.01
+solution = "10 000 × 1,01 = 10 100 ; × 0,99 = 9 999 ; × 1,02 = **10 198,98 $** après le trade 3."
+
+[[step]]
+id = "creux"
+prompt = "Quel est le capital au creux le plus bas qui suit ce sommet, en dollars ?"
+unit = "$"
+answer = 9844.62
+tolerance = 0.01
+solution = "Après le trade 9 : 10 198,98 × 0,99³ × 1,015 × 0,99² = **9 844,62 $**."
+
+[[step]]
+id = "drawdown"
+prompt = "Quel est le drawdown maximal, en pourcentage ? (deux décimales)"
+unit = "%"
+answer = 3.47
+tolerance = 0.01
+solution = "1 − 9 844,62 ÷ 10 198,98 = 0,0347, soit **3,47 %**."
+
+[[step]]
+id = "recuperation"
+prompt = "Quel gain, en pourcentage, faut-il depuis le creux pour revenir au sommet ? (deux décimales)"
+unit = "%"
+answer = 3.60
+tolerance = 0.01
+solution = "10 198,98 ÷ 9 844,62 − 1 = 0,0360, soit **3,60 %** : un peu plus que la baisse, comme toujours."

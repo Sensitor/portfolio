@@ -174,3 +174,59 @@ def _streaks(plan: R.RiskPlan, currency: str, k: str) -> None:
     html('<p class="sx-note" style="margin-top:.7rem">Hypothèse : trades indépendants et taux '
          'de réussite constant. Dans la réalité, les pertes ont tendance à se regrouper, ce qui '
          'rend les longues séries plus probables encore.</p>')
+
+
+def render_ruin(*, scope: str) -> None:
+    """Expectancy, break-even, risk of ruin and final-equity range for given assumptions."""
+    from .. import expectancy as E
+
+    k = f"ruin_{scope}"
+    with st.container(key=f"panel_{k}"):
+        html('<div class="sx-kicker">Simulateur pédagogique</div>'
+             '<h2 class="sx-h3">Espérance et risque de ruine</h2>'
+             '<p class="sx-body">Calcul exact sous trois hypothèses : trades indépendants, taux de '
+             'réussite et ratio constants, risque en pourcentage du capital restant. Ce ne sont pas '
+             'des prévisions.</p>')
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            win = st.number_input("Taux de réussite (%)", min_value=1.0, max_value=99.0, value=45.0,
+                                  step=1.0, format="%.0f", key=f"{k}_win")
+        with c2:
+            reward = st.number_input("Gain moyen (R)", min_value=0.1, max_value=10.0, value=1.5,
+                                     step=0.1, format="%.1f", key=f"{k}_reward")
+        with c3:
+            risk_pct = st.number_input("Risque par trade (%)", min_value=0.1, max_value=20.0,
+                                       value=1.0, step=0.25, format="%.2f", key=f"{k}_risk")
+        c1, c2 = st.columns(2)
+        with c1:
+            trades = st.number_input("Nombre de trades", min_value=10, max_value=500, value=200,
+                                     step=10, key=f"{k}_trades")
+        with c2:
+            threshold = st.number_input("Seuil de perte depuis le départ (%)", min_value=5.0,
+                                        max_value=90.0, value=20.0, step=5.0, format="%.0f",
+                                        key=f"{k}_threshold")
+
+        p = win / 100
+        exp = E.expectancy_r(p, reward)
+        breakeven = E.breakeven_win_rate(reward)
+        ruin = E.ruin_probability(p, reward, risk_pct, int(trades), threshold)
+        q = E.final_equity_quantiles(p, reward, risk_pct, int(trades))
+        sign = "+" if exp > 0 else ""
+        cells = [
+            _cell("Espérance par trade", f"{sign}{number(exp, 3)} R",
+                  "positive" if exp > 0 else "nulle" if abs(exp) < 1e-9 else "négative", emph=True),
+            _cell("Seuil de rentabilité", percent(breakeven * 100), f"pour des gains de {number(reward, 1)}R"),
+            _cell("Profit factor", number(E.profit_factor(p, reward), 2), "gains ÷ pertes"),
+            _cell(f"Perdre {number(threshold, 0)} % au moins une fois",
+                  "< 0,1 %" if ruin < 0.001 else percent(ruin * 100), f"sur {int(trades)} trades"),
+        ]
+        html('<div class="sx-figures four">' + "".join(cells) + "</div>")
+        html('<div class="sx-kicker muted" style="margin-top:1.2rem">Capital final, pour 100 au départ</div>')
+        html('<div class="sx-figures three">'
+             + _cell("Scénario défavorable (5 %)", number(q[0.05], 1), "5 % des cas finissent plus bas")
+             + _cell("Médiane", number(q[0.5], 1), "la moitié des cas finit plus bas")
+             + _cell("Scénario favorable (95 %)", number(q[0.95], 1), "5 % des cas finissent plus haut")
+             + "</div>")
+        html('<p class="sx-note" style="margin-top:.8rem">Le seuil se mesure depuis le capital de '
+             'départ ; mesuré depuis un sommet, il serait atteint plus souvent. Les résultats réels se '
+             'regroupent en séries, ce qui rend en général la réalité moins favorable que ces chiffres.</p>')

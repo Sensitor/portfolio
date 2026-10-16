@@ -1,0 +1,73 @@
+id = "check-correlation"
+title = "Contrôle : corrélation et exposition"
+course = "risque-dans-la-duree"
+lesson = "correlation-exposition"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "dollar"
+prompt = "Achat EURUSD, achat GBPUSD et vente USDCHF, à 1 % chacun. Quelle est l'exposition sur l'idée « le dollar baisse » ?"
+kind = "single"
+lesson = "correlation-exposition"
+
+[[question.option]]
+id = "trois"
+text = "Environ 3 % : les trois positions vendent du dollar."
+correct = true
+explanation = "Oui : elles perdraient ensemble si le dollar montait."
+
+[[question.option]]
+id = "un"
+text = "1 % : chaque trade est indépendant."
+explanation = "Les trois positions portent la même idée."
+
+[[question.option]]
+id = "zero"
+text = "Aucune : elles se compensent."
+explanation = "Elles ne se compensent pas : le dollar est vendu dans les trois cas."
+
+[[question]]
+id = "decomposer"
+prompt = "Que vend une position acheteuse sur EURUSD ?"
+kind = "single"
+lesson = "correlation-exposition"
+
+[[question.option]]
+id = "usd"
+text = "Du dollar."
+correct = true
+explanation = "Acheter EURUSD, c'est acheter de l'euro contre du dollar."
+
+[[question.option]]
+id = "eur"
+text = "De l'euro."
+explanation = "L'euro est la devise achetée."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "Toute position de change achète une devise et en vend une autre."
+
+[[question]]
+id = "limite"
+prompt = "Quelle règle complète le risque par trade pour éviter ce piège ?"
+kind = "single"
+lesson = "correlation-exposition"
+
+[[question.option]]
+id = "par-idee"
+text = "Une limite de risque par idée et une limite globale sur les positions ouvertes."
+correct = true
+explanation = "Oui : elles s'écrivent dans le plan de trading."
+
+[[question.option]]
+id = "plus-de-paires"
+text = "Répartir l'idée sur davantage de paires."
+explanation = "Les paires corrélées perdent ensemble ; on multiplie surtout les coûts."
+
+[[question.option]]
+id = "stop-large"
+text = "Élargir les stops."
+explanation = "Cela ne change rien à la corrélation des positions."

@@ -1,0 +1,229 @@
+id = "risque-validation"
+title = "Quiz de validation : Gérer le risque dans la durée"
+course = "risque-dans-la-duree"
+lesson = "recap-risque"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "esperance"
+prompt = "Taux de réussite de 50 %, gains moyens de 1,5R, pertes de 1R. Quelle est l'espérance ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "plus-025"
+text = "+0,25R par trade"
+correct = true
+explanation = "0,50 × 1,5 − 0,50 × 1 = 0,25R."
+
+[[question.option]]
+id = "plus-075"
+text = "+0,75R par trade"
+explanation = "C'est la part des gains seulement."
+
+[[question.option]]
+id = "zero"
+text = "0R, puisqu'on gagne une fois sur deux"
+explanation = "Les gains sont plus grands que les pertes : l'espérance est positive."
+
+[[question]]
+id = "seuil"
+prompt = "Gains moyens de 1,5R : quel taux de réussite minimal pour ne pas perdre, hors coûts ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "quarante"
+text = "40 %"
+correct = true
+explanation = "1 ÷ (1 + 1,5) = 40 %."
+
+[[question.option]]
+id = "cinquante"
+text = "50 %"
+explanation = "C'est le seuil d'un ratio de 1R."
+
+[[question.option]]
+id = "trente-trois"
+text = "33 %"
+explanation = "C'est le seuil d'un ratio de 2R."
+
+[[question]]
+id = "couts"
+prompt = "Des coûts de 0,1R par trade s'appliquent à une approche à +0,2R. Que devient son espérance ?"
+kind = "single"
+lesson = "esperance"
+
+[[question.option]]
+id = "plus-01"
+text = "+0,1R par trade"
+correct = true
+explanation = "Les coûts se retirent de chaque trade, gagnant ou perdant."
+
+[[question.option]]
+id = "inchangee"
+text = "Elle ne change pas."
+explanation = "Les coûts réduisent l'espérance du même montant à chaque trade."
+
+[[question.option]]
+id = "plus-018"
+text = "+0,18R, les coûts ne touchant que les trades perdants"
+explanation = "Les coûts touchent tous les trades."
+
+[[question]]
+id = "echantillon"
+prompt = "Après 100 trades à 60 % de réussite observée, quel intervalle à 95 % retenir, environ ?"
+kind = "single"
+lesson = "taille-echantillon"
+
+[[question.option]]
+id = "cinquante-soixante-neuf"
+text = "De 50 % à 69 %."
+correct = true
+explanation = "Oui (intervalle de Wilson : 50,2 % à 69,1 %)."
+
+[[question.option]]
+id = "soixante"
+text = "Exactement 60 %."
+explanation = "60 % est l'estimation ; l'intervalle donne la marge d'erreur."
+
+[[question.option]]
+id = "cinquante-neuf"
+text = "De 59 % à 61 %."
+explanation = "Beaucoup trop étroit pour cent trades."
+
+[[question]]
+id = "drawdown"
+prompt = "Comment se mesure le drawdown maximal ?"
+kind = "single"
+lesson = "drawdown"
+
+[[question.option]]
+id = "sommet-creux"
+text = "Du plus haut atteint au creux le plus bas qui le suit."
+correct = true
+explanation = "Oui : c'est la mesure depuis le sommet."
+
+[[question.option]]
+id = "depart"
+text = "Du capital de départ au point le plus bas."
+explanation = "C'est une autre mesure, depuis le départ, moins exigeante."
+
+[[question.option]]
+id = "pertes"
+text = "En additionnant les trades perdants."
+explanation = "Les gains intercalés comptent aussi : on mesure l'écart entre un sommet et un creux."
+
+[[question]]
+id = "recuperation"
+prompt = "Après une baisse de 50 %, quel gain faut-il pour revenir au sommet ?"
+kind = "single"
+lesson = "drawdown"
+
+[[question.option]]
+id = "cent"
+text = "100 %"
+correct = true
+explanation = "1 ÷ 0,5 − 1 = 100 %."
+
+[[question.option]]
+id = "cinquante"
+text = "50 %"
+explanation = "Un gain de 50 % sur la moitié du capital ne ramène qu'à 75 % du sommet."
+
+[[question.option]]
+id = "soixante-quinze"
+text = "75 %"
+explanation = "Insuffisant : le capital restant doit doubler."
+
+[[question]]
+id = "ruine"
+prompt = "À espérance égale, que fait le risque de ruine quand le risque par trade passe de 1 % à 3 % ?"
+kind = "single"
+lesson = "risque-de-ruine"
+
+[[question.option]]
+id = "augmente"
+text = "Il augmente nettement."
+correct = true
+explanation = "Oui : à 45 % de réussite et 1,5R, il passe de 1,9 % à 31,2 % (seuil de 20 %, 200 trades)."
+
+[[question.option]]
+id = "stable"
+text = "Il ne change pas, puisque l'espérance est la même."
+explanation = "L'espérance en R ne change pas, mais chaque série de pertes coûte trois fois plus."
+
+[[question.option]]
+id = "baisse"
+text = "Il baisse, puisque les gains sont plus gros."
+explanation = "Les pertes aussi sont plus grosses, et ce sont elles qui mènent au seuil."
+
+[[question]]
+id = "perdante"
+prompt = "Une approche a une espérance négative. Un risque par trade très faible suffit-il à la rendre sûre ?"
+kind = "single"
+lesson = "risque-de-ruine"
+
+[[question.option]]
+id = "non"
+text = "Non : il ralentit les pertes, il ne les empêche pas."
+correct = true
+explanation = "Oui : à 36 % et 1,5R, même 0,5 % par trade laisse 11 % de probabilité de perdre 20 % en 200 trades."
+
+[[question.option]]
+id = "oui"
+text = "Oui, à condition de rester sous 0,5 %."
+explanation = "Le temps joue contre une espérance négative, quel que soit le risque."
+
+[[question.option]]
+id = "inverse"
+text = "Elle devient gagnante avec un risque assez faible."
+explanation = "Le risque par trade ne change pas le signe de l'espérance."
+
+[[question]]
+id = "correlation"
+prompt = "Achat EURUSD et achat GBPUSD, 1 % chacun. Quelle lecture est la plus juste ?"
+kind = "single"
+lesson = "correlation-exposition"
+
+[[question.option]]
+id = "meme-idee"
+text = "Deux positions vendeuses de dollar : près de 2 % sur une même idée."
+correct = true
+explanation = "Oui : elles perdraient ensemble si le dollar montait."
+
+[[question.option]]
+id = "independantes"
+text = "Deux risques indépendants de 1 %."
+explanation = "Les deux positions partagent la même devise vendue."
+
+[[question.option]]
+id = "couverture"
+text = "Une couverture : les risques s'annulent."
+explanation = "Elles vont dans le même sens sur le dollar."
+
+[[question]]
+id = "limite"
+prompt = "Limite journalière de 4 %, risque de 1,5 % par trade. Combien de pertes consécutives suffisent à atteindre ou dépasser la limite ?"
+kind = "single"
+lesson = "limites-de-perte"
+explanation = "4 ÷ 1,5 = 2,67 : deux pertes font 3 %, la troisième porte la perte à 4,5 %."
+
+[[question.option]]
+id = "trois"
+text = "3"
+correct = true
+explanation = "Oui : il faut arrondir vers le haut."
+
+[[question.option]]
+id = "deux"
+text = "2"
+explanation = "Deux pertes font 3 %, sous la limite de 4 %."
+
+[[question.option]]
+id = "quatre"
+text = "4"
+explanation = "La troisième perte dépasse déjà la limite."

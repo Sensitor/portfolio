@@ -1,0 +1,73 @@
+id = "check-ruine"
+title = "Contrôle : le risque de ruine"
+course = "risque-dans-la-duree"
+lesson = "risque-de-ruine"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "definition"
+prompt = "Quels paramètres faut-il fixer pour parler de risque de ruine ?"
+kind = "single"
+lesson = "risque-de-ruine"
+
+[[question.option]]
+id = "seuil-horizon"
+text = "Un seuil de perte et un horizon en nombre de trades."
+correct = true
+explanation = "Oui : sans eux, le chiffre ne veut rien dire."
+
+[[question.option]]
+id = "capital"
+text = "Seulement le capital du compte."
+explanation = "Le montant du compte ne suffit pas : il faut savoir quelle perte on considère comme une ruine, et sur quelle durée."
+
+[[question.option]]
+id = "marche"
+text = "Le marché traité."
+explanation = "Le marché influe sur les résultats, mais la définition repose sur un seuil et un horizon."
+
+[[question]]
+id = "gagnante"
+prompt = "Une approche a une espérance positive. Peut-elle quand même faire perdre 20 % d'un compte ?"
+kind = "single"
+lesson = "risque-de-ruine"
+
+[[question.option]]
+id = "oui"
+text = "Oui, surtout si le risque par trade est élevé."
+correct = true
+explanation = "À 45 % de réussite et 1,5R, la probabilité dépasse 50 % en 200 trades avec 5 % de risque par trade."
+
+[[question.option]]
+id = "non"
+text = "Non, une espérance positive l'empêche."
+explanation = "L'espérance est une moyenne ; elle ne dit rien des baisses en chemin."
+
+[[question.option]]
+id = "seulement-tard"
+text = "Seulement après plusieurs milliers de trades."
+explanation = "Le risque est même le plus fort au début, quand le capital n'a pas encore accumulé de marge."
+
+[[question]]
+id = "hypotheses"
+prompt = "Les probabilités du tableau supposent des trades indépendants. Qu'en déduire ?"
+kind = "single"
+lesson = "risque-de-ruine"
+
+[[question.option]]
+id = "optimistes"
+text = "Qu'elles sont plutôt optimistes : les résultats réels se regroupent en séries."
+correct = true
+explanation = "Oui : les séries rendent les baisses profondes plus probables."
+
+[[question.option]]
+id = "pessimistes"
+text = "Qu'elles sont trop pessimistes."
+explanation = "C'est l'inverse : la dépendance entre trades aggrave en général le risque."
+
+[[question.option]]
+id = "exactes"
+text = "Qu'elles s'appliquent exactement à tout compte."
+explanation = "Elles sont exactes sous leurs hypothèses, qui ne décrivent jamais parfaitement un compte réel."

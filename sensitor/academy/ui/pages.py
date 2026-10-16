@@ -418,7 +418,12 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
             "d'une série de pertes.")
     risk_view.render(scope="lab")
 
-    section(2, "Exercices pratiques",
+    section(2, "Espérance et risque de ruine",
+            "Ce que rapporte une approche en moyenne, et la probabilité de traverser une baisse "
+            "donnée avant que son avantage ait le temps de jouer.")
+    risk_view.render_ruin(scope="lab")
+
+    section(3, "Exercices pratiques",
             "Des cas chiffrés, résolus étape par étape, avec un corrigé pour chaque étape.")
     shown = 0
     for course in catalog.available_courses():
@@ -438,7 +443,7 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
     if not shown:
         note("Aucun exercice publié pour l'instant.")
 
-    section(3, "En préparation", "Annoncé pour le Trading Lab, pas encore disponible.")
+    section(4, "En préparation", "Annoncé pour le Trading Lab, pas encore disponible.")
     from ...platform import spaces
     rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(p)}</span>'
                    f'{pill("Prévu", "soon")}</li>'

@@ -224,6 +224,16 @@ def main() -> int:
         "equity": 10000, "risk_pct": 1, "entry": 100, "stop": 95, "direction": "long"})
     check("without a spec, no position size", r.status_code == 200 and r.json()["position"] is None)
 
+    r = client.post("/academy/risk/expectancy", json={"win_rate": 0.45, "reward_r": 1.5, "risk_pct": 2,
+                                                      "trades": 200, "threshold_pct": 20})
+    body = r.json()
+    check("expectancy endpoint answers", r.status_code == 200)
+    check("same figures as the lesson", abs(body["expectancy_r"] - 0.125) < 1e-9
+          and round(body["ruin_probability"] * 100, 1) == 16.0 and abs(body["breakeven_win_rate"] - 0.4) < 1e-9)
+    check("an impossible win rate is 422",
+          client.post("/academy/risk/expectancy", json={"win_rate": 1.5, "reward_r": 1.5, "risk_pct": 2,
+                                                         "trades": 200, "threshold_pct": 20}).status_code == 422)
+
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:
         print(f"  - {failure}")

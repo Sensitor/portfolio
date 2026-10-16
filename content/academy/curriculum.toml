@@ -42,7 +42,8 @@ id = "risk-management"
 number = 5
 title = "Gestion du risque"
 summary = "Taille de position, espérance, séries de pertes, drawdown, risque de ruine, corrélations et contraintes des prop firms."
-status = "planned"
+status = "published"
+courses = ["risque-dans-la-duree"]
 topics = ["Espérance et échantillon", "Drawdown", "Risque de ruine", "Limites journalières"]
 
 [[path]]

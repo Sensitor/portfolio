@@ -1,0 +1,73 @@
+id = "check-drawdown"
+title = "Contrôle : le drawdown"
+course = "risque-dans-la-duree"
+lesson = "drawdown"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "mesure"
+prompt = "Un compte passe de 10 000 $ à 12 000 $, puis redescend à 10 500 $. Quel est son drawdown depuis le sommet ?"
+kind = "single"
+lesson = "drawdown"
+
+[[question.option]]
+id = "douze-cinq"
+text = "12,5 %"
+correct = true
+explanation = "1 − 10 500 ÷ 12 000 = 12,5 %."
+
+[[question.option]]
+id = "zero"
+text = "0 %, puisque le compte est au-dessus de son départ."
+explanation = "C'est la mesure depuis le départ ; depuis le sommet, le compte a rendu 1 500 $."
+
+[[question.option]]
+id = "quinze"
+text = "15 %"
+explanation = "1 500 $ rapportés à 10 000 $ : la baisse se mesure par rapport au sommet, 12 000 $."
+
+[[question]]
+id = "recuperer"
+prompt = "Après un drawdown de 25 %, quel gain faut-il pour revenir au sommet ?"
+kind = "single"
+lesson = "drawdown"
+
+[[question.option]]
+id = "trente-trois"
+text = "Environ 33,3 %"
+correct = true
+explanation = "1 ÷ 0,75 − 1 = 33,3 %."
+
+[[question.option]]
+id = "vingt-cinq"
+text = "25 %"
+explanation = "Le gain s'applique à un capital plus petit : il faut davantage."
+
+[[question.option]]
+id = "cinquante"
+text = "50 %"
+explanation = "C'est le gain nécessaire après une baisse d'un tiers, pas d'un quart."
+
+[[question]]
+id = "risque"
+prompt = "Pourquoi un risque par trade modéré protège-t-il une approche ?"
+kind = "single"
+lesson = "drawdown"
+
+[[question.option]]
+id = "profondeur"
+text = "Il limite la profondeur des baisses ordinaires, qui se rattrapent plus difficilement qu'elles ne se creusent."
+correct = true
+explanation = "Oui : c'est l'asymétrie de la récupération."
+
+[[question.option]]
+id = "gagne"
+text = "Il augmente le taux de réussite."
+explanation = "Le risque par trade ne change pas le taux de réussite."
+
+[[question.option]]
+id = "evite"
+text = "Il évite les séries de pertes."
+explanation = "Les séries arrivent quel que soit le risque ; elles coûtent seulement moins cher."

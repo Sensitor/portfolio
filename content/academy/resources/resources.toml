@@ -37,3 +37,15 @@ file = "fiche-lire-la-structure.md"
 pdf = "fiche-lire-la-structure.pdf"
 access = "member"
 lessons = ["swings-definition", "supports-resistances", "multi-unites-de-temps", "cas-structure", "recap-structure"]
+
+[[resource]]
+id = "fiche-risque-duree"
+title = "Gérer le risque dans la durée"
+description = "Espérance, seuil de rentabilité, drawdown, risque de ruine, exposition et limites de perte : les formules et les repères du parcours 5."
+kind = "fiche"
+category = "Gestion du risque"
+level = "intermediaire"
+file = "fiche-risque-duree.md"
+pdf = "fiche-risque-duree.pdf"
+access = "member"
+lessons = ["esperance", "drawdown", "risque-de-ruine", "limites-de-perte", "recap-risque"]

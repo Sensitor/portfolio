@@ -157,6 +157,7 @@ requires one. See [ACADEMY.md](ACADEMY.md).
 | `GET /academy/progress` | per-course progress, recent attempts, next step |
 | `GET /academy/resources` · `…/{id}/download` | the library; member files need a token |
 | `POST /academy/risk/plan` | risk amount, stop distance, R:R, and position size when a contract spec is given |
+| `POST /academy/risk/expectancy` | expectancy, break-even win rate, profit factor, exact risk of ruin, final-equity range |
 
 ---
 

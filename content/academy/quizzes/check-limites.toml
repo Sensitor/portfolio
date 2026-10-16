@@ -1,0 +1,73 @@
+id = "check-limites"
+title = "Contrôle : les limites de perte"
+course = "risque-dans-la-duree"
+lesson = "limites-de-perte"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "nombre"
+prompt = "Limite journalière de 5 %, risque de 1 % par trade. Au bout de combien de pertes consécutives la limite est-elle atteinte ?"
+kind = "single"
+lesson = "limites-de-perte"
+
+[[question.option]]
+id = "cinq"
+text = "5"
+correct = true
+explanation = "5 % ÷ 1 % = 5 pertes."
+
+[[question.option]]
+id = "quatre"
+text = "4"
+explanation = "Quatre pertes font 4 % : la limite n'est pas encore atteinte."
+
+[[question.option]]
+id = "dix"
+text = "10"
+explanation = "Ce serait avec 0,5 % par trade."
+
+[[question]]
+id = "trailing"
+prompt = "Compte de 100 000 $, perte maximale suiveuse de 6 000 $. Le compte monte à 104 000 $. Où se situe le seuil d'élimination ?"
+kind = "single"
+lesson = "limites-de-perte"
+
+[[question.option]]
+id = "98"
+text = "À 98 000 $."
+correct = true
+explanation = "Le seuil suit le plus haut : 104 000 − 6 000."
+
+[[question.option]]
+id = "94"
+text = "À 94 000 $."
+explanation = "Ce serait une perte maximale fixe depuis le solde initial."
+
+[[question.option]]
+id = "100"
+text = "À 100 000 $."
+explanation = "Le seuil ne se fixe pas au solde initial."
+
+[[question]]
+id = "refaire"
+prompt = "Après deux pertes, un trader double son risque pour se refaire. Quel est l'effet ?"
+kind = "single"
+lesson = "limites-de-perte"
+
+[[question.option]]
+id = "plus-vite"
+text = "Il atteint sa limite deux fois plus vite, au moment où il décide le moins bien."
+correct = true
+explanation = "Oui : la limite se rapproche et la décision se dégrade."
+
+[[question.option]]
+id = "neutre"
+text = "Aucun effet sur le risque, puisque l'espérance ne change pas."
+explanation = "L'espérance en R ne change pas, mais chaque perte coûte le double."
+
+[[question.option]]
+id = "protege"
+text = "Il se protège, puisqu'un gain efface les pertes."
+explanation = "Un gain n'est pas garanti ; une perte de plus le rapproche de la limite."
