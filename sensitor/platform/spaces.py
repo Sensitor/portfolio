@@ -65,7 +65,7 @@ SPACES: tuple[Space, ...] = (
     Space("psychology", "Psychologie et discipline", "apprendre", PREPARING,
           "Biais cognitifs, routines et journal de réflexion pour trader avec méthode.",
           entry="psychology", pages=("psychology",), numeral="III",
-          planned=("Parcours 6 — Psychologie du trading : FOMO, revenge trading, suractivité, "
+          planned=("Parcours 6, Psychologie du trading : FOMO, revenge trading, suractivité, "
                    "biais de récence et de confirmation",
                    "Routines avant, pendant et après la séance",
                    "Journal de réflexion personnel, privé à chaque membre"),
@@ -80,7 +80,7 @@ SPACES: tuple[Space, ...] = (
           entry="market", pages=("market",), numeral="V",
           planned=("Contexte de marché et calendrier économique commentés",
                    "Scénarios avec invalidation, publiés avant la séance",
-                   "Bilans pédagogiques après la séance — pas de signaux"),
+                   "Bilans pédagogiques après la séance, sans signaux"),
           related=(("Leçon : lire la structure", "lesson:premiers-pas/structure-de-marche"),)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",
@@ -97,7 +97,7 @@ SPACES: tuple[Space, ...] = (
           planned=("Intégration au même espace membre",)),
 )
 
-PLATFORM_PAGES = ("home", "account")
+PLATFORM_PAGES = ("home", "account", "reset", "verify")
 LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
 
 

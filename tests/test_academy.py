@@ -118,6 +118,10 @@ def test_real_catalog():
     for resource in catalog.resources.values():
         check(f"resource {resource.id}: the file is really there", resource.file.is_file())
 
+    dashed = [str(p.relative_to(C.CONTENT_ROOT)) for p in C.CONTENT_ROOT.rglob("*")
+              if p.is_file() and any(d in p.read_text(encoding="utf-8") for d in ("\u2014", "\u2013"))]
+    check("no em or en dash anywhere in the content (house style)", not dashed, str(dashed))
+
 
 def test_lesson_figures_match_the_calculator():
     """The numbers printed in lessons are recomputed here, from the modules."""
@@ -558,7 +562,7 @@ def test_store():
 
     from sensitor.database.models import SCHEMA_VERSION
     version = store._read("PRAGMA user_version")[0][0]
-    check("a fresh database is stamped with the current version", version == SCHEMA_VERSION == 6)
+    check("a fresh database is stamped with the current version", version == SCHEMA_VERSION)
 
 
 def test_upgrade_from_v5():
@@ -582,7 +586,9 @@ def test_upgrade_from_v5():
     store.mark_lesson_complete("old@example.com", "premiers-pas", "fonctionnement-marche")
     check("and can record progress at once",
           len(store.completed_lessons("old@example.com")) == 1)
-    check("the database is now version 6", store._read("PRAGMA user_version")[0][0] == 6)
+    from sensitor.database.models import SCHEMA_VERSION
+    check("the database is now at the current version",
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION)
 
 
 def main() -> int:

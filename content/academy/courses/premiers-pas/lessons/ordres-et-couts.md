@@ -41,7 +41,7 @@ Un ordre limite garantit le prix, pas l'exécution. Un ordre stop garantit le d�
 
 ## Le stop-loss est un ordre stop
 
-Un stop-loss est un ordre stop qui ferme votre position lorsque le prix atteint votre niveau d'invalidation. Une fois déclenché, il est exécuté **au meilleur prix disponible**. Dans un marché rapide, ou si le prix ouvre en *gap* au-delà de votre niveau — après un week-end ou une annonce —, la perte réelle peut dépasser la perte prévue. Certains courtiers proposent des stops garantis, en général contre une prime : renseignez-vous sur leurs conditions avant de compter dessus.
+Un stop-loss est un ordre stop qui ferme votre position lorsque le prix atteint votre niveau d'invalidation. Une fois déclenché, il est exécuté **au meilleur prix disponible**. Dans un marché rapide, ou si le prix ouvre en *gap* au-delà de votre niveau (après un week-end ou une annonce), la perte réelle peut dépasser la perte prévue. Certains courtiers proposent des stops garantis, en général contre une prime : renseignez-vous sur leurs conditions avant de compter dessus.
 
 ## Pips, lots et valeur d'un mouvement
 
@@ -59,10 +59,10 @@ Le spread n'est que la partie visible. Un aller-retour peut comporter :
 
 - **le spread**, payé à l'entrée ;
 - **une commission**, souvent facturée par lot sur certains types de comptes ;
-- **le swap**, des frais — ou plus rarement un crédit — de financement pour une position gardée d'un jour sur l'autre, liés au différentiel de taux d'intérêt entre les deux devises et à la marge du courtier ;
+- **le swap**, des frais (ou plus rarement un crédit) de financement pour une position gardée d'un jour sur l'autre, liés au différentiel de taux d'intérêt entre les deux devises et à la marge du courtier ;
 - **le glissement**, l'écart entre le prix demandé et le prix obtenu.
 
-::: callout example "Exemple pédagogique — le coût d'un aller-retour"
+::: callout example "Exemple pédagogique : le coût d'un aller-retour"
 Achat de 1 lot EURUSD avec un spread de 0,8 pip et une commission de 7 $ par lot aller-retour (hypothèse de compte). Le spread coûte 0,8 × 10 $ = 8 $, la commission 7 $ : 15 $ au total, avant swap et glissement. Si le stop est placé à 15 pips, soit 150 $ de risque, les coûts représentent déjà 10 % de la perte prévue.
 :::
 

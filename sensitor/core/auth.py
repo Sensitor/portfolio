@@ -48,6 +48,8 @@ MULTI = "multi"
 
 # How long a session lasts, and how many failures buy a lockout.
 SESSION_DAYS = 30
+RESET_MINUTES = 60
+VERIFY_HOURS = 48
 MAX_FAILED_LOGINS = 5
 LOCKOUT_MINUTES = 15
 
@@ -276,6 +278,78 @@ class Auth:
         self.store.set_password_hash(email, hash_password(new))
         self.store.revoke_sessions(email)
         return self._issue(email)
+
+    # ── E-mailed tokens: password reset, address verification ───────────────
+    #
+    # Both are single-use, short-lived, and stored as a fingerprint only. The
+    # requests never say whether an account exists: the page shows the same
+    # message either way, and the token is simply not created for an unknown
+    # address.
+
+    def request_password_reset(self, email: str) -> str | None:
+        """A reset token for an account that has a password, else None."""
+        email = _normalise(email)
+        credential = self.store.credential(email) if email else None
+        if not self.multi_user or not credential or not credential.get("password_hash"):
+            return None
+        return self._account_token(email, "reset", timedelta(minutes=RESET_MINUTES))
+
+    def reset_password(self, token: str, new_password: str) -> AuthResult:
+        """
+        Set a new password from a reset link, revoke every session, sign in.
+
+        The token is checked before the password, and spent only once the new
+        password has been accepted, so a typo in the new password does not burn
+        the link.
+        """
+        row = self._valid_token(token, "reset")
+        if row is None:
+            return AuthResult(False, reason="invalid_token")
+        try:
+            check_password_strength(new_password or "")
+        except PasswordError as exc:
+            return AuthResult(False, email=row["user_email"], reason="weak_password",
+                              detail=str(exc))
+        if not self.store.use_account_token(token_fingerprint(token)):
+            return AuthResult(False, reason="invalid_token")
+        email = row["user_email"]
+        self.store.set_password_hash(email, hash_password(new_password))
+        self.store.revoke_sessions(email)
+        self.store.record_login_success(email)
+        return self._issue(email)
+
+    def request_verification(self, email: str) -> str | None:
+        email = _normalise(email)
+        if not email or self.store.get_user(email) is None:
+            return None
+        return self._account_token(email, "verify", timedelta(hours=VERIFY_HOURS))
+
+    def verify_email(self, token: str) -> AuthResult:
+        row = self._valid_token(token, "verify")
+        if row is None or not self.store.use_account_token(token_fingerprint(token)):
+            return AuthResult(False, reason="invalid_token")
+        self.store.set_email_verified(row["user_email"])
+        return AuthResult(True, email=row["user_email"])
+
+    def _account_token(self, email: str, purpose: str, lifetime: timedelta) -> str:
+        token = new_token()
+        self.store.create_account_token(email, token_fingerprint(token), purpose=purpose,
+                                        expires_at=_stamp(_now() + lifetime))
+        return token
+
+    def _valid_token(self, token: str | None, purpose: str) -> dict | None:
+        if not token:
+            return None
+        row = self.store.account_token(token_fingerprint(token), purpose)
+        if not row or row.get("used_at"):
+            return None
+        try:
+            expires = datetime.fromisoformat(row["expires_at"])
+        except (TypeError, ValueError):
+            return None
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        return row if expires > _now() else None
 
     # ── Description ──────────────────────────────────────────────────────────
 

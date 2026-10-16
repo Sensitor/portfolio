@@ -72,7 +72,7 @@ topics = ["CPI, PPI, emploi", "Banques centrales", "Calendrier économique"]
 id = "methode-sensitor"
 number = 9
 title = "La méthode Sensitor"
-summary = "Contexte, liquidité, confirmation structurelle, zone d'intérêt, confluence, invalidation et revue — y compris quand ne pas trader."
+summary = "Contexte, liquidité, confirmation structurelle, zone d'intérêt, confluence, invalidation et revue, y compris savoir quand ne pas trader."
 status = "planned"
 topics = ["Setups valides et invalides", "Documenter sa thèse", "Évaluer la décision"]
 

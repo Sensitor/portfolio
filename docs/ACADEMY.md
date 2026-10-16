@@ -152,27 +152,21 @@ The Academy is a **second app from the same repository**:
 
 ## 6. Known limitations
 
-* **A browser reload signs the member out.** The session token lives in
-  Streamlit session state, as in the portfolio app. The fix is a cookie-backed
-  session or Streamlit's built-in OIDC login (`st.login`), which needs an
-  identity provider to be chosen.
-* **No password reset or email verification yet** — the existing auth has
-  neither; both need an email service.
-* The logo is a vector trace of the supplied image; drop the official file in
-  `assets/brand/sensitor-mark-official.svg` to replace it everywhere.
-* Fonts load from Google Fonts; without network access the app falls back to
-  system fonts.
-* On a phone, the lesson outline sits above the lesson rather than beside it.
+Account limitations (reload sign-out, password reset, verification) are
+resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
+
 * Library files are Markdown. PDFs can be added the same way once they exist.
+* Videos and ebooks are announced in the Academy home as « En préparation ».
 
 ---
 
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 215 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy.py       # 216 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  56 checks — HTTP access policy, isolation, no answer key
-python tests/test_academy_app.py   #  76 checks — every page and space renders, locking, writes per member
+python tests/test_academy_app.py   #  91 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  39 checks — spaces registry, renderers, brand asset
+python tests/test_accounts.py      #  38 checks — reset, verification, e-mail, export, v7 upgrade
 python -m sensitor.academy.validate
 ```

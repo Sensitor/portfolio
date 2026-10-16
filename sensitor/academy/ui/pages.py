@@ -64,6 +64,15 @@ def lesson_state(lesson: Lesson, member: Member, progress: P.CourseProgress) -> 
     return "todo"
 
 
+def _outline_state(item: Lesson, reading: Lesson, member: Member,
+                   progress: P.CourseProgress) -> str:
+    """In a lesson's outline, only the lesson being read is marked current."""
+    state = lesson_state(item, member, progress)
+    if item.id == reading.id:
+        return "done" if state == "done" else "current"
+    return "todo" if state == "current" else state
+
+
 def lesson_row(lesson: Lesson, state: str, *, flush: bool = False, when: str = "") -> str:
     if state == "done":
         badge = pill(f"Terminée{' · ' + when if when else ''}", "done", "check")
@@ -269,15 +278,22 @@ def lesson_page(catalog: Catalog, email: str | None, route: dict) -> None:
             rt.link("← Le parcours", "course", key="lesson_back", kind="tertiary", course=course.id)
             html(f'<div class="sx-outline-head">Plan du parcours<b>{esc(course.title)}</b></div>')
             for item in course.lessons:
-                state = lesson_state(item, member, progress)
-                if item.id == lesson.id and state != "done":
-                    state = "current"
+                state = _outline_state(item, lesson, member, progress)
                 tap(f"outline_{item.id}",
                     f'<div class="sx-outline-item{" current" if item.id == lesson.id else ""}">'
                     f'{hexmark(str(item.number), state)}<span class="x">{esc(item.title)}</span></div>',
                     f"Leçon {item.number} : {item.title}", "lesson", course=course.id, lesson=item.id)
 
     with body:
+        with st.container(key=f"mobileonly_outline_{lesson.id}"):
+            with st.expander(f"Plan du parcours · leçon {lesson.number} sur {len(course.lessons)}"):
+                for item in course.lessons:
+                    state = _outline_state(item, lesson, member, progress)
+                    tap(f"m_outline_{item.id}",
+                        f'<div class="sx-outline-item{" current" if item.id == lesson.id else ""}">'
+                        f'{hexmark(str(item.number), state)}<span class="x">{esc(item.title)}</span></div>',
+                        f"Leçon {item.number} : {item.title}", "lesson", course=course.id,
+                        lesson=item.id)
         done = lesson.id in progress.completed
         state = (pill("Terminée", "done", "check") if done else
                  pill("Accès libre", "free") if lesson.is_public else pill("Membres", "member", "lock"))
@@ -435,7 +451,7 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
 def progress_page(catalog: Catalog, email: str | None, route: dict) -> None:
     crumbs("Sensitor", "Progression")
     page_header("Espace VII · Progression", "Mesurer ce que l'on <em>apprend</em>.",
-                "Vos leçons terminées, vos quiz et les notions à revoir — calculés à partir de ce "
+                "Vos leçons terminées, vos quiz et les notions à revoir, calculés à partir de ce "
                 "que vous avez réellement fait.")
     if not email:
         with st.container(key="navy_progress_locked"):

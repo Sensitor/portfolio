@@ -11,7 +11,7 @@
 ## 2. L'invalidation
 
 - [ ] Je sais à quel prix mon scénario est faux.
-- [ ] Mon stop est placé à ce niveau, avec une marge pour le spread — pas là où « ça coûte moins cher ».
+- [ ] Mon stop est placé à ce niveau, avec une marge pour le spread, et non là où « ça coûte moins cher ».
 
 ## 3. Le budget
 

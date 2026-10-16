@@ -206,6 +206,10 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 .stApp [data-testid="stSelectbox"] [data-baseweb="select"] > div,
 .stApp [data-testid="stSelectbox"] [data-baseweb="select"] > div > div { background-color: var(--white) !important; }
+.stApp [data-testid="stTextInputRootElement"], .stApp [data-testid="stTextInputRootElement"] > div {
+  background-color: var(--white) !important;
+}
+.stApp [data-testid="stExpander"] summary { background: var(--white) !important; }
 .stApp input::placeholder { color: var(--faint) !important; -webkit-text-fill-color: var(--faint); }
 .stApp [data-testid="stNumberInputContainer"] button { background: var(--paper-2) !important; color: var(--ink) !important; border: 0 !important; }
 .stApp [data-testid="InputInstructions"] { color: var(--muted) !important; }
@@ -306,7 +310,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [class*="st-key-solution_incorrect"] .sx-callout-title { color: var(--red); }
 .stApp [class*="st-key-solution_"] p { font-size: 15px; }
 
-/* Lesson outline */
+/* Lesson outline: a side column on desktop, a collapsible panel on phones */
+.stApp [class*="st-key-mobileonly_"] { display: none; }
 .stApp [class*="st-key-outline"] { position: sticky; top: 1.2rem; }
 .stApp [data-testid="stHorizontalBlock"]:has([class*="st-key-outline"]) { align-items: stretch; }
 
@@ -658,6 +663,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   .stApp [class*="st-key-sheet_"] { padding: 1.5rem 1.15rem 1.2rem; }
   .stApp [class*="st-key-panel_"] { padding: 1.3rem 1.1rem 1.1rem; }
   .stApp [class*="st-key-outline"] { position: static; }
+  .stApp [data-testid="stColumn"]:has(> div > [class*="st-key-outline_"]),
+  .stApp [data-testid="stColumn"]:has([class*="st-key-outline_"]) { display: none; }
+  .stApp [class*="st-key-mobileonly_"] { display: flex; }
   .stApp .sx-result { grid-template-columns: 1fr; gap: .6rem; }
   .stApp .sx-lesson-head .no { font-size: 3.4rem; }
   .stApp .sx-lesson-head { gap: 0 1rem; }

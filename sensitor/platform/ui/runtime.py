@@ -8,28 +8,44 @@ same `Store` and `Auth` are used, so one account works in both apps.
 
 Navigation is held in session state and mirrored into the URL query string, so
 the address bar shows where you are and a shared link to a public lesson opens
-that lesson. A page reload starts a new Streamlit session and therefore signs
-the visitor out — the same limitation as the portfolio app, documented in
-docs/PLATFORM.md.
+that lesson.
+
+Staying signed in across reloads
+--------------------------------
+A reload starts a new Streamlit session, which knows nothing of the last one.
+The session token is therefore also kept in a cookie (`sensitor_session`),
+written from the page by a small script and read back from the request through
+`st.context.cookies` when a new session starts. The cookie holds the same token
+the session table knows only by its fingerprint; it expires with the session
+(30 days), is cleared on sign-out, and every session can be revoked at once
+from the account page. It is not HttpOnly — Streamlit offers no way to set a
+server-side cookie — which is acceptable here because every piece of text the
+app renders is escaped.
 """
 
 from __future__ import annotations
 
+import json
 import os
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from ...academy.content import Catalog, cached_catalog
 from .. import spaces
 
 SECRET_KEYS = (
     "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
-    "SENSITOR_ACADEMY_PREVIEW", "SENSITOR_TOOLS_URL",
+    "SENSITOR_ACADEMY_PREVIEW", "SENSITOR_TOOLS_URL", "SENSITOR_PUBLIC_URL",
+    "SENSITOR_SMTP_HOST", "SENSITOR_SMTP_PORT", "SENSITOR_SMTP_USER",
+    "SENSITOR_SMTP_PASSWORD", "SENSITOR_MAIL_FROM",
 )
+COOKIE = "sensitor_session"
+COOKIE_OP = "ac_cookie_op"
 
 ROUTE_KEY = "ac_route"
 TOKEN_KEY = "session_token"
-ROUTE_FIELDS = ("course", "lesson", "quiz", "resource")
+ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token")
 
 
 def tools_url() -> str:
@@ -76,15 +92,63 @@ def catalog() -> Catalog:
     return cached_catalog()
 
 
+def _cookie_token() -> str | None:
+    try:
+        value = st.context.cookies.get(COOKIE)
+    except Exception:                                    # noqa: BLE001
+        return None
+    return value if isinstance(value, str) and value else None
+
+
 def current_user() -> str | None:
+    """
+    The verified email behind this session, or None.
+
+    The token comes from session state, or — on the first run after a reload —
+    from the cookie. A cookie whose session has expired or been revoked is
+    cleared rather than retried on every run.
+    """
     auth = get_auth()
+    if auth is None:
+        return None
     token = st.session_state.get(TOKEN_KEY)
-    if auth is None or not token:
+    from_cookie = False
+    if not token and not st.session_state.get("ac_cookie_checked"):
+        st.session_state["ac_cookie_checked"] = True
+        token = _cookie_token()
+        from_cookie = bool(token)
+    if not token:
         return None
     email = auth.resolve(token)
-    if not email:
-        st.session_state.pop(TOKEN_KEY, None)
-    return email
+    if email:
+        st.session_state[TOKEN_KEY] = token
+        return email
+    st.session_state.pop(TOKEN_KEY, None)
+    if from_cookie:
+        st.session_state[COOKIE_OP] = ("clear", None)
+    return None
+
+
+def remember(token: str) -> None:
+    from ...core.auth import SESSION_DAYS
+    st.session_state[TOKEN_KEY] = token
+    st.session_state[COOKIE_OP] = ("set", token, SESSION_DAYS * 86_400)
+
+
+def flush_cookie() -> None:
+    """Write or clear the session cookie, once, at the end of a run."""
+    op = st.session_state.pop(COOKIE_OP, None)
+    if not op:
+        return
+    if op[0] == "set":
+        value, age = json.dumps(op[1]), int(op[2])
+    else:
+        value, age = json.dumps(""), 0
+    components.html(
+        "<script>(function(){try{const d=window.parent.document;"
+        "const secure=window.parent.location.protocol==='https:'?'; Secure':'';"
+        f"d.cookie='{COOKIE}='+encodeURIComponent({value})+'; Max-Age={age}; Path=/; SameSite=Lax'+secure;"
+        "}catch(e){}})();</script>", height=0)
 
 
 def multi_user() -> bool:
@@ -96,7 +160,7 @@ def sign_in(email: str, password: str | None):
     auth = get_auth()
     result = auth.sign_in(email, password) if auth else None
     if result:
-        st.session_state[TOKEN_KEY] = result.token
+        remember(result.token)
     return result
 
 
@@ -104,7 +168,7 @@ def sign_up(email: str, password: str | None):
     auth = get_auth()
     result = auth.sign_up(email, password) if auth else None
     if result:
-        st.session_state[TOKEN_KEY] = result.token
+        remember(result.token)
     return result
 
 
@@ -115,6 +179,7 @@ def sign_out() -> None:
     for key in list(st.session_state):
         if key == TOKEN_KEY or key.startswith("quiz::") or key.startswith("ex::"):
             del st.session_state[key]
+    st.session_state[COOKIE_OP] = ("clear", None)
 
 
 # ── Navigation ───────────────────────────────────────────────────────────────

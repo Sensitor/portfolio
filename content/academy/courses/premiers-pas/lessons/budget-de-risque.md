@@ -40,7 +40,7 @@ La taille de position découle du montant risqué et de la distance entre l'entr
 \text{Taille (lots)} = \frac{\text{Montant risqué}}{\text{Distance au stop} \times \text{Valeur d'un mouvement de 1 par lot}}
 :::
 
-::: callout example "Exemple pédagogique — EURUSD, compte en dollars"
+::: callout example "Exemple pédagogique : EURUSD, compte en dollars"
 Capital de 10 000 $, risque de 1 %, soit 100 $. Achat à 1,0850, stop à 1,0820 : 30 pips. Avec la convention du lot standard (100 000 unités), 1 pip vaut 10 $ par lot : toucher le stop coûte 300 $ par lot.
 
 Taille : 100 ÷ 300 = 0,333 lot, arrondie **vers le bas** à 0,33 lot si le pas de volume est de 0,01. Risque effectif : 0,33 × 300 = 99 $. Ce calcul n'inclut ni le spread, ni la commission, ni le glissement.
@@ -76,7 +76,7 @@ La dernière colonne explique pourquoi un drawdown profond est si difficile à e
 Ces séries ne sont pas rares. Avec un taux de réussite de 50 % et des trades indépendants, la probabilité de connaître **au moins une série de 5 pertes consécutives** sur 100 trades est d'environ 81 % ; pour une série de 6 pertes ou plus, d'environ 55 %.
 
 ::: callout method "Hypothèse"
-Ces probabilités supposent des trades indépendants et un taux de réussite constant. En pratique, les résultats ont tendance à se regrouper — périodes de marché difficiles, erreurs répétées —, ce qui rend les longues séries encore plus probables.
+Ces probabilités supposent des trades indépendants et un taux de réussite constant. En pratique, les résultats ont tendance à se regrouper (périodes de marché difficiles, erreurs répétées), ce qui rend les longues séries encore plus probables.
 :::
 
 ## À vous de calculer

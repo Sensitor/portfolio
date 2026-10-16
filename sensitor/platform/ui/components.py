@@ -192,5 +192,5 @@ def diagram(svg: str, caption: str, number: int | None = None) -> None:
 
 def footer() -> None:
     html(f'<footer class="sx-footer"><span class="m">{brand.monogram_svg(16, color="#0f1b26")}'
-         f'SENSITOR</span><span class="c">CONTENU ÉDUCATIF — NE CONSTITUE PAS UN CONSEIL EN '
+         f'SENSITOR</span><span class="c">CONTENU ÉDUCATIF · NE CONSTITUE PAS UN CONSEIL EN '
          f'INVESTISSEMENT</span><span>APPRENDRE AVEC MÉTHODE</span></footer>')

@@ -169,6 +169,7 @@ class Store:
             conn.execute("DELETE FROM workspace WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM lesson_progress WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM quiz_attempts WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -182,7 +183,10 @@ class Store:
         """
         email = _email(email)
         return {
-            "user": self.get_user(email),
+            # The credential is not personal data the person needs back, and an
+            # export is a file that gets e-mailed and left in download folders.
+            "user": {k: v for k, v in (self.get_user(email) or {}).items()
+                     if k not in ("password_hash", "failed_logins", "locked_until")} or None,
             "portfolios": [
                 {
                     "portfolio": asdict(portfolio),
@@ -277,6 +281,48 @@ class Store:
             item["passed"] = bool(item["passed"])
             rows.append(item)
         return rows
+
+    # ── Single-use account tokens ────────────────────────────────────────────
+
+    def create_account_token(self, email: str, fingerprint: str, *, purpose: str,
+                             expires_at: str) -> None:
+        """
+        Record a new token and retire every unused one of the same purpose.
+
+        Only the latest link sent works: asking twice for a reset must not leave
+        two live links in someone's mailbox.
+        """
+        email = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, email)
+            conn.execute(
+                "UPDATE account_tokens SET used_at = ? WHERE user_email = ? "
+                "AND purpose = ? AND used_at IS NULL", (stamp, email, purpose))
+            conn.execute(
+                "INSERT INTO account_tokens (fingerprint, user_email, purpose, "
+                "created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+                (fingerprint, email, purpose, stamp, expires_at))
+
+    def account_token(self, fingerprint: str, purpose: str) -> dict | None:
+        """The token row if it exists for this purpose. Expiry is the caller's call."""
+        rows = self._read(
+            "SELECT * FROM account_tokens WHERE fingerprint = ? AND purpose = ?",
+            (fingerprint, purpose))
+        return dict(rows[0]) if rows else None
+
+    def use_account_token(self, fingerprint: str) -> bool:
+        """Mark a token used. False if it was already used: a link works once."""
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE account_tokens SET used_at = ? WHERE fingerprint = ? "
+                "AND used_at IS NULL", (_now(), fingerprint))
+            return cursor.rowcount == 1
+
+    def set_email_verified(self, email: str) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE users SET email_verified_at = ?, updated_at = ? "
+                         "WHERE email = ?", (_now(), _now(), _email(email)))
 
     # ── Credentials ──────────────────────────────────────────────────────────
 

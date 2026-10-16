@@ -86,4 +86,4 @@ def space_cards(*, key: str, exclude: tuple[str, ...] = ()) -> None:
                     f'</div><div class="t">{esc(space.label)}</div><div class="s">'
                     f'{esc(space.summary)}</div><div class="foot">'
                     f'{pill(space.status_label, "on-navy" if navy else kind)}{icon("arrow")}</div></div>',
-                    f"{space.label} — {space.status_label}", space.entry)
+                    f"{space.label}, {space.status_label.lower()}", space.entry)

@@ -222,6 +222,9 @@ def test_every_user_method_is_scoped():
         # holding it is what proves identity, and the lookup is how the user is
         # discovered rather than something to check the user against.
         "session", "touch_session", "revoke_session",
+        # E-mailed reset and verification tokens: the same construction, the
+        # same reasoning. The link is how the account is found.
+        "account_token", "use_account_token",
     }
     offenders = []
     for name, method in inspect.getmembers(Store, inspect.isfunction):

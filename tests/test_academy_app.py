@@ -81,6 +81,9 @@ ROUTES = [
     {"page": "market"},
     {"page": "community"},
     {"page": "tools"},
+    {"page": "reset"},
+    {"page": "reset", "token": "invalide"},
+    {"page": "verify", "token": "invalide"},
     {"page": "page-inconnue"},
     {"page": "course", "course": "premiers-pas"},
     {"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"},
@@ -107,11 +110,31 @@ def main() -> int:
     alice = token("alice@example.com")
 
     print("\nEvery page renders")
+    dashed = []
     for route in ROUTES:
-        app = run(route)
-        check(f"visitor · {label(route)}", not app.exception, error(app))
-        app = run(route, alice)
-        check(f"member · {label(route)}", not app.exception, error(app))
+        for who, tok in (("visitor", None), ("member", alice)):
+            app = run(route, tok)
+            check(f"{who} · {label(route)}", not app.exception, error(app))
+            if any(d in m.value for m in app.markdown if not m.value.startswith("<style")
+                   for d in ("\u2014", "\u2013")):
+                dashed.append(f"{who} · {label(route)}")
+    check("no em or en dash on any rendered page (house style)", not dashed, str(dashed))
+
+    print("\nAccount")
+    me = run({"page": "account"}, alice)
+    body = text(me)
+    labels = [b.label for b in me.button]
+    check("the member sees sign-out everywhere", "Se déconnecter de tous les appareils" in labels)
+    check("…a password change form", any(f.label == "Changer le mot de passe" for f in me.button)
+          or "Changer le mot de passe" in str(me))
+    check("…a full export", "Exporter toutes mes données (JSON)" in str(me))
+    check("…and account deletion", "Supprimer le compte" in body)
+    check("verification status is shown", "Adresse vérifiée" in body)
+    visitor = run({"page": "account"})
+    check("a visitor sees the forgotten-password tab", "Mot de passe oublié" in str(visitor))
+    check("…which says e-mail is not configured here", "non configuré" in text(visitor))
+    bad = run({"page": "verify", "token": "invalide"})
+    check("a bad verification link says so", "expiré" in text(bad))
 
     print("\nAccess")
     locked = run({"page": "lesson", "course": "premiers-pas", "lesson": "budget-de-risque"})

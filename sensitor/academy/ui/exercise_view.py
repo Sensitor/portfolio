@@ -66,7 +66,7 @@ def _solution(step, text: str | None, *, checked: bool, key: str) -> None:
         result = X.check_step(step, text)
         label, cls = LABELS[result.status], CLASSES[result.status]
         if result.value is not None and result.status == X.INCORRECT:
-            label += f" — vous avez répondu {esc(text)}"
+            label += f" · vous avez répondu {esc(text)}"
     else:
         label, cls = "Corrigé", "neutral"
     with st.container(key=f"solution_{cls}_{key}"):

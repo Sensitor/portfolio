@@ -186,7 +186,7 @@ def _dashboard(catalog, email: str) -> None:
         last_text = "Aucun pour l'instant"
         if last:
             title = last_quiz.title if last_quiz else last["quiz_id"]
-            last_text = f"{title} — {last['correct']} / {last['total']}"
+            last_text = f"{title} : {last['correct']} / {last['total']}"
         html('<div class="sx-facts" style="height:100%">'
              f'<div><dt>Leçons terminées</dt><dd><b>{done}</b> / {total}</dd></div>'
              f'<div><dt>Quiz de validation</dt><dd><b>{sum(1 for q in finals if q in passed)}</b>'

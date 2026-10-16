@@ -167,7 +167,7 @@ def _feedback(question: Question, outcome: Q.QuestionResult, catalog: Catalog,
             mark, cls = icon("cross"), "ko"
         else:
             continue
-        chosen = " — votre choix" if option.id in selected else ""
+        chosen = " (votre choix)" if option.id in selected else ""
         items.append(f'<li class="{cls}"><span class="mark">{mark}</span><b>{esc(option.text)}</b>'
                      f'{chosen}<span class="why">{esc(option.explanation)}</span></li>')
     general = f'<p class="general">{esc(question.explanation)}</p>' if question.explanation else ""

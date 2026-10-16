@@ -21,7 +21,7 @@ En six leçons, vous avez parcouru le chemin qui précède chaque décision de t
 
 1. **Le prix** naît d'une transaction. Vous achetez à l'ask, vous vendez au bid, et le spread est un coût payé à chaque aller-retour.
 2. **Les ordres** n'offrent pas les mêmes garanties : un ordre limite garantit le prix, un ordre stop garantit le déclenchement. Un stop-loss peut glisser.
-3. **Les coûts** — spread, commission, swap, glissement — se rapportent au risque du trade, pas seulement à son gain.
+3. **Les coûts** (spread, commission, swap, glissement) se rapportent au risque du trade, pas seulement à son gain.
 4. **La structure** se décrit à partir des swings. Une cassure est une observation ; ce que l'on en déduit est une hypothèse, avec son invalidation.
 5. **Le risque** se décide avant l'entrée : invalidation, budget, puis taille de position, arrondie vers le bas.
 6. **Les séries de pertes** sont normales. Un risque par position modéré permet de les traverser.

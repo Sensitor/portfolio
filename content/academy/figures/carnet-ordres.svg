@@ -13,7 +13,7 @@
 <line x1="60" y1="150" x2="420" y2="150" stroke="#b9b4a7" stroke-dasharray="4 4"/>
 <g stroke="#284764" stroke-width="1.4" fill="none"><path d="M440 117 H458 V177 H440"/></g>
 <g font-size="13" fill="#1b2733"><text x="470" y="140" font-weight="700">Spread</text><text x="470" y="158" fill="#5b646b">0,8 pip</text></g>
-<g font-size="12"><text x="470" y="96" fill="#8a4a40">Vendeurs — ask</text><text x="470" y="112" fill="#5b646b">vous achetez ici</text>
-<text x="470" y="204" fill="#3f6553">Acheteurs — bid</text><text x="470" y="220" fill="#5b646b">vous vendez ici</text></g>
+<g font-size="12"><text x="470" y="96" fill="#8a4a40">Vendeurs (ask)</text><text x="470" y="112" fill="#5b646b">vous achetez ici</text>
+<text x="470" y="204" fill="#3f6553">Acheteurs (bid)</text><text x="470" y="220" fill="#5b646b">vous vendez ici</text></g>
 <text x="70" y="282" font-size="11" fill="#7b8389">Chiffres illustratifs.</text>
 </svg>

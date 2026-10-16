@@ -22,11 +22,11 @@ Un marché financier met en relation des personnes qui veulent acheter un actif 
 Les intervenants n'ont pas tous les mêmes raisons d'être là :
 
 - les **teneurs de marché** (*market makers*) affichent en permanence un prix d'achat et un prix de vente et se rémunèrent sur l'écart entre les deux ;
-- les **investisseurs institutionnels** — fonds, assureurs, caisses de retraite — déplacent des volumes importants, souvent sur plusieurs jours ;
+- les **investisseurs institutionnels** (fonds, assureurs, caisses de retraite) déplacent des volumes importants, souvent sur plusieurs jours ;
 - les **entreprises** se couvrent : un exportateur européen qui vend des dollars, une compagnie aérienne qui fixe à l'avance le prix de son carburant ;
 - les **particuliers** interviennent le plus souvent par l'intermédiaire d'un courtier.
 
-Se couvrir, investir, spéculer, fournir de la liquidité : ces motivations différentes expliquent pourquoi il y a presque toujours quelqu'un en face de votre ordre — mais pas toujours au prix que vous espériez.
+Se couvrir, investir, spéculer, fournir de la liquidité : ces motivations différentes expliquent pourquoi il y a presque toujours quelqu'un en face de votre ordre, mais pas toujours au prix que vous espériez.
 
 ## Le carnet d'ordres
 

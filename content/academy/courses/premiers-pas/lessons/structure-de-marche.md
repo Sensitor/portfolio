@@ -16,7 +16,7 @@ quiz = "check-structure-de-marche"
 
 ## Ce que l'on regarde
 
-Un graphique en chandeliers résume chaque période — une minute, une heure, une journée — par quatre prix : l'ouverture, le plus haut, le plus bas et la clôture. Plutôt que de commenter chaque bougie, l'analyse de structure s'intéresse aux **points où le prix a changé de direction**. Ce sont eux qui donnent la forme du mouvement.
+Un graphique en chandeliers résume chaque période (une minute, une heure, une journée) par quatre prix : l'ouverture, le plus haut, le plus bas et la clôture. Plutôt que de commenter chaque bougie, l'analyse de structure s'intéresse aux **points où le prix a changé de direction**. Ce sont eux qui donnent la forme du mouvement.
 
 ::: callout definition "Sommet et creux de swing"
 Un **sommet de swing** est un plus haut encadré, de part et d'autre, par des plus hauts inférieurs. Un **creux de swing** est un plus bas encadré par des plus bas supérieurs.
@@ -52,7 +52,7 @@ La structure décrit le passé ; elle ne prédit pas l'avenir. Une analyse solid
 
 ## L'unité de temps change la lecture
 
-Une tendance haussière sur un graphique en 15 minutes peut s'inscrire dans une baisse sur le graphique journalier. Les deux lectures sont exactes : elles décrivent des échelles différentes. Précisez donc toujours l'unité de temps dont vous parlez. L'analyse multi-unités de temps — partir du contexte large avant d'affiner sur une unité plus courte — sera traitée plus loin dans le programme.
+Une tendance haussière sur un graphique en 15 minutes peut s'inscrire dans une baisse sur le graphique journalier. Les deux lectures sont exactes : elles décrivent des échelles différentes. Précisez donc toujours l'unité de temps dont vous parlez. L'analyse multi-unités de temps, qui part du contexte large avant d'affiner sur une unité plus courte, sera traitée plus loin dans le programme.
 
 ::: callout mistake "Erreur fréquente"
 Redessiner ses swings après coup pour qu'ils confirment l'idée de départ. Fixez votre définition avant de regarder le graphique, et appliquez-la même quand elle vous contrarie.

@@ -149,17 +149,55 @@ Spaces in preparation say so and offer nothing to click but links to real conten
 ## 6. Deploying
 
 Streamlit Cloud: main file **`sensitor_app.py`** (or keep an existing
-`academy_app.py` deployment), with the same secrets as the portfolio app:
-`SENSITOR_DB_URL`, `SENSITOR_AUTH = "multi"`, and optionally
-`SENSITOR_TOOLS_URL` for the link to the analytics app.
+`academy_app.py` deployment), with the same secrets as the portfolio app, plus
+the optional ones for e-mail:
+
+```toml
+SENSITOR_DB_URL = "postgresql://…"
+SENSITOR_AUTH = "multi"
+SENSITOR_PUBLIC_URL = "https://<your-app>.streamlit.app"   # base of e-mailed links
+SENSITOR_TOOLS_URL = "https://<portfolio-app>.streamlit.app" # optional
+
+# E-mail (password reset, address verification). Any SMTP provider works:
+SENSITOR_SMTP_HOST = "smtp-relay.brevo.com"
+SENSITOR_SMTP_PORT = "587"
+SENSITOR_SMTP_USER = "…"
+SENSITOR_SMTP_PASSWORD = "…"
+SENSITOR_MAIL_FROM = "Sensitor <no-reply@your-domain>"
+```
+
+Without the SMTP block the app says that e-mail is not configured, and an
+operator can still hand out a reset link:
+
+```bash
+python -m sensitor.core.admin reset-link someone@example.com    # valid 1 hour, once
+python -m sensitor.core.admin verify-link someone@example.com   # valid 48 hours, once
+```
 
 ---
 
-## 7. Known limitations
+## 7. Accounts
 
-* A browser reload signs the member out (session token in Streamlit session
-  state). Fix: cookie-backed session or `st.login` with an identity provider.
-* No password reset or email verification yet.
+* **Staying signed in.** The session token is kept in a `sensitor_session`
+  cookie (SameSite=Lax, Secure on HTTPS, 30 days) and read back on reload.
+  Sign-out clears it; « Se déconnecter de tous les appareils » revokes every
+  session server-side.
+* **Password reset** and **address verification** use single-use tokens
+  stored as fingerprints (table `account_tokens`, schema v7). Reset links last
+  one hour and revoke every session when used; asking twice keeps only the
+  latest link; the request page never reveals whether an address has an account.
+* **For a member:** password change, full JSON export (credentials excluded),
+  and account deletion with confirmation, which removes every row filed under
+  the address.
+
+---
+
+## 8. Known limitations
+
+* The session cookie is set from the page, so it cannot be HttpOnly; all
+  rendered text is escaped, which is what makes that acceptable.
+* Verification is shown, not enforced: an unverified address can still read.
 * The portfolio app keeps its own look and sign-in screen until it is brought
   into the shell; the account itself is already shared.
+* Library files are Markdown; PDFs can be added the same way once they exist.
 * Fonts load from Google Fonts; offline, system fonts are used.

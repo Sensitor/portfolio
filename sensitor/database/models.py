@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 TABLES: dict[str, str] = {
     "users": """
@@ -37,6 +37,10 @@ CREATE TABLE IF NOT EXISTS users (
     -- decides whether that is acceptable, so the distinction lives in one place
     -- rather than being inferred from a null check at every call site.
     password_hash TEXT,
+
+    -- When the address was proven to belong to the account holder, by a link
+    -- sent to it. NULL until then; nothing is gated on it yet, it is shown.
+    email_verified_at TEXT,
 
     last_login_at TEXT,
     -- Throttling state. Kept on the user rather than in memory so a restart
@@ -60,6 +64,20 @@ CREATE TABLE IF NOT EXISTS sessions (
     expires_at  TEXT NOT NULL,
     last_seen_at TEXT,
     label       TEXT
+)""",
+
+    # Single-use tokens sent by e-mail: password reset and address
+    # verification. Like sessions, only the fingerprint is stored, so a copy of
+    # the database cannot be turned into a working link.
+    "account_tokens": """
+CREATE TABLE IF NOT EXISTS account_tokens (
+    fingerprint TEXT PRIMARY KEY,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    purpose     TEXT NOT NULL CHECK (purpose IN ('reset', 'verify')),
+    created_at  TEXT NOT NULL,
+    expires_at  TEXT NOT NULL,
+    used_at     TEXT
 )""",
 
     # Every table below cascades from `users`. Deleting a person removes their
@@ -276,6 +294,7 @@ CREATE INDEX IF NOT EXISTS idx_accounts_user ON trading_accounts(user_email);
 CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_email, closed_at);
 CREATE INDEX IF NOT EXISTS idx_trades_account ON trades(user_email, account_id);
 CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
+CREATE INDEX IF NOT EXISTS idx_tokens_user ON account_tokens(user_email, purpose);
 CREATE INDEX IF NOT EXISTS idx_progress_user ON lesson_progress(user_email, course_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_id, created_at);
 """

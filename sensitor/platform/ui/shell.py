@@ -22,6 +22,8 @@ from .components import esc, html
 RENDERERS = {
     "home": home.render,
     "account": account.render,
+    "reset": account.reset_page,
+    "verify": account.verify_page,
     "academy": academy.academy_home,
     "course": academy.course_page,
     "lesson": academy.lesson_page,
@@ -79,9 +81,11 @@ def main() -> None:
     except ContentError as exc:
         st.error("Le contenu de l'Academy contient des erreurs et ne peut pas être affiché.")
         st.code("\n".join(exc.problems))
+        rt.flush_cookie()
         return
 
     email = rt.current_user()
     _sidebar(page, email)
     RENDERERS.get(page, home.render)(catalog, email, route)
     _scroll_to_top()
+    rt.flush_cookie()

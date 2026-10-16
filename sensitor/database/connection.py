@@ -175,7 +175,7 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "workspace": [("manual_prices", "TEXT")],
     "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
               ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
-              ("locked_until", "TEXT")],
+              ("locked_until", "TEXT"), ("email_verified_at", "TEXT")],
 }
 
 
@@ -215,6 +215,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # Version 6 adds the Academy tables, `lesson_progress` and `quiz_attempts`.
     # New tables only — `executescript` has created them — so, as for version 4,
     # no existing row is touched.
+    #
+    # Version 7 adds `account_tokens` (password reset, address verification)
+    # and `users.email_verified_at`: a new table and a new nullable column,
+    # both applied above.
     #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
