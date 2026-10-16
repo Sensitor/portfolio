@@ -615,6 +615,15 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-entry-q { margin: .9rem 0 .2rem; font: italic 500 1.05rem/1.45 var(--serif); color: var(--ink); }
 .stApp .sx-entry-body { margin-top: .6rem; font-size: 15px; line-height: 1.7; color: var(--ink); overflow-wrap: anywhere; }
 .stApp [class*="st-key-panel_entry_"] { margin-bottom: .2rem; padding: 1.3rem 1.6rem .6rem; }
+.stApp .sx-routine-label { margin: .4rem 0 .2rem; font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.stApp .sx-entry-routine { margin-top: .9rem; padding-top: .7rem; border-top: 1px solid var(--line); }
+.stApp .sx-entry-routine b { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.stApp .sx-entry-routine ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .3rem; }
+.stApp .sx-entry-routine li { display: flex; gap: .5rem; align-items: flex-start; font-size: 13.5px; line-height: 1.5; }
+.stApp .sx-entry-routine li svg { width: 15px; height: 15px; flex: none; margin-top: .15rem; }
+.stApp .sx-entry-routine li.on { color: var(--ink); }
+.stApp .sx-entry-routine li.on svg { color: var(--green, #3f6553); }
+.stApp .sx-entry-routine li.off { color: var(--faint); }
 .stApp .sx-plan { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
 .stApp .sx-plan li { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 1rem; align-items: baseline; padding: 1rem 0; border-bottom: 1px solid var(--line); }
 .stApp .sx-plan .n { font: 500 12px var(--mono); color: var(--faint); }

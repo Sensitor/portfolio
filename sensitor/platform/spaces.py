@@ -63,10 +63,9 @@ SPACES: tuple[Space, ...] = (
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
           entry="library", pages=("library", "resource"), numeral="II"),
     Space("psychology", "Psychologie et discipline", "apprendre", LIVE,
-          "Un journal de réflexion privé avant et après chaque séance, et le parcours 6 sur les biais "
+          "Un journal de réflexion privé avec sa routine de séance, et le parcours 6 sur les biais "
           "et les routines.",
           entry="psychology", pages=("psychology",), numeral="III",
-          planned=("Routines avant, pendant et après la séance, à cocher dans le journal",),
           related=(("Parcours 6 : Décider sous incertitude", "course:decider-sous-incertitude"),
                    ("La routine de séance", "resource:routine-de-seance"),
                    ("La checklist avant chaque trade", "resource:checklist-avant-trade"))),

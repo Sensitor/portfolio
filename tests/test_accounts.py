@@ -184,7 +184,35 @@ def test_upgrade() -> None:
     check("the journal table is there after the upgrade",
           store.add_journal_entry("old@example.com", kind="free", body="Première note.") > 0)
     check("the database is at the current version",
-          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 8)
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 9)
+
+    print("\nUpgrading a version-8 database (journal without routines)")
+    path = os.path.join(WORK, "v8.db")
+    conn = sqlite3.connect(path)
+    conn.executescript("""
+        CREATE TABLE users (email TEXT PRIMARY KEY, tier TEXT NOT NULL DEFAULT 'free',
+            display_name TEXT, password_hash TEXT, last_login_at TEXT,
+            failed_logins INTEGER NOT NULL DEFAULT 0, locked_until TEXT, email_verified_at TEXT,
+            created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        INSERT INTO users (email, created_at, updated_at) VALUES ('old@example.com', 'x', 'x');
+        CREATE TABLE journal_entries (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+            kind TEXT NOT NULL CHECK (kind IN ('pre', 'post', 'free')),
+            mood INTEGER CHECK (mood IS NULL OR mood BETWEEN 1 AND 5),
+            prompt TEXT NOT NULL DEFAULT '', body TEXT NOT NULL CHECK (length(body) > 0),
+            created_at TEXT NOT NULL);
+        INSERT INTO journal_entries (user_email, kind, body, created_at)
+            VALUES ('old@example.com', 'pre', 'Une note d''avant.', '2026-10-01T08:00:00+00:00');
+        PRAGMA user_version = 8;
+    """)
+    conn.commit()
+    conn.close()
+    store = Store(path)
+    old = store.journal_entries("old@example.com")
+    check("the old note survives, with no routine", len(old) == 1 and old[0]["checks"] is None)
+    store.add_journal_entry("old@example.com", kind="pre", body="Nouvelle note.", checks=["etat"])
+    check("a new note stores its routine", store.journal_entries("old@example.com")[0]["checks"] == ["etat"])
+    check("the database is at version 9", store._read("PRAGMA user_version")[0][0] == 9)
 
 
 def main() -> int:

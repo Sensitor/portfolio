@@ -176,6 +176,7 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
               ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
               ("locked_until", "TEXT"), ("email_verified_at", "TEXT")],
+    "journal_entries": [("checks", "TEXT")],
 }
 
 
@@ -222,6 +223,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     #
     # Version 8 adds `journal_entries`, the private reflection journal. A new
     # table only, so, as for versions 4 and 6, no existing row is touched.
+    #
+    # Version 9 adds `journal_entries.checks`, the routine items ticked on a
+    # note. A nullable column, applied above; existing notes keep NULL, which
+    # reads as « no routine offered » and keeps them out of the routine counts.
     #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.

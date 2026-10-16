@@ -598,6 +598,16 @@ def test_journal():
             refused = True
         check(f"the database refuses {label}", refused)
     check("a refused write leaves nothing behind", len(store.journal_entries(ALICE)) == 1)
+    with_routine = store.add_journal_entry(ALICE, kind="pre", body="Routine faite.", checks=["etat", "limites"])
+    without = store.add_journal_entry(ALICE, kind="free", body="Sans routine.")
+    rows = {e["id"]: e for e in store.journal_entries(ALICE)}
+    check("ticked routine items come back as a list", rows[with_routine]["checks"] == ["etat", "limites"])
+    check("no routine comes back as None", rows[without]["checks"] is None)
+    store.add_journal_entry(ALICE, kind="post", body="Rien coché.", checks=[])
+    check("an empty routine is kept as an empty list", store.journal_entries(ALICE, "post")[0]["checks"] == [])
+    store.delete_journal_entry(ALICE, with_routine)
+    store.delete_journal_entry(ALICE, without)
+    store.delete_journal_entry(ALICE, store.journal_entries(ALICE, "post")[0]["id"])
     try:
         store.add_journal_entry("", kind="pre", body="x")
         anonymous = False

@@ -211,6 +211,9 @@ def main() -> int:
     secret = "Trop pressé ce matin <script>alert(1)</script>\nDeuxième ligne $ 100"
     page.text_area(key="jr_body_pre").input(secret)
     page.radio(key="jr_mood_pre").set_value(2)
+    check("the routine before the session is offered", len(page.checkbox) == 5)
+    page.checkbox(key="jr_chk_pre_etat").check()
+    page.checkbox(key="jr_chk_pre_limites").check()
     next(b for b in page.button if b.label == "Enregistrer la note").click().run()
     notes = store().journal_entries("alice@example.com")
     check("the note is stored under the member", len(notes) == 1 and notes[0]["mood"] == 2
@@ -219,6 +222,13 @@ def main() -> int:
     body = text(page)
     check("the note is shown, escaped", "&lt;script&gt;" in body and "<script>" not in body)
     check("its line breaks are kept", "<br>Deuxième ligne" in body)
+    check("its routine is stored in order", store().journal_entries("alice@example.com")[0]["checks"]
+          == ["etat", "limites"])
+    check("its routine is shown on the note", "Routine : 2 sur 5" in body)
+    check("each routine item is counted with its sample size",
+          "Mes limites du jour sont écrites</td><td>1 sur 1 note</td>" in body
+          and "Chaque scénario a son invalidation écrite</td><td>0 sur 1 note</td>" in body)
+    check("nothing is announced as planned any more", "Ce qui est prévu" not in body)
     check("its sample size is shown", "1 note</td>" in body)
     check("no diagnosis is offered", "ni une évaluation ni un diagnostic" in body)
     page.text_area(key="jr_body_pre").input("   ")

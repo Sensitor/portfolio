@@ -254,9 +254,23 @@ def main() -> int:
                            ("a mood of 7", {"kind": "pre", "body": "x", "mood": 7}),
                            ("an invented question", {"kind": "pre", "body": "x", "prompt": "Inventée ?"})):
         check(f"{label} is 422", client.post("/journal", json=payload, headers=h(alice)).status_code == 422)
+    check("the kinds carry their routine", any(k["routine"] for k in client.get("/journal/kinds").json()))
+    for label, payload in (("a routine item from another moment", {"kind": "pre", "body": "x", "checks": ["regles"]}),
+                           ("routine items on a free note", {"kind": "free", "body": "x", "checks": ["etat"]})):
+        check(f"{label} is 422", client.post("/journal", json=payload, headers=h(alice)).status_code == 422)
+    r = client.post("/journal", json={"kind": "post", "body": "Revue.", "checks": ["arret", "regles"]}, headers=h(alice))
+    routine_id = r.json()["id"]
+    check("a routine is stored in its own order",
+          next(e for e in client.get("/journal", headers=h(alice)).json() if e["id"] == routine_id)["checks"]
+          == ["regles", "arret"])
+    routine = client.get("/journal/summary", headers=h(alice)).json()["routine"]
+    check("the summary counts routine items with their sample size",
+          {(i["id"], i["ticked"], i["n"]) for i in routine if i["kind"] == "post"} >= {("regles", 1, 1), ("poursuite", 0, 1)})
+    client.delete(f"/journal/{routine_id}", headers=h(alice))
     summary = client.get("/journal/summary", headers=h(alice)).json()
     check("the summary counts with its sample size",
-          summary["total"] == 1 and summary["moods"] == [{"kind": "pre", "average": 3.0, "n": 1}], str(summary))
+          summary["total"] == 1 and summary["moods"] == [{"kind": "pre", "average": 3.0, "n": 1}]
+          and summary["routine"] == [], str(summary))
     check("the owner deletes it", client.delete(f"/journal/{note_id}", headers=h(alice)).status_code == 204)
     check("and it is gone", client.get("/journal", headers=h(alice)).json() == [])
     params = {p["name"] for route in client.get("/openapi.json").json()["paths"].values()

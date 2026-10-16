@@ -22,7 +22,7 @@ place, and each one is reused as it was:
 | Existing piece | Role in the platform |
 |---|---|
 | `sensitor/core/auth.py` + `Store` sessions | the single account system, shared with the portfolio app |
-| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6, the reflection journal since v8 |
+| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6, the reflection journal since v8, its routine since v9 |
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
@@ -52,7 +52,7 @@ are all built from it.
 |---|---|---|---|
 | I | Academy | live | `academy`, `course`, `lesson`, `quiz` |
 | II | Bibliothèque | live | `library`, `resource` |
-| III | Psychologie et discipline | live | `psychology` (private reflection journal) |
+| III | Psychologie et discipline | live | `psychology` (private reflection journal and session routine) |
 | IV | Trading Lab | live | `lab` (risk calculator, exercises) |
 | V | Salle des marchés | preparing | `market` |
 | VI | Communauté | preparing | `community` |
@@ -68,17 +68,21 @@ active ». It has no inputs, no sample posts, no fake members. A test checks it.
 (`platform/journal.py` for the rules, `platform/ui/psychology.py` for the page,
 table `journal_entries`, routes under `/journal`). Each note has a moment
 (before the session, after it, or free), an optional guided question from a
-fixed list, an optional 1 to 5 scale and up to 4 000 characters of text.
+fixed list, an optional 1 to 5 scale and up to 4 000 characters of text. Notes
+before and after a session also carry the « Routine de séance » of path 6 to
+tick (column `checks`, a JSON list; NULL when no routine was offered, so notes
+written before v9 stay out of the routine counts).
 
 * **Private by construction.** Every store method takes the member's address
   and puts it in the WHERE clause; the API takes the member from the bearer
   token only, and a note that belongs to someone else answers 404, like a
   missing one. Notes are in the account export and are erased with the account.
-* **No interpretation.** The page shows counts and the average of the scale the
-  member filled in, each with its sample size. It never reads the text, scores
+* **No interpretation.** The page shows counts, the average of the scale the
+  member filled in, and how many notes ticked each routine item, each with its
+  sample size. It never reads the text, scores
   it, labels the person or suggests a diagnosis.
 * The space links to path 6, « Décider sous incertitude », and to its « Routine de séance »
-  checklist. What remains announced (routines to tick inside the journal) stays listed as « Prévu ».
+  checklist. Nothing in it is announced as planned any more.
 
 **The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
 set, and says the link is not configured otherwise.

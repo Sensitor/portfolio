@@ -293,24 +293,27 @@ class Store:
     # or replayed id from another member matches nothing.
 
     def add_journal_entry(self, user_email: str, *, kind: str, body: str,
-                          mood: int | None = None, prompt: str = "") -> int:
+                          mood: int | None = None, prompt: str = "",
+                          checks: list[str] | None = None) -> int:
         user_email = _email(user_email)
         if not user_email:
             raise ValueError("user_email is required")
         with self._write() as conn:
             self._ensure_user(conn, user_email)
             cursor = conn.execute(
-                """INSERT INTO journal_entries (user_email, kind, mood, prompt, body, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?)
+                """INSERT INTO journal_entries
+                     (user_email, kind, mood, prompt, body, checks, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
                    RETURNING id""",
-                (user_email, kind, mood, prompt or "", body, _now()),
+                (user_email, kind, mood, prompt or "", body,
+                 None if checks is None else json.dumps(list(checks)), _now()),
             )
             return int(cursor.fetchone()[0])
 
     def journal_entries(self, user_email: str, kind: str | None = None, *,
                         limit: int = 200) -> list[dict]:
-        """Newest first."""
-        sql = ("SELECT id, kind, mood, prompt, body, created_at FROM journal_entries "
+        """Newest first. `checks` is decoded: a list, or None when no routine was offered."""
+        sql = ("SELECT id, kind, mood, prompt, body, checks, created_at FROM journal_entries "
                "WHERE user_email = ?")
         params: tuple = (_email(user_email),)
         if kind:
@@ -318,7 +321,12 @@ class Store:
             params += (kind,)
         sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
         params += (int(limit),)
-        return [dict(r) for r in self._read(sql, params)]
+        rows = []
+        for row in self._read(sql, params):
+            item = dict(row)
+            item["checks"] = None if item["checks"] is None else json.loads(item["checks"])
+            rows.append(item)
+        return rows
 
     def delete_journal_entry(self, user_email: str, entry_id: int) -> bool:
         with self._write() as conn:

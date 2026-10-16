@@ -43,7 +43,7 @@ La revue répond à des questions sur les **décisions**, pas sur le résultat :
 - Qu'est-ce que je refais à l'identique demain, et qu'est-ce que je change ?
 
 ::: callout method "Le journal de réflexion"
-L'espace **Psychologie et discipline** propose un journal privé avec des questions guidées avant et après la séance, et une échelle d'état de 1 à 5. Il compte vos notes sans les interpréter. Au bout de quelques semaines, il permet de voir si la routine est réellement suivie, et ce qui revient d'une séance à l'autre.
+L'espace **Psychologie et discipline** propose un journal privé avec des questions guidées avant et après la séance, une échelle d'état de 1 à 5, et la routine de cette leçon à cocher. Il compte vos notes et les éléments cochés sans les interpréter, toujours avec le nombre de notes concernées. Au bout de quelques semaines, il montre si la routine est réellement suivie, et quel élément est le plus souvent oublié.
 :::
 
 ::: callout example "Exemple pédagogique"

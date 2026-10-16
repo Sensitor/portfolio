@@ -49,8 +49,7 @@ def main() -> int:
     check("lesson targets parse", spaces.parse_target("lesson:c/l") == ("lesson", {"course": "c", "lesson": "l"}))
 
     check("Psychologie et discipline is open", spaces.space("psychology").is_live)
-    check("and still announces what is not built",
-          any("Routines" in p for p in spaces.space("psychology").planned))
+    check("and announces nothing it has not built", spaces.space("psychology").planned == ())
     check("it links to path 6", ("Parcours 6 : Décider sous incertitude", "course:decider-sous-incertitude")
           in spaces.space("psychology").related)
     check("course targets parse", spaces.parse_target("course:c") == ("course", {"course": "c"}))
@@ -81,6 +80,35 @@ def main() -> int:
         except ValueError:
             refused = True
         check(f"refuses {label}", refused)
+    check("before and after a session carry a routine, a free note does not",
+          bool(journal.kind("pre").routine) and bool(journal.kind("post").routine)
+          and journal.kind("free").routine == ())
+    ids = [item for item, _ in journal.kind("pre").routine]
+    check("routine ids are unique", len(ids) == len(set(ids)))
+    check("ticked items come back in the routine's order",
+          journal.clean_checks("pre", [ids[2], ids[0]]) == [ids[0], ids[2]])
+    check("nothing ticked is an answer, not an absence", journal.clean_checks("post", []) == [])
+    check("a free note has no routine", journal.clean_checks("free", None) is None)
+    check("a routine not presented is not « nothing ticked »", journal.clean_checks("pre", None) is None)
+    for label, call in (("an item from another moment", lambda: journal.clean_checks("pre", ["regles"])),
+                        ("an invented item", lambda: journal.clean_checks("post", ["diagnostic"])),
+                        ("items on a free note", lambda: journal.clean_checks("free", ["etat"])),
+                        ("an unknown kind", lambda: journal.clean_checks("autre", []))):
+        try:
+            call()
+            refused = False
+        except ValueError:
+            refused = True
+        check(f"routine refuses {label}", refused)
+    routine_notes = [{"kind": "pre", "mood": None, "created_at": "x", "checks": ["etat", "limites"]},
+                     {"kind": "pre", "mood": None, "created_at": "x", "checks": ["etat"]},
+                     {"kind": "pre", "mood": None, "created_at": "x", "checks": []},
+                     {"kind": "pre", "mood": None, "created_at": "x", "checks": None}]
+    counted = {r.id: (r.ticked, r.n) for r in journal.summarize(routine_notes).routine}
+    check("routine counts per item, over the notes that offered it",
+          counted["etat"] == (2, 3) and counted["limites"] == (1, 3) and counted["contexte"] == (0, 3))
+    check("no routine row for a moment with no routine note",
+          all(r.kind == "pre" for r in journal.summarize(routine_notes).routine))
     now = datetime(2026, 10, 16, 12, tzinfo=timezone.utc)
     notes = [{"kind": "pre", "mood": 2, "created_at": "2026-10-15T08:00:00+00:00"},
              {"kind": "pre", "mood": 4, "created_at": "2026-10-01T08:00:00+00:00"},

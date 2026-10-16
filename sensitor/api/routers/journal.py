@@ -28,11 +28,12 @@ class EntryRequest(BaseModel):
     body: str
     mood: int | None = None
     prompt: str = ""
+    checks: list[str] | None = None
 
 
 @router.get("/kinds")
 def kinds() -> list[dict]:
-    """The entry types and their guided questions. Public: it is the same for everyone."""
+    """The entry types, their guided questions and routines. Public: the same for everyone."""
     return [asdict(k) for k in J.KINDS]
 
 
@@ -48,9 +49,11 @@ def add_entry(body: EntryRequest, email: str = Depends(current_user),
     try:
         kind, text, mood, prompt = J.clean_entry(body.kind, body.body, mood=body.mood,
                                                  prompt=body.prompt)
+        checks = J.clean_checks(kind, body.checks)
     except ValueError as exc:
         raise HTTPException(status_code=UNPROCESSABLE, detail=str(exc)) from exc
-    return {"id": store.add_journal_entry(email, kind=kind, body=text, mood=mood, prompt=prompt)}
+    return {"id": store.add_journal_entry(email, kind=kind, body=text, mood=mood, prompt=prompt,
+                                          checks=checks)}
 
 
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)

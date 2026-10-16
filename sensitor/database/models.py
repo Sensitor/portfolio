@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 TABLES: dict[str, str] = {
     "users": """
@@ -288,6 +288,8 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     # text written by one member for themselves: it is read back only through
     # methods scoped by `user_email`, exported with the account and deleted
     # with it. `prompt` keeps the guided question the note answered, as text.
+    # `checks` is the JSON list of routine items ticked, or NULL when the note
+    # offered no routine (a free note, or one written before routines existed).
     "journal_entries": """
 CREATE TABLE IF NOT EXISTS journal_entries (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -297,6 +299,7 @@ CREATE TABLE IF NOT EXISTS journal_entries (
     mood        INTEGER CHECK (mood IS NULL OR mood BETWEEN 1 AND 5),
     prompt      TEXT NOT NULL DEFAULT '',
     body        TEXT NOT NULL CHECK (length(body) > 0),
+    checks      TEXT,
     created_at  TEXT NOT NULL
 )""",
 }
