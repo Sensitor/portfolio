@@ -1,0 +1,74 @@
+id = "check-order-blocks"
+title = "Contrôle : l'order block"
+course = "zones-et-entrees"
+lesson = "order-blocks"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "regle"
+prompt = "Quel est l'order block d'une impulsion haussière qui casse la structure ?"
+kind = "single"
+lesson = "order-blocks"
+
+[[question.option]]
+id = "derniere"
+text = "La dernière bougie baissière avant l'impulsion."
+correct = true
+explanation = "C'est la convention du parcours."
+
+[[question.option]]
+id = "premiere"
+text = "La première bougie haussière de l'impulsion."
+explanation = "Elle fait partie de l'impulsion ; l'order block est juste avant."
+
+[[question.option]]
+id = "plus-grande"
+text = "La plus grande bougie des dix précédentes."
+explanation = "La règle désigne une bougie précise, pas la plus grande."
+
+[[question]]
+id = "bornes"
+prompt = "Bougie : ouverture 1,2646, plus haut 1,2650, plus bas 1,2630, clôture 1,2634. Bornes selon la convention du parcours ?"
+kind = "single"
+lesson = "order-blocks"
+
+[[question.option]]
+id = "range"
+text = "1,2630 à 1,2650"
+correct = true
+explanation = "Du plus bas au plus haut."
+
+[[question.option]]
+id = "corps"
+text = "1,2634 à 1,2646"
+explanation = "C'est la variante « corps seul », valable si on la choisit à l'avance, mais ce n'est pas celle du parcours."
+
+[[question.option]]
+id = "ouv-bas"
+text = "1,2630 à 1,2646"
+explanation = "C'est la variante « ouverture au plus bas »."
+
+[[question]]
+id = "contexte"
+prompt = "Quelles conditions rendent un order block pertinent selon les méthodes qui l'utilisent ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "order-blocks"
+
+[[question.option]]
+id = "cassure"
+text = "L'impulsion casse la structure en clôture."
+correct = true
+explanation = "Oui, c'est même une condition de la définition."
+
+[[question.option]]
+id = "fvg"
+text = "L'impulsion laisse un FVG."
+correct = true
+explanation = "Oui, signe d'un déplacement rapide."
+
+[[question.option]]
+id = "garantie"
+text = "Le prix y reviendra forcément."
+explanation = "Rien ne le garantit : c'est une hypothèse."

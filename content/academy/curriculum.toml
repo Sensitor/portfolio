@@ -35,7 +35,8 @@ id = "fvg-ob-ote"
 number = 4
 title = "FVG, Order Blocks et OTE"
 summary = "Définitions, critères de sélection, confluence, déclencheurs d'entrée et erreurs d'analyse fréquentes."
-status = "planned"
+status = "published"
+courses = ["zones-et-entrees"]
 topics = ["Fair Value Gaps", "Order Blocks", "Retracements et OTE"]
 
 [[path]]

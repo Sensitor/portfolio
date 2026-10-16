@@ -1,0 +1,63 @@
+id = "fvg-reperage"
+title = "Repérer et mesurer un FVG"
+context = """
+Cinq bougies consécutives sur EURUSD en M15. Critère de taille retenu : **au moins 5 pips**.
+
+| Bougie | B1 | B2 | B3 | B4 | B5 |
+|---|---|---|---|---|---|
+| Plus haut | 1,0832 | 1,0861 | 1,0874 | 1,0870 | 1,0858 |
+| Plus bas | 1,0818 | 1,0829 | 1,0846 | 1,0851 | 1,0838 |
+
+Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+Un seul FVG dans la série, haussier, de 1,0832 à 1,0846 : il passe le critère de taille. La bougie 5 y est entrée sans le traverser : il est **partiellement comblé**, un peu au-delà de son milieu. Aucune clôture n'est encore passée sous 1,0832, il n'est donc pas invalidé.
+"""
+
+[[step]]
+id = "bougie"
+prompt = "Quelle est la bougie du milieu du seul FVG de la série ? (Répondez par son numéro.)"
+unit = "n°"
+answer = 2
+tolerance = 0
+solution = "Le plus bas de B3 (1,0846) est au-dessus du plus haut de B1 (1,0832) : **FVG haussier autour de B2**. Les autres triplets ne laissent pas d'écart : le plus bas de B4 (1,0851) est sous le plus haut de B2 (1,0861), et le plus bas de B5 (1,0838) sous le plus haut de B3 (1,0874)."
+
+[[step]]
+id = "bas"
+prompt = "Quelle est la borne basse du FVG ?"
+unit = "prix"
+answer = 1.0832
+tolerance = 0.00001
+solution = "Le plus haut de la bougie 1 : **1,0832**."
+
+[[step]]
+id = "haut"
+prompt = "Quelle est sa borne haute ?"
+unit = "prix"
+answer = 1.0846
+tolerance = 0.00001
+solution = "Le plus bas de la bougie 3 : **1,0846**."
+
+[[step]]
+id = "taille"
+prompt = "Quelle est sa taille, en pips ?"
+unit = "pips"
+answer = 14
+tolerance = 0.01
+solution = "1,0846 − 1,0832 = 0,0014, soit **14 pips** : au-dessus du critère de 5 pips."
+
+[[step]]
+id = "milieu"
+prompt = "Où se trouve son milieu ?"
+unit = "prix"
+answer = 1.0839
+tolerance = 0.00001
+solution = "(1,0832 + 1,0846) ÷ 2 = **1,0839**."
+
+[[step]]
+id = "remplissage"
+prompt = "La bougie 5 descend à 1,0838. Quelle part du FVG a-t-elle comblée, en pourcentage ? (Arrondi à l'unité.)"
+unit = "%"
+answer = 57
+tolerance = 0.6
+solution = "Depuis la borne haute : 1,0846 − 1,0838 = 8 pips, sur 14 : 8 ÷ 14 = **57 %**. Le prix est passé sous le milieu (1,0839) sans atteindre la borne basse."

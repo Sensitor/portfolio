@@ -1,0 +1,80 @@
+id = "cas-zone-entree"
+title = "Une entrée sur GBPUSD, de la zone à la taille"
+context = """
+GBPUSD en M15, sur un **compte de démonstration en dollars**. La structure H4 est haussière.
+
+Deux creux égaux se trouvent à **1,2633** et **1,2632**. Puis :
+
+| Bougie | Ouverture | Plus haut | Plus bas | Clôture |
+|---|---|---|---|---|
+| C1 | 1,2652 | 1,2658 | 1,2641 | 1,2645 |
+| C2 | 1,2646 | 1,2650 | 1,2630 | 1,2634 |
+| C3 | 1,2634 | 1,2671 | 1,2632 | 1,2668 |
+| C4 | 1,2668 | 1,2702 | 1,2664 | 1,2697 |
+| C5 | 1,2697 | 1,2730 | 1,2690 | 1,2722 |
+
+C2 balaie les creux égaux (plus bas 1,2630, clôture 1,2634). C4 clôture au-dessus du dernier sommet de swing à 1,2685 : la structure casse vers le haut. C2 est l'order block (1,2630 à 1,2650). L'impulsion laisse deux FVG : **1,2650 à 1,2664** et **1,2671 à 1,2690**. La jambe va de **1,2630** à **1,2730**.
+
+Plan : entrée à l'achat par **ordre limite au milieu du FVG** qui recoupe la zone OTE ; invalidation **5 pips sous le plus bas du sweep** ; objectif au sommet de la jambe, **1,2730**, la liquidité externe. Budget de risque : **0,5 % de 10 000 $**, soit 50 $. Sur GBPUSD, 1 pip vaut 10 $ par lot dans un compte en dollars ; pas de volume 0,01 lot.
+
+Scénario fictif, construit pour l'exercice.
+"""
+conclusion = """
+Le plan est complet : zone d'entrée 1,2651 à 1,2664, ordre limite à 1,2657, invalidation à 1,2625, objectif à 1,2730, 0,15 lot pour 48 $ de risque. L'order block, sous la zone OTE, n'a pas servi d'entrée : il explique d'où vient le mouvement, et l'invalidation se trouve sous lui.
+"""
+
+[[step]]
+id = "ote-haut"
+prompt = "Où se trouve la borne haute de la zone OTE (62 %) de la jambe 1,2630 à 1,2730 ?"
+unit = "prix"
+answer = 1.2668
+tolerance = 0.00001
+solution = "1,2730 − 0,62 × 0,0100 = **1,2668**."
+
+[[step]]
+id = "ote-bas"
+prompt = "Et sa borne basse (79 %) ?"
+unit = "prix"
+answer = 1.2651
+tolerance = 0.00001
+solution = "1,2730 − 0,79 × 0,0100 = **1,2651**. La zone OTE va de 1,2651 à 1,2668."
+
+[[step]]
+id = "chevauchement"
+prompt = "Le FVG inférieur (1,2650 à 1,2664) recoupe la zone OTE. Sur combien de pips ?"
+unit = "pips"
+answer = 13
+tolerance = 0.01
+solution = "Plus haute des bornes basses : 1,2651. Plus basse des bornes hautes : 1,2664. Intervalle commun **1,2651 à 1,2664**, soit 13 pips. Le FVG supérieur commence à 1,2671, au-dessus de la zone ; l'order block s'arrête à 1,2650, en dessous."
+
+[[step]]
+id = "entree"
+prompt = "À quel prix se place l'ordre limite ?"
+unit = "prix"
+answer = 1.2657
+tolerance = 0.00001
+solution = "Au milieu du FVG inférieur : (1,2650 + 1,2664) ÷ 2 = **1,2657**, à l'intérieur de la zone OTE."
+
+[[step]]
+id = "distance"
+prompt = "Invalidation 5 pips sous le plus bas du sweep : à combien de pips de l'entrée se trouve-t-elle ?"
+unit = "pips"
+answer = 32
+tolerance = 0.01
+solution = "Invalidation : 1,2630 − 0,0005 = 1,2625. Distance : 1,2657 − 1,2625 = **32 pips**."
+
+[[step]]
+id = "taille"
+prompt = "Quelle taille de position, arrondie vers le bas au pas de 0,01 lot ?"
+unit = "lots"
+answer = 0.15
+tolerance = 0.0001
+solution = "50 $ ÷ (32 pips × 10 $) = 0,156 lot, arrondi vers le bas : **0,15 lot**, pour un risque effectif de 32 × 10 × 0,15 = 48 $."
+
+[[step]]
+id = "ratio"
+prompt = "Quel est le ratio gain / risque jusqu'à l'objectif ? (Deux décimales.)"
+unit = "R"
+answer = 2.28
+tolerance = 0.006
+solution = "Gain possible : 1,2730 − 1,2657 = 73 pips. Risque : 32 pips. 73 ÷ 32 = **2,28R**, avant spread et commission."

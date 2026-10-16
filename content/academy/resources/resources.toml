@@ -61,3 +61,15 @@ file = "fiche-liquidite.md"
 pdf = "fiche-liquidite.pdf"
 access = "member"
 lessons = ["liquidite-ordres", "equal-highs-lows", "interne-externe", "scenario-liquidite", "recap-liquidite"]
+
+[[resource]]
+id = "fiche-zones"
+title = "Zones d'intérêt et entrées"
+description = "FVG, order blocks, retracements et zone OTE, intervalle commun et ordre des questions avant une entrée : les règles du parcours 4 sur une page."
+kind = "fiche"
+category = "FVG, Order Blocks et OTE"
+level = "intermediaire"
+file = "fiche-zones.md"
+pdf = "fiche-zones.pdf"
+access = "member"
+lessons = ["fvg-definition", "fvg-criteres", "order-blocks", "ote-retracements", "confluence", "cas-entree", "recap-zones"]

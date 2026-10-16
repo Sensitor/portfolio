@@ -1,0 +1,62 @@
+id = "ote-calcul"
+title = "Calculer une zone OTE"
+context = """
+XAUUSD en H1. Une jambe haussière part d'un creux de swing à **2 380,00** et atteint un sommet de swing à **2 420,00**.
+
+Plus tard, une jambe baissière part d'un sommet à **2 450,00** et descend jusqu'à un creux à **2 410,00**.
+
+Rappel : niveau(r) = fin de la jambe − r × (fin − départ). Zone OTE : de 62 % à 79 %.
+
+Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+Sur une jambe haussière, la zone OTE se trouve sous le sommet ; sur une jambe baissière, au-dessus du creux. Dans les deux cas, elle mesure 17 % de la jambe : 6,80 $ ici, pour une jambe de 40 $.
+"""
+
+[[step]]
+id = "amplitude"
+prompt = "Quelle est l'amplitude de la jambe haussière, en dollars ?"
+unit = "$"
+answer = 40
+tolerance = 0.001
+solution = "2 420,00 − 2 380,00 = **40,00 $**."
+
+[[step]]
+id = "cinquante"
+prompt = "Où se trouve le retracement de 50 % ?"
+unit = "prix"
+answer = 2400
+tolerance = 0.001
+solution = "2 420,00 − 0,50 × 40 = **2 400,00**."
+
+[[step]]
+id = "ote-haut"
+prompt = "Où se trouve la borne haute de la zone OTE (62 %) ?"
+unit = "prix"
+answer = 2395.2
+tolerance = 0.001
+solution = "2 420,00 − 0,62 × 40 = 2 420,00 − 24,80 = **2 395,20**."
+
+[[step]]
+id = "ote-bas"
+prompt = "Et sa borne basse (79 %) ?"
+unit = "prix"
+answer = 2388.4
+tolerance = 0.001
+solution = "2 420,00 − 0,79 × 40 = 2 420,00 − 31,60 = **2 388,40**."
+
+[[step]]
+id = "largeur"
+prompt = "Quelle est la largeur de la zone OTE, en dollars ?"
+unit = "$"
+answer = 6.8
+tolerance = 0.001
+solution = "2 395,20 − 2 388,40 = **6,80 $**, soit 17 % de la jambe."
+
+[[step]]
+id = "vente-haut"
+prompt = "Sur la jambe baissière de 2 450,00 à 2 410,00, où se trouve la borne haute de la zone OTE (79 %) ?"
+unit = "prix"
+answer = 2441.6
+tolerance = 0.001
+solution = "La fin est 2 410,00 : 2 410,00 − 0,79 × (2 410,00 − 2 450,00) = 2 410,00 + 31,60 = **2 441,60**. La zone va de 2 434,80 (62 %) à 2 441,60, au-dessus du creux."

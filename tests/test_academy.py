@@ -285,6 +285,96 @@ def test_liquidity_figures():
         check("liquidity helpers refuse bad input", raises(bad, ValueError))
 
 
+def test_zone_figures():
+    """Path 4: FVGs, order blocks, OTE and the GBPUSD case, recomputed with the lesson rules."""
+    print("\nPath 4 figures")
+    from sensitor.academy import zones as Z
+    catalog = C.load_catalog()
+    pip = 0.0001
+
+    ex = {s.id: s.answer for s in catalog.exercise("fvg-reperage").steps}
+    highs = [1.0832, 1.0861, 1.0874, 1.0870, 1.0858]
+    lows = [1.0818, 1.0829, 1.0846, 1.0851, 1.0838]
+    gaps = Z.fair_value_gaps(highs, lows)
+    check("exactly one FVG in the series", len(gaps) == 1 and gaps[0].kind == Z.BULLISH, str(gaps))
+    gap = gaps[0]
+    check("FVG exercise: middle bar", gap.index + 1 == ex["bougie"])
+    check("FVG exercise: bounds", close(gap.low, ex["bas"]) and close(gap.high, ex["haut"]))
+    check("FVG exercise: 14 pips", close(gap.size / pip, ex["taille"], 1e-6))
+    check("FVG exercise: midpoint", close(gap.midpoint, ex["milieu"], 1e-9))
+    check("FVG exercise: 57 % filled", abs(Z.filled_fraction(gap, 1.0838) * 100 - ex["remplissage"]) < 0.6)
+    check("FVG quiz: 1,0839 fills half", close(Z.filled_fraction(gap, 1.0839), 0.5, 1e-9))
+    check("lesson 1: touching wicks leave no gap", Z.fair_value_gaps([1.0832, 1.0861, 1.0874],
+                                                                    [1.0818, 1.0829, 1.0832]) == [])
+    bear = Z.fair_value_gaps([1.2720, 1.2715, 1.2698], [1.2710, 1.2690, 1.2680])
+    check("validation quiz: bearish FVG 1,2698 to 1,2710", len(bear) == 1 and bear[0].kind == Z.BEARISH
+          and close(bear[0].low, 1.2698) and close(bear[0].high, 1.2710))
+    check("validation quiz: 1,2707 fills 75 %", close(Z.filled_fraction(bear[0], 1.2707), 0.75, 1e-9))
+
+    case = {s.id: s.answer for s in catalog.exercise("cas-zone-entree").steps}
+    opens = [1.2652, 1.2646, 1.2634, 1.2668, 1.2697]
+    highs = [1.2658, 1.2650, 1.2671, 1.2702, 1.2730]
+    lows = [1.2641, 1.2630, 1.2632, 1.2664, 1.2690]
+    closes = [1.2645, 1.2634, 1.2668, 1.2697, 1.2722]
+    from sensitor.academy import structure as T
+    check("case: C2 sweeps the equal lows", T.equal_levels([1.2633, 1.2632], 0.0002) == [[0, 1]]
+          and T.is_sweep(highs[1], lows[1], closes[1], 1.2632, side="below"))
+    check("case: C4 breaks the swing high on the close", T.is_break(closes[3], 1.2685, direction="up")
+          and not T.is_break(closes[2], 1.2685, direction="up"))
+    ob = Z.order_block(opens, closes, 2, direction=Z.BULLISH)
+    check("case: the order block is C2, 1,2630 to 1,2650", ob == 1 and close(lows[ob], 1.2630)
+          and close(highs[ob], 1.2650))
+    check("lesson 3: body-only variant 1,2634 to 1,2646",
+          close(min(opens[ob], closes[ob]), 1.2634) and close(max(opens[ob], closes[ob]), 1.2646))
+    fvgs = Z.fair_value_gaps(highs, lows)
+    check("case: two FVGs, 1,2650-1,2664 and 1,2671-1,2690",
+          [(round(g.low, 4), round(g.high, 4)) for g in fvgs] == [(1.2650, 1.2664), (1.2671, 1.2690)])
+    ote = Z.ote_zone(1.2630, 1.2730)
+    check("case: OTE high", close(ote[1], case["ote-haut"], 1e-9))
+    check("case: OTE low", close(ote[0], case["ote-bas"], 1e-9))
+    common = Z.overlap(ote, (fvgs[0].low, fvgs[0].high))
+    check("case: 13 pips of overlap", close((common[1] - common[0]) / pip, case["chevauchement"], 1e-6))
+    check("case: the upper FVG and the order block miss the OTE zone",
+          Z.overlap(ote, (fvgs[1].low, fvgs[1].high)) is None and Z.overlap(ote, (1.2630, 1.2650)) is None)
+    check("case: entry at the FVG midpoint, inside the zone", close(fvgs[0].midpoint, case["entree"], 1e-9)
+          and common[0] <= case["entree"] <= common[1])
+    plan = R.plan(equity=10_000, risk_pct=0.5, entry=case["entree"], stop=1.2630 - 0.0005,
+                  direction=R.LONG, target=1.2730,
+                  spec=R.InstrumentSpec(contract_size=100_000, lot_step=0.01, pip_size=pip))
+    check("case: 32 pips to the invalidation", close(plan.stop_distance_pips, case["distance"], 1e-6))
+    check("case: 0.15 lot", close(plan.risk_amount, 50) and close(plan.position.lots, case["taille"]))
+    check("case: 48 $ effective risk", close(plan.position.effective_risk, 48, 1e-6))
+    check("case: 2.28R", abs(plan.reward_to_risk - case["ratio"]) < 0.006)
+    check("case lesson: 45 pips at 0.15 lot risk 67,50 $", close(45 * 10 * 0.15, 67.5))
+    check("case quiz: 0.16 lot would risk 51,20 $", close(32 * 10 * 0.16, 51.2))
+
+    ote_ex = {s.id: s.answer for s in catalog.exercise("ote-calcul").steps}
+    gold = Z.ote_zone(2380, 2420)
+    check("OTE exercise: 50 %", close(Z.retracement(2380, 2420, 0.5), ote_ex["cinquante"]))
+    check("OTE exercise: bounds 2 388,40 to 2 395,20", close(gold[0], ote_ex["ote-bas"], 1e-9)
+          and close(gold[1], ote_ex["ote-haut"], 1e-9))
+    check("OTE exercise: 6,80 $ wide", close(gold[1] - gold[0], ote_ex["largeur"], 1e-9))
+    down = Z.ote_zone(2450, 2410)
+    check("OTE exercise: bearish leg 2 434,80 to 2 441,60", close(down[0], 2434.8, 1e-9)
+          and close(down[1], ote_ex["vente-haut"], 1e-9))
+    check("OTE middle 70,5 % at 2 391,80", close(Z.retracement(2380, 2420, Z.OTE_MIDDLE), 2391.8, 1e-9))
+    eur = Z.ote_zone(1.0800, 1.0900)
+    check("lesson 4: EURUSD OTE 1,0821 to 1,0838", close(eur[0], 1.0821, 1e-9) and close(eur[1], 1.0838, 1e-9))
+    check("lesson 4: 70,5 % at 1,08295", close(Z.retracement(1.0800, 1.0900, 0.705), 1.08295, 1e-9))
+    common = Z.overlap(eur, (1.0826, 1.0845))
+    check("lesson 5: overlap 1,0826 to 1,0838, 12 pips", close(common[0], 1.0826) and close(common[1], 1.0838)
+          and close((common[1] - common[0]) / pip, 12, 1e-6))
+
+    final = catalog.quiz("zones-validation")
+    taught = {lesson.id for lesson in catalog.course("zones-et-entrees").lessons} - {"recap-zones"}
+    check("validation quiz: covers every path 4 lesson", {q.lesson_id for q in final.questions} == taught)
+    for bad in (lambda: Z.fair_value_gaps([1, 2], [1]), lambda: Z.ote_zone(1, 2, 0.8, 0.6),
+                lambda: Z.order_block([1], [1], 0, direction="up"),
+                lambda: Z.filled_fraction(Z.Gap(Z.BULLISH, 1, 2.0, 2.0), 2.0)):
+        check("zone helpers refuse bad input", raises(bad, ValueError))
+    check("order block: none when no opposite bar", Z.order_block([1, 2], [2, 3], 1, direction=Z.BULLISH) is None)
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -822,6 +912,7 @@ def main() -> int:
     test_lesson_figures_match_the_calculator()
     test_structure_figures()
     test_liquidity_figures()
+    test_zone_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

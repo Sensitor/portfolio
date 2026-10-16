@@ -1,0 +1,229 @@
+id = "zones-validation"
+title = "Quiz de validation : Zones d'intérêt et entrées"
+course = "zones-et-entrees"
+lesson = "recap-zones"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "fvg-baissier"
+prompt = "Bougie 1 : plus bas 1,2710. Bougie 3 : plus haut 1,2698. Que conclure ?"
+kind = "single"
+lesson = "fvg-definition"
+
+[[question.option]]
+id = "baissier"
+text = "Un FVG baissier de 1,2698 à 1,2710."
+correct = true
+explanation = "Le plus haut de la bougie 3 est sous le plus bas de la bougie 1."
+
+[[question.option]]
+id = "haussier"
+text = "Un FVG haussier de 1,2698 à 1,2710."
+explanation = "Un FVG haussier demande le plus bas de la bougie 3 au-dessus du plus haut de la bougie 1."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun FVG."
+explanation = "Il y a bien un écart de 12 pips entre les mèches."
+
+[[question]]
+id = "grande-bougie"
+prompt = "Une très grande bougie haussière, dont les voisines se recouvrent par leurs mèches, laisse-t-elle un FVG ?"
+kind = "single"
+lesson = "fvg-definition"
+
+[[question.option]]
+id = "non"
+text = "Non : la règle porte sur les mèches des bougies 1 et 3."
+correct = true
+explanation = "Sans écart entre elles, pas de FVG."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toute grande bougie laisse un FVG."
+explanation = "C'est l'erreur fréquente de la leçon 1."
+
+[[question.option]]
+id = "parfois"
+text = "Oui, si elle dépasse 20 pips."
+explanation = "La taille de la bougie du milieu ne suffit pas."
+
+[[question]]
+id = "part-comblee"
+prompt = "FVG baissier de 1,2698 à 1,2710. Le prix remonte jusqu'à 1,2707. Quelle part est comblée ?"
+kind = "single"
+lesson = "fvg-criteres"
+
+[[question.option]]
+id = "75"
+text = "75 %"
+correct = true
+explanation = "Depuis la borne basse : 1,2707 − 1,2698 = 9 pips sur 12."
+
+[[question.option]]
+id = "25"
+text = "25 %"
+explanation = "C'est la part restante, mesurée depuis la borne haute."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Il faudrait atteindre 1,2710."
+
+[[question]]
+id = "etat"
+prompt = "Une bougie clôture sous la borne basse d'un FVG haussier. Quel est son état ?"
+kind = "single"
+lesson = "fvg-criteres"
+
+[[question.option]]
+id = "invalide"
+text = "Invalidé."
+correct = true
+explanation = "Une clôture au-delà de la borne opposée l'invalide."
+
+[[question.option]]
+id = "comble"
+text = "Comblé, et toujours valable."
+explanation = "Comblé suffit pour une mèche ; une clôture au-delà l'invalide."
+
+[[question.option]]
+id = "intact"
+text = "Intact."
+explanation = "Le prix l'a entièrement traversé."
+
+[[question]]
+id = "ob-baissier"
+prompt = "Quel est l'order block d'une impulsion baissière qui casse la structure ?"
+kind = "single"
+lesson = "order-blocks"
+
+[[question.option]]
+id = "haussiere"
+text = "La dernière bougie haussière avant l'impulsion."
+correct = true
+explanation = "C'est la convention symétrique."
+
+[[question.option]]
+id = "baissiere"
+text = "La dernière bougie baissière avant l'impulsion."
+explanation = "C'est la règle pour une impulsion haussière."
+
+[[question.option]]
+id = "sommet"
+text = "La bougie du sommet de swing le plus proche."
+explanation = "Ce n'est pas la règle du parcours."
+
+[[question]]
+id = "ob-apres-coup"
+prompt = "Pourquoi ne pas choisir l'order block après coup, en remontant jusqu'à la bougie qui « a tenu » ?"
+kind = "single"
+lesson = "order-blocks"
+
+[[question.option]]
+id = "selection"
+text = "Parce qu'on choisit alors la zone avec le résultat : elle ne peut que « fonctionner »."
+correct = true
+explanation = "Une règle choisie après coup ne teste rien."
+
+[[question.option]]
+id = "interdit"
+text = "Parce que les plateformes l'interdisent."
+explanation = "Rien n'interdit de le faire : c'est une erreur de méthode."
+
+[[question.option]]
+id = "lent"
+text = "Parce que c'est trop long."
+explanation = "La raison est logique, pas pratique."
+
+[[question]]
+id = "ote-calcul"
+prompt = "Jambe haussière de 2 380 à 2 420. Où est le niveau de 79 % ?"
+kind = "single"
+lesson = "ote-retracements"
+
+[[question.option]]
+id = "ok"
+text = "2 388,40"
+correct = true
+explanation = "2 420 − 0,79 × 40 = 2 388,40."
+
+[[question.option]]
+id = "depart"
+text = "2 411,60"
+explanation = "C'est 79 % mesuré depuis le départ."
+
+[[question.option]]
+id = "62"
+text = "2 395,20"
+explanation = "C'est le niveau de 62 %."
+
+[[question]]
+id = "confluence-calcul"
+prompt = "Zone OTE de 1,2651 à 1,2668, order block de 1,2630 à 1,2650. Intervalle commun ?"
+kind = "single"
+lesson = "confluence"
+
+[[question.option]]
+id = "aucun"
+text = "Aucun : l'order block s'arrête sous la zone OTE."
+correct = true
+explanation = "La plus haute des bornes basses (1,2651) dépasse la plus basse des bornes hautes (1,2650)."
+
+[[question.option]]
+id = "ok"
+text = "1,2650 à 1,2651"
+explanation = "Il faudrait que les zones se touchent au moins ; ici 1,2651 est au-dessus de 1,2650."
+
+[[question.option]]
+id = "union"
+text = "1,2630 à 1,2668"
+explanation = "C'est la réunion des zones."
+
+[[question]]
+id = "erreurs"
+prompt = "Lesquelles sont des erreurs d'analyse décrites dans le parcours ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "confluence"
+
+[[question.option]]
+id = "double"
+text = "Compter un FVG et un order block issus de la même impulsion comme deux preuves."
+correct = true
+explanation = "C'est le double compte."
+
+[[question.option]]
+id = "etirer"
+text = "Étirer une zone pour qu'elle touche la suivante."
+correct = true
+explanation = "Les bornes données par la règle ne bougent pas."
+
+[[question.option]]
+id = "ecrire"
+text = "Écrire ses critères avant de tester."
+explanation = "C'est le remède, pas l'erreur."
+
+[[question]]
+id = "invalidation"
+prompt = "Une fois en position, déplacer l'invalidation de 32 à 45 pips avec la même taille de 0,15 lot à 10 $ par pip : que devient le risque ?"
+kind = "single"
+lesson = "cas-entree"
+
+[[question.option]]
+id = "6750"
+text = "67,50 $, au-delà du budget de 50 $."
+correct = true
+explanation = "45 × 10 × 0,15 = 67,50 $."
+
+[[question.option]]
+id = "48"
+text = "Il reste à 48 $."
+explanation = "Le risque dépend de la distance : il augmente."
+
+[[question.option]]
+id = "50"
+text = "Il reste à 50 $, le budget."
+explanation = "Le budget ne se respecte que si la taille est recalculée."
