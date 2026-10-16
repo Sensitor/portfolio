@@ -1,0 +1,73 @@
+id = "check-recence"
+title = "Contrôle : le biais de récence"
+course = "decider-sous-incertitude"
+lesson = "biais-recence"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "intervalle"
+prompt = "4 gains sur les 5 derniers trades. Que dit l'intervalle de confiance à 95 % ?"
+kind = "single"
+lesson = "biais-recence"
+
+[[question.option]]
+id = "large"
+text = "Le vrai taux de réussite se situe quelque part entre 38 % et 96 %."
+correct = true
+explanation = "Cinq trades renseignent très peu."
+
+[[question.option]]
+id = "80"
+text = "Le vrai taux de réussite est de 80 %."
+explanation = "80 % est l'observation, pas le vrai taux."
+
+[[question.option]]
+id = "hausse"
+text = "La méthode s'est améliorée."
+explanation = "Rien ne permet de le dire sur cinq trades."
+
+[[question]]
+id = "taille"
+prompt = "Après quatre gains de suite, une trader veut tripler son risque. Que conseille la leçon ?"
+kind = "single"
+lesson = "biais-recence"
+
+[[question.option]]
+id = "revue"
+text = "Ne changer la taille qu'après une revue écrite sur un échantillon fixé à l'avance."
+correct = true
+explanation = "La règle de changement se décide avant, au calme."
+
+[[question.option]]
+id = "tripler"
+text = "Tripler tant que la série dure."
+explanation = "C'est le biais de récence : la série ne change pas le vrai taux."
+
+[[question.option]]
+id = "doubler"
+text = "Doubler seulement, par prudence."
+explanation = "Le problème n'est pas l'ampleur, c'est le moment de la décision."
+
+[[question]]
+id = "definition"
+prompt = "Qu'est-ce que le biais de récence ?"
+kind = "single"
+lesson = "biais-recence"
+
+[[question.option]]
+id = "poids"
+text = "Accorder plus de poids aux événements récents qu'aux précédents."
+correct = true
+explanation = "C'est la définition de la leçon."
+
+[[question.option]]
+id = "confirmer"
+text = "Chercher ce qui confirme son idée."
+explanation = "C'est le biais de confirmation."
+
+[[question.option]]
+id = "apres"
+text = "Juger une décision avec la suite connue."
+explanation = "C'est le biais rétrospectif."

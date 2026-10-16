@@ -53,7 +53,8 @@ id = "psychologie"
 number = 6
 title = "Psychologie du trading"
 summary = "FOMO, revenge trading, suractivité, biais cognitifs, routines et journal émotionnel."
-status = "planned"
+status = "published"
+courses = ["decider-sous-incertitude"]
 topics = ["Biais cognitifs", "Processus et résultat", "Routines"]
 
 [[path]]

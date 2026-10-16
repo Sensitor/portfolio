@@ -375,6 +375,61 @@ def test_zone_figures():
     check("order block: none when no opposite bar", Z.order_block([1, 2], [2, 3], 1, direction=Z.BULLISH) is None)
 
 
+def test_psychology_figures():
+    """Path 6: streaks, small samples, the chased entry, the revenge trade and overtrading, recomputed."""
+    print("\nPath 6 figures")
+    from sensitor.academy import expectancy as X
+    catalog = C.load_catalog()
+    check("lesson 1: 50 % at 1.5R is +0.25R", close(X.expectancy_r(0.5, 1.5), 0.25))
+    check("lesson 1: five losses in five trades, 3.1 %", round(R.streak_probability(5, 5, 0.5) * 100, 1) == 3.1)
+    streaks = [round(R.streak_probability(n, 5, 0.5) * 100, 1) for n in (10, 20, 50, 100, 200)]
+    check("lesson 1 figure: 10.9, 25.0, 55.2, 81.0, 96.6 %", streaks == [10.9, 25.0, 55.2, 81.0, 96.6], str(streaks))
+
+    for (w, n), (lo, hi) in {(4, 5): (38, 96), (2, 5): (12, 77), (52, 100): (42, 62)}.items():
+        i = X.win_rate_interval(w, n)
+        check(f"lesson 2: {w}/{n} interval {lo} to {hi} %", round(i.low * 100) == lo and round(i.high * 100) == hi,
+              f"{i.low:.4f} {i.high:.4f}")
+    check("validation quiz: 70 % sits inside the 2/5 interval", X.win_rate_interval(2, 5).high > 0.70)
+    check("lesson 2: 40 % sits inside the 4/5 interval", X.win_rate_interval(4, 5).low < 0.40)
+
+    spec = R.InstrumentSpec(contract_size=100_000, lot_step=0.01, pip_size=0.0001)
+    planned = R.plan(equity=10_000, risk_pct=0.5, entry=1.2657, stop=1.2625, direction=R.LONG,
+                     target=1.2730, spec=spec)
+    chased = R.plan(equity=10_000, risk_pct=0.5, entry=1.2700, stop=1.2625, direction=R.LONG,
+                    target=1.2730, spec=spec)
+    check("FOMO: 75 pips of risk, 0.40R", close(chased.stop_distance_pips, 75, 1e-6)
+          and close(chased.reward_to_risk, 0.4, 1e-9))
+    check("FOMO: break-even 30 % against 71 %", round(X.breakeven_win_rate(planned.reward_to_risk) * 100) == 30
+          and round(X.breakeven_win_rate(chased.reward_to_risk) * 100) == 71)
+    check("FOMO: 0.06 lot, 45 $ for the chased entry", close(chased.position.lots, 0.06)
+          and close(chased.position.effective_risk, 45, 1e-6))
+
+    rev = {s.id: s.answer for s in catalog.exercise("revanche-serie").steps}
+    three = X.equity_path(10_000, [-1, -1, -1], 1)
+    check("revenge: 9 702,99 after three losses", close(round(three[-1], 2), rev["apres-trois"]))
+    check("revenge: 2,97 % drawdown", abs(X.max_drawdown(three).pct - rev["drawdown-trois"]) < 0.006)
+    disc = three[-1] * 0.99
+    revenge = three[-1] * 0.97
+    check("revenge: 9 605,96 at 1 %", close(round(disc, 2), rev["discipline"]))
+    check("revenge: 9 411,90 at 3 %", close(round(revenge, 2), rev["revanche"]))
+    check("revenge: 5,88 % drawdown", abs((1 - revenge / 10_000) * 100 - rev["drawdown-revanche"]) < 0.006)
+    check("revenge: 6,25 % to recover", abs(R.recovery_needed(1 - revenge / 10_000) * 100 - rev["recuperation"]) < 0.006)
+    check("revenge conclusion: 97,03 $ and 291,09 $", close(round(three[-1] * 0.01, 2), 97.03)
+          and close(round(three[-1] * 0.03, 2), 291.09))
+
+    cost = {s.id: s.answer for s in catalog.exercise("cout-suractivite").steps}
+    check("overtrading: +0,22R net", close(0.30 - 0.08, cost["net-a"], 1e-9))
+    check("overtrading: +1,10R", close(5 * (0.30 - 0.08), cost["total-a"], 1e-9))
+    check("overtrading: -0,06R net", close(0.02 - 0.08, cost["net-marginal"], 1e-9))
+    check("overtrading: -0,90R", close(15 * (0.02 - 0.08), cost["total-marginal"], 1e-9))
+    check("overtrading: +0,20R for the week", close(cost["total-a"] + cost["total-marginal"], cost["semaine"], 1e-9))
+    check("overtrading: 45 $", close((cost["total-a"] - cost["semaine"]) * 50, cost["difference"], 1e-9))
+
+    final = catalog.quiz("psychologie-validation")
+    taught = {lesson.id for lesson in catalog.course("decider-sous-incertitude").lessons} - {"recap-psychologie"}
+    check("validation quiz: covers every path 6 lesson", {q.lesson_id for q in final.questions} == taught)
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -656,6 +711,12 @@ def test_exercises():
     check("dot decimals", E.parse_number("2.40") == 2.4)
     check("blank is None", E.parse_number("  ") is None)
     check("garbage raises", raises(lambda: E.parse_number("abc"), ValueError))
+    check("the typographic minus of the solutions", E.parse_number("\u22120,06") == -0.06)
+    check("a hyphen minus too", E.parse_number("-0,90") == -0.9)
+    check("a trailing percent sign", E.parse_number("57 %") == 57)
+    check("a trailing R", E.parse_number("2,28R") == 2.28 and E.parse_number("1,10 R") == 1.1)
+    check("a unit alone is still blank", E.parse_number("%") is None)
+    check("letters elsewhere still raise", raises(lambda: E.parse_number("R2"), ValueError))
 
     step = C.ExerciseStep("x", "?", "$", 60, 0.01, "…")
     check("exact answer is correct", E.check_step(step, "60").status == E.CORRECT)
@@ -913,6 +974,7 @@ def main() -> int:
     test_structure_figures()
     test_liquidity_figures()
     test_zone_figures()
+    test_psychology_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

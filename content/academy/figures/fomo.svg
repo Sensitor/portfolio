@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Le coût d'une entrée poursuivie</title>
+<desc id="d">Deux entrées sur le même scénario GBPUSD. L'entrée prévue à 1,2657 risque 32 pips pour 73 ; l'entrée poursuivie à 1,2700 risque 75 pips pour 30.</desc>
+<line x1="40" y1="93.1" x2="600" y2="93.1" stroke="#3f6553" stroke-dasharray="5 4"/>
+<line x1="40" y1="230.4" x2="600" y2="230.4" stroke="#8a4a40" stroke-dasharray="5 4"/>
+<text x="44" y="87.1" font-size="11" fill="#3f6553">objectif 1,2730</text>
+<text x="44" y="245.4" font-size="11" fill="#8a4a40">invalidation 1,2625</text>
+<polyline points="40,204.2 110,218.6 170,145.4 210,168.9 250,132.3 290,116.6" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<line x1="330" y1="188.5" x2="420" y2="188.5" stroke="#1b2733" stroke-width="1.6"/>
+<line x1="470" y1="132.3" x2="560" y2="132.3" stroke="#1b2733" stroke-width="1.6"/>
+<line x1="375" y1="188.5" x2="375" y2="93.1" stroke="#3f6553" stroke-width="5" opacity=".7"/><text x="385" y="144.8" font-size="11.5" fill="#3f6553">+73 pips</text>
+<line x1="375" y1="230.4" x2="375" y2="188.5" stroke="#8a4a40" stroke-width="5" opacity=".7"/><text x="385" y="213.5" font-size="11.5" fill="#8a4a40">−32 pips</text>
+<line x1="515" y1="132.3" x2="515" y2="93.1" stroke="#3f6553" stroke-width="5" opacity=".7"/><text x="525" y="116.7" font-size="11.5" fill="#3f6553">+30 pips</text>
+<line x1="515" y1="230.4" x2="515" y2="132.3" stroke="#8a4a40" stroke-width="5" opacity=".7"/><text x="525" y="185.3" font-size="11.5" fill="#8a4a40">−75 pips</text>
+<text x="375" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#1b2733">Entrée prévue</text>
+<text x="515" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#1b2733">Entrée poursuivie</text>
+<text x="375" y="52" text-anchor="middle" font-size="11" fill="#5b646b">1,2657 · 2,28R</text>
+<text x="515" y="52" text-anchor="middle" font-size="11" fill="#5b646b">1,2700 · 0,40R</text>
+<text x="40" y="282" font-size="11" fill="#7b8389">Même invalidation, même objectif : entrer après le mouvement divise le gain possible et plus que double le risque.</text>
+</svg>

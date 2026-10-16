@@ -73,3 +73,15 @@ file = "fiche-zones.md"
 pdf = "fiche-zones.pdf"
 access = "member"
 lessons = ["fvg-definition", "fvg-criteres", "order-blocks", "ote-retracements", "confluence", "cas-entree", "recap-zones"]
+
+[[resource]]
+id = "routine-de-seance"
+title = "Routine de séance"
+description = "Avant, pendant et après la séance : les vérifications du parcours 6 et une grille pour écrire ses règles d'arrêt."
+kind = "checklist"
+category = "Psychologie du trading"
+level = "intermediaire"
+file = "routine-de-seance.md"
+pdf = "routine-de-seance.pdf"
+access = "member"
+lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie"]

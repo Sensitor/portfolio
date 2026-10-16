@@ -1,0 +1,73 @@
+id = "check-processus"
+title = "Contrôle : décision et résultat"
+course = "decider-sous-incertitude"
+lesson = "processus-resultat"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "dangereux"
+prompt = "Laquelle de ces combinaisons est la plus dangereuse pour la suite ?"
+kind = "single"
+lesson = "processus-resultat"
+
+[[question.option]]
+id = "mauvaise-gain"
+text = "Une mauvaise décision suivie d'un gain."
+correct = true
+explanation = "Le gain renforce le comportement que la méthode voulait écarter."
+
+[[question.option]]
+id = "bonne-perte"
+text = "Une bonne décision suivie d'une perte."
+explanation = "C'est une issue normale d'une approche à espérance positive."
+
+[[question.option]]
+id = "mauvaise-perte"
+text = "Une mauvaise décision suivie d'une perte."
+explanation = "Elle coûte, mais elle se voit et se corrige."
+
+[[question]]
+id = "serie"
+prompt = "À 50 % de réussite, quelle est la probabilité d'au moins cinq pertes d'affilée sur 100 trades indépendants ?"
+kind = "single"
+lesson = "processus-resultat"
+
+[[question.option]]
+id = "81"
+text = "Environ 81 %"
+correct = true
+explanation = "Calcul exact : une telle série est presque certaine sur un an d'activité."
+
+[[question.option]]
+id = "3"
+text = "Environ 3 %"
+explanation = "C'est la probabilité sur cinq trades seulement."
+
+[[question.option]]
+id = "50"
+text = "Environ 50 %"
+explanation = "C'est le taux de réussite, pas la probabilité de la série."
+
+[[question]]
+id = "revue"
+prompt = "Quelle question la revue de séance doit-elle poser en premier ?"
+kind = "single"
+lesson = "processus-resultat"
+
+[[question.option]]
+id = "regles"
+text = "Combien de mes trades respectaient toutes mes règles ?"
+correct = true
+explanation = "Ce chiffre dépend de vous ; le résultat dépend aussi du marché."
+
+[[question.option]]
+id = "gain"
+text = "Combien ai-je gagné aujourd'hui ?"
+explanation = "Le résultat d'une séance dit peu de chose sur les décisions."
+
+[[question.option]]
+id = "marche"
+text = "Qu'aurait-il fallu faire, sachant la suite du marché ?"
+explanation = "C'est juger avec une information qui n'existait pas : le biais rétrospectif."

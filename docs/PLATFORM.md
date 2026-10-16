@@ -77,7 +77,8 @@ fixed list, an optional 1 to 5 scale and up to 4 000 characters of text.
 * **No interpretation.** The page shows counts and the average of the scale the
   member filled in, each with its sample size. It never reads the text, scores
   it, labels the person or suggests a diagnosis.
-* What remains announced (path 6 and routines) stays listed as « Prévu ».
+* The space links to path 6, « Décider sous incertitude », and to its « Routine de séance »
+  checklist. What remains announced (routines to tick inside the journal) stays listed as « Prévu ».
 
 **The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
 set, and says the link is not configured otherwise.

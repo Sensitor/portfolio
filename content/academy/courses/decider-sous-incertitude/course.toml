@@ -1,0 +1,39 @@
+id = "decider-sous-incertitude"
+path = "psychologie"
+title = "Décider sous incertitude"
+summary = "Huit leçons sur ce qui se passe entre la règle écrite et le clic : juger une décision plutôt qu'un résultat, les biais de récence et de confirmation, la peur de rater un mouvement, le trade de revanche, la suractivité, puis les routines qui protègent le plan. Chaque comportement est chiffré, aucun n'est un diagnostic."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Juger un trade sur la qualité de la décision, pas sur son seul résultat.",
+  "Reconnaître les biais de récence et de confirmation dans sa propre lecture.",
+  "Chiffrer le coût d'une entrée poursuivie, d'un trade de revanche et de la suractivité.",
+  "Mettre en place des routines et des règles d'arrêt écrites avant la séance.",
+]
+prerequisites = ["Premiers pas sur les marchés", "Gérer le risque dans la durée"]
+final_quiz = "psychologie-validation"
+
+[[module]]
+id = "processus"
+title = "Processus et résultat"
+summary = "Pourquoi un trade gagnant peut être une mauvaise décision, et une perte une bonne."
+lessons = ["processus-resultat"]
+
+[[module]]
+id = "biais"
+title = "Deux biais de lecture"
+summary = "Accorder trop de poids aux derniers trades, et ne chercher que ce qui confirme son idée."
+lessons = ["biais-recence", "biais-confirmation"]
+
+[[module]]
+id = "comportements"
+title = "Trois comportements coûteux"
+summary = "La peur de rater un mouvement, le trade pour se refaire et la suractivité, chacun avec son coût chiffré."
+lessons = ["fomo", "revanche", "suractivite"]
+
+[[module]]
+id = "routines"
+title = "Protéger le plan"
+summary = "Les routines avant, pendant et après la séance, les règles d'arrêt, puis le quiz de validation."
+lessons = ["routines", "recap-psychologie"]

@@ -1,0 +1,73 @@
+id = "check-fomo"
+title = "Contrôle : la peur de rater le mouvement"
+course = "decider-sous-incertitude"
+lesson = "fomo"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ratio"
+prompt = "Invalidation 1,2625, objectif 1,2730. Entrée poursuivie à 1,2700 : quel ratio gain / risque ?"
+kind = "single"
+lesson = "fomo"
+
+[[question.option]]
+id = "040"
+text = "0,40R"
+correct = true
+explanation = "30 pips de gain pour 75 de risque."
+
+[[question.option]]
+id = "228"
+text = "2,28R"
+explanation = "C'est le ratio de l'entrée prévue à 1,2657."
+
+[[question.option]]
+id = "250"
+text = "2,50R"
+explanation = "C'est le rapport inverse, 75 ÷ 30."
+
+[[question]]
+id = "seuil"
+prompt = "Avec 0,40R, quel taux de réussite minimal faut-il pour ne pas perdre, hors coûts ?"
+kind = "single"
+lesson = "fomo"
+
+[[question.option]]
+id = "71"
+text = "Environ 71 %"
+correct = true
+explanation = "1 ÷ (1 + 0,40) = 71 %."
+
+[[question.option]]
+id = "30"
+text = "Environ 30 %"
+explanation = "C'est le seuil de l'entrée prévue à 2,28R."
+
+[[question.option]]
+id = "50"
+text = "50 %"
+explanation = "C'est le seuil d'un ratio de 1R."
+
+[[question]]
+id = "manque"
+prompt = "Le prix part vers l'objectif sans toucher la zone. Selon la leçon, qu'est-ce que c'est ?"
+kind = "single"
+lesson = "fomo"
+
+[[question.option]]
+id = "manque"
+text = "Un trade manqué, à noter dans le journal : ni une perte, ni une erreur."
+correct = true
+explanation = "C'est une issue normale d'un ordre limite."
+
+[[question.option]]
+id = "erreur"
+text = "Une erreur d'analyse."
+explanation = "Le scénario était peut-être juste ; l'entrée n'a simplement pas eu lieu."
+
+[[question.option]]
+id = "entrer"
+text = "Un signal pour entrer au marché."
+explanation = "C'est précisément l'entrée poursuivie que la leçon chiffre."

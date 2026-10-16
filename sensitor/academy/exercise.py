@@ -27,13 +27,16 @@ def parse_number(text: str | None) -> float | None:
     """
     Read a number the way a French speaker types it.
 
-    "1 234,5", "1234.5" and "0,33" all parse. Returns None for an empty field and
-    raises ValueError for anything that is not a number, so the page can tell
-    "you left this blank" from "this is not a number".
+    "1 234,5", "1234.5" and "0,33" all parse, as do the typographic minus the
+    solutions print ("−0,06") and a trailing unit of the answer ("57 %", "2,28R").
+    Returns None for an empty field and raises ValueError for anything that is
+    not a number, so the page can tell "you left this blank" from "this is not
+    a number".
     """
     if text is None:
         return None
-    cleaned = _SPACES.sub("", str(text)).replace("€", "").replace("$", "")
+    cleaned = _SPACES.sub("", str(text)).replace("€", "").replace("$", "").replace("\u2212", "-")
+    cleaned = cleaned.removesuffix("%").removesuffix("R").removesuffix("r")
     if not cleaned:
         return None
     if cleaned.count(",") == 1 and "." not in cleaned:

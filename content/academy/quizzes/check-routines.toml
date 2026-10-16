@@ -1,0 +1,73 @@
+id = "check-routines"
+title = "Contrôle : les routines"
+course = "decider-sous-incertitude"
+lesson = "routines"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "avant"
+prompt = "Que contient la préparation avant la séance selon la leçon ?"
+kind = "single"
+lesson = "routines"
+
+[[question.option]]
+id = "ok"
+text = "L'état, le contexte, le plan et les limites."
+correct = true
+explanation = "Quatre points, courts, écrits."
+
+[[question.option]]
+id = "resultat"
+text = "L'objectif de gain du jour."
+explanation = "Un objectif de gain pousse à forcer les trades."
+
+[[question.option]]
+id = "rien"
+text = "Rien, il vaut mieux réagir au marché."
+explanation = "Réagir sans plan est le terrain des comportements de ce parcours."
+
+[[question]]
+id = "revue"
+prompt = "Quand faire la revue de séance ?"
+kind = "single"
+lesson = "routines"
+
+[[question.option]]
+id = "toujours"
+text = "Après chaque séance, gagnante ou perdante."
+correct = true
+explanation = "Les jours de gain cachent aussi des décisions à examiner."
+
+[[question.option]]
+id = "pertes"
+text = "Seulement après une séance perdante."
+explanation = "C'est l'erreur fréquente de la leçon."
+
+[[question.option]]
+id = "mois"
+text = "Une fois par mois suffit."
+explanation = "Une revue mensuelle complète la revue de séance, elle ne la remplace pas."
+
+[[question]]
+id = "journal"
+prompt = "Que fait le journal de réflexion de l'espace Psychologie et discipline ?"
+kind = "single"
+lesson = "routines"
+
+[[question.option]]
+id = "compte"
+text = "Il conserve vos notes et les compte, sans les interpréter."
+correct = true
+explanation = "Il n'analyse pas le texte et ne pose aucun diagnostic."
+
+[[question.option]]
+id = "diagnostic"
+text = "Il analyse vos émotions et propose un diagnostic."
+explanation = "Il ne fait rien de tel."
+
+[[question.option]]
+id = "partage"
+text = "Il partage vos notes avec la communauté."
+explanation = "Vos notes sont privées."

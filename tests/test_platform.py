@@ -50,7 +50,10 @@ def main() -> int:
 
     check("Psychologie et discipline is open", spaces.space("psychology").is_live)
     check("and still announces what is not built",
-          any("Parcours 6" in p for p in spaces.space("psychology").planned))
+          any("Routines" in p for p in spaces.space("psychology").planned))
+    check("it links to path 6", ("Parcours 6 : Décider sous incertitude", "course:decider-sous-incertitude")
+          in spaces.space("psychology").related)
+    check("course targets parse", spaces.parse_target("course:c") == ("course", {"course": "c"}))
 
     print("\nReflection journal")
     from datetime import datetime, timezone

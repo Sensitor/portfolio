@@ -1,0 +1,60 @@
+id = "cout-suractivite"
+title = "Une semaine de suractivité, coûts compris"
+context = """
+Sur une semaine, un trader prend **5 trades conformes** à toutes ses règles, d'espérance brute **+0,30R** chacun, et **15 trades marginaux** qui n'en remplissent qu'une partie, d'espérance brute **+0,02R** chacun.
+
+Spread, commission et glissement coûtent en moyenne **0,08R par trade**, quel qu'il soit. Le risque par trade est de **50 $**.
+
+On raisonne en espérance : ce que chaque groupe rapporte en moyenne. Chiffres fictifs, construits pour l'exercice.
+"""
+conclusion = """
+Les quinze trades marginaux ont effacé plus des quatre cinquièmes de ce que les cinq trades conformes rapportaient : 0,20R au lieu de 1,10R, soit 10 $ au lieu de 55 $ par semaine en moyenne. Ils étaient presque à l'équilibre avant coûts ; ce sont les coûts qui les rendent perdants.
+"""
+
+[[step]]
+id = "net-a"
+prompt = "Quelle est l'espérance nette d'un trade conforme, en R ?"
+unit = "R"
+answer = 0.22
+tolerance = 0.001
+solution = "0,30 − 0,08 = **+0,22R**."
+
+[[step]]
+id = "total-a"
+prompt = "Que rapportent en moyenne les 5 trades conformes sur la semaine, en R ?"
+unit = "R"
+answer = 1.10
+tolerance = 0.001
+solution = "5 × 0,22 = **+1,10R**."
+
+[[step]]
+id = "net-marginal"
+prompt = "Quelle est l'espérance nette d'un trade marginal, en R ?"
+unit = "R"
+answer = -0.06
+tolerance = 0.001
+solution = "0,02 − 0,08 = **−0,06R** : un trade marginal coûte de l'argent en moyenne."
+
+[[step]]
+id = "total-marginal"
+prompt = "Que coûtent en moyenne les 15 trades marginaux sur la semaine, en R ?"
+unit = "R"
+answer = -0.90
+tolerance = 0.001
+solution = "15 × (−0,06) = **−0,90R**."
+
+[[step]]
+id = "semaine"
+prompt = "Quelle est l'espérance nette de la semaine complète, en R ?"
+unit = "R"
+answer = 0.20
+tolerance = 0.001
+solution = "1,10 − 0,90 = **+0,20R**."
+
+[[step]]
+id = "difference"
+prompt = "Combien la suractivité coûte-t-elle en moyenne sur la semaine, en dollars, avec 50 $ de risque par trade ?"
+unit = "$"
+answer = 45
+tolerance = 0.01
+solution = "(1,10 − 0,20) × 50 = **45 $** : 55 $ attendus avec les seuls trades conformes, 10 $ avec les vingt."

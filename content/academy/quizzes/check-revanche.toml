@@ -1,0 +1,74 @@
+id = "check-revanche"
+title = "Contrôle : le trade pour se refaire"
+course = "decider-sous-incertitude"
+lesson = "revanche"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "chiffre"
+prompt = "Après trois pertes à 1 % sur 10 000 $, un quatrième trade à 3 % est perdu. Quel est le capital ?"
+kind = "single"
+lesson = "revanche"
+
+[[question.option]]
+id = "9411"
+text = "9 411,90 $"
+correct = true
+explanation = "9 702,99 × 0,97."
+
+[[question.option]]
+id = "9605"
+text = "9 605,96 $"
+explanation = "C'est le résultat à 1 %."
+
+[[question.option]]
+id = "9400"
+text = "9 400,00 $"
+explanation = "Le risque se calcule sur le capital courant, pas sur le départ."
+
+[[question]]
+id = "signes"
+prompt = "Lesquels sont des signes d'un trade de revanche ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "revanche"
+
+[[question.option]]
+id = "apres"
+text = "Il suit de près une ou plusieurs pertes."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "taille"
+text = "Il est plus gros que d'habitude."
+correct = true
+explanation = "Oui, souvent."
+
+[[question.option]]
+id = "plan"
+text = "Il figurait dans le plan écrit avant la séance."
+explanation = "Un trade prévu par le plan, à la taille prévue, n'en est pas un."
+
+[[question]]
+id = "regle"
+prompt = "Pourquoi écrire les règles d'arrêt avant la séance ?"
+kind = "single"
+lesson = "revanche"
+
+[[question.option]]
+id = "calme"
+text = "Parce que la décision de s'arrêter se prend mal juste après une perte."
+correct = true
+explanation = "La règle déplace la décision vers un moment calme."
+
+[[question.option]]
+id = "obligation"
+text = "Parce que c'est une obligation réglementaire."
+explanation = "Ce n'en est pas une ; c'est une protection personnelle."
+
+[[question.option]]
+id = "gain"
+text = "Parce qu'elles augmentent le taux de réussite."
+explanation = "Elles limitent les pertes ; elles ne changent pas le taux de réussite."

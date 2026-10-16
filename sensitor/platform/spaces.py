@@ -63,13 +63,13 @@ SPACES: tuple[Space, ...] = (
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
           entry="library", pages=("library", "resource"), numeral="II"),
     Space("psychology", "Psychologie et discipline", "apprendre", LIVE,
-          "Un journal de réflexion privé avant et après chaque séance ; biais et routines à venir.",
+          "Un journal de réflexion privé avant et après chaque séance, et le parcours 6 sur les biais "
+          "et les routines.",
           entry="psychology", pages=("psychology",), numeral="III",
-          planned=("Parcours 6, Psychologie du trading : FOMO, revenge trading, suractivité, "
-                   "biais de récence et de confirmation",
-                   "Routines avant, pendant et après la séance, à cocher dans le journal"),
-          related=(("La checklist avant chaque trade", "resource:checklist-avant-trade"),
-                   ("Leçon : le budget de risque", "lesson:premiers-pas/budget-de-risque"))),
+          planned=("Routines avant, pendant et après la séance, à cocher dans le journal",),
+          related=(("Parcours 6 : Décider sous incertitude", "course:decider-sous-incertitude"),
+                   ("La routine de séance", "resource:routine-de-seance"),
+                   ("La checklist avant chaque trade", "resource:checklist-avant-trade"))),
     Space("lab", "Trading Lab", "pratiquer", LIVE,
           "Le calculateur de risque et les exercices pratiques, sans capital réel.",
           entry="lab", pages=("lab",), numeral="IV",
@@ -123,12 +123,14 @@ def by_group() -> list[tuple[str, list[Space]]]:
 
 def parse_target(target: str) -> tuple[str, dict]:
     """
-    Read a `related` target: "resource:<id>", "lesson:<course>/<lesson>", or a page id.
-    Returns (page, route fields).
+    Read a `related` target: "resource:<id>", "course:<id>", "lesson:<course>/<lesson>",
+    or a page id. Returns (page, route fields).
     """
     kind, _, rest = target.partition(":")
     if kind == "resource" and rest:
         return "resource", {"resource": rest}
+    if kind == "course" and rest:
+        return "course", {"course": rest}
     if kind == "lesson" and "/" in rest:
         course, lesson = rest.split("/", 1)
         return "lesson", {"course": course, "lesson": lesson}

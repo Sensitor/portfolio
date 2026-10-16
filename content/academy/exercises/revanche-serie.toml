@@ -1,0 +1,60 @@
+id = "revanche-serie"
+title = "Chiffrer un trade de revanche"
+context = """
+Un compte de **10 000 $**, un risque de **1 % du capital courant** par trade. Trois pertes complètes s'enchaînent.
+
+Au quatrième trade, deux choix : rester à 1 %, ou passer à **3 %** « pour se refaire en un seul gain ». On regarde ce qui se passe si ce quatrième trade est perdu, ce qui arrive aussi souvent que d'habitude.
+
+Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+Les trois premières pertes sont les mêmes dans les deux cas. Le quatrième trade, perdu, coûte 97,03 $ à 1 % et 291,09 $ à 3 % : le drawdown passe de 3,94 % à 5,88 %, et il faut ensuite gagner 6,25 % pour revenir au départ. La règle qui l'évite tient en une ligne : le risque par trade ne change jamais pendant la séance.
+"""
+
+[[step]]
+id = "apres-trois"
+prompt = "Quel est le capital après les trois pertes à 1 % ?"
+unit = "$"
+answer = 9702.99
+tolerance = 0.011
+solution = "10 000 × 0,99 × 0,99 × 0,99 = **9 702,99 $**."
+
+[[step]]
+id = "drawdown-trois"
+prompt = "Quel est le drawdown à ce stade, en pourcentage ?"
+unit = "%"
+answer = 2.97
+tolerance = 0.006
+solution = "1 − 9 702,99 ÷ 10 000 = **2,97 %**."
+
+[[step]]
+id = "discipline"
+prompt = "Quatrième trade à 1 %, perdu : quel est le capital ?"
+unit = "$"
+answer = 9605.96
+tolerance = 0.011
+solution = "9 702,99 × 0,99 = **9 605,96 $**, soit un drawdown de 3,94 %."
+
+[[step]]
+id = "revanche"
+prompt = "Quatrième trade à 3 %, perdu : quel est le capital ?"
+unit = "$"
+answer = 9411.90
+tolerance = 0.011
+solution = "9 702,99 × 0,97 = **9 411,90 $**."
+
+[[step]]
+id = "drawdown-revanche"
+prompt = "Quel est alors le drawdown, en pourcentage ?"
+unit = "%"
+answer = 5.88
+tolerance = 0.006
+solution = "1 − 9 411,90 ÷ 10 000 = **5,88 %** : le drawdown a presque doublé en un seul trade."
+
+[[step]]
+id = "recuperation"
+prompt = "Quel gain, en pourcentage, faut-il ensuite pour revenir à 10 000 $ ?"
+unit = "%"
+answer = 6.25
+tolerance = 0.006
+solution = "10 000 ÷ 9 411,90 − 1 = **6,25 %**, à obtenir avec un compte plus petit et après quatre pertes."

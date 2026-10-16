@@ -1,0 +1,74 @@
+id = "check-confirmation"
+title = "Contrôle : le biais de confirmation"
+course = "decider-sous-incertitude"
+lesson = "biais-confirmation"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ordre"
+prompt = "Dans quel ordre la leçon propose-t-elle d'écrire un scénario ?"
+kind = "single"
+lesson = "biais-confirmation"
+
+[[question.option]]
+id = "tort"
+text = "Ce qui me donnerait tort, le scénario opposé, mes arguments, ma décision."
+correct = true
+explanation = "L'invalidation d'abord, avant que les arguments ne l'orientent."
+
+[[question.option]]
+id = "arguments"
+text = "Mes arguments, puis l'invalidation qui les protège."
+explanation = "C'est l'ordre qui laisse le biais choisir l'invalidation."
+
+[[question.option]]
+id = "decision"
+text = "Ma décision, puis ses justifications."
+explanation = "C'est l'ordre du biais de confirmation lui-même."
+
+[[question]]
+id = "signes"
+prompt = "Lesquels sont des signes de biais de confirmation ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "biais-confirmation"
+
+[[question.option]]
+id = "ut"
+text = "Changer d'unité de temps jusqu'à trouver celle qui confirme."
+correct = true
+explanation = "Oui, on cherche la confirmation au lieu de la tester."
+
+[[question.option]]
+id = "avis"
+text = "Chercher en ligne un avis qui confirme une position perdante."
+correct = true
+explanation = "Oui, et on en trouve toujours un."
+
+[[question.option]]
+id = "ecrire"
+text = "Écrire le scénario opposé avant d'entrer."
+explanation = "C'est la parade, pas le biais."
+
+[[question]]
+id = "position"
+prompt = "Une fois en position, que fait-on du plan écrit avant l'entrée ?"
+kind = "single"
+lesson = "biais-confirmation"
+
+[[question.option]]
+id = "garder"
+text = "On ne le réécrit pas : l'invalidation ne s'éloigne pas."
+correct = true
+explanation = "Une nouvelle analyse se fait hors position."
+
+[[question.option]]
+id = "adapter"
+text = "On l'adapte à chaque nouvelle bougie."
+explanation = "C'est là que le biais est le plus fort."
+
+[[question.option]]
+id = "oublier"
+text = "On l'oublie, le marché décide."
+explanation = "Le plan sert précisément à ce moment."
