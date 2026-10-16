@@ -146,7 +146,7 @@ def main() -> int:
     check("…and account deletion", "Supprimer le compte" in body)
     check("verification status is shown", "Adresse vérifiée" in body)
     visitor = run({"page": "account"})
-    check("a visitor sees the forgotten-password tab", "Mot de passe oublié" in str(visitor))
+    check("a visitor sees the forgotten-password panel", "Mot de passe oublié" in str(visitor))
     check("…which says e-mail is not configured here", "non configuré" in text(visitor))
     bad = run({"page": "verify", "token": "invalide"})
     check("a bad verification link says so", "expiré" in text(bad))

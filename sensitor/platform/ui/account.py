@@ -87,8 +87,7 @@ def _visitor() -> None:
     multi = rt.multi_user()
     left, right = st.columns([1.15, 1], gap="large")
     with left:
-        tabs = ["Se connecter", "Créer un compte"] + (["Mot de passe oublié"] if multi else [])
-        panes = st.tabs(tabs)
+        panes = st.tabs(["Se connecter", "Créer un compte"])
         with panes[0]:
             with st.form("sign_in_form"):
                 address = st.text_input("Adresse e-mail", key="si_email")
@@ -113,7 +112,7 @@ def _visitor() -> None:
                         st.rerun()
                     st.error(_message(result))
         if multi:
-            with panes[2]:
+            with st.expander("Mot de passe oublié ?"):
                 _forgot()
         else:
             note("Mode local : aucun mot de passe n'est demandé. Pour un site ouvert au public, "

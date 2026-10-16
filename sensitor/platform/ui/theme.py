@@ -212,7 +212,19 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [data-testid="stExpander"] summary { background: var(--white) !important; }
 .stApp input::placeholder { color: var(--faint) !important; -webkit-text-fill-color: var(--faint); }
 .stApp [data-testid="stNumberInputContainer"] button { background: var(--paper-2) !important; color: var(--ink) !important; border: 0 !important; }
-.stApp [data-testid="InputInstructions"] { color: var(--muted) !important; }
+/* "Press Enter to submit form" sits on top of the typed text: hidden. */
+.stApp [data-testid="InputInstructions"] { display: none !important; }
+/* Whatever wraps an input directly gets the white field, so a Streamlit
+   release that renames its wrappers cannot bring back a dark field. */
+.stApp div:has(> input[type="text"]), .stApp div:has(> input[type="password"]),
+.stApp div:has(> input[type="email"]), .stApp div:has(> input[type="number"]) {
+  background-color: var(--white) !important;
+}
+.stApp [data-testid="stTextInputRootElement"]:focus-within,
+.stApp [data-testid="stNumberInputContainer"]:focus-within {
+  border-color: var(--blue-2) !important; box-shadow: 0 0 0 3px var(--blue-soft) !important;
+}
+:root { color-scheme: light; }
 [data-baseweb="popover"] li, [data-baseweb="popover"] ul { background: var(--white) !important; color: var(--ink) !important; }
 
 /* Choices — Streamlit 1.64: label[data-testid=stRadioOption], stCheckbox > label */
@@ -244,6 +256,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 /* Expanders, tabs, forms, alerts */
 .stApp [data-testid="stExpander"] details { border: 1px solid var(--line) !important; border-radius: 3px; background: var(--white); }
 .stApp [data-testid="stExpander"] summary, .stApp [data-testid="stExpander"] summary * { color: var(--ink) !important; font-weight: 600; }
+/* Tabs: Streamlit 1.64 uses react-aria (stTab + SelectionIndicator) */
+.stApp [data-testid="stTab"] { color: var(--muted) !important; border-color: transparent !important;
+  outline-color: var(--blue-2) !important; }
+.stApp [data-testid="stTab"] p { color: var(--muted) !important; font-weight: 600; font-size: 14.5px; }
+.stApp [data-testid="stTab"][aria-selected="true"], .stApp [data-testid="stTab"][data-selected="true"],
+.stApp [data-testid="stTab"][aria-selected="true"] p, .stApp [data-testid="stTab"][data-selected="true"] p {
+  color: var(--ink) !important;
+}
+.stApp .react-aria-SelectionIndicator { background-color: var(--ink) !important; border-color: var(--ink) !important;
+  color: var(--ink) !important; }
 .stApp [data-baseweb="tab-list"] { gap: 1.6rem; border-bottom: 1px solid var(--line); }
 .stApp [data-baseweb="tab"] { background: transparent !important; padding: .7rem 0; }
 .stApp [data-baseweb="tab"] p { color: var(--muted) !important; font-weight: 600; font-size: 14.5px; }
