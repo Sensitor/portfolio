@@ -137,8 +137,10 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
                     "Chaque parcours ouvre lorsque son contenu est rédigé, relu et testé.",
                     display=True)
     with right:
-        if courses:
-            start_card(courses[0], member, key="academy_start")
+        step = P.next_step(catalog, member.completed, member.passed)
+        target = step.course or (courses[0] if courses else None)
+        if target:
+            start_card(target, member, key="academy_start")
 
     section(1, "Les parcours ouverts",
             "Un parcours est une suite de chapitres et de leçons, conclue par un quiz de validation.")
@@ -201,7 +203,8 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
     free = sum(1 for l in course.lessons if l.is_public)
     section(2, "Le plan du parcours",
             f"{len(course.modules)} chapitres, {len(course.lessons)} leçons. "
-            f"{free} leçons se lisent sans compte ; les suivantes demandent un compte gratuit.")
+            + (f"{free} leçon se lit sans compte" if free == 1 else f"{free} leçons se lisent sans compte")
+            + " ; les suivantes demandent un compte gratuit.")
     for module in course.modules:
         html(f'<div class="sx-chapter"><div class="numeral">{numeral(module.number)}.</div><div>'
              f'<div class="k">Chapitre {numeral(module.number)} · {len(module.lessons)} '
@@ -243,7 +246,7 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
              f'<div><dt>Niveau</dt><dd>{esc(course.level_label)}</dd></div>'
              f'<div><dt>Prérequis</dt><dd>{esc(prerequisites)}</dd></div>'
              f'<div><dt>Durée de lecture</dt><dd>{esc(duration(course.duration_minutes))}</dd></div>'
-             f'<div><dt>Accès</dt><dd>{free} leçons libres · {len(course.lessons) - free} membres</dd></div>'
+             f'<div><dt>Accès</dt><dd>{free} en accès libre · {len(course.lessons) - free} réservées aux membres</dd></div>'
              '<div><dt>Format</dt><dd>Leçons écrites, schémas, quiz, exercice</dd></div></dl>')
     with c2:
         ids = []

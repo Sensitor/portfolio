@@ -32,8 +32,8 @@ def book_row(resource: Resource, *, key: str, index: int = 0, compact: bool = Fa
     tap(key,
         f'<div class="sx-book">{_cover(resource, index)}<div><div class="sx-kicker muted">'
         f'{esc(resource.kind_label)} · {esc(resource.category)}</div><div class="t">'
-        f'{esc(resource.title)}</div>{summary}<div style="margin-top:.6rem">{_access_pill(resource)}'
-        f'</div></div><span class="arrow">{icon("arrow")}</span></div>',
+        f'{esc(resource.title)}</div>{summary}<div style="margin-top:.6rem;display:flex;gap:.4rem">'
+        f'{_access_pill(resource)}{pill("PDF", "") if resource.pdf else ""}</div></div><span class="arrow">{icon("arrow")}</span></div>',
         f"Ouvrir la ressource {resource.title}", "resource", resource=resource.id)
 
 
@@ -97,12 +97,18 @@ def resource_page(catalog: Catalog, email: str | None, route: dict) -> None:
              f'<div><dt>Type</dt><dd>{esc(resource.kind_label)}</dd></div>'
              f'<div><dt>Thème</dt><dd>{esc(resource.category)}</dd></div>'
              f'<div><dt>Accès</dt><dd>{"Libre" if resource.access == "public" else "Membres"}</dd></div>'
-             f'<div><dt>Format</dt><dd>Texte (Markdown)</dd></div>'
+             f'<div><dt>Format</dt><dd>{"PDF et texte" if resource.pdf else "Texte (Markdown)"}</dd></div>'
              f'<div><dt>Auteur</dt><dd>{esc(resource.author)}</dd></div></dl>')
         if allowed:
-            st.download_button("Télécharger", data=resource.read_text().encode("utf-8"),
+            if resource.pdf:
+                st.download_button("Télécharger le PDF", data=resource.read_pdf(),
+                                   file_name=resource.pdf_name, mime="application/pdf",
+                                   key=f"dl_pdf_{resource.id}", type="primary", width="stretch")
+            st.download_button("Version texte (.md)" if resource.pdf else "Télécharger",
+                               data=resource.read_text().encode("utf-8"),
                                file_name=resource.filename, mime="text/markdown",
-                               key=f"dl_{resource.id}", type="primary", width="stretch")
+                               key=f"dl_{resource.id}", type="secondary" if resource.pdf else "primary",
+                               width="stretch")
         else:
             rt.link("Se connecter pour télécharger", "account", key=f"dl_lock_{resource.id}",
                     kind="primary", width="stretch")

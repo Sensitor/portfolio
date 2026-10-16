@@ -1,0 +1,71 @@
+id = "cas-gbpusd"
+title = "Lire une séquence GBPUSD en H1"
+context = """
+GBPUSD en H1, sur un **compte de démonstration en dollars**. Les swings confirmés successifs sont :
+
+| Swing | Niveau |
+|---|---|
+| Creux C1 | 1,2602 |
+| Sommet S1 | 1,2668 |
+| Creux C2 | 1,2631 |
+| Sommet S2 | 1,2712 |
+| Creux C3 | 1,2683 |
+| Sommet S3 | 1,2764 |
+
+Le mouvement parti de C3 a cassé S2 en clôture : c'est la dernière cassure de structure haussière. Le prix redescend ensuite, et une bougie clôture à **1,2671**.
+
+GBPUSD est coté en dollars : 1 pip vaut 10 $ pour un lot standard. Budget de risque : **50 $**. Pas de volume : 0,01 lot.
+
+Scénario fictif, construit pour l'exercice.
+"""
+conclusion = """
+Le plan est complet : constat (changement de structure, sommet plus bas), invalidation placée par la structure, et taille calculée par le budget. Si le prix clôture au-dessus de 1,2746, le scénario est faux, et la perte prévue est de 0,17 × 28 × 10 = 47,60 $, sous le budget de 50 $, avant les coûts.
+"""
+
+[[step]]
+id = "creux-cle"
+prompt = "Quel est le creux dont la cassure en clôture marque un changement de structure ?"
+unit = "prix"
+answer = 1.2683
+tolerance = 0.00001
+solution = "**C3, à 1,2683** : c'est le dernier creux plus haut, celui d'où est parti le mouvement qui a cassé S2 et fait le sommet S3."
+
+[[step]]
+id = "ecart-mss"
+prompt = "La bougie clôture à 1,2671. De combien de pips sous ce creux ?"
+unit = "pips"
+answer = 12
+tolerance = 0.01
+solution = "1,2683 − 1,2671 = 0,0012, soit **12 pips**. La clôture est sous C3 : changement de structure."
+
+[[step]]
+id = "sommet-plus-bas"
+prompt = "Le prix remonte jusqu'à 1,2741, puis repart à la baisse et ce point devient un sommet de swing confirmé. De combien de pips est-il sous S3 ?"
+unit = "pips"
+answer = 23
+tolerance = 0.01
+solution = "1,2764 − 1,2741 = 0,0023, soit **23 pips**. C'est un sommet plus bas : le premier élément d'une séquence baissière, pas encore une tendance."
+
+[[step]]
+id = "invalidation"
+prompt = "Un scénario baissier est invalidé par une clôture au-dessus de ce sommet plus bas, avec 5 pips de marge. À quel niveau ?"
+unit = "prix"
+answer = 1.2746
+tolerance = 0.00001
+solution = "1,2741 + 0,0005 = **1,2746**. Au-dessus, le sommet plus bas n'en est plus un, et le scénario baissier perd son point d'appui."
+
+[[step]]
+id = "distance"
+prompt = "Pour une vente hypothétique à 1,2718, quelle est la distance jusqu'à l'invalidation, en pips ?"
+unit = "pips"
+answer = 28
+tolerance = 0.01
+solution = "1,2746 − 1,2718 = 0,0028, soit **28 pips**."
+
+[[step]]
+id = "taille"
+prompt = "Avec un budget de 50 $, quelle taille de position, en lots ? (Arrondissez vers le bas au pas de 0,01.)"
+unit = "lots"
+answer = 0.17
+tolerance = 0.0001
+solution = "Coût du stop par lot : 28 × 10 = 280 $. Taille : 50 ÷ 280 = 0,1786 lot, arrondie vers le bas à **0,17 lot**. Risque effectif : 0,17 × 280 = 47,60 $."

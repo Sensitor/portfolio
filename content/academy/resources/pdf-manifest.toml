@@ -1,0 +1,5 @@
+# Written by scripts/build_resource_pdfs.py: SHA-256 of each PDF's Markdown source.
+[built]
+"checklist-avant-trade.pdf" = "626530222d244fc31200e7725cfe65fd88c5edd18f10bc25dae8c578befe511d"
+"fiche-lire-la-structure.pdf" = "007c668d92661c8b8fd79883977d3c73619c7e07f3f8f108ecf006fd7b416a46"
+"fiche-vocabulaire-execution.pdf" = "8f5d675efddbe667efb1a9db8cc1619e4d873475d1ab956cda681ff660268c3b"

@@ -10,6 +10,7 @@ kind = "fiche"
 category = "Bases des marchés"
 level = "debutant"
 file = "fiche-vocabulaire-execution.md"
+pdf = "fiche-vocabulaire-execution.pdf"
 access = "public"
 lessons = ["fonctionnement-marche", "ordres-et-couts", "recapitulatif"]
 
@@ -21,5 +22,18 @@ kind = "checklist"
 category = "Gestion du risque"
 level = "debutant"
 file = "checklist-avant-trade.md"
+pdf = "checklist-avant-trade.pdf"
 access = "member"
 lessons = ["budget-de-risque", "cas-pratique", "recapitulatif"]
+
+[[resource]]
+id = "fiche-lire-la-structure"
+title = "Lire la structure"
+description = "Swings, zones, cassures et changements de structure, unités de temps : les définitions du parcours 2 sur une page."
+kind = "fiche"
+category = "Structure de marché"
+level = "debutant"
+file = "fiche-lire-la-structure.md"
+pdf = "fiche-lire-la-structure.pdf"
+access = "member"
+lessons = ["swings-definition", "supports-resistances", "multi-unites-de-temps", "cas-structure", "recap-structure"]

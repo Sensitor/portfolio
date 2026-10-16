@@ -1,0 +1,73 @@
+id = "check-swings"
+title = "Contrôle : repérer les swings"
+course = "lire-la-structure"
+lesson = "swings-definition"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "regle"
+prompt = "Les plus hauts de cinq bougies consécutives sont 1,1010, 1,1024, 1,1037, 1,1031 et 1,1019. Avec la règle des deux bougies, laquelle est un sommet de swing ?"
+kind = "single"
+lesson = "swings-definition"
+
+[[question.option]]
+id = "troisieme"
+text = "La troisième, à 1,1037."
+correct = true
+explanation = "Oui : 1,1037 dépasse les deux plus hauts qui précèdent et les deux qui suivent."
+
+[[question.option]]
+id = "quatrieme"
+text = "La quatrième, à 1,1031."
+explanation = "La troisième bougie, juste avant elle, monte plus haut : la règle n'est pas remplie."
+
+[[question.option]]
+id = "aucune"
+text = "Aucune : il faut au moins trois bougies de chaque côté."
+explanation = "Ce parcours utilise deux bougies de chaque côté. Trois est une autre convention, possible, mais pas celle retenue ici."
+
+[[question]]
+id = "retard"
+prompt = "Pourquoi un sommet de swing n'est-il connu qu'avec retard ?"
+kind = "single"
+lesson = "swings-definition"
+
+[[question.option]]
+id = "suivantes"
+text = "Parce qu'il faut attendre les bougies qui le suivent pour vérifier qu'elles ne le dépassent pas."
+correct = true
+explanation = "Exact. Un retournement ne se reconnaît qu'une fois entamé."
+
+[[question.option]]
+id = "plateforme"
+text = "Parce que les plateformes affichent les données avec un délai."
+explanation = "Le retard vient de la définition elle-même, pas d'un délai technique."
+
+[[question.option]]
+id = "volume"
+text = "Parce qu'il faut attendre la confirmation par le volume."
+explanation = "La règle ne fait pas intervenir le volume : elle ne porte que sur les plus hauts."
+
+[[question]]
+id = "anticipation"
+prompt = "Un test historique utilise chaque swing dès la bougie qui le forme. Quel est le problème ?"
+kind = "single"
+lesson = "swings-definition"
+
+[[question.option]]
+id = "biais"
+text = "Il utilise une information qui n'existait pas encore : c'est un biais d'anticipation."
+correct = true
+explanation = "Oui. En temps réel, le swing n'aurait été confirmé que deux bougies plus tard."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun : le swing finit de toute façon par être confirmé."
+explanation = "Pas toujours : beaucoup de « swings » provisoires sont dépassés et n'existent jamais."
+
+[[question.option]]
+id = "lent"
+text = "Le test sera simplement plus lent à calculer."
+explanation = "La question n'est pas la vitesse de calcul mais la validité des résultats."

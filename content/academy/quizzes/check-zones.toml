@@ -1,0 +1,73 @@
+id = "check-zones"
+title = "Contrôle : supports et résistances"
+course = "lire-la-structure"
+lesson = "supports-resistances"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "construire"
+prompt = "Trois sommets de swing se situent à 1,0862, 1,0868 et 1,0871. Quelle zone de résistance en déduire ?"
+kind = "single"
+lesson = "supports-resistances"
+
+[[question.option]]
+id = "zone"
+text = "De 1,0862 à 1,0871."
+correct = true
+explanation = "Oui : de la réaction la plus basse à la plus haute du groupe."
+
+[[question.option]]
+id = "ligne"
+text = "Une ligne à 1,0867, la moyenne des trois."
+explanation = "Une ligne au pip près ignore l'imprécision réelle des réactions."
+
+[[question.option]]
+id = "plus-haut"
+text = "Une ligne à 1,0871, le plus haut des trois."
+explanation = "Les deux autres réactions se sont produites plus bas : la zone doit les inclure."
+
+[[question]]
+id = "dans-zone"
+prompt = "Le prix monte à 1,0866, à l'intérieur de cette zone. Que constate-t-on ?"
+kind = "single"
+lesson = "supports-resistances"
+
+[[question.option]]
+id = "test"
+text = "Un test de la zone en cours, ni cassure ni rejet."
+correct = true
+explanation = "Exact : rien n'est encore tranché."
+
+[[question.option]]
+id = "cassure"
+text = "Une cassure, puisque le prix a dépassé 1,0862."
+explanation = "Le prix est dans la zone, pas au-dessus."
+
+[[question.option]]
+id = "rejet"
+text = "Un rejet, puisque le prix n'a pas atteint 1,0871."
+explanation = "Il est trop tôt pour parler de rejet : le test est en cours."
+
+[[question]]
+id = "inversion"
+prompt = "Une résistance vient d'être franchie. Que peut-on dire de son rôle à venir ?"
+kind = "single"
+lesson = "supports-resistances"
+
+[[question.option]]
+id = "frequent"
+text = "Elle sert souvent de support lors d'un retour, sans que ce soit garanti."
+correct = true
+explanation = "Oui : l'inversion de rôle est fréquente, pas une règle."
+
+[[question.option]]
+id = "toujours"
+text = "Elle devient toujours un support."
+explanation = "Aucune réaction de prix n'est garantie."
+
+[[question.option]]
+id = "disparait"
+text = "Elle ne joue plus aucun rôle."
+explanation = "Les anciennes zones restent souvent observées par les intervenants."

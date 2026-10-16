@@ -199,5 +199,4 @@ python -m sensitor.core.admin verify-link someone@example.com   # valid 48 hours
 * Verification is shown, not enforced: an unverified address can still read.
 * The portfolio app keeps its own look and sign-in screen until it is brought
   into the shell; the account itself is already shared.
-* Library files are Markdown; PDFs can be added the same way once they exist.
 * Fonts load from Google Fonts; offline, system fonts are used.

@@ -58,7 +58,7 @@ SPACES: tuple[Space, ...] = (
     Space("academy", "Academy", "apprendre", LIVE,
           "Parcours structurés, leçons illustrées, quiz corrigés et exercices chiffrés.",
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
-          planned=("Vidéos intégrées aux leçons", "Ebooks", "Neuf parcours supplémentaires")),
+          planned=("Vidéos intégrées aux leçons", "Ebooks", "Les parcours suivants du programme")),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
           entry="library", pages=("library", "resource"), numeral="II"),

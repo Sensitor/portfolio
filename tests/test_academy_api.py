@@ -71,7 +71,10 @@ def main() -> int:
     check("the catalogue is public", r.status_code == 200)
     paths = r.json()["paths"]
     check("ten paths", len(paths) == 10)
-    check("one available", [p["id"] for p in paths if p["available"]] == ["bases-marches"])
+    from sensitor.academy.content import load_catalog
+    catalog = load_catalog()
+    check("the available paths are the published ones",
+          [p["id"] for p in paths if p["available"]] == [p.id for p in catalog.paths if p.is_available])
     check("planned paths list no course",
           all(not p["courses"] for p in paths if p["status"] == "planned"))
 
@@ -180,7 +183,8 @@ def main() -> int:
 
     print("\nLibrary")
     r = client.get("/academy/resources")
-    check("the library lists real resources", r.status_code == 200 and len(r.json()) == 2)
+    check("the library lists every real resource",
+          r.status_code == 200 and len(r.json()) == len(catalog.resources))
     r = client.get("/academy/resources/fiche-vocabulaire-execution/download")
     check("a public sheet downloads anonymously",
           r.status_code == 200 and r.text.startswith("# Le vocabulaire"))
@@ -190,6 +194,15 @@ def main() -> int:
     check("and downloads with a token",
           client.get("/academy/resources/checklist-avant-trade/download",
                      headers=h(bob)).status_code == 200)
+    r = client.get("/academy/resources/fiche-vocabulaire-execution/download?format=pdf")
+    check("the PDF downloads", r.status_code == 200 and r.content[:5] == b"%PDF-"
+          and r.headers["content-type"] == "application/pdf")
+    check("a member PDF is 401 anonymously",
+          client.get("/academy/resources/checklist-avant-trade/download?format=pdf").status_code == 401)
+    check("an unknown format is refused",
+          client.get("/academy/resources/fiche-vocabulaire-execution/download?format=docx").status_code == 422)
+    check("the resource list names its PDF",
+          all(item["pdf"] for item in client.get("/academy/resources").json()))
     check("an unknown resource is 404",
           client.get("/academy/resources/nope/download").status_code == 404)
 

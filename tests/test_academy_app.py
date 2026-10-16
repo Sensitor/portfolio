@@ -102,6 +102,21 @@ ROUTES = [
 ]
 
 
+def _catalog_routes() -> list[dict]:
+    """Every course, lesson and final quiz of every open path."""
+    from sensitor.academy.content import load_catalog
+    routes = []
+    for course in load_catalog().available_courses():
+        routes.append({"page": "course", "course": course.id})
+        routes += [{"page": "lesson", "course": course.id, "lesson": l.id} for l in course.lessons]
+        if course.final_quiz_id:
+            routes.append({"page": "quiz", "quiz": course.final_quiz_id, "course": course.id})
+    return routes
+
+
+ROUTES += [r for r in _catalog_routes() if r not in ROUTES]
+
+
 def label(route: dict) -> str:
     return "/".join(str(v) for v in route.values())
 
@@ -179,7 +194,9 @@ def main() -> int:
     check("bob has none", store().quiz_attempts("bob@example.com") == [])
 
     dash = run({"page": "home"}, alice)
-    check("the dashboard reads the real progress", "<b>1</b> / 6" in text(dash))
+    from sensitor.academy.content import load_catalog
+    total = sum(len(c.lessons) for c in load_catalog().available_courses())
+    check("the dashboard reads the real progress", f"<b>1</b> / {total}" in text(dash))
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)

@@ -1,0 +1,229 @@
+id = "structure-validation"
+title = "Quiz de validation : Lire la structure du marché"
+course = "lire-la-structure"
+lesson = "recap-structure"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "creux-swing"
+prompt = "Les plus bas de cinq bougies consécutives sont 1,2540, 1,2531, 1,2518, 1,2526 et 1,2533. Avec la règle des deux bougies, laquelle est un creux de swing ?"
+kind = "single"
+lesson = "swings-definition"
+
+[[question.option]]
+id = "troisieme"
+text = "La troisième, à 1,2518."
+correct = true
+explanation = "Oui : son plus bas est inférieur à ceux des deux bougies qui précèdent et des deux qui suivent."
+
+[[question.option]]
+id = "deuxieme"
+text = "La deuxième, à 1,2531."
+explanation = "La troisième bougie, juste après elle, descend plus bas."
+
+[[question.option]]
+id = "cinquieme"
+text = "La cinquième, à 1,2533."
+explanation = "Il lui manque deux bougies après elle pour appliquer la règle, et son plus bas n'est pas le plus bas."
+
+[[question]]
+id = "dernier-swing"
+prompt = "Sur un graphique en temps réel, que peut-on dire du dernier swing affiché ?"
+kind = "single"
+lesson = "swings-definition"
+
+[[question.option]]
+id = "provisoire"
+text = "Qu'il est provisoire tant que les bougies suivantes ne l'ont pas confirmé."
+correct = true
+explanation = "Oui : un swing se confirme toujours avec retard."
+
+[[question.option]]
+id = "definitif"
+text = "Qu'il est définitif dès la clôture de sa bougie."
+explanation = "Les bougies suivantes peuvent encore le dépasser."
+
+[[question.option]]
+id = "faux"
+text = "Qu'il est forcément faux."
+explanation = "Il peut être confirmé ; il n'est simplement pas encore certain."
+
+[[question]]
+id = "zone"
+prompt = "Pourquoi tracer un support comme une zone plutôt que comme une ligne ?"
+kind = "single"
+lesson = "supports-resistances"
+
+[[question.option]]
+id = "imprecision"
+text = "Parce que les réactions du prix ne se produisent pas au pip près."
+correct = true
+explanation = "Oui : ordres étalés, mèches variables, spreads qui s'élargissent."
+
+[[question.option]]
+id = "joli"
+text = "Parce que c'est plus lisible sur le graphique."
+explanation = "La raison est la précision réelle des réactions, pas l'esthétique."
+
+[[question.option]]
+id = "garantie"
+text = "Parce qu'une zone garantit une réaction, contrairement à une ligne."
+explanation = "Aucune zone ne garantit de réaction."
+
+[[question]]
+id = "force"
+prompt = "« Une zone testée trois fois est plus solide. » De quoi s'agit-il ?"
+kind = "single"
+lesson = "supports-resistances"
+
+[[question.option]]
+id = "hypothese"
+text = "D'une hypothèse de méthode, à vérifier sur son propre historique."
+correct = true
+explanation = "Oui. L'idée inverse, qu'une zone « s'use », circule aussi."
+
+[[question.option]]
+id = "fait"
+text = "D'un fait établi sur tous les marchés."
+explanation = "Rien ne l'établit de façon générale."
+
+[[question.option]]
+id = "definition"
+text = "De la définition d'une zone."
+explanation = "La définition dit seulement où le marché a réagi."
+
+[[question]]
+id = "bos"
+prompt = "Tendance haussière, dernier sommet de swing à 1,3050. Laquelle de ces bougies est une cassure de structure, selon la convention du parcours ?"
+kind = "single"
+lesson = "cassure-de-structure"
+
+[[question.option]]
+id = "cloture"
+text = "Plus haut 1,3062, clôture 1,3057."
+correct = true
+explanation = "Oui : la clôture est au-dessus du sommet."
+
+[[question.option]]
+id = "meche"
+text = "Plus haut 1,3058, clôture 1,3044."
+explanation = "Seule la mèche dépasse le niveau : tentative rejetée."
+
+[[question.option]]
+id = "proche"
+text = "Plus haut 1,3049, clôture 1,3047."
+explanation = "Le prix n'a même pas atteint le sommet."
+
+[[question]]
+id = "mss"
+prompt = "Dans une tendance haussière, qu'est-ce qu'un changement de structure ?"
+kind = "single"
+lesson = "changement-de-structure"
+
+[[question.option]]
+id = "dernier-creux"
+text = "Une clôture sous le dernier creux plus haut, celui d'où est parti le dernier sommet."
+correct = true
+explanation = "Oui : le point d'appui de la tendance est cassé."
+
+[[question.option]]
+id = "nouveau-sommet"
+text = "Une clôture au-dessus du dernier sommet."
+explanation = "C'est une cassure de structure, qui prolonge la tendance."
+
+[[question.option]]
+id = "bougie-basse"
+text = "N'importe quelle bougie qui clôture plus bas que la précédente."
+explanation = "Il faut franchir le creux de swing qui soutient la tendance."
+
+[[question]]
+id = "apres-mss"
+prompt = "Que montre un changement de structure, et que ne montre-t-il pas ?"
+kind = "single"
+lesson = "changement-de-structure"
+
+[[question.option]]
+id = "interrompt"
+text = "Il montre que la séquence haussière est interrompue ; il ne montre pas qu'une baisse a commencé."
+correct = true
+explanation = "Oui : retournement, range ou correction restent possibles."
+
+[[question.option]]
+id = "retournement"
+text = "Il montre que la tendance s'est retournée."
+explanation = "Un retournement demande un sommet plus bas puis un creux plus bas."
+
+[[question.option]]
+id = "rien"
+text = "Il ne montre rien du tout."
+explanation = "Il élimine une hypothèse : la continuation sans interruption."
+
+[[question]]
+id = "top-down"
+prompt = "Dans quel ordre une lecture du haut vers le bas utilise-t-elle les unités de temps ?"
+kind = "single"
+lesson = "multi-unites-de-temps"
+
+[[question.option]]
+id = "haut-bas"
+text = "Contexte sur la plus longue, structure sur l'intermédiaire, déclenchement sur la plus courte."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "bas-haut"
+text = "Déclenchement d'abord, contexte ensuite pour confirmer."
+explanation = "Partir du déclenchement pousse à chercher le contexte qui donne raison."
+
+[[question.option]]
+id = "une-seule"
+text = "Une seule unité suffit si elle est bien choisie."
+explanation = "On peut trader sur une seule unité, mais ce n'est plus une lecture du haut vers le bas."
+
+[[question]]
+id = "ut-shopping"
+prompt = "Un trader change d'unité de temps jusqu'à en trouver une qui confirme son idée. Quel est le problème ?"
+kind = "single"
+lesson = "multi-unites-de-temps"
+
+[[question.option]]
+id = "confirmation"
+text = "Il cherche une confirmation au lieu de lire ce que montre chaque unité."
+correct = true
+explanation = "Oui : les unités se fixent avant d'ouvrir le graphique."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun : plus on regarde d'unités, mieux c'est."
+explanation = "Regarder plus d'unités n'aide pas si l'on ne retient que celles qui confirment."
+
+[[question.option]]
+id = "lenteur"
+text = "Il perd du temps."
+explanation = "Le problème est le biais de confirmation, pas le temps passé."
+
+[[question]]
+id = "taille"
+prompt = "Budget de 60 $, invalidation à 24 pips sur une paire cotée en dollars (10 $ par pip et par lot), pas de 0,01 lot. Quelle taille ?"
+kind = "single"
+lesson = "cas-structure"
+explanation = "Coût du stop par lot : 24 × 10 = 240 $. Taille : 60 ÷ 240 = 0,25 lot."
+
+[[question.option]]
+id = "vingt-cinq"
+text = "0,25 lot"
+correct = true
+explanation = "Oui : 60 $ ÷ 240 $ par lot."
+
+[[question.option]]
+id = "deux-cinq"
+text = "2,5 lots"
+explanation = "Dix fois trop : le risque serait de 600 $."
+
+[[question.option]]
+id = "vingt-quatre"
+text = "0,24 lot"
+explanation = "Le calcul tombe juste sur 0,25 : aucun arrondi n'est nécessaire."

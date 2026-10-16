@@ -17,7 +17,8 @@ id = "structure-price-action"
 number = 2
 title = "Structure de marché et price action"
 summary = "Tendances, ranges, swings, supports et résistances, cassures de structure et lecture multi-unités de temps."
-status = "planned"
+status = "published"
+courses = ["lire-la-structure"]
 topics = ["Tendance et range", "BOS, MSS / CHOCH", "Multi-timeframe", "Observation et interprétation"]
 
 [[path]]

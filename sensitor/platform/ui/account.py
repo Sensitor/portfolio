@@ -32,7 +32,7 @@ REASONS = {
 }
 
 BENEFITS = (
-    ("Toutes les leçons publiées", "Les leçons réservées aux membres, au-delà des deux leçons en accès libre."),
+    ("Toutes les leçons publiées", "Les leçons réservées aux membres, au-delà de celles en accès libre."),
     ("Une progression enregistrée", "Leçons terminées, quiz et erreurs à revoir, retrouvés à chaque visite."),
     ("Un compte pour tous les espaces", "Le même compte servira à chaque espace Sensitor à son ouverture."),
 )

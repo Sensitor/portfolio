@@ -68,7 +68,7 @@ def test_real_catalog():
           C.validate() == [], str(C.validate()))
 
     available = [p for p in catalog.paths if p.is_available]
-    check("exactly one path is open", [p.id for p in available] == ["bases-marches"],
+    check("paths 1 and 2 are open", [p.id for p in available] == ["bases-marches", "structure-price-action"],
           str([p.id for p in available]))
     check("ten paths in the curriculum", len(catalog.paths) == 10)
     check("paths are in programme order",
@@ -119,7 +119,8 @@ def test_real_catalog():
         check(f"resource {resource.id}: the file is really there", resource.file.is_file())
 
     dashed = [str(p.relative_to(C.CONTENT_ROOT)) for p in C.CONTENT_ROOT.rglob("*")
-              if p.is_file() and any(d in p.read_text(encoding="utf-8") for d in ("\u2014", "\u2013"))]
+              if p.is_file() and p.suffix in (".md", ".toml", ".svg")
+              and any(d in p.read_text(encoding="utf-8") for d in ("\u2014", "\u2013"))]
     check("no em or en dash anywhere in the content (house style)", not dashed, str(dashed))
 
 
@@ -167,6 +168,98 @@ def test_lesson_figures_match_the_calculator():
     check("case study: ratio", close(plan.reward_to_risk, answers["ratio"], 1e-9))
     costs = 0.9 * 10 * plan.position.lots + 7 * plan.position.lots
     check("case study: costs", close(costs, answers["couts"], 1e-6), str(costs))
+
+
+def test_structure_figures():
+    """Path 2: the exercise answers are recomputed with the rules the lessons teach."""
+    print("\nPath 2 figures")
+    from sensitor.academy import structure as T
+    catalog = C.load_catalog()
+    ex = {s.id: s.answer for s in catalog.exercise("reperer-swings").steps}
+    highs = [1.0810, 1.0824, 1.0841, 1.0835, 1.0827, 1.0819, 1.0806, 1.0814, 1.0828]
+    lows = [1.0791, 1.0802, 1.0818, 1.0812, 1.0801, 1.0789, 1.0776, 1.0783, 1.0797]
+    found = T.swings(highs, lows)
+    tops = [s for s in found if s.kind == T.HIGH]
+    bottoms = [s for s in found if s.kind == T.LOW]
+    check("exactly one swing high and one swing low", len(tops) == 1 and len(bottoms) == 1, str(found))
+    check("swing high: bar and price", tops[0].index + 1 == ex["sommet-bougie"]
+          and close(tops[0].price, ex["sommet-prix"]))
+    check("swing low: bar", bottoms[0].index + 1 == ex["creux-bougie"])
+    check("swing low: confirmed at the close of bar 9", bottoms[0].confirmed_at + 1 == ex["confirmation"])
+    check("amplitude in pips", close((tops[0].price - bottoms[0].price) / 0.0001, ex["amplitude"], 1e-6))
+
+    quiz = catalog.quiz("check-swings")
+    q = quiz.question("regle")
+    five = [1.1010, 1.1024, 1.1037, 1.1031, 1.1019]
+    hit = [s for s in T.swings(five, [0.0] * 5) if s.kind == T.HIGH]
+    check("check-swings: the third bar is the swing high", [s.index for s in hit] == [2]
+          and q.correct_ids == {"troisieme"})
+    final = catalog.quiz("structure-validation")
+    lows5 = [1.2540, 1.2531, 1.2518, 1.2526, 1.2533]
+    low_hit = [s for s in T.swings([9.0] * 5, lows5) if s.kind == T.LOW]
+    check("validation quiz: the third bar is the swing low", [s.index for s in low_hit] == [2]
+          and final.question("creux-swing").correct_ids == {"troisieme"})
+
+    check("BOS on a close beyond, not at the level", T.is_break(1.0897, 1.0890, direction="up")
+          and not T.is_break(1.0884, 1.0890, direction="up"))
+    check("MSS lesson: 1,0855 breaks 1,0861 down", T.is_break(1.0855, 1.0861, direction="down"))
+    check("BOS quiz option: close 1,3057 breaks 1,3050", T.is_break(1.3057, 1.3050, direction="up")
+          and not T.is_break(1.3044, 1.3050, direction="up"))
+
+    case = {s.id: s.answer for s in catalog.exercise("cas-gbpusd").steps}
+    check("case: the key low is C3", close(case["creux-cle"], 1.2683))
+    check("case: 12 pips below it", close((1.2683 - 1.2671) / 0.0001, case["ecart-mss"], 1e-6))
+    check("case: lower high 23 pips under S3", close((1.2764 - 1.2741) / 0.0001, case["sommet-plus-bas"], 1e-6))
+    check("case: invalidation 5 pips above it", close(1.2741 + 0.0005, case["invalidation"], 1e-9))
+    plan = R.plan(equity=10_000, risk_pct=0.5, entry=1.2718, stop=case["invalidation"],
+                  direction=R.SHORT, spec=R.InstrumentSpec(contract_size=100_000, lot_step=0.01,
+                                                           pip_size=0.0001))
+    check("case: 28 pips to the invalidation", close(plan.stop_distance_pips, case["distance"], 1e-6))
+    check("case: 50 $ budget gives 0.17 lot", close(plan.risk_amount, 50)
+          and close(plan.position.lots, case["taille"]))
+    check("case: 47,60 $ effective risk", close(plan.position.effective_risk, 47.6, 1e-6))
+    size = R.position_size(60, 0.0024, R.InstrumentSpec(contract_size=100_000, lot_step=0.01))
+    check("validation quiz: 60 $ over 24 pips is 0.25 lot", close(size.lots, 0.25))
+
+    for bad in (lambda: T.swings([1, 2], [1]), lambda: T.swings([1], [1], n=0),
+                lambda: T.is_break(1, 1, direction="sideways")):
+        check("structure helpers refuse bad input", raises(bad, ValueError))
+    check("bars at the edges are never swings", T.swings([1, 9, 1], [5, 0, 5]) == [])
+    check("equal highs are not a swing (strict rule)",
+          not [s for s in T.swings([1, 2, 5, 5, 2, 1], [0] * 6) if s.kind == T.HIGH])
+
+
+def test_printable():
+    print("\nPrintable resources")
+    from sensitor.academy import printable
+    catalog = C.load_catalog()
+    with_pdf = [r for r in catalog.resources.values() if r.pdf]
+    check("every library resource has a PDF", len(with_pdf) == len(catalog.resources))
+    for resource in with_pdf:
+        check(f"{resource.pdf_name} is a real PDF", resource.read_pdf()[:5] == b"%PDF-")
+    built = printable.read_manifest(catalog.root / "resources")
+    check("every PDF was built from the current source",
+          all(built.get(r.pdf_name) == printable.source_hash(r.file) for r in with_pdf))
+
+    root = _copy_tree()
+    sheet = root / "resources" / "fiche-lire-la-structure.md"
+    sheet.write_text(sheet.read_text() + "\nUne ligne ajoutée.\n")
+    check("editing a sheet without rebuilding its PDF is reported",
+          any("PDF à reconstruire" in p for p in C.validate(root)))
+    root = _copy_tree()
+    (root / "resources" / "checklist-avant-trade.pdf").unlink()
+    check("a declared PDF that is missing is refused",
+          any("PDF introuvable" in p for p in C.validate(root)))
+
+    out = printable.markdown_to_html("# Titre\n\n*Sous-titre*\n\n## Partie\n\n- **Gras** : texte\n"
+                                     "- [ ] Case\n\n1. Un\n2. Deux\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n---\n\nFin & <b>")
+    check("headings", "<h1>Titre</h1>" in out and "<h2>Partie</h2>" in out)
+    check("emphasis", "<em>Sous-titre</em>" in out and "<strong>Gras</strong>" in out)
+    check("task lists", 'class="task"' in out and "Case" in out)
+    check("numbered lists", "<ol><li>Un</li><li>Deux</li></ol>" in out)
+    check("tables, separator row dropped", "<th>A</th>" in out and "<td>2</td>" in out and "---" not in out)
+    check("rules", "<hr>" in out)
+    check("text is escaped", "&lt;b&gt;" in out and "&amp;" in out)
 
 
 def _copy_tree() -> Path:
@@ -482,6 +575,12 @@ def test_progress_logic():
     check("lessons done, quiz not passed: the final quiz", step.kind == "final_quiz")
     step = P.next_step(catalog, {"premiers-pas": {l.id for l in course.lessons}},
                        {"premiers-pas-validation"})
+    check("course 1 finished: the next course starts", step.kind == "lesson"
+          and step.course.id == "lire-la-structure" and step.lesson.id == "swings-definition")
+    second = catalog.course("lire-la-structure")
+    everything = {"premiers-pas": {l.id for l in course.lessons},
+                  "lire-la-structure": {l.id for l in second.lessons}}
+    step = P.next_step(catalog, everything, {"premiers-pas-validation", "structure-validation"})
     check("everything done: explore", step.kind == "explore")
 
 
@@ -594,6 +693,8 @@ def test_upgrade_from_v5():
 def main() -> int:
     test_real_catalog()
     test_lesson_figures_match_the_calculator()
+    test_structure_figures()
+    test_printable()
     test_validation_catches_mistakes()
     test_drafts()
     test_markup()

@@ -17,7 +17,7 @@ No calculation lives here. Scoring is `academy.quiz`, progress is
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from pydantic import BaseModel, Field
 
 from ...academy import access, progress, quiz as Q, risk as R, views
@@ -210,14 +210,21 @@ def resources(catalog: Catalog = Depends(get_catalog)) -> list[dict]:
     return [views.resource_view(r) for r in catalog.resources.values()]
 
 
-@router.get("/resources/{resource_id}/download", response_class=PlainTextResponse)
+@router.get("/resources/{resource_id}/download")
 def download(resource_id: str, catalog: Catalog = Depends(get_catalog),
-             email: str | None = Depends(optional_user)) -> PlainTextResponse:
+             email: str | None = Depends(optional_user),
+             format: str = Query("md", pattern="^(md|pdf)$")) -> Response:
+    """The resource file: Markdown by default, `?format=pdf` when a PDF exists."""
     found = catalog.resource(resource_id)
     if found is None:
         raise _not_found("resource")
     if not access.can_download(found, email):
         raise _SIGN_IN
+    if format == "pdf":
+        if not found.pdf:
+            raise _not_found("pdf for this resource")
+        return Response(found.read_pdf(), media_type="application/pdf",
+                        headers={"Content-Disposition": f'attachment; filename="{found.pdf_name}"'})
     return PlainTextResponse(
         found.read_text(), media_type="text/markdown; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{found.filename}"'})

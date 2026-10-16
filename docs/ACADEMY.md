@@ -19,20 +19,21 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 10 paths declared; **path 1 published**, 9 marked « en préparation » and not clickable |
-| Course | « Premiers pas sur les marchés » — 6 lessons in 4 modules, ~1 h 34 |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 5 original SVG diagrams, KaTeX formulas |
-| Quizzes | 5 knowledge checks (immediate feedback) + 1 validation quiz (10 questions, deferred correction, pass at 7 / 10) |
-| Exercise | « Préparer un achat sur EURUSD » — 6 numeric steps, tolerance per step, worked solution |
+| Curriculum | 10 paths declared; **paths 1 and 2 published**, 8 marked « en préparation » and not clickable |
+| Courses | « Premiers pas sur les marchés » (6 lessons, ~1 h 34) and « Lire la structure du marché » (7 lessons, ~1 h 51), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 10 original SVG diagrams, KaTeX formulas |
+| Quizzes | 11 knowledge checks (immediate feedback) + 2 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 3 numeric exercises (EURUSD sizing, swing identification, GBPUSD structure case) with worked solutions |
 | Risk lab | risk amount, stop distance, reward-to-risk, position size (only with a contract spec), losing-streak table, streak probability |
-| Library | 2 real Markdown resources (a revision sheet, public; a pre-trade checklist, members) |
+| Library | 3 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
 
 Every figure quoted in a lesson (the 10-loss table, the 81 % / 55 % streak
-probabilities, the 0.33-lot example, the case-study answers) is recomputed in
-`tests/test_academy.py` from the module the calculator uses.
+probabilities, the 0.33-lot example, the case-study answers, the swings of the
+path 2 exercise) is recomputed in `tests/test_academy.py` from the modules the
+app uses: `risk.py` for money, `structure.py` for the swing and break rules.
 
 ---
 
@@ -54,6 +55,8 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   quiz.py      grading, pass mark, public view without the answer key
   exercise.py  French number parsing, step checking
   risk.py      every risk figure
+  structure.py the swing and break rules taught in path 2
+  printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"
   access.py    who may read what (the only place that decides)
   views.py     plain-data shapes served by the API
@@ -117,6 +120,17 @@ database stores only what members do with the content.
 6. Set `status = "published"`, bump `version` for a substantial rewrite, and
    merge. The catalogue reloads when files change.
 
+**Library PDFs.** A resource may declare `pdf = "<name>.pdf"` next to its
+Markdown `file`. After editing a sheet, rebuild its PDF:
+
+```bash
+PLAYWRIGHT_CHROMIUM=/path/to/chromium python scripts/build_resource_pdfs.py
+```
+
+The script (a development tool: Playwright, Chromium, network for the fonts)
+writes the PDFs and `pdf-manifest.toml`, the SHA-256 of each source. The
+validator and the tests refuse a PDF whose source has changed since it was built.
+
 **Not built:** an in-app editor. Until there is one, the workflow above is the
 CMS. Nothing in the UI pretends otherwise.
 
@@ -155,7 +169,6 @@ The Academy is a **second app from the same repository**:
 Account limitations (reload sign-out, password reset, verification) are
 resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 
-* Library files are Markdown. PDFs can be added the same way once they exist.
 * Videos and ebooks are announced in the Academy home as « En préparation ».
 
 ---
@@ -163,9 +176,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 216 checks — content, validation, quiz, risk, progress, store
-python tests/test_academy_api.py   #  56 checks — HTTP access policy, isolation, no answer key
-python tests/test_academy_app.py   #  91 checks — every page and space renders, locking, writes per member
+python tests/test_academy.py       # 282 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy_api.py   #  60 checks — HTTP access policy, isolation, no answer key
+python tests/test_academy_app.py   # 109 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  39 checks — spaces registry, renderers, brand asset
 python tests/test_accounts.py      #  38 checks — reset, verification, e-mail, export, v7 upgrade
 python -m sensitor.academy.validate

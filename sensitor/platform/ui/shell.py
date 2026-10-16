@@ -39,7 +39,11 @@ RENDERERS = {
 }
 
 
-def _sidebar(page: str, email: str | None) -> None:
+def _free_lessons(catalog) -> int:
+    return len(catalog.public_lessons())
+
+
+def _sidebar(page: str, email: str | None, catalog) -> None:
     current = spaces.space_of(page)
     with st.sidebar:
         html(f'<div class="sx-brand">{brand.mark_svg(42, uid="side")}<div>'
@@ -58,7 +62,7 @@ def _sidebar(page: str, email: str | None) -> None:
         rt.link("Mon compte" if email else "Se connecter", "account", key="nav_account",
                 kind="primary" if page == "account" else "secondary", width="stretch")
         who = (f"<b>{esc(email)}</b>Membre · un compte pour tous les espaces" if email
-               else "<b>Visiteur</b>Deux leçons et la fiche de révision en accès libre")
+               else f"<b>Visiteur</b>{_free_lessons(catalog)} leçons en accès libre, sans compte")
         html(f'<div class="sx-side-user">{who}</div><div class="sx-side-foot">Contenu éducatif. '
              'Ne constitue pas un conseil en investissement.</div>')
 
@@ -85,7 +89,7 @@ def main() -> None:
         return
 
     email = rt.current_user()
-    _sidebar(page, email)
+    _sidebar(page, email, catalog)
     RENDERERS.get(page, home.render)(catalog, email, route)
     _scroll_to_top()
     rt.flush_cookie()

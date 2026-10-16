@@ -1,0 +1,73 @@
+id = "check-bos"
+title = "Contrôle : la cassure de structure"
+course = "lire-la-structure"
+lesson = "cassure-de-structure"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "meche"
+prompt = "Dernier sommet de swing à 1,0890. Une bougie monte à 1,0895 puis clôture à 1,0884. Avec la convention de ce parcours ?"
+kind = "single"
+lesson = "cassure-de-structure"
+
+[[question.option]]
+id = "pas-de-bos"
+text = "Pas de cassure : seule la mèche a dépassé le niveau."
+correct = true
+explanation = "Oui : c'est une tentative rejetée."
+
+[[question.option]]
+id = "bos"
+text = "Cassure de structure, puisque le prix a dépassé 1,0890."
+explanation = "La convention exige une clôture au-delà du niveau."
+
+[[question.option]]
+id = "fausse"
+text = "Fausse cassure."
+explanation = "Avec la convention de clôture, il n'y a pas eu de cassure, donc pas de fausse cassure."
+
+[[question]]
+id = "baissiere"
+prompt = "Dans une tendance baissière, qu'est-ce qu'une cassure de structure ?"
+kind = "single"
+lesson = "cassure-de-structure"
+
+[[question.option]]
+id = "sous-creux"
+text = "Une clôture sous le dernier creux de swing confirmé."
+correct = true
+explanation = "Oui : la séquence de creux plus bas se prolonge."
+
+[[question.option]]
+id = "dessus-sommet"
+text = "Une clôture au-dessus du dernier sommet de swing."
+explanation = "Ce serait plutôt un changement de structure, étudié dans la leçon suivante."
+
+[[question.option]]
+id = "bougie-rouge"
+text = "Une grande bougie baissière."
+explanation = "La taille d'une bougie ne dit rien de la structure."
+
+[[question]]
+id = "hypothese"
+prompt = "Après une cassure de structure haussière, laquelle de ces phrases est un constat ?"
+kind = "single"
+lesson = "cassure-de-structure"
+
+[[question.option]]
+id = "constat"
+text = "« Le prix a clôturé au-dessus du dernier sommet de swing. »"
+correct = true
+explanation = "Oui : c'est vérifiable sur le graphique."
+
+[[question.option]]
+id = "continue"
+text = "« La tendance va continuer. »"
+explanation = "C'est une hypothèse, qui a besoin d'une invalidation."
+
+[[question.option]]
+id = "acheteurs"
+text = "« Les acheteurs contrôlent le marché. »"
+explanation = "C'est une interprétation, pas un constat."

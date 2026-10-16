@@ -245,10 +245,18 @@ class Resource:
     lessons: tuple[str, ...] = ()
     author: str = "Sensitor"
     access: str = MEMBER
+    pdf: Path | None = None
 
     @property
     def kind_label(self) -> str:
         return RESOURCE_KINDS.get(self.kind, self.kind)
+
+    @property
+    def pdf_name(self) -> str | None:
+        return self.pdf.name if self.pdf else None
+
+    def read_pdf(self) -> bytes:
+        return self.pdf.read_bytes()
 
     @property
     def filename(self) -> str:
@@ -364,6 +372,12 @@ def validate(root: Path | str | None = None, *, include_drafts: bool = True) -> 
     catalog = loader.load()
     problems = list(loader.problems)
     if not problems:
+        from .printable import read_manifest, source_hash
+        built = read_manifest(catalog.root / "resources")
+        for resource in catalog.resources.values():
+            if resource.pdf and built.get(resource.pdf_name) != source_hash(resource.file):
+                problems.append(f"resources/{resource.pdf_name} : PDF à reconstruire, sa source a "
+                                "changé (python scripts/build_resource_pdfs.py)")
         for course in catalog.courses.values():
             for lesson in course.lessons:
                 if lesson.status == PUBLISHED:
@@ -782,13 +796,23 @@ class _Loader:
             access = str(raw.get("access", MEMBER))
             if access not in ACCESS:
                 self.problem(where, f"accès inconnu « {access} »")
+            pdf_path = None
+            if raw.get("pdf"):
+                pdf_path = (folder / str(raw["pdf"])).resolve()
+                if folder.resolve() not in pdf_path.parents or pdf_path.suffix.lower() != ".pdf":
+                    self.problem(where, "le PDF doit être un fichier .pdf dans resources/")
+                    pdf_path = None
+                elif not pdf_path.is_file():
+                    self.problem(where, f"PDF introuvable : resources/{raw['pdf']} "
+                                        "(python scripts/build_resource_pdfs.py)")
+                    pdf_path = None
             resources[rid] = Resource(id=rid, title=str(raw.get("title", "")),
                                       description=str(raw.get("description", "")).strip(),
                                       kind=kind, category=str(raw.get("category", "")),
                                       level=str(raw.get("level", "debutant")),
                                       file=file_path, lessons=lessons,
                                       author=str(raw.get("author", "Sensitor")),
-                                      access=access)
+                                      access=access, pdf=pdf_path)
         for course in courses.values():
             for lesson in course.lessons:
                 for rid in lesson.resources:

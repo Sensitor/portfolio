@@ -105,6 +105,7 @@ def resource_view(resource: Resource) -> dict:
         "kind_label": resource.kind_label, "category": resource.category,
         "level": resource.level, "filename": resource.filename,
         "lessons": list(resource.lessons), "access": resource.access,
+        "pdf": resource.pdf_name,
         "author": resource.author,
     }
 
