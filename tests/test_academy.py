@@ -231,6 +231,60 @@ def test_structure_figures():
           not [s for s in T.swings([1, 2, 5, 5, 2, 1], [0] * 6) if s.kind == T.HIGH])
 
 
+def test_liquidity_figures():
+    """Path 3: equal levels, sweeps and the XAUUSD case, recomputed with the lesson rules."""
+    print("\nPath 3 figures")
+    from sensitor.academy import structure as T
+    catalog = C.load_catalog()
+    ex = {s.id: s.answer for s in catalog.exercise("egalites-tolerance").steps}
+    tops = [1.0942, 1.0915, 1.0944, 1.0928, 1.0941]
+    groups = T.equal_levels(tops, 0.0003)
+    check("three equal highs: S1, S3, S5", groups == [[0, 2, 4]], str(groups))
+    group = [tops[i] for i in groups[0]]
+    check("exercise: group size", len(group) == ex["nombre"])
+    check("exercise: reference is the highest", close(max(group), ex["reference"]))
+    check("exercise: 3 pips spread", close((max(group) - min(group)) / 0.0001, ex["ecart"], 1e-6))
+    check("exercise: 7 pips beyond", close((1.0951 - max(group)) / 0.0001, ex["depassement"], 1e-6))
+    check("exercise: close 6 pips back", close((max(group) - 1.0938) / 0.0001, ex["retour"], 1e-6))
+    check("lesson example: 1,0928 sits outside a 3 pip band",
+          T.equal_levels([1.0942, 1.0944, 1.0928], 0.0003) == [[0, 1]])
+
+    check("1,0951 / 1,0938 sweeps 1,0944", T.is_sweep(1.0951, 1.0930, 1.0938, 1.0944, side="above"))
+    check("a close at 1,0947 is a break, not a sweep",
+          not T.is_sweep(1.0951, 1.0930, 1.0947, 1.0944, side="above")
+          and T.is_break(1.0947, 1.0944, direction="up"))
+    check("sweep below a level of lows", T.is_sweep(1.2, 1.0990, 1.1003, 1.1000, side="below")
+          and not T.is_sweep(1.2, 1.1001, 1.1003, 1.1000, side="below"))
+    check("false break lesson: 1,0943 closes back under 1,0944",
+          not T.is_break(1.0943, 1.0944, direction="up"))
+    check("confirmed break: 1,0949 and 1,0956 hold",
+          all(T.is_break(c, 1.0944, direction="up") for c in (1.0947, 1.0949, 1.0956)))
+
+    case = {s.id: s.answer for s in catalog.exercise("cas-xauusd").steps}
+    gold = [2412.40, 2398.10, 2412.90, 2405.00]
+    check("XAUUSD: the two tops are equal within 1 $", T.equal_levels(gold, 1.0) == [[0, 2]])
+    check("XAUUSD: 0,50 $ between them", close(2412.90 - 2412.40, case["ecart"], 1e-9))
+    check("XAUUSD: 2,40 $ beyond", close(2415.30 - 2412.90, case["depassement"], 1e-9))
+    check("XAUUSD: close 2,10 $ back", close(2412.90 - 2410.80, case["retour"], 1e-9))
+    check("XAUUSD: the sweep bar is a sweep", T.is_sweep(2415.30, 2408.0, 2410.80, 2412.90, side="above"))
+    check("XAUUSD: invalidation 0,50 $ above the sweep high", close(2415.30 + 0.50, case["invalidation"], 1e-9))
+    gold_spec = R.InstrumentSpec(contract_size=100, lot_step=0.01)
+    plan = R.plan(equity=10_000, risk_pct=1, entry=2409.30, stop=case["invalidation"],
+                  direction=R.SHORT, spec=gold_spec)
+    check("XAUUSD: 6,50 $ to the invalidation", close(abs(2409.30 - case["invalidation"]), case["distance"], 1e-9))
+    check("XAUUSD: 100 $ budget gives 0.15 lot", close(plan.risk_amount, 100)
+          and close(plan.position.lots, case["taille"]))
+    check("XAUUSD: 97,50 $ effective risk", close(plan.position.effective_risk, 97.5, 1e-6))
+    ten = R.position_size(100, 6.50, R.InstrumentSpec(contract_size=10, lot_step=0.01))
+    check("quiz: a 10 oz contract gives 1.53 lot", close(ten.lots, 1.53))
+    final = catalog.quiz("liquidite-validation")
+    taught = {lesson.id for lesson in catalog.course("liquidite-et-scenarios").lessons} - {"recap-liquidite"}
+    check("validation quiz: covers every path 3 lesson", {q.lesson_id for q in final.questions} == taught)
+
+    for bad in (lambda: T.equal_levels([1, 2], -1), lambda: T.is_sweep(1, 0, 1, 1, side="up")):
+        check("liquidity helpers refuse bad input", raises(bad, ValueError))
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -767,6 +821,7 @@ def main() -> int:
     test_real_catalog()
     test_lesson_figures_match_the_calculator()
     test_structure_figures()
+    test_liquidity_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

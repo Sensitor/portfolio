@@ -26,7 +26,8 @@ id = "liquidite-contexte"
 number = 3
 title = "Liquidité et contexte"
 summary = "Equal highs et equal lows, sweeps, fausses cassures, construction de scénarios et invalidation."
-status = "planned"
+status = "published"
+courses = ["liquidite-et-scenarios"]
 topics = ["Concepts de liquidité", "Sweeps", "Scénarios et invalidation"]
 
 [[path]]

@@ -50,3 +50,36 @@ def is_break(close: float, level: float, *, direction: str) -> bool:
     if direction == "down":
         return close < level
     raise ValueError("direction must be 'up' or 'down'")
+
+
+def equal_levels(levels: Sequence[float], tolerance: float) -> list[list[int]]:
+    """
+    Group swing levels that sit within `tolerance` of each other ("equal highs"
+    or "equal lows"). Returns the groups of indices with at least two members,
+    in order. Grouping is by distance to the group's first level, so a slow
+    drift of many small steps is not mistaken for one level.
+    """
+    if tolerance < 0:
+        raise ValueError("tolerance must be non-negative")
+    groups: list[list[int]] = []
+    for i, level in enumerate(levels):
+        for group in groups:
+            if abs(level - levels[group[0]]) <= tolerance + 1e-12:
+                group.append(i)
+                break
+        else:
+            groups.append([i])
+    return [g for g in groups if len(g) >= 2]
+
+
+def is_sweep(high: float, low: float, close: float, level: float, *, side: str) -> bool:
+    """
+    A sweep, per the course convention: the bar trades beyond the level and
+    closes back on the original side. `side="above"` for a level of highs,
+    `side="below"` for a level of lows.
+    """
+    if side == "above":
+        return high > level and close <= level
+    if side == "below":
+        return low < level and close >= level
+    raise ValueError("side must be 'above' or 'below'")

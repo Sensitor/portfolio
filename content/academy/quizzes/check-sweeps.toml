@@ -1,0 +1,80 @@
+id = "check-sweeps"
+title = "Contrôle : le sweep"
+course = "liquidite-et-scenarios"
+lesson = "sweeps"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "identifier"
+prompt = "Niveau de sommets égaux à 1,0944. Laquelle de ces bougies est un sweep ?"
+kind = "single"
+lesson = "sweeps"
+
+[[question.option]]
+id = "sweep"
+text = "Plus haut 1,0951, clôture 1,0938."
+correct = true
+explanation = "Oui : mèche au-delà, clôture revenue sous le niveau."
+
+[[question.option]]
+id = "cassure"
+text = "Plus haut 1,0951, clôture 1,0947."
+explanation = "La clôture est au-dessus du niveau : c'est une cassure."
+
+[[question.option]]
+id = "sous"
+text = "Plus haut 1,0940, clôture 1,0935."
+explanation = "Le prix n'a pas atteint le niveau."
+
+[[question]]
+id = "avant-cloture"
+prompt = "La mèche dépasse le niveau, mais la bougie n'est pas close. Que sait-on ?"
+kind = "single"
+lesson = "sweeps"
+
+[[question.option]]
+id = "rien"
+text = "Rien encore : sweep et cassure sont indiscernables avant la clôture."
+correct = true
+explanation = "Oui : la clôture tranche."
+
+[[question.option]]
+id = "sweep"
+text = "Que c'est un sweep."
+explanation = "La bougie peut encore clôturer au-dessus du niveau."
+
+[[question.option]]
+id = "cassure"
+text = "Que c'est une cassure."
+explanation = "La bougie peut encore revenir sous le niveau."
+
+[[question]]
+id = "prouve"
+prompt = "Un sweep a eu lieu. Qu'est-ce qu'il ne prouve pas ? Plusieurs réponses possibles."
+kind = "multiple"
+lesson = "sweeps"
+
+[[question.option]]
+id = "stops"
+text = "Que des stops se trouvaient au-dessus du niveau."
+correct = true
+explanation = "Oui : on ne voit pas les ordres."
+
+[[question.option]]
+id = "retournement"
+text = "Que le prix va se retourner."
+correct = true
+explanation = "Oui : il rend un retour plausible, sans le garantir."
+
+[[question.option]]
+id = "cloture"
+text = "Que la bougie a clôturé sous le niveau."
+explanation = "Ça, c'est la définition même du sweep : c'est un constat."
+
+[[question.option]]
+id = "toutes-ut"
+text = "Qu'il est visible sur toutes les unités de temps."
+correct = true
+explanation = "Oui : un sweep appartient à son unité de temps."

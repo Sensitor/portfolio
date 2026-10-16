@@ -1,0 +1,73 @@
+id = "check-egalites"
+title = "Contrôle : equal highs et equal lows"
+course = "liquidite-et-scenarios"
+lesson = "equal-highs-lows"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "groupe"
+prompt = "Tolérance de 3 pips. Sommets à 1,0942, 1,0944 et 1,0928. Lesquels sont égaux ?"
+kind = "single"
+lesson = "equal-highs-lows"
+
+[[question.option]]
+id = "deux"
+text = "1,0942 et 1,0944."
+correct = true
+explanation = "Oui : 2 pips d'écart. 1,0928 est 14 pips plus bas."
+
+[[question.option]]
+id = "trois"
+text = "Les trois."
+explanation = "1,0928 dépasse largement la tolérance."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, ils ne sont pas exactement au même prix."
+explanation = "La tolérance sert justement à ne pas exiger une égalité exacte."
+
+[[question]]
+id = "reference"
+prompt = "Quel niveau de référence retenir pour un groupe d'equal highs ?"
+kind = "single"
+lesson = "equal-highs-lows"
+
+[[question.option]]
+id = "plus-haut"
+text = "Le plus haut des sommets du groupe."
+correct = true
+explanation = "Oui : les ordres se trouvent, par hypothèse, au-delà de ce prix."
+
+[[question.option]]
+id = "moyenne"
+text = "La moyenne des sommets."
+explanation = "Un prix moyen ne correspond à aucun niveau réellement atteint."
+
+[[question.option]]
+id = "premier"
+text = "Le premier sommet chronologiquement."
+explanation = "Le premier sert à grouper ; la référence est le plus haut."
+
+[[question]]
+id = "tolerance-large"
+prompt = "Que se passe-t-il avec une tolérance trop large ?"
+kind = "single"
+lesson = "equal-highs-lows"
+
+[[question.option]]
+id = "dilue"
+text = "Presque tous les sommets finissent dans le même groupe, et le niveau ne veut plus rien dire."
+correct = true
+explanation = "Oui : la tolérance se fixe à l'avance, par instrument et unité de temps."
+
+[[question.option]]
+id = "meilleur"
+text = "On trouve plus d'equal highs, donc plus d'opportunités."
+explanation = "Plus de niveaux ne fait pas plus d'information."
+
+[[question.option]]
+id = "rien"
+text = "Rien ne change."
+explanation = "La lecture change complètement."

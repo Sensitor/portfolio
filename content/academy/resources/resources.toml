@@ -49,3 +49,15 @@ file = "fiche-risque-duree.md"
 pdf = "fiche-risque-duree.pdf"
 access = "member"
 lessons = ["esperance", "drawdown", "risque-de-ruine", "limites-de-perte", "recap-risque"]
+
+[[resource]]
+id = "fiche-liquidite"
+title = "Liquidité et scénarios"
+description = "Niveaux égaux, sweeps, cassures et fausses cassures, liquidité interne et externe, construction d'un scénario : les règles du parcours 3 sur une page."
+kind = "fiche"
+category = "Liquidité et contexte"
+level = "intermediaire"
+file = "fiche-liquidite.md"
+pdf = "fiche-liquidite.pdf"
+access = "member"
+lessons = ["liquidite-ordres", "equal-highs-lows", "interne-externe", "scenario-liquidite", "recap-liquidite"]

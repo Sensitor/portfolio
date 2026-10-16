@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Equal highs</title>
+<desc id="d">Deux sommets de swing presque au même niveau, dans une bande de tolérance : des sommets égaux.</desc>
+<rect x="100" y="77.0" width="430" height="11.0" fill="#86672f" opacity=".15"/>
+<polyline points="40,180.0 130,84.0 200,140.0 300,81.0 370,144.0 440,116.0 520,170.0 600,130.0" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="130" cy="84.0" r="4.5" fill="#284764"/><circle cx="300" cy="81.0" r="4.5" fill="#284764"/>
+<text x="130" y="70.0" text-anchor="middle" font-size="12" fill="#284764">sommet 1</text>
+<text x="300" y="67.0" text-anchor="middle" font-size="12" fill="#284764">sommet 2</text>
+<text x="540" y="84.0" font-size="12" fill="#86672f">tolérance</text>
+<text x="40" y="282" font-size="11" fill="#7b8389">Deux sommets dans la même tolérance forment des « equal highs » : un niveau très visible, donc très observé.</text>
+</svg>
