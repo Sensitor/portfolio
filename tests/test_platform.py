@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.modules["streamlit"] = None
 
-from sensitor.platform import brand, spaces  # noqa: E402
+from sensitor.platform import brand, journal, spaces  # noqa: E402
 
 FAILURES: list[str] = []
 COUNT = 0
@@ -47,6 +47,50 @@ def main() -> int:
     check("unknown pages resolve home", spaces.resolve_page("nope") == "home")
     check("no page resolves home", spaces.resolve_page(None) == "home")
     check("lesson targets parse", spaces.parse_target("lesson:c/l") == ("lesson", {"course": "c", "lesson": "l"}))
+
+    check("Psychologie et discipline is open", spaces.space("psychology").is_live)
+    check("and still announces what is not built",
+          any("Parcours 6" in p for p in spaces.space("psychology").planned))
+
+    print("\nReflection journal")
+    from datetime import datetime, timezone
+    check("three entry kinds", [k.id for k in journal.KINDS] == ["pre", "post", "free"])
+    check("every kind has guided questions", all(k.prompts for k in journal.KINDS))
+    check("a clean entry is trimmed",
+          journal.clean_entry("pre", "  Plan.  ", mood=3) == ("pre", "Plan.", 3, ""))
+    check("a guided question of the same kind is accepted",
+          journal.clean_entry("post", "x", prompt=journal.kind("post").prompts[0])[3]
+          == journal.kind("post").prompts[0])
+    for label, call in (
+            ("an unknown kind", lambda: journal.clean_entry("diagnostic", "x")),
+            ("an empty note", lambda: journal.clean_entry("pre", "   ")),
+            ("a note over the limit", lambda: journal.clean_entry("pre", "x" * (journal.MAX_BODY + 1))),
+            ("a mood of 0", lambda: journal.clean_entry("pre", "x", mood=0)),
+            ("a mood of 6", lambda: journal.clean_entry("pre", "x", mood=6)),
+            ("a mood that is not an integer", lambda: journal.clean_entry("pre", "x", mood=2.5)),
+            ("a boolean mood", lambda: journal.clean_entry("pre", "x", mood=True)),
+            ("a question from another kind",
+             lambda: journal.clean_entry("pre", "x", prompt=journal.kind("post").prompts[0])),
+            ("an invented question", lambda: journal.clean_entry("pre", "x", prompt="Êtes-vous anxieux ?"))):
+        try:
+            call()
+            refused = False
+        except ValueError:
+            refused = True
+        check(f"refuses {label}", refused)
+    now = datetime(2026, 10, 16, 12, tzinfo=timezone.utc)
+    notes = [{"kind": "pre", "mood": 2, "created_at": "2026-10-15T08:00:00+00:00"},
+             {"kind": "pre", "mood": 4, "created_at": "2026-10-01T08:00:00+00:00"},
+             {"kind": "post", "mood": None, "created_at": "2026-08-01T08:00:00+00:00"},
+             {"kind": "free", "mood": 5, "created_at": "pas une date"}]
+    summary = journal.summarize(notes, now=now)
+    check("counts by kind", summary.by_kind == {"pre": 2, "post": 1, "free": 1} and summary.total == 4)
+    check("the last 30 days", summary.last_30_days == 2)
+    check("averages only where the scale was filled, with their sample size",
+          [(m.kind, m.average, m.n) for m in summary.moods] == [("pre", 3.0, 2), ("free", 5.0, 1)]
+          and summary.rated == 3)
+    check("an empty journal summarises to zeros",
+          journal.summarize([], now=now).total == 0 and journal.summarize([], now=now).moods == ())
 
     print("\nRenderers")
     import importlib.util

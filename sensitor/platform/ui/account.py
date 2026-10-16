@@ -209,8 +209,8 @@ def _member(email: str) -> None:
                        key="export_all")
 
     section(3, "Supprimer le compte",
-            "La suppression efface définitivement le compte, la progression, les quiz et, le cas "
-            "échéant, les portefeuilles et le journal de trading. Elle ne peut pas être annulée.")
+            "La suppression efface définitivement le compte, la progression, les quiz, le journal "
+            "de réflexion et, le cas échéant, les portefeuilles et le journal de trading. Elle ne peut pas être annulée.")
     with st.form("delete_account_form"):
         typed = st.text_input("Pour confirmer, saisissez votre adresse e-mail", key="del_email")
         if st.form_submit_button("Supprimer définitivement mon compte"):

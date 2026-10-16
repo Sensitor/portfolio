@@ -198,13 +198,51 @@ def main() -> int:
     total = sum(len(c.lessons) for c in load_catalog().available_courses())
     check("the dashboard reads the real progress", f"<b>1</b> / {total}" in text(dash))
 
+    print("\nThe reflection journal")
+    visitor = run({"page": "psychology"})
+    check("visitor: the space is open and explains the journal",
+          not visitor.exception and "Pourquoi écrire" in text(visitor), error(visitor))
+    check("visitor: asked to sign in, offered no field",
+          "Connectez-vous pour tenir votre journal" in text(visitor) and not visitor.text_area)
+    page = run({"page": "psychology"}, alice)
+    check("member: the journal renders", not page.exception and page.text_area, error(page))
+    check("member: the privacy notice is shown", "Seul votre compte peut lire ces notes" in text(page))
+    check("member: no note yet", "Aucune note pour l" in text(page))
+    secret = "Trop pressé ce matin <script>alert(1)</script>\nDeuxième ligne $ 100"
+    page.text_area(key="jr_body_pre").input(secret)
+    page.radio(key="jr_mood_pre").set_value(2)
+    next(b for b in page.button if b.label == "Enregistrer la note").click().run()
+    notes = store().journal_entries("alice@example.com")
+    check("the note is stored under the member", len(notes) == 1 and notes[0]["mood"] == 2
+          and notes[0]["kind"] == "pre", str(notes))
+    check("bob has no note", store().journal_entries("bob@example.com") == [])
+    body = text(page)
+    check("the note is shown, escaped", "&lt;script&gt;" in body and "<script>" not in body)
+    check("its line breaks are kept", "<br>Deuxième ligne" in body)
+    check("its sample size is shown", "1 note</td>" in body)
+    check("no diagnosis is offered", "ni une évaluation ni un diagnostic" in body)
+    page.text_area(key="jr_body_pre").input("   ")
+    next(b for b in page.button if b.label == "Enregistrer la note").click().run()
+    check("an empty note is refused", "Écrivez quelques mots" in "\n".join(e.value for e in page.error)
+          and len(store().journal_entries("alice@example.com")) == 1)
+    bob = token("bob@example.com")
+    bob_page = run({"page": "psychology"}, bob)
+    check("bob's journal does not show alice's note",
+          "Trop pressé" not in text(bob_page) and "Aucune note pour l" in text(bob_page))
+    next(b for b in page.button if b.label == "Supprimer").click().run()
+    check("deleting asks for confirmation first", len(store().journal_entries("alice@example.com")) == 1
+          and any(b.label == "Oui, supprimer" for b in page.button))
+    next(b for b in page.button if b.label == "Oui, supprimer").click().run()
+    check("then deletes the note", store().journal_entries("alice@example.com") == []
+          and not page.exception, error(page))
+
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
           "Construire une <em>méthode</em>" in text(old))
-    for page in ("psychology", "market", "community"):
+    for page in ("market", "community"):
         app = run({"page": page})
         body = text(app)
         check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)

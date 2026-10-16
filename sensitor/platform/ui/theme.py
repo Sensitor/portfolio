@@ -217,10 +217,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 /* Whatever wraps an input directly gets the white field, so a Streamlit
    release that renames its wrappers cannot bring back a dark field. */
 .stApp div:has(> input[type="text"]), .stApp div:has(> input[type="password"]),
-.stApp div:has(> input[type="email"]), .stApp div:has(> input[type="number"]) {
+.stApp div:has(> input[type="email"]), .stApp div:has(> input[type="number"]),
+.stApp div:has(> textarea), .stApp [data-testid="stTextAreaRootElement"] {
   background-color: var(--white) !important;
 }
+.stApp [data-testid="stTextAreaRootElement"] { border: 1px solid var(--line-strong) !important; border-radius: 3px !important; }
+/* Streamlit 1.64 draws the selectbox as a react-aria ComboBox, not a baseweb select. */
+.stApp [data-testid="stSelectbox"] .react-aria-ComboBox div:has(> input) { border-color: var(--line-strong) !important; border-radius: 3px !important; }
+.stApp [data-testid="stSelectbox"] .react-aria-ComboBox button { color: var(--muted) !important; }
 .stApp [data-testid="stTextInputRootElement"]:focus-within,
+.stApp [data-testid="stTextAreaRootElement"]:focus-within,
 .stApp [data-testid="stNumberInputContainer"]:focus-within {
   border-color: var(--blue-2) !important; box-shadow: 0 0 0 3px var(--blue-soft) !important;
 }
@@ -247,6 +253,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 .stApp [data-testid="stRadioOption"][data-selected="true"] > div > div:first-child { background: var(--blue-2) !important; }
 .stApp [data-testid="stRadioOption"][data-selected="true"] > div > div:first-child > div { background: var(--white) !important; }
+.stApp [data-testid="stRadioOption"]:not([data-selected="true"]) > div > div:first-child > div { background: transparent !important; }
 .stApp [data-testid="stCheckbox"] > label > div:first-of-type { border-color: var(--blue-2) !important; background-color: var(--white) !important; margin-top: 3px; border-radius: 2px; }
 .stApp [data-testid="stCheckbox"] > label:has(input:checked) > div:first-of-type { background-color: var(--blue-2) !important; }
 .stApp [class*="st-key-inline_"] [data-testid="stRadio"] [role="radiogroup"] { width: auto; }
@@ -273,6 +280,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [data-baseweb="tab-highlight"] { background: var(--ink) !important; height: 2px; }
 .stApp [data-baseweb="tab-border"] { display: none; }
 .stApp [data-testid="stForm"] { border: 1px solid var(--line); background: var(--white); border-radius: 3px; padding: 1.6rem 1.7rem; }
+.stApp [class*="st-key-panel_"] [data-testid="stForm"] { border: 0; background: transparent; padding: 0; }
 .stApp [data-testid="stAlert"] { border-radius: 3px; }
 .stApp [data-testid="stAlert"] p { color: var(--ink) !important; }
 .stApp [data-testid="stToast"] { background: var(--ink) !important; }
@@ -602,6 +610,11 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-notice b { display: block; color: var(--ink); font-size: 14.5px; margin-bottom: .2rem; }
 .stApp .sx-notice p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
 .stApp .sx-note { font-size: 13.5px; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--line-strong); padding-left: .9rem; margin: 0; }
+/* Reflection journal */
+.stApp .sx-entry-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stApp .sx-entry-q { margin: .9rem 0 .2rem; font: italic 500 1.05rem/1.45 var(--serif); color: var(--ink); }
+.stApp .sx-entry-body { margin-top: .6rem; font-size: 15px; line-height: 1.7; color: var(--ink); overflow-wrap: anywhere; }
+.stApp [class*="st-key-panel_entry_"] { margin-bottom: .2rem; padding: 1.3rem 1.6rem .6rem; }
 .stApp .sx-plan { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
 .stApp .sx-plan li { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 1rem; align-items: baseline; padding: 1rem 0; border-bottom: 1px solid var(--line); }
 .stApp .sx-plan .n { font: 500 12px var(--mono); color: var(--faint); }

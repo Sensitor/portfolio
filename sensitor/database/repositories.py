@@ -156,6 +156,8 @@ class Store:
                 "SELECT COUNT(*) AS n FROM lesson_progress WHERE user_email = ?", email),
             "quiz_attempts": self._count(
                 "SELECT COUNT(*) AS n FROM quiz_attempts WHERE user_email = ?", email),
+            "journal_entries": self._count(
+                "SELECT COUNT(*) AS n FROM journal_entries WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -169,6 +171,7 @@ class Store:
             conn.execute("DELETE FROM workspace WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM lesson_progress WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM quiz_attempts WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM journal_entries WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
@@ -201,6 +204,7 @@ class Store:
             "trades": [t.to_dict() for t in self.list_trades(email)],
             "lesson_progress": self.completed_lessons(email),
             "quiz_attempts": self.quiz_attempts(email, limit=100_000),
+            "journal_entries": self.journal_entries(email, limit=100_000),
             "schema_version": SCHEMA_VERSION,
         }
 
@@ -281,6 +285,47 @@ class Store:
             item["passed"] = bool(item["passed"])
             rows.append(item)
         return rows
+
+    # ── Reflection journal ───────────────────────────────────────────────────
+    #
+    # Private notes. Every read and every delete carries the owner's address in
+    # its WHERE clause: an entry id on its own never reaches a row, so a guessed
+    # or replayed id from another member matches nothing.
+
+    def add_journal_entry(self, user_email: str, *, kind: str, body: str,
+                          mood: int | None = None, prompt: str = "") -> int:
+        user_email = _email(user_email)
+        if not user_email:
+            raise ValueError("user_email is required")
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            cursor = conn.execute(
+                """INSERT INTO journal_entries (user_email, kind, mood, prompt, body, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   RETURNING id""",
+                (user_email, kind, mood, prompt or "", body, _now()),
+            )
+            return int(cursor.fetchone()[0])
+
+    def journal_entries(self, user_email: str, kind: str | None = None, *,
+                        limit: int = 200) -> list[dict]:
+        """Newest first."""
+        sql = ("SELECT id, kind, mood, prompt, body, created_at FROM journal_entries "
+               "WHERE user_email = ?")
+        params: tuple = (_email(user_email),)
+        if kind:
+            sql += " AND kind = ?"
+            params += (kind,)
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
+        params += (int(limit),)
+        return [dict(r) for r in self._read(sql, params)]
+
+    def delete_journal_entry(self, user_email: str, entry_id: int) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(
+                "DELETE FROM journal_entries WHERE user_email = ? AND id = ?",
+                (_email(user_email), int(entry_id)))
+            return cursor.rowcount > 0
 
     # ── Single-use account tokens ────────────────────────────────────────────
 

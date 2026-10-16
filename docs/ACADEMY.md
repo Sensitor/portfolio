@@ -178,9 +178,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 
 ```bash
 python tests/test_academy.py       # 414 checks — content, validation, quiz, risk, progress, store
-python tests/test_academy_api.py   #  63 checks — HTTP access policy, isolation, no answer key
-python tests/test_academy_app.py   # 127 checks — every page and space renders, locking, writes per member
-python tests/test_platform.py      #  39 checks — spaces registry, renderers, brand asset
-python tests/test_accounts.py      #  38 checks — reset, verification, e-mail, export, v7 upgrade
+python tests/test_academy_api.py   #  81 checks — HTTP access policy, isolation, no answer key, journal
+python tests/test_academy_app.py   # 158 checks — every page and space renders, locking, writes per member
+python tests/test_platform.py      #  58 checks — spaces registry, journal rules, renderers, brand asset
+python tests/test_accounts.py      #  39 checks — reset, verification, e-mail, export, v8 upgrade
 python -m sensitor.academy.validate
 ```

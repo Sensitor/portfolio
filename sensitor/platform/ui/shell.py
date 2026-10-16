@@ -15,7 +15,7 @@ from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from .. import brand, spaces
-from . import account, home, spaces_view, theme
+from . import account, home, psychology, spaces_view, theme
 from . import runtime as rt
 from .components import esc, html
 
@@ -32,7 +32,7 @@ RENDERERS = {
     "resource": library_pages.resource_page,
     "lab": academy.lab,
     "progress": academy.progress_page,
-    "psychology": spaces_view.preparing,
+    "psychology": psychology.render,
     "market": spaces_view.preparing,
     "community": spaces_view.preparing,
     "tools": spaces_view.tools,

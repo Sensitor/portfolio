@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 TABLES: dict[str, str] = {
     "users": """
@@ -283,6 +283,22 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     created_at   TEXT NOT NULL,
     CHECK (correct <= total)
 )""",
+
+    # The reflection journal of the « Psychologie et discipline » space. Free
+    # text written by one member for themselves: it is read back only through
+    # methods scoped by `user_email`, exported with the account and deleted
+    # with it. `prompt` keeps the guided question the note answered, as text.
+    "journal_entries": """
+CREATE TABLE IF NOT EXISTS journal_entries (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    kind        TEXT NOT NULL CHECK (kind IN ('pre', 'post', 'free')),
+    mood        INTEGER CHECK (mood IS NULL OR mood BETWEEN 1 AND 5),
+    prompt      TEXT NOT NULL DEFAULT '',
+    body        TEXT NOT NULL CHECK (length(body) > 0),
+    created_at  TEXT NOT NULL
+)""",
 }
 
 INDEXES = """
@@ -297,6 +313,7 @@ CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
 CREATE INDEX IF NOT EXISTS idx_tokens_user ON account_tokens(user_email, purpose);
 CREATE INDEX IF NOT EXISTS idx_progress_user ON lesson_progress(user_email, course_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_email, created_at);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

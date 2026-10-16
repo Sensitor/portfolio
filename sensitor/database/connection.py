@@ -220,6 +220,9 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # and `users.email_verified_at`: a new table and a new nullable column,
     # both applied above.
     #
+    # Version 8 adds `journal_entries`, the private reflection journal. A new
+    # table only, so, as for versions 4 and 6, no existing row is touched.
+    #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

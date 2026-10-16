@@ -234,6 +234,35 @@ def main() -> int:
           client.post("/academy/risk/expectancy", json={"win_rate": 1.5, "reward_r": 1.5, "risk_pct": 2,
                                                          "trades": 200, "threshold_pct": 20}).status_code == 422)
 
+    print("\nThe reflection journal")
+    for method, path in (("GET", "/journal"), ("POST", "/journal"), ("DELETE", "/journal/1"),
+                         ("GET", "/journal/summary")):
+        check(f"{method} {path} without a token is 401", client.request(method, path).status_code == 401)
+    check("the entry kinds are public", client.get("/journal/kinds").status_code == 200
+          and [k["id"] for k in client.get("/journal/kinds").json()] == ["pre", "post", "free"])
+    r = client.post("/journal", json={"kind": "pre", "body": " Plan du jour. ", "mood": 3}, headers=h(alice))
+    check("a note is created", r.status_code == 201 and r.json()["id"] > 0, r.text)
+    note_id = r.json()["id"]
+    mine = client.get("/journal", headers=h(alice)).json()
+    check("and listed for its owner, trimmed", [e["body"] for e in mine] == ["Plan du jour."])
+    check("bob lists nothing", client.get("/journal", headers=h(bob)).json() == [])
+    check("bob cannot delete it: 404, like a missing note",
+          client.delete(f"/journal/{note_id}", headers=h(bob)).status_code == 404)
+    check("it is still there", len(client.get("/journal", headers=h(alice)).json()) == 1)
+    for label, payload in (("an unknown kind", {"kind": "diagnostic", "body": "x"}),
+                           ("an empty note", {"kind": "pre", "body": "  "}),
+                           ("a mood of 7", {"kind": "pre", "body": "x", "mood": 7}),
+                           ("an invented question", {"kind": "pre", "body": "x", "prompt": "Inventée ?"})):
+        check(f"{label} is 422", client.post("/journal", json=payload, headers=h(alice)).status_code == 422)
+    summary = client.get("/journal/summary", headers=h(alice)).json()
+    check("the summary counts with its sample size",
+          summary["total"] == 1 and summary["moods"] == [{"kind": "pre", "average": 3.0, "n": 1}], str(summary))
+    check("the owner deletes it", client.delete(f"/journal/{note_id}", headers=h(alice)).status_code == 204)
+    check("and it is gone", client.get("/journal", headers=h(alice)).json() == [])
+    params = {p["name"] for route in client.get("/openapi.json").json()["paths"].values()
+              for op in route.values() for p in op.get("parameters", [])}
+    check("no journal route takes an address", not params & {"email", "user", "user_email"})
+
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:
         print(f"  - {failure}")

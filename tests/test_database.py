@@ -79,7 +79,7 @@ def fresh_store(name="iso.db") -> Store:
         # keeps the tests independent of each other's leftovers.
         with store._write() as conn:                      # noqa: SLF001
             for table in ("snapshots", "sessions", "trades", "trading_accounts",
-                          "workspace", "portfolios", "users"):
+                          "workspace", "portfolios", "journal_entries", "users"):
                 conn.execute(f"DELETE FROM {table}")
         return store
 
@@ -278,6 +278,8 @@ def test_user_lifecycle():
     store.save_workspace(ALICE, {"MC.PA": 0.6, "AAPL": 0.4}, base_currency="EUR")
     store.save_portfolio(BOB, "Bob's", {"QQQ": 1.0})
     store.save_trades(BOB, [a_trade("b1")])
+    store.add_journal_entry(ALICE, kind="pre", body="Plan écrit avant la séance.", mood=3)
+    store.add_journal_entry(BOB, kind="post", body="La note de Bob.")
 
     check("a write registers the user without being asked",
           store.get_user(ALICE) is not None)
@@ -297,13 +299,17 @@ def test_user_lifecycle():
     check("an export is JSON-serialisable", bool(json.dumps(export, default=str)))
     check("an export does not reach another user",
           all(t["id"] != "b1" for t in export["trades"]))
+    check("an export carries the journal, and only the owner's notes",
+          [e["body"] for e in export["journal_entries"]] == ["Plan écrit avant la séance."])
 
     counts = store.delete_user(ALICE)
     check("deletion reports what it removed",
           counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
                      "trades": 2, "sessions": 0, "workspace": 1,
-                     "lesson_progress": 0, "quiz_attempts": 0},
+                     "lesson_progress": 0, "quiz_attempts": 0, "journal_entries": 1},
           f"got {counts}")
+    check("the journal is gone", store.journal_entries(ALICE) == [])
+    check("the other user's journal is untouched", len(store.journal_entries(BOB)) == 1)
     check("the user is gone", store.get_user(ALICE) is None)
     check("the portfolios are gone", store.list_portfolios(ALICE) == [])
     check("the working portfolio is gone", store.load_workspace(ALICE) is None)
@@ -559,9 +565,50 @@ def test_fresh_database_is_not_migrated():
     check("and works", store.count_trades(ALICE) == 1)
 
 
+def test_journal():
+    print("\nReflection journal")
+    store = fresh_store("journal.db")
+    first = store.add_journal_entry(ALICE, kind="pre", body="Limite du jour : 2 %.", mood=2,
+                                    prompt="Quelle est ma limite de perte aujourd'hui ?")
+    second = store.add_journal_entry(ALICE, kind="post", body="Plan suivi.", mood=4)
+    store.add_journal_entry(BOB, kind="free", body="Note privée de Bob.")
+
+    mine = store.journal_entries(ALICE)
+    check("newest first", [e["id"] for e in mine] == [second, first])
+    check("the fields come back as written", mine[1]["mood"] == 2 and mine[1]["kind"] == "pre"
+          and mine[1]["prompt"].startswith("Quelle est"))
+    check("the user's address is not repeated in each row", "user_email" not in mine[0])
+    check("a filter by kind", [e["id"] for e in store.journal_entries(ALICE, "post")] == [second])
+    check("another member's notes are not listed",
+          all(e["body"] != "Note privée de Bob." for e in mine))
+    check("Bob cannot delete Alice's note by its id", store.delete_journal_entry(BOB, first) is False)
+    check("and it is still there", len(store.journal_entries(ALICE)) == 2)
+    check("the address is normalised", len(store.journal_entries("  ALICE@Example.com ")) == 2)
+    check("the owner can delete it", store.delete_journal_entry(ALICE, first) is True)
+    check("once", store.delete_journal_entry(ALICE, first) is False)
+    check("Bob's note is untouched", len(store.journal_entries(BOB)) == 1)
+
+    for label, fields in (("an unknown kind", {"kind": "diagnostic", "body": "x"}),
+                          ("a mood outside 1 to 5", {"kind": "pre", "body": "x", "mood": 6}),
+                          ("an empty body", {"kind": "pre", "body": ""})):
+        try:
+            store.add_journal_entry(ALICE, **fields)
+            refused = False
+        except Exception:
+            refused = True
+        check(f"the database refuses {label}", refused)
+    check("a refused write leaves nothing behind", len(store.journal_entries(ALICE)) == 1)
+    try:
+        store.add_journal_entry("", kind="pre", body="x")
+        anonymous = False
+    except ValueError:
+        anonymous = True
+    check("a note needs an owner", anonymous)
+
+
 def main() -> int:
     for test in (test_isolation, test_every_user_method_is_scoped,
-                 test_user_lifecycle, test_constraints, test_migration,
+                 test_user_lifecycle, test_journal, test_constraints, test_migration,
                  test_fresh_database_is_not_migrated):
         test()
 

@@ -299,18 +299,18 @@ python tests/test_investment_engine.py    #  44 checks — engine, no Streamlit
 python tests/test_currency.py             # 107 checks — FX, timezones, no network
 python tests/test_trading_engine.py       # 173 checks — engine, review, copilot
 python tests/test_mt5_connector.py        # 131 checks — mocked terminal
-python tests/test_database.py             #  97 checks — isolation, migrations
+python tests/test_database.py             # 116 checks — isolation, migrations
 SENSITOR_TEST_PG=postgresql://… python tests/test_database.py   # the same, on Postgres
 python tests/test_auth.py                 #  95 checks — crypto, sessions, lockout
-python tests/test_api.py                  # 170 checks — HTTP, isolation, no maths
+python tests/test_api.py                  # 176 checks — HTTP, isolation, no maths
 python tests/test_workspace.py            #  20 checks — survives a restart
-python tests/test_sensitor_pages.py       # 164 render checks
+python tests/test_sensitor_pages.py       # 176 render checks
 python tests/test_trading_pages.py        #  82 render checks
 python tests/test_academy.py              # 414 checks — Academy content, quiz, risk maths
-python tests/test_academy_api.py          #  63 checks — Academy over HTTP
-python tests/test_academy_app.py          # 127 checks — platform pages, headless
-python tests/test_platform.py             #  39 checks — spaces registry, brand
-python tests/test_accounts.py             #  38 checks — reset, verification, e-mail
+python tests/test_academy_api.py          #  81 checks — Academy and journal over HTTP
+python tests/test_academy_app.py          # 158 checks — platform pages, headless
+python tests/test_platform.py             #  58 checks — spaces registry, brand
+python tests/test_accounts.py             #  39 checks — reset, verification, e-mail
 python -m sensitor.academy.validate       # content check before publishing
 cd mobile && npm run test:integration     #  38 checks against a live server
 ```

@@ -181,8 +181,10 @@ def test_upgrade() -> None:
     check("the new column is there", "email_verified_at" in store.get_user("old@example.com"))
     check("tokens can be stored at once",
           bool(Auth(store, mode="multi").request_verification("old@example.com")))
+    check("the journal table is there after the upgrade",
+          store.add_journal_entry("old@example.com", kind="free", body="Première note.") > 0)
     check("the database is at the current version",
-          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 7)
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 8)
 
 
 def main() -> int:

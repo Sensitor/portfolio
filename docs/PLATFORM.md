@@ -22,7 +22,7 @@ place, and each one is reused as it was:
 | Existing piece | Role in the platform |
 |---|---|
 | `sensitor/core/auth.py` + `Store` sessions | the single account system, shared with the portfolio app |
-| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6 |
+| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6, the reflection journal since v8 |
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
@@ -52,7 +52,7 @@ are all built from it.
 |---|---|---|---|
 | I | Academy | live | `academy`, `course`, `lesson`, `quiz` |
 | II | Bibliothèque | live | `library`, `resource` |
-| III | Psychologie et discipline | preparing | `psychology` |
+| III | Psychologie et discipline | live | `psychology` (private reflection journal) |
 | IV | Trading Lab | live | `lab` (risk calculator, exercises) |
 | V | Salle des marchés | preparing | `market` |
 | VI | Communauté | preparing | `community` |
@@ -63,6 +63,21 @@ are all built from it.
 (`spaces_view.preparing`): its status, what is planned, what already exists
 that is related, and the sentence « Aucune de ses fonctionnalités n'est
 active ». It has no inputs, no sample posts, no fake members. A test checks it.
+
+**Psychologie et discipline** is live with one feature: a reflection journal
+(`platform/journal.py` for the rules, `platform/ui/psychology.py` for the page,
+table `journal_entries`, routes under `/journal`). Each note has a moment
+(before the session, after it, or free), an optional guided question from a
+fixed list, an optional 1 to 5 scale and up to 4 000 characters of text.
+
+* **Private by construction.** Every store method takes the member's address
+  and puts it in the WHERE clause; the API takes the member from the bearer
+  token only, and a note that belongs to someone else answers 404, like a
+  missing one. Notes are in the account export and are erased with the account.
+* **No interpretation.** The page shows counts and the average of the scale the
+  member filled in, each with its sample size. It never reads the text, scores
+  it, labels the person or suggests a diagnosis.
+* What remains announced (path 6 and routines) stays listed as « Prévu ».
 
 **The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
 set, and says the link is not configured otherwise.
