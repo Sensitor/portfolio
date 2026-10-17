@@ -89,7 +89,17 @@ def next_step(catalog: Catalog, completed: dict[str, set[str]],
             return NextStep("lesson", course, progress.next_lesson)
         if progress.lessons_finished and progress.final_quiz_passed is False:
             return NextStep("final_quiz", course)
-    for course in courses:
+    # Nothing in progress: the next unstarted course of a track the member has
+    # already worked in comes first, so finishing trading course 1 leads to
+    # trading course 2, not back to the top of the programme. A new member
+    # starts with the first course of the programme.
+    def track(course) -> str:
+        path = catalog.path(course.path_id)
+        return path.track if path else ""
+
+    worked = {track(c) for c in courses if completed.get(c.id)}
+    ordered = [c for c in courses if track(c) in worked] + [c for c in courses if track(c) not in worked]
+    for course in ordered:
         progress = course_progress(course, completed.get(course.id, set()),
                                    passed_quizzes=passed)
         if progress.next_lesson is not None:

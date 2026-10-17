@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Les trois fonctions de la monnaie</title>
+<desc id="d">Trois cases : intermédiaire des échanges, unité de compte, réserve de valeur, chacune avec une courte explication.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5b646b"/></marker></defs>
+<rect x="30" y="40" width="182" height="196" rx="3" fill="#fbfaf6" stroke="#284764"/>
+<rect x="30" y="40" width="182" height="5" fill="#284764"/>
+<text x="121" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#284764">01</text>
+<text x="121" y="100" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2733">Moyen d'échange</text>
+<text x="121" y="196" text-anchor="middle" font-size="11.5" fill="#5b646b">On l'accepte en paiement,</text>
+<text x="121" y="212" text-anchor="middle" font-size="11.5" fill="#5b646b">car d'autres l'accepteront.</text>
+<rect x="230" y="40" width="182" height="196" rx="3" fill="#fbfaf6" stroke="#86672f"/>
+<rect x="230" y="40" width="182" height="5" fill="#86672f"/>
+<text x="321" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">02</text>
+<text x="321" y="100" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2733">Unité de compte</text>
+<text x="321" y="196" text-anchor="middle" font-size="11.5" fill="#5b646b">Les prix et les dettes</text>
+<text x="321" y="212" text-anchor="middle" font-size="11.5" fill="#5b646b">s'expriment dans la même unité.</text>
+<rect x="430" y="40" width="182" height="196" rx="3" fill="#fbfaf6" stroke="#3f6553"/>
+<rect x="430" y="40" width="182" height="5" fill="#3f6553"/>
+<text x="521" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#3f6553">03</text>
+<text x="521" y="100" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2733">Réserve de valeur</text>
+<text x="521" y="196" text-anchor="middle" font-size="11.5" fill="#5b646b">On la garde pour plus tard,</text>
+<text x="521" y="212" text-anchor="middle" font-size="11.5" fill="#5b646b">tant qu'elle garde sa valeur.</text>
+<path d="M95 140 h44 m-8 -6 l8 6 l-8 6 M139 160 h-44 m8 -6 l-8 6 l8 6" stroke="#284764" stroke-width="1.6" fill="none"/>
+<text x="321" y="160" text-anchor="middle" font-size="26" font-weight="700" fill="#86672f">12,90 €</text>
+<path d="M478 168 h66 M478 168 v-34 M494 168 v-14 M510 168 v-22 M526 168 v-18" stroke="#3f6553" stroke-width="1.6" fill="none"/>
+<text x="30" y="282" font-size="11" fill="#7b8389">Trois fonctions, rarement remplies aussi bien : une monnaie peut servir à payer et mal conserver sa valeur.</text>
+</svg>

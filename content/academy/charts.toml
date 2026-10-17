@@ -29,3 +29,38 @@ title = "La récompense de bloc, divisée par deux tous les 210 000 blocs"
 [[chart.series]]
 column = "recompense"
 label = "Récompense par bloc (BTC)"
+
+[[chart]]
+id = "taux-bce-fed"
+dataset = "taux-directeurs"
+kind = "step"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Le prix de l'argent fixé par deux banques centrales, depuis 1999"
+
+[[chart.series]]
+column = "bce_depot"
+label = "BCE, facilité de dépôt"
+
+[[chart.series]]
+column = "fed_funds"
+label = "États-Unis, fonds fédéraux (effectif)"
+
+[[chart]]
+id = "credit-interets-capital"
+dataset = "credit-amortissement"
+kind = "bar"
+stacked = true
+x = "annee"
+x_label = "Année du crédit"
+y_label = "Remboursé dans l'année, en €"
+title = "Ce que paie chaque année l'emprunteur : d'abord des intérêts, puis du capital"
+
+[[chart.series]]
+column = "interets"
+label = "Intérêts"
+
+[[chart.series]]
+column = "capital"
+label = "Capital remboursé"

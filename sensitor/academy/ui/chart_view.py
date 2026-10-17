@@ -49,7 +49,9 @@ def figure(chart: Chart, dataset: Dataset) -> go.Figure:
         else:
             fig.add_trace(go.Scatter(
                 x=xs, y=ys, name=label, text=text, hoverinfo="text+x",
-                mode="lines+markers", line=dict(color=color, width=2.2, shape="hv" if chart.kind == "step" else "linear"),
+                # Markers help on a handful of points (one per halving); on a monthly
+                # series they hide the line.
+                mode="lines+markers" if len(rows) <= 40 else "lines", line=dict(color=color, width=2.2, shape="hv" if chart.kind == "step" else "linear"),
                 fill="tozeroy" if chart.kind == "area" else None,
                 marker=dict(size=[7 if f else 8 for f in flags], color=[TOKENS["white"] if f else color for f in flags],
                             line=dict(color=color, width=1.6))))
@@ -61,6 +63,7 @@ def figure(chart: Chart, dataset: Dataset) -> go.Figure:
         separators=", ", font=dict(family=FONT, size=13, color=TOKENS["text"]),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=10, t=14, b=10), height=380, bargap=0.25,
+        barmode="stack" if chart.stacked else "group",
         showlegend=len(chart.series) > 1, legend=dict(orientation="h", y=1.08, x=0),
         hoverlabel=dict(bgcolor=TOKENS["white"], bordercolor=TOKENS["line-strong"],
                         font=dict(family=FONT, color=TOKENS["ink"])),

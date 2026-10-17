@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import bitcoin
+from . import bitcoin, money
 
 FILE = "file"
 COMPUTED = "computed"
@@ -37,6 +37,7 @@ CHART_KINDS = {"line", "area", "bar", "step"}
 # tested in its own module.
 GENERATORS: dict[str, Callable[[], list[dict]]] = {
     "bitcoin-issuance": bitcoin.issuance_rows,
+    "loan-amortisation": money.example_amortisation_rows,
 }
 
 
@@ -78,6 +79,7 @@ class Chart:
     y_label: str = ""
     y_log: bool = False
     highlight: str = ""                     # boolean column: points drawn as estimates
+    stacked: bool = False                   # bars: stack the series instead of grouping them
     extra: dict = field(default_factory=dict)
 
 
@@ -131,7 +133,13 @@ def load(root: Path, problem: Callable[[str, str], None]) -> tuple[dict[str, Dat
 
 def _dataset(root: Path, raw: dict, where: str, problem) -> Dataset | None:
     synthetic = bool(raw.get("synthetic", False))
-    required = ("id", "title", "kind") if synthetic else ("id", "title", "kind", "source", "url", "license", "retrieved")
+    # A computed dataset cites the rule it applies; a URL is only required for observed data.
+    if synthetic:
+        required = ("id", "title", "kind")
+    elif raw.get("kind") == COMPUTED:
+        required = ("id", "title", "kind", "source", "license", "retrieved")
+    else:
+        required = ("id", "title", "kind", "source", "url", "license", "retrieved")
     missing = [k for k in required if not str(raw.get(k, "")).strip()]
     if missing:
         problem(where, f"champ(s) obligatoire(s) manquant(s) : {', '.join(missing)}")
@@ -197,4 +205,4 @@ def _chart(raw: dict, where: str, datasets: dict[str, Dataset], problem) -> Char
     return Chart(id=str(raw.get("id", "")), dataset=dataset.id, kind=kind, x=x, series=series,
                  title=str(raw.get("title", "")), x_label=str(raw.get("x_label", "")),
                  y_label=str(raw.get("y_label", "")), y_log=bool(raw.get("y_log", False)),
-                 highlight=str(raw.get("highlight", "")))
+                 highlight=str(raw.get("highlight", "")), stacked=bool(raw.get("stacked", False)))

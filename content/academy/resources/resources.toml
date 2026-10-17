@@ -97,3 +97,15 @@ file = "fiche-backtest.md"
 pdf = "fiche-backtest.pdf"
 access = "member"
 lessons = ["regles-explicites", "backtest-manuel", "biais-backtest", "echantillon", "surajustement", "hors-echantillon", "cas-backtest", "recap-backtest"]
+
+[[resource]]
+id = "fiche-la-monnaie"
+title = "La monnaie"
+description = "Fonctions et histoire de la monnaie, création monétaire par le crédit, banque centrale et taux, obligations, politique monétaire, monnaie et richesse : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-la-monnaie.md"
+pdf = "fiche-la-monnaie.pdf"
+access = "public"
+lessons = ["fonctions-monnaie", "histoire-monnaie", "monnaie-bancaire", "banque-centrale", "taux-interet", "dette-obligations", "politique-monetaire", "monnaie-liquidite-richesse", "recap-monnaie"]

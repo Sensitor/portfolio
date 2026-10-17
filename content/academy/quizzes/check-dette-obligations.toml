@@ -1,0 +1,73 @@
+id = "check-dette-obligations"
+title = "Contrôle : dette et obligations"
+course = "la-monnaie"
+lesson = "dette-obligations"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "flux"
+prompt = "Quelle différence entre déficit et dette ?"
+kind = "single"
+lesson = "dette-obligations"
+
+[[question.option]]
+id = "flux"
+text = "Le déficit est l'écart d'une année ; la dette, le stock accumulé."
+correct = true
+explanation = "Un déficit s'ajoute à la dette."
+
+[[question.option]]
+id = "meme"
+text = "Ce sont deux mots pour la même chose."
+explanation = "L'un est un flux, l'autre un stock."
+
+[[question.option]]
+id = "prive"
+text = "Le déficit concerne les entreprises, la dette l'État."
+explanation = "Les deux concernent ici l'État."
+
+[[question]]
+id = "prix"
+prompt = "Une obligation à coupon de 3 % a été émise à 100. Les taux du marché montent à 4 %. Son prix :"
+kind = "single"
+lesson = "dette-obligations"
+
+[[question.option]]
+id = "baisse"
+text = "baisse, autour de 91,89 pour une échéance de 10 ans."
+correct = true
+explanation = "Relation inverse entre taux et prix."
+
+[[question.option]]
+id = "monte"
+text = "monte, car les taux montent."
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "fixe"
+text = "reste à 100, le nominal."
+explanation = "Le nominal n'est rendu qu'à l'échéance."
+
+[[question]]
+id = "court"
+prompt = "Pour une même hausse des taux, quelle obligation perd le moins ?"
+kind = "single"
+lesson = "dette-obligations"
+
+[[question.option]]
+id = "court"
+text = "Celle dont l'échéance est la plus courte."
+correct = true
+explanation = "À 2 ans, la baisse n'est que de 1,89 %."
+
+[[question.option]]
+id = "long"
+text = "Celle dont l'échéance est la plus longue."
+explanation = "C'est elle qui perd le plus."
+
+[[question.option]]
+id = "pareil"
+text = "Elles perdent toutes autant."
+explanation = "La sensibilité dépend de l'échéance."

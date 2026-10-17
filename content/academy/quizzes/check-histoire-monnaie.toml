@@ -1,0 +1,73 @@
+id = "check-histoire-monnaie"
+title = "Contrôle : l'histoire de la monnaie"
+course = "la-monnaie"
+lesson = "histoire-monnaie"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "fiduciaire"
+prompt = "Qu'est-ce qu'une monnaie fiduciaire ?"
+kind = "single"
+lesson = "histoire-monnaie"
+
+[[question.option]]
+id = "confiance"
+text = "Une monnaie sans valeur propre ni convertibilité, qui repose sur la confiance dans ses institutions."
+correct = true
+explanation = "C'est la définition de la leçon."
+
+[[question.option]]
+id = "or"
+text = "Une monnaie garantie par un stock d'or."
+explanation = "C'était le cas sous l'étalon-or, plus aujourd'hui."
+
+[[question.option]]
+id = "privee"
+text = "Une monnaie émise par une entreprise privée."
+explanation = "L'émetteur n'est pas ce qui la définit."
+
+[[question]]
+id = "1971"
+prompt = "Que se passe-t-il le 15 août 1971 ?"
+kind = "single"
+lesson = "histoire-monnaie"
+
+[[question.option]]
+id = "nixon"
+text = "Les États-Unis suspendent la convertibilité du dollar en or."
+correct = true
+explanation = "Depuis, les grandes monnaies ne sont plus convertibles en rien."
+
+[[question.option]]
+id = "euro"
+text = "L'euro entre en circulation."
+explanation = "Les billets en euros datent du 1er janvier 2002."
+
+[[question.option]]
+id = "bretton"
+text = "Le système de Bretton Woods est créé."
+explanation = "Il date de 1944."
+
+[[question]]
+id = "troc"
+prompt = "Que disent des anthropologues comme David Graeber du récit selon lequel le troc a précédé la monnaie ?"
+kind = "single"
+lesson = "histoire-monnaie"
+
+[[question.option]]
+id = "credit"
+text = "Aucune société connue n'a reposé principalement sur le troc ; le crédit a souvent précédé les pièces."
+correct = true
+explanation = "C'est la critique présentée dans la leçon."
+
+[[question.option]]
+id = "confirme"
+text = "Ils le confirment entièrement."
+explanation = "Ils le contestent."
+
+[[question.option]]
+id = "sans"
+text = "Que la monnaie est apparue sans aucune dette."
+explanation = "Ils soulignent au contraire le rôle des dettes."

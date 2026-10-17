@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Qui crée la monnaie</title>
+<desc id="d">La banque centrale fournit des réserves aux banques commerciales ; celles-ci accordent des crédits aux ménages et aux entreprises, ce qui crée des dépôts, et achètent des obligations de l'État.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5b646b"/></marker></defs>
+<rect x="220" y="22" width="200" height="50" rx="3" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<text x="320.0" y="42.0" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#1b2733">Banque centrale</text>
+<text x="320.0" y="59.0" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#5b646b">monnaie centrale, taux directeurs</text>
+<rect x="220" y="120" width="200" height="50" rx="3" fill="#fbfaf6" stroke="#284764" stroke-width="1.3"/>
+<text x="320.0" y="140.0" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#1b2733">Banques commerciales</text>
+<text x="320.0" y="157.0" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#5b646b">monnaie bancaire</text>
+<rect x="40" y="214" width="150" height="46" rx="3" fill="#fbfaf6" stroke="#3f6553" stroke-width="1.3"/>
+<text x="115.0" y="237.0" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#1b2733">Ménages</text>
+<rect x="245" y="214" width="150" height="46" rx="3" fill="#fbfaf6" stroke="#3f6553" stroke-width="1.3"/>
+<text x="320.0" y="237.0" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#1b2733">Entreprises</text>
+<rect x="450" y="214" width="150" height="46" rx="3" fill="#fbfaf6" stroke="#86672f" stroke-width="1.3"/>
+<text x="525.0" y="237.0" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#1b2733">État</text>
+<line x1="320" y1="72" x2="320" y2="118" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)"/><text x="328.0" y="99.0" text-anchor="start" font-size="11" fill="#5b646b">réserves, au taux directeur</text>
+<line x1="250" y1="170" x2="130" y2="212" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)"/><text x="176.0" y="191.0" text-anchor="end" font-size="11" fill="#5b646b">crédits, donc dépôts</text>
+<line x1="320" y1="170" x2="320" y2="212" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)"/><text x="328.0" y="197.0" text-anchor="start" font-size="11" fill="#5b646b">crédits</text>
+<line x1="395" y1="170" x2="500" y2="212" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)"/><text x="459.5" y="191.0" text-anchor="start" font-size="11" fill="#5b646b">achats d'obligations</text>
+<line x1="190" y1="237" x2="243" y2="237" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="216" y="230" text-anchor="middle" font-size="10.5" fill="#5b646b">paiements</text>
+<line x1="395" y1="237" x2="448" y2="237" stroke="#5b646b" stroke-width="1.3" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="421" y="230" text-anchor="middle" font-size="10.5" fill="#5b646b">impôts</text>
+<text x="30" y="284" font-size="11" fill="#7b8389">Schéma simplifié : la monnaie du quotidien est surtout créée par les banques, quand elles prêtent.</text>
+</svg>

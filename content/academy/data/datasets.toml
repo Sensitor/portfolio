@@ -20,3 +20,28 @@ retrieved = 2026-10-17
 unit = "BTC"
 columns = ["annee", "date", "recompense", "offre", "part", "estimation"]
 notes = "Les dates à partir de 2028 sont des estimations : la durée réelle d'une époque dépend du rythme de production des blocs."
+
+[[dataset]]
+id = "taux-directeurs"
+title = "Taux de la BCE et de la Réserve fédérale, mensuels, depuis 1999"
+kind = "file"
+file = "taux-directeurs.csv"
+source = "Banque centrale européenne, Data Portal, série FM.D.U2.EUR.4F.KR.DFR.LEV (taux de la facilité de dépôt, valeur en fin de mois) ; Board of Governors of the Federal Reserve System, série FEDFUNDS (taux effectif des fonds fédéraux, moyenne mensuelle), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV"
+license = "statistiques BCE réutilisables avec mention de la source ; données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "bce_depot", "fed_funds"]
+notes = "Les deux séries ne mesurent pas exactement la même chose : la BCE fixe le taux de sa facilité de dépôt, la Réserve fédérale vise une fourchette dont la série donne la moyenne effective du mois."
+
+[[dataset]]
+id = "credit-amortissement"
+title = "Un crédit de 200 000 € à 4 % sur 20 ans, année par année"
+kind = "computed"
+generator = "loan-amortisation"
+source = "formule de l'annuité constante, mensualités, taux fixe ; exemple pédagogique de la leçon sur le taux d'intérêt"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-17
+unit = "€"
+columns = ["annee", "interets", "capital", "restant"]
+notes = "Un crédit réel ajoute assurance, frais de dossier et de garantie, que l'exemple ne compte pas."

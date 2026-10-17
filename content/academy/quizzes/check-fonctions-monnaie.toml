@@ -1,0 +1,73 @@
+id = "check-fonctions-monnaie"
+title = "Contrôle : les fonctions de la monnaie"
+course = "la-monnaie"
+lesson = "fonctions-monnaie"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "compter"
+prompt = "Les prix d'un supermarché sont affichés en euros. Quelle fonction de la monnaie est à l'œuvre ?"
+kind = "single"
+lesson = "fonctions-monnaie"
+
+[[question.option]]
+id = "unite"
+text = "L'unité de compte."
+correct = true
+explanation = "Les prix s'expriment dans la même unité, ce qui permet de les comparer."
+
+[[question.option]]
+id = "echange"
+text = "Le moyen d'échange."
+explanation = "Le paiement viendra à la caisse ; afficher un prix, c'est compter."
+
+[[question.option]]
+id = "reserve"
+text = "La réserve de valeur."
+explanation = "Rien n'est conservé ici."
+
+[[question]]
+id = "acceptation"
+prompt = "Pourquoi acceptez-vous des euros en échange de votre travail ?"
+kind = "single"
+lesson = "fonctions-monnaie"
+
+[[question.option]]
+id = "autres"
+text = "Parce que d'autres les accepteront à leur tour."
+correct = true
+explanation = "C'est la propriété centrale d'une monnaie."
+
+[[question.option]]
+id = "utile"
+text = "Parce qu'ils sont utiles en eux-mêmes."
+explanation = "Un billet n'a presque aucune utilité propre."
+
+[[question.option]]
+id = "or"
+text = "Parce qu'ils sont échangeables contre de l'or."
+explanation = "L'euro n'est convertible en aucune marchandise."
+
+[[question]]
+id = "separer"
+prompt = "« Cette monnaie perd 30 % de sa valeur par an, mais tout le monde l'accepte. » Que peut-on en dire ?"
+kind = "single"
+lesson = "fonctions-monnaie"
+
+[[question.option]]
+id = "separe"
+text = "Bon moyen d'échange, mauvaise réserve de valeur."
+correct = true
+explanation = "Les fonctions se jugent séparément."
+
+[[question.option]]
+id = "rien"
+text = "Ce n'est pas une monnaie."
+explanation = "Elle remplit au moins la fonction de paiement."
+
+[[question.option]]
+id = "parfaite"
+text = "C'est une excellente monnaie."
+explanation = "Elle conserve très mal la valeur."

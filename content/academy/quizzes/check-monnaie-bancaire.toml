@@ -1,0 +1,74 @@
+id = "check-monnaie-bancaire"
+title = "Contrôle : la monnaie bancaire"
+course = "la-monnaie"
+lesson = "monnaie-bancaire"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "credit"
+prompt = "Une banque accorde un crédit de 10 000 € à une entreprise. Que se passe-t-il sur son bilan ?"
+kind = "single"
+lesson = "monnaie-bancaire"
+
+[[question.option]]
+id = "deux"
+text = "+10 000 € de crédits à l'actif, +10 000 € de dépôts au passif."
+correct = true
+explanation = "Le crédit crée un dépôt du même montant."
+
+[[question.option]]
+id = "puise"
+text = "Les dépôts des autres clients baissent de 10 000 €."
+explanation = "Le crédit ne puise pas dans les dépôts existants."
+
+[[question.option]]
+id = "reserves"
+text = "Les réserves baissent de 10 000 €."
+explanation = "Elles ne bougent que si l'argent part vers une autre banque."
+
+[[question]]
+id = "remboursement"
+prompt = "Un client rembourse 5 000 € de son crédit avec l'argent de son compte. Pour la quantité de monnaie :"
+kind = "single"
+lesson = "monnaie-bancaire"
+
+[[question.option]]
+id = "detruit"
+text = "5 000 € de monnaie sont détruits."
+correct = true
+explanation = "Le dépôt utilisé disparaît avec le crédit."
+
+[[question.option]]
+id = "rien"
+text = "Rien ne change."
+explanation = "Le dépôt utilisé pour rembourser disparaît."
+
+[[question.option]]
+id = "cree"
+text = "5 000 € de monnaie sont créés."
+explanation = "C'est l'inverse."
+
+[[question]]
+id = "limites"
+prompt = "Lesquelles limitent la création monétaire d'une banque ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "monnaie-bancaire"
+
+[[question.option]]
+id = "demande"
+text = "La demande de crédit des emprunteurs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "risque"
+text = "Le risque que le crédit ne soit pas remboursé."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "depots"
+text = "La quantité de dépôts déjà reçus, qu'elle prête un par un."
+explanation = "Ce n'est pas ainsi que fonctionne le crédit."

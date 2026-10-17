@@ -1,0 +1,60 @@
+id = "cout-credit"
+title = "Ce que coûte vraiment un crédit immobilier"
+context = """
+Un ménage emprunte **200 000 €** sur **20 ans**, remboursés en 240 mensualités constantes.
+
+Deux offres : un taux de **4 %** par an, ou un taux de **2 %**. On ignore l'assurance et les frais.
+
+Rappel : mensualité = capital × r ÷ (1 − (1 + r)^−n), avec r = taux annuel ÷ 12 et n = 240.
+"""
+conclusion = """
+Deux points de taux font passer le coût des intérêts de 42 824 € à 90 870,56 €, plus du double, pour le même logement. C'est pourquoi le niveau des taux directeurs, transmis aux crédits, pèse autant sur l'immobilier.
+"""
+
+[[step]]
+id = "mensualite-4"
+prompt = "Quelle est la mensualité au taux de 4 % ?"
+unit = "€"
+answer = 1211.96
+tolerance = 0.5
+solution = "r = 0,04 ÷ 12 = 0,003333. Mensualité = 200 000 × 0,003333 ÷ (1 − 1,003333^−240) = **1 211,96 €**."
+
+[[step]]
+id = "total-4"
+prompt = "Combien le ménage rembourse-t-il au total, sur 20 ans ?"
+unit = "€"
+answer = 290870.56
+tolerance = 2
+solution = "1 211,96 × 240 = **290 870,56 €** (au centime près selon l'arrondi de la mensualité)."
+
+[[step]]
+id = "interets-4"
+prompt = "Combien d'intérêts au total, à 4 % ?"
+unit = "€"
+answer = 90870.56
+tolerance = 2
+solution = "290 870,56 − 200 000 = **90 870,56 €**."
+
+[[step]]
+id = "mensualite-2"
+prompt = "Quelle est la mensualité au taux de 2 % ?"
+unit = "€"
+answer = 1011.77
+tolerance = 0.5
+solution = "r = 0,02 ÷ 12. Mensualité = **1 011,77 €**, soit 200,19 € de moins par mois."
+
+[[step]]
+id = "interets-2"
+prompt = "Combien d'intérêts au total, à 2 % ?"
+unit = "€"
+answer = 42824
+tolerance = 2
+solution = "1 011,77 × 240 − 200 000 = **42 824 €** environ."
+
+[[step]]
+id = "ecart"
+prompt = "Quelle différence de coût total entre les deux offres ?"
+unit = "€"
+answer = 48046.56
+tolerance = 3
+solution = "90 870,56 − 42 824 = **48 046,56 €** : plus que le coût total des intérêts de l'offre à 2 %."

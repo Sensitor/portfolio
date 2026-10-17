@@ -1,0 +1,73 @@
+id = "check-banque-centrale"
+title = "Contrôle : la banque centrale"
+course = "la-monnaie"
+lesson = "banque-centrale"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "outil"
+prompt = "Quel est l'outil principal d'une banque centrale aujourd'hui ?"
+kind = "single"
+lesson = "banque-centrale"
+
+[[question.option]]
+id = "taux"
+text = "Ses taux directeurs, le prix des réserves."
+correct = true
+explanation = "Elle agit d'abord par le prix de l'argent."
+
+[[question.option]]
+id = "billets"
+text = "La quantité de billets imprimés chaque mois."
+explanation = "Les billets suivent la demande du public."
+
+[[question.option]]
+id = "credits"
+text = "Les crédits qu'elle accorde aux ménages."
+explanation = "Elle ne prête pas aux ménages."
+
+[[question]]
+id = "negatif"
+prompt = "Sur quelle période le taux de la facilité de dépôt de la BCE a-t-il été négatif ?"
+kind = "single"
+lesson = "banque-centrale"
+
+[[question.option]]
+id = "2014-2022"
+text = "De juin 2014 à juillet 2022."
+correct = true
+explanation = "C'est ce que montrent les données de la BCE."
+
+[[question.option]]
+id = "2008"
+text = "Juste après la crise de 2008."
+explanation = "Il est resté positif jusqu'en 2012, puis nul."
+
+[[question.option]]
+id = "jamais"
+text = "Jamais."
+explanation = "Il est descendu jusqu'à −0,5 %."
+
+[[question]]
+id = "delai"
+prompt = "Pourquoi une banque centrale décide-t-elle en fonction de l'inflation qu'elle anticipe ?"
+kind = "single"
+lesson = "banque-centrale"
+
+[[question.option]]
+id = "delai"
+text = "Parce que l'effet de ses taux sur les prix prend plusieurs trimestres."
+correct = true
+explanation = "La transmission est lente."
+
+[[question.option]]
+id = "loi"
+text = "Parce que la loi lui interdit de regarder l'inflation passée."
+explanation = "Rien de tel."
+
+[[question.option]]
+id = "immediat"
+text = "Parce que ses décisions agissent immédiatement."
+explanation = "C'est l'inverse."

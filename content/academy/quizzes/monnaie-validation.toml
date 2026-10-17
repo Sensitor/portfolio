@@ -1,0 +1,228 @@
+id = "monnaie-validation"
+title = "Quiz de validation : La monnaie"
+course = "la-monnaie"
+lesson = "recap-monnaie"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "fonctions"
+prompt = "Quelles sont les trois fonctions de la monnaie ?"
+kind = "single"
+lesson = "fonctions-monnaie"
+
+[[question.option]]
+id = "trois"
+text = "Moyen d'échange, unité de compte, réserve de valeur."
+correct = true
+explanation = "Les trois fonctions classiques."
+
+[[question.option]]
+id = "or"
+text = "Paiement, convertibilité en or, crédit."
+explanation = "La convertibilité n'est pas une fonction."
+
+[[question.option]]
+id = "impots"
+text = "Impôt, épargne, investissement."
+explanation = "Ce ne sont pas des fonctions de la monnaie."
+
+[[question]]
+id = "fiduciaire"
+prompt = "Sur quoi repose la valeur d'une monnaie fiduciaire ?"
+kind = "single"
+lesson = "histoire-monnaie"
+
+[[question.option]]
+id = "institutions"
+text = "Sur la confiance dans ses institutions et sur son acceptation."
+correct = true
+explanation = "Elle n'a ni valeur propre ni convertibilité."
+
+[[question.option]]
+id = "or"
+text = "Sur un stock d'or conservé par la banque centrale."
+explanation = "Plus depuis 1971."
+
+[[question.option]]
+id = "rien"
+text = "Sur rien du tout."
+explanation = "La confiance dans des institutions réelles est quelque chose."
+
+[[question]]
+id = "depots"
+prompt = "Selon la Banque d'Angleterre en 2014, quelle part de la monnaie détenue par le public britannique était faite de dépôts bancaires ?"
+kind = "single"
+lesson = "monnaie-bancaire"
+
+[[question.option]]
+id = "97"
+text = "Environ 97 %."
+correct = true
+explanation = "Billets et pièces ne représentaient qu'environ 3 %."
+
+[[question.option]]
+id = "50"
+text = "Environ 50 %."
+explanation = "Bien davantage."
+
+[[question.option]]
+id = "3"
+text = "Environ 3 %."
+explanation = "C'est la part des billets et des pièces."
+
+[[question]]
+id = "bilan"
+prompt = "Bilan : crédits 90, dépôts 92. La banque accorde un crédit de 10. Dépôts ?"
+kind = "single"
+lesson = "monnaie-bancaire"
+
+[[question.option]]
+id = "102"
+text = "102"
+correct = true
+explanation = "Le crédit crée un dépôt de 10."
+
+[[question.option]]
+id = "82"
+text = "82"
+explanation = "Le crédit ne retire rien aux autres dépôts."
+
+[[question.option]]
+id = "92"
+text = "92"
+explanation = "Le dépôt de l'emprunteur s'ajoute."
+
+[[question]]
+id = "transmission"
+prompt = "Une banque centrale monte ses taux. Dans quel ordre l'effet se propage-t-il ?"
+kind = "single"
+lesson = "banque-centrale"
+
+[[question.option]]
+id = "ordre"
+text = "Taux du marché, taux des crédits, demande, puis prix."
+correct = true
+explanation = "Avec des délais à chaque étape."
+
+[[question.option]]
+id = "prix"
+text = "Prix d'abord, puis crédits."
+explanation = "Les prix viennent en dernier."
+
+[[question.option]]
+id = "direct"
+text = "Directement sur les prix, le jour même."
+explanation = "La transmission prend plusieurs trimestres."
+
+[[question]]
+id = "mensualite"
+prompt = "200 000 € à 4 % sur 20 ans : mensualité et intérêts totaux ?"
+kind = "single"
+lesson = "taux-interet"
+
+[[question.option]]
+id = "ok"
+text = "1 211,96 € par mois, 90 870,56 € d'intérêts."
+correct = true
+explanation = "Hors assurance et frais."
+
+[[question.option]]
+id = "simple"
+text = "833,33 € par mois, aucun intérêt."
+explanation = "C'est le capital seul divisé par 240."
+
+[[question.option]]
+id = "deux"
+text = "1 011,77 € par mois, 42 824 € d'intérêts."
+explanation = "C'est le résultat à 2 %."
+
+[[question]]
+id = "obligation"
+prompt = "Les taux du marché baissent de 3 % à 2 %. Une obligation existante à coupon de 3 % :"
+kind = "single"
+lesson = "dette-obligations"
+
+[[question.option]]
+id = "monte"
+text = "voit son prix monter, à 108,98 pour 10 ans d'échéance."
+correct = true
+explanation = "Elle rapporte plus que les nouvelles."
+
+[[question.option]]
+id = "baisse"
+text = "voit son prix baisser."
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "defaut"
+text = "fait défaut."
+explanation = "Le taux du marché ne change rien au remboursement."
+
+[[question]]
+id = "monetisation"
+prompt = "Lequel de ces actes est une monétisation au sens strict ?"
+kind = "single"
+lesson = "politique-monetaire"
+
+[[question.option]]
+id = "direct"
+text = "La banque centrale achète des obligations de l'État directement à l'émission."
+correct = true
+explanation = "Interdit à la BCE par l'article 123."
+
+[[question.option]]
+id = "taux"
+text = "La banque centrale baisse son taux directeur."
+explanation = "C'est un assouplissement."
+
+[[question.option]]
+id = "marche"
+text = "La banque centrale achète des obligations sur le marché secondaire, pour son objectif d'inflation."
+explanation = "C'est de l'assouplissement quantitatif, permis sous conditions."
+
+[[question]]
+id = "hyper"
+prompt = "Que montrent les hyperinflations historiques ?"
+kind = "single"
+lesson = "politique-monetaire"
+
+[[question.option]]
+id = "combinaison"
+text = "Elles combinent financement monétaire massif et effondrement de la confiance."
+correct = true
+explanation = "Ce n'est pas une conséquence automatique de toute dette."
+
+[[question.option]]
+id = "dette"
+text = "Que toute dette publique finit en hyperinflation."
+explanation = "Ce n'est pas ce que dit l'histoire."
+
+[[question.option]]
+id = "taux"
+text = "Qu'elles viennent de taux d'intérêt trop élevés."
+explanation = "Ce n'est pas leur cause."
+
+[[question]]
+id = "richesse"
+prompt = "Monnaie, liquidité et richesse :"
+kind = "single"
+lesson = "monnaie-liquidite-richesse"
+
+[[question.option]]
+id = "distinctes"
+text = "sont trois notions distinctes : on peut être riche et peu liquide."
+correct = true
+explanation = "Un propriétaire sans épargne en est un exemple."
+
+[[question.option]]
+id = "memes"
+text = "désignent la même chose."
+explanation = "Elles sont distinctes."
+
+[[question.option]]
+id = "liquide"
+text = "toute richesse est liquide."
+explanation = "Un appartement ne l'est pas."

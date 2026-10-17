@@ -1,0 +1,58 @@
+id = "obligation-taux"
+title = "Une obligation quand les taux bougent"
+context = """
+Une obligation d'État de nominal **100**, coupon **3 %** par an, échéance **10 ans**, vient d'être émise au prix de 100.
+
+Rappel : prix = somme des coupons et du nominal, chacun divisé par (1 + taux du marché) élevé au nombre d'années qui le séparent d'aujourd'hui.
+"""
+conclusion = """
+La même obligation vaut 100, 91,89 ou 108,98 selon le taux du marché, sans que l'émetteur ait changé. Plus l'échéance est longue, plus le prix réagit : à 2 ans, la même hausse de taux ne coûte que 1,89 %. C'est la sensibilité des obligations aux taux.
+"""
+
+[[step]]
+id = "coupon"
+prompt = "Combien l'obligation verse-t-elle chaque année ?"
+unit = "€"
+answer = 3
+tolerance = 0
+solution = "3 % de 100 : **3** par an pendant 10 ans, puis 100 à l'échéance."
+
+[[step]]
+id = "prix-3"
+prompt = "Si le taux du marché reste à 3 %, quel est son prix ?"
+unit = "€"
+answer = 100
+tolerance = 0.01
+solution = "Le coupon égale le taux du marché : le prix est **100**, le nominal."
+
+[[step]]
+id = "prix-4"
+prompt = "Le taux du marché monte à 4 %. Quel est le nouveau prix ? (Deux décimales.)"
+unit = "€"
+answer = 91.89
+tolerance = 0.01
+solution = "Somme des 3 actualisés à 4 % sur 10 ans, plus 100 ÷ 1,04^10 : **91,89**."
+
+[[step]]
+id = "perte"
+prompt = "De combien de pourcents son prix a-t-il baissé, pour celui qui revend maintenant ?"
+unit = "%"
+answer = 8.11
+tolerance = 0.01
+solution = "(100 − 91,89) ÷ 100 = **8,11 %** de baisse : une perte réelle sur un titre de dette réputé sûr."
+
+[[step]]
+id = "prix-2"
+prompt = "Si au contraire le taux du marché tombe à 2 %, quel est le prix ?"
+unit = "€"
+answer = 108.98
+tolerance = 0.01
+solution = "**108,98** : l'obligation rapporte plus que les nouvelles, elle se revend plus cher."
+
+[[step]]
+id = "prix-court"
+prompt = "Une obligation identique mais à 2 ans d'échéance, quand le taux passe à 4 % : quel prix ?"
+unit = "€"
+answer = 98.11
+tolerance = 0.01
+solution = "3 ÷ 1,04 + 103 ÷ 1,04² = **98,11** : une baisse de 1,89 % seulement. L'échéance courte protège des hausses de taux."

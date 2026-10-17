@@ -69,7 +69,7 @@ def test_real_catalog():
 
     available = [p for p in catalog.paths if p.is_available]
     check("the open paths are exactly those with published courses",
-          all(p.courses for p in available) and available[0].id == "bases-marches"
+          all(p.courses for p in available) and available[0].id == "monnaie-inflation"
           and all(not p.courses for p in catalog.paths if p not in available),
           str([p.id for p in available]))
     check("four tracks, Bitcoin first", [t.id for t in catalog.tracks]
@@ -82,9 +82,11 @@ def test_real_catalog():
     check("every path belongs to a known track", all(catalog.track(p.track) for p in catalog.paths))
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
-    check("the new tracks are announced, not open yet",
-          all(p.status == C.PLANNED for t in ("monnaie-bitcoin", "crypto", "investissement")
-              for p in catalog.paths_in(t)) and len(catalog.paths) == 16)
+    check("Monnaie et Bitcoin opens with path 1; the rest of the new tracks is announced",
+          catalog.path("monnaie-inflation").is_available
+          and all(p.status == C.PLANNED for p in catalog.paths
+                  if p.track in ("crypto", "investissement") or p.id == "bitcoin")
+          and len(catalog.paths) == 16)
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
     check("planned paths carry no readable course",
@@ -630,6 +632,80 @@ def test_access_levels():
     check("a lesson may declare premium", not C.validate(root))
 
 
+def test_money_figures():
+    """Course « La monnaie »: balance sheets, loans, bonds and the policy-rate data, recomputed."""
+    print("\nCourse « La monnaie » figures")
+    from sensitor.academy import money as M
+    catalog = C.load_catalog()
+
+    ex = {s.id: s.answer for s in catalog.exercise("bilan-credit").steps}
+    start = M.BalanceSheet({"Réserves": 10, "Crédits": 90}, {"Dépôts": 92, "Capital": 8})
+    check("balance sheet: 100 at the start", start.total_assets == ex["total-avant"] and start.balanced)
+    lent = M.grant_loan(start, 10)
+    check("a loan of 10 creates 10 of deposits", lent.liabilities["Dépôts"] == ex["depots-credit"]
+          and lent.total_assets == ex["total-credit"] and lent.balanced)
+    paid = M.transfer_out(lent, 4)
+    check("a payment to another bank settles in reserves", paid.assets["Réserves"] == ex["reserves-paiement"]
+          and paid.liabilities["Dépôts"] == ex["depots-paiement"] and paid.balanced)
+    repaid = M.repay_loan(paid, 5)
+    check("a repayment destroys money", repaid.liabilities["Dépôts"] == ex["depots-remboursement"]
+          and repaid.assets["Crédits"] == 95 and repaid.balanced)
+    check("quiz: 92 + 10 = 102", M.grant_loan(start, 10).liabilities["Dépôts"] == 102)
+    for bad in (lambda: M.grant_loan(start, 0), lambda: M.transfer_out(start, 11),
+                lambda: M.repay_loan(start, 91)):
+        check("balance sheet helpers refuse impossible operations", raises(bad, ValueError))
+
+    loan = {s.id: s.answer for s in catalog.exercise("cout-credit").steps}
+    check("loan: 1 211,96 a month at 4 %", abs(M.payment(200_000, 0.04, 20) - loan["mensualite-4"]) < 0.005)
+    check("loan: 290 870,56 repaid", abs(M.payment(200_000, 0.04, 20) * 240 - loan["total-4"]) < 0.01)
+    check("loan: 90 870,56 of interest", abs(M.total_interest(200_000, 0.04, 20) - loan["interets-4"]) < 0.01)
+    check("loan: 1 011,77 a month at 2 %", abs(M.payment(200_000, 0.02, 20) - loan["mensualite-2"]) < 0.005)
+    check("loan: 42 824 of interest at 2 %", abs(M.total_interest(200_000, 0.02, 20) - loan["interets-2"]) < 1)
+    check("loan: 48 046,56 apart", abs(loan["interets-4"] - loan["interets-2"] - loan["ecart"]) < 0.01)
+    check("lesson: two points more than double the interest",
+          M.total_interest(200_000, 0.04, 20) > 2 * M.total_interest(200_000, 0.02, 20))
+    rows = M.example_amortisation_rows()
+    check("lesson: year 1 is 7 878,69 of interest out of 14 543,53",
+          rows[0]["interets"] == 7878.69 and round(rows[0]["interets"] + rows[0]["capital"], 2) == 14543.53)
+    check("lesson: the last year is 310,27 of interest", rows[-1]["interets"] == 310.27 and rows[-1]["restant"] == 0)
+    check("the schedule repays the whole principal", abs(sum(r["capital"] for r in rows) - 200_000) < 0.5)
+    check("a zero rate divides the principal evenly", M.payment(1200, 0, 1) == 100)
+
+    bond = {s.id: s.answer for s in catalog.exercise("obligation-taux").steps}
+    check("bond: 3 a year", 100 * 0.03 == bond["coupon"])
+    check("bond: 100 at 3 %", abs(M.bond_price(100, 0.03, 10, 0.03) - bond["prix-3"]) < 1e-9)
+    check("bond: 91,89 at 4 %", round(M.bond_price(100, 0.03, 10, 0.04), 2) == bond["prix-4"])
+    check("bond: 8,11 % lower", round(100 - M.bond_price(100, 0.03, 10, 0.04), 2) == bond["perte"])
+    check("bond: 108,98 at 2 %", round(M.bond_price(100, 0.03, 10, 0.02), 2) == bond["prix-2"])
+    check("bond: 98,11 at two years", round(M.bond_price(100, 0.03, 2, 0.04), 2) == bond["prix-court"])
+    check("the yield of a 91,89 bond is 4 %", abs(M.bond_yield(M.bond_price(100, 0.03, 10, 0.04), 100, 0.03, 10) - 0.04) < 1e-9)
+
+    rates = catalog.dataset("taux-directeurs")
+    by_month = {r["mois"][:7]: r for r in rates.rows}
+    negative = sorted(m for m, r in by_month.items() if r["bce_depot"] < 0)
+    check("data: the ECB deposit rate is negative from June 2014 to June 2022 (month ends)",
+          negative[0] == "2014-06" and negative[-1] == "2022-06", f"{negative[0]} {negative[-1]}")
+    check("data: back to zero at the end of July 2022", by_month["2022-07"]["bce_depot"] == 0)
+    check("data: 4 % in September 2023", by_month["2023-09"]["bce_depot"] == 4.0)
+    check("data: the first cut lands in June 2024", by_month["2024-05"]["bce_depot"] == 4.0
+          and by_month["2024-06"]["bce_depot"] == 3.75)
+    check("data: the floor is -0,5 %", min(r["bce_depot"] for r in rates.rows) == -0.5)
+    check("data: monthly rows from January 1999", rates.rows[0]["mois"] == "1999-01-01"
+          and len({r["mois"] for r in rates.rows}) == len(rates.rows))
+    check("data: the dataset names its sources and licence",
+          "FM.D.U2.EUR.4F.KR.DFR.LEV" in rates.source and "FEDFUNDS" in rates.source and rates.license)
+
+    course = catalog.course("la-monnaie")
+    check("the course opens path 1 of the Monnaie et Bitcoin track",
+          catalog.path("monnaie-inflation").is_available and catalog.path("monnaie-inflation").track == "monnaie-bitcoin")
+    check("every lesson is sourced and dated", all(l.sources and l.updated for l in course.lessons))
+    final = catalog.quiz("monnaie-validation")
+    taught = {l.id for l in course.lessons} - {"recap-monnaie"}
+    check("validation quiz: covers every lesson", {q.lesson_id for q in final.questions} == taught)
+    opinion = [b for l in course.lessons for b in l.blocks if b.kind == "callout" and b.callout_kind == "opinion"]
+    check("the founder's view appears once, framed as an opinion", len(opinion) == 1)
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -1077,16 +1153,18 @@ def test_progress_logic():
     check("final quiz passed", everything.final_quiz_passed is True)
 
     step = P.next_step(catalog, {}, set())
-    check("a new member is sent to lesson 1", step.kind == "lesson"
-          and step.lesson.id == "fonctionnement-marche")
+    check("a new member starts with the first course of the programme", step.kind == "lesson"
+          and step.lesson.id == "fonctions-monnaie")
     step = P.next_step(catalog, {"premiers-pas": {"fonctionnement-marche"}}, set())
     check("a started member is sent to the next lesson", step.lesson.id == "ordres-et-couts")
     step = P.next_step(catalog, {"premiers-pas": {l.id for l in course.lessons}}, set())
     check("lessons done, quiz not passed: the final quiz", step.kind == "final_quiz")
     step = P.next_step(catalog, {"premiers-pas": {l.id for l in course.lessons}},
                        {"premiers-pas-validation"})
-    check("course 1 finished: the next course starts", step.kind == "lesson"
-          and step.course.id == "lire-la-structure" and step.lesson.id == "swings-definition")
+    check("trading course 1 finished: the next trading course starts, not the top of the programme",
+          step.kind == "lesson" and step.course.id == "lire-la-structure" and step.lesson.id == "swings-definition")
+    step = P.next_step(catalog, {"la-monnaie": {"fonctions-monnaie"}}, set())
+    check("a started money course is resumed", step.lesson.id == "histoire-monnaie")
     courses = catalog.available_courses()
     everything = {c.id: {l.id for l in c.lessons} for c in courses}
     step = P.next_step(catalog, everything, {c.final_quiz_id for c in courses})
@@ -1210,6 +1288,7 @@ def main() -> int:
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()
+    test_money_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

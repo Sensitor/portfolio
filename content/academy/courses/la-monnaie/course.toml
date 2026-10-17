@@ -1,0 +1,40 @@
+id = "la-monnaie"
+path = "monnaie-inflation"
+title = "La monnaie"
+summary = "Neuf leçons pour comprendre ce qu'est la monnaie et d'où elle vient : ses fonctions et son histoire, la monnaie créée par les banques quand elles prêtent, le rôle de la banque centrale et des taux d'intérêt, la dette publique et les obligations, la politique monétaire et ses limites, puis la différence entre monnaie, liquidité et richesse."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Distinguer les fonctions de la monnaie et dire lesquelles une monnaie remplit bien ou mal.",
+  "Expliquer comment un crédit bancaire crée de la monnaie, bilan à l'appui.",
+  "Décrire comment une banque centrale agit sur les taux et pourquoi ses effets sont lents.",
+  "Relier taux d'intérêt, coût d'un crédit et prix des obligations, chiffres à l'appui.",
+  "Séparer les mécanismes documentés de la politique monétaire des débats qui les entourent.",
+]
+prerequisites = []
+final_quiz = "monnaie-validation"
+
+[[module]]
+id = "nature"
+title = "Ce qu'est la monnaie"
+summary = "Ses trois fonctions, puis son histoire, des marchandises à la monnaie fondée sur la confiance."
+lessons = ["fonctions-monnaie", "histoire-monnaie"]
+
+[[module]]
+id = "creation"
+title = "Qui crée la monnaie"
+summary = "Les banques quand elles prêtent, la banque centrale qui fixe le prix de l'argent, et ce que coûte un crédit."
+lessons = ["monnaie-bancaire", "banque-centrale", "taux-interet"]
+
+[[module]]
+id = "dette"
+title = "Dette et politique monétaire"
+summary = "La dette publique et les obligations, puis ce que peut et ne peut pas faire la politique monétaire."
+lessons = ["dette-obligations", "politique-monetaire"]
+
+[[module]]
+id = "bilan"
+title = "Faire le point"
+summary = "Monnaie, liquidité et richesse, puis le quiz de validation."
+lessons = ["monnaie-liquidite-richesse", "recap-monnaie"]

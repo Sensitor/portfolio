@@ -110,6 +110,10 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 [data-testid="stSidebarHeader"] { padding-bottom: 0; }
 [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg { color: var(--on-navy-muted) !important; }
 [data-testid="stExpandSidebarButton"] svg { color: var(--ink) !important; }
+/* The control that reopens a collapsed sidebar: a visible tile, not a faint glyph. */
+[data-testid="stExpandSidebarButton"] { background: var(--white) !important; border: 1px solid var(--line-strong) !important;
+  border-radius: 4px !important; box-shadow: 0 1px 3px rgba(15, 27, 38, .12) !important; opacity: 1 !important; }
+[data-testid="stExpandSidebarButton"]:hover { border-color: var(--blue-2) !important; }
 [data-testid="stSidebar"] .stButton { margin: 0; }
 [data-testid="stSidebar"] .stButton > button {
   width: 100%; justify-content: flex-start; background: transparent; border: 0; border-radius: 4px;
@@ -481,8 +485,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-chart-title { font: 600 1.05rem/1.35 var(--serif); color: var(--ink); margin-bottom: .2rem; }
 .stApp .sx-chart-foot { border-top: 1px solid var(--line); padding-top: .7rem; }
 .stApp .sx-chart-foot > b { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-right: .6rem; }
-.stApp .sx-chart-foot > span { font-size: 14px; color: var(--text); }
-.stApp .sx-chart-credit { margin: .45rem 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.stApp .sx-chart-foot > span { font-size: 14px !important; color: var(--text); }
+.stApp .sx-chart-credit, .stApp [class*="st-key-chart_"] p.sx-chart-credit { margin: .45rem 0 0 !important; font-size: 12.5px !important; line-height: 1.55 !important; color: var(--muted) !important; }
 .stApp .sx-chart-credit a { color: var(--blue); }
 .stApp .sx-chart-key { color: var(--faint); }
 .stApp .sx-track { margin: 2.2rem 0 .9rem; }

@@ -1,0 +1,65 @@
+id = "bilan-credit"
+title = "Suivre la monnaie sur un bilan de banque"
+context = """
+Le bilan simplifié d'une banque, en millions d'euros :
+
+| Actif | | Passif | |
+|---|---|---|---|
+| Réserves à la banque centrale | 10 | Dépôts des clients | 92 |
+| Crédits accordés | 90 | Capital | 8 |
+
+Trois opérations se succèdent : la banque accorde un **crédit de 10** à une entreprise ; l'entreprise **paie 4** à un fournisseur client d'une autre banque ; un autre client **rembourse 5** de son crédit avec l'argent de son compte.
+
+Bilan fictif, construit pour l'exercice.
+"""
+conclusion = """
+Le crédit a créé 10 de dépôts, donc de monnaie. Le paiement vers une autre banque n'a rien créé ni détruit dans l'économie : la monnaie a changé de banque, et la première a réglé en réserves. Le remboursement a détruit 5 de monnaie. À chaque étape, le bilan reste équilibré.
+"""
+
+[[step]]
+id = "total-avant"
+prompt = "Quel est le total du bilan au départ ?"
+unit = "M€"
+answer = 100
+tolerance = 0
+solution = "Actif : 10 + 90 = **100**. Passif : 92 + 8 = 100. Le bilan est équilibré."
+
+[[step]]
+id = "depots-credit"
+prompt = "Après le crédit de 10, à combien s'élèvent les dépôts ?"
+unit = "M€"
+answer = 102
+tolerance = 0
+solution = "La banque inscrit 10 sur le compte de l'entreprise : 92 + 10 = **102**. Les crédits passent de 90 à 100."
+
+[[step]]
+id = "total-credit"
+prompt = "Quel est alors le total du bilan ?"
+unit = "M€"
+answer = 110
+tolerance = 0
+solution = "Actif : 10 + 100 = **110**. Passif : 102 + 8 = 110. Le crédit a agrandi le bilan des deux côtés."
+
+[[step]]
+id = "reserves-paiement"
+prompt = "L'entreprise paie 4 à un client d'une autre banque. Que deviennent les réserves de la banque ?"
+unit = "M€"
+answer = 6
+tolerance = 0
+solution = "La banque règle l'autre banque en monnaie centrale : 10 − 4 = **6** de réserves. Les dépôts baissent aussi de 4, à 98."
+
+[[step]]
+id = "depots-paiement"
+prompt = "Et les dépôts ?"
+unit = "M€"
+answer = 98
+tolerance = 0
+solution = "102 − 4 = **98**. La monnaie n'a pas disparu : elle est désormais un dépôt dans l'autre banque."
+
+[[step]]
+id = "depots-remboursement"
+prompt = "Un client rembourse 5 de son crédit avec l'argent de son compte. À combien s'élèvent les dépôts ?"
+unit = "M€"
+answer = 93
+tolerance = 0
+solution = "Le dépôt utilisé disparaît avec le crédit : 98 − 5 = **93**, et les crédits passent de 100 à 95. Le remboursement a détruit 5 de monnaie."

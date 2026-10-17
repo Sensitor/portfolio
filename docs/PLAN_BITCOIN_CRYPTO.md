@@ -1,7 +1,7 @@
 # Sensitor : Bitcoin, Crypto & Trading Intelligence
 
 Plan de mise en œuvre de la vision produit. Rédigé le 17 octobre 2026 après audit du dépôt.
-Les lots A, B1 et B2 sont terminés ; les suivants sont construits un par un, chacun vérifié avant le suivant.
+Les lots A, B1, B2 et C1 sont terminés ; les suivants sont construits un par un, chacun vérifié avant le suivant.
 
 ## 1. État réel du dépôt (phase A)
 
@@ -133,7 +133,7 @@ Un espace éditorial : convictions, indicateurs suivis, critères, règles de ri
 | Donnée | Source envisagée | Point à régler |
 |---|---|---|
 | Émission de Bitcoin, halvings | règles du protocole, calcul exact ; dates passées des halvings | aucun |
-| Inflation France, zone euro, États-Unis | INSEE (IPC), Eurostat (IPCH), BLS (CPI) : données publiques réutilisables avec attribution | INSEE et FRED sont **bloqués par le réseau de cet environnement** : il faut autoriser ces domaines ou me fournir les fichiers |
+| Inflation France, zone euro, États-Unis | INSEE (IPC), Eurostat (IPCH), BLS (CPI) : données publiques réutilisables avec attribution | accès réseau ouvert le 17 octobre 2026 (sauf api.insee.fr) |
 | Taux directeurs | BCE, Réserve fédérale | même point réseau |
 | Prix historique de Bitcoin | à choisir | **licence à vérifier** : plusieurs jeux gratuits (dont Coin Metrics Community) sont, à ma connaissance, sous licence non commerciale |
 | Indicateurs on-chain (MVRV, SOPR, NUPL…) | fournisseur spécialisé, généralement payant | **décision d'achat ou de licence** avant toute courbe historique |
@@ -161,7 +161,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **A** ✔ | Stabilisation, correctif « Analyse », audit, ce document, point de sauvegarde | terminé |
 | **B1** ✔ | Filières et numérotation par filière, champ `updated` (« Mis à jour le ») et sources obligatoires pour les nouvelles filières, encadrés « Opinion » et « Débat », registre de données sourcées, composant de graphique interactif aux couleurs de la charte, niveau d'accès Premium sans facturation | terminé |
 | **B2** ✔ | Sous-titre de marque, accueil et barre latérale en quatre groupes (Apprendre, Investir, Trader, Échanger) | terminé |
-| **C1** | M1, cours « La monnaie », avec ses schémas | contenu |
+| **C1** ✔ | M1, cours « La monnaie » : 9 leçons sourcées, 5 schémas, données de taux BCE et Fed, 3 exercices | terminé |
 | **C2** | M1, cours « L'inflation » et écoles de pensée | contenu |
 | **C3** | M1, cours « Inflation et patrimoine », simulateur nominal et réel | contenu et simulateur |
 | **C4** | M2, cours « Origines et fonctionnement », émission calculée | contenu et visualisation |

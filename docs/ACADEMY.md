@@ -19,13 +19,13 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Trading paths 1 to 7 published**, the other 9 marked « en préparation » and not clickable |
-| Courses | « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 29 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
-| Quizzes | 43 knowledge checks (immediate feedback) + 7 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
-| Exercises | 15 numeric exercises (EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
+| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Monnaie et Bitcoin path 1** (its first course) **and Trading paths 1 to 7 published**, the other 8 marked « en préparation » and not clickable |
+| Courses | « La monnaie » (9 lessons, sourced, with ECB and Federal Reserve rate data), « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 34 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Quizzes | 51 knowledge checks (immediate feedback) + 8 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 18 numeric exercises (a bank balance sheet, the cost of a mortgage, a bond when rates move, EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
 | Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
-| Library | 8 real resources, each as Markdown and as a typeset PDF |
+| Library | 9 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
@@ -58,6 +58,8 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   structure.py the swing and break rules (path 2), equal levels and sweeps (path 3)
   zones.py     FVGs, order blocks, retracements, OTE band, zone overlap (path 4)
   backtest.py  series summary, interval of an expectancy, multiple testing, degradation (path 7)
+  money.py     bank balance sheets, loan instalments and schedules, bond prices (« La monnaie »)
+  bitcoin.py   Bitcoin's issuance from the protocol rules
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"
@@ -165,7 +167,10 @@ synthétique ». `content/academy/charts.toml` then says what to draw: dataset,
 boolean column (`highlight`) whose rows are drawn as estimates. Charts are
 Plotly figures in the design system (`sensitor/academy/ui/chart_view.py`).
 
-The first dataset is Bitcoin's issuance, computed from the protocol rules in
+Datasets so far: the ECB deposit facility rate and the US effective federal
+funds rate, monthly since 1999 (`data/taux-directeurs.csv`, built from the ECB
+Data Portal and FRED and dated with its retrieval); a 200 000 € mortgage
+schedule (computed). Another one is Bitcoin's issuance, computed from the protocol rules in
 `sensitor/academy/bitcoin.py` (20 999 999,9769 BTC in total; past halving dates
 recorded, future ones estimated and flagged).
 
@@ -216,9 +221,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 662 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy.py       # 736 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  92 checks — HTTP access policy, isolation, no answer key, journal
-python tests/test_academy_app.py   # 241 checks — every page and space renders, locking, writes per member
+python tests/test_academy_app.py   # 263 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  74 checks — spaces registry, journal rules, renderers, brand asset
 python tests/test_accounts.py      #  42 checks — reset, verification, e-mail, export, v8 and v9 upgrades
 python -m sensitor.academy.validate
