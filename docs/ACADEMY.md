@@ -19,13 +19,13 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Monnaie et Bitcoin path 1** (its first course) **and Trading paths 1 to 7 published**, the other 8 marked « en préparation » and not clickable |
-| Courses | « La monnaie » (9 lessons, sourced, with ECB and Federal Reserve rate data), « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 34 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
-| Quizzes | 51 knowledge checks (immediate feedback) + 8 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
-| Exercises | 18 numeric exercises (a bank balance sheet, the cost of a mortgage, a bond when rates move, EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
+| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Monnaie et Bitcoin path 1** (two of its three courses) **and Trading paths 1 to 7 published**, the other 8 marked « en préparation » and not clickable |
+| Courses | « La monnaie » (9 lessons, sourced, with ECB and Federal Reserve rate data), « L'inflation » (9 lessons, with Eurostat, ECB and US data), « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 37 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Quizzes | 59 knowledge checks (immediate feedback) + 9 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 21 numeric exercises (a bank balance sheet, the cost of a mortgage, a bond when rates move, reading a price index, contributions to inflation, purchasing power over thirty years, EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
 | Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
-| Library | 9 real resources, each as Markdown and as a typeset PDF |
+| Library | 10 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
@@ -59,6 +59,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   zones.py     FVGs, order blocks, retracements, OTE band, zone overlap (path 4)
   backtest.py  series summary, interval of an expectancy, multiple testing, degradation (path 7)
   money.py     bank balance sheets, loan instalments and schedules, bond prices (« La monnaie »)
+  inflation.py rates from an index, cumulative and annualised inflation, purchasing power, contributions
   bitcoin.py   Bitcoin's issuance from the protocol rules
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
@@ -170,7 +171,12 @@ Plotly figures in the design system (`sensitor/academy/ui/chart_view.py`).
 Datasets so far: the ECB deposit facility rate and the US effective federal
 funds rate, monthly since 1999 (`data/taux-directeurs.csv`, built from the ECB
 Data Portal and FRED and dated with its retrieval); a 200 000 € mortgage
-schedule (computed). Another one is Bitcoin's issuance, computed from the protocol rules in
+schedule (computed); euro area, French and US inflation since 1997, euro area
+inflation by component since 2015, M3 growth against inflation since 1999, US
+inflation and federal funds since 1960, and the purchasing power of 100 € of
+1996 in France (Eurostat `prc_hicp_minr`, ECB, FRED). An empty cell in a CSV is
+a missing observation, drawn as a gap and never as a zero. Another one is
+Bitcoin's issuance, computed from the protocol rules in
 `sensitor/academy/bitcoin.py` (20 999 999,9769 BTC in total; past halving dates
 recorded, future ones estimated and flagged).
 
@@ -221,9 +227,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 736 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy.py       # 813 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  92 checks — HTTP access policy, isolation, no answer key, journal
-python tests/test_academy_app.py   # 263 checks — every page and space renders, locking, writes per member
+python tests/test_academy_app.py   # 285 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  74 checks — spaces registry, journal rules, renderers, brand asset
 python tests/test_accounts.py      #  42 checks — reset, verification, e-mail, export, v8 and v9 upgrades
 python -m sensitor.academy.validate

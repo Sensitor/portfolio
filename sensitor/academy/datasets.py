@@ -88,7 +88,9 @@ _MONTHS = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "ao
 
 
 def _number(value: str):
-    text = value.strip()
+    text = (value or "").strip()
+    if text == "":
+        return None             # a missing observation: a gap in the curve, never a zero
     if text.lower() in ("true", "false"):
         return text.lower() == "true"
     try:

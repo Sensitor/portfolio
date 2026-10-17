@@ -14,6 +14,7 @@ keyboard focus; the drawing is `aria-hidden`.
 from __future__ import annotations
 
 import html as _html
+import re
 from datetime import datetime
 
 import streamlit as st
@@ -38,8 +39,22 @@ def html(fragment: str) -> None:
     st.markdown(flat.replace("$", "&#36;"), unsafe_allow_html=True)
 
 
+_UNIT_SPACE = re.compile(r"(?<=\d) (?=(?:%|€|\$|R\b|pips\b|points?\b|BTC\b|ans\b))")
+
+
+_THOUSANDS = re.compile(r"(?<=\d) (?=\d{3}(?!\d))")
+
+
+def keep_units(text: str) -> str:
+    """
+    A number never splits across lines: not from its unit (« 6 % », « 100 € »,
+    « 2,28 R »), and not inside its thousands groups (« 200 000 »).
+    """
+    return _UNIT_SPACE.sub("\u00a0", _THOUSANDS.sub("\u00a0", text))
+
+
 def md(text: str) -> None:
-    st.markdown(text.replace("$", "\\$"))
+    st.markdown(keep_units(text).replace("$", "\\$"))
 
 
 def tap(key: str, fragment: str, label: str, page: str, **fields) -> None:

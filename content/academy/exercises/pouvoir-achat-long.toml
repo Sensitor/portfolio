@@ -1,0 +1,60 @@
+id = "pouvoir-achat-long"
+title = "L'inflation sur trente ans"
+context = """
+Vous gardez **1 000 €** en billets pendant **30 ans**.
+
+On compare une inflation constante de **2 %** par an, l'objectif de la BCE, avec ce qu'a réellement connu la France de janvier 1996 à janvier 2026 : une hausse de l'indice des prix de **67,2 %**, selon Eurostat.
+
+Rappel : années pour diviser le pouvoir d'achat par deux = ln 2 ÷ ln(1 + inflation).
+"""
+conclusion = """
+Même une inflation « faible » de 2 % fait perdre près de la moitié du pouvoir d'achat en trente ans, et le diviserait par deux en 35 ans. C'est la question que posent les cours suivants : comment conserver une épargne sur la durée, avec quels risques.
+"""
+
+[[step]]
+id = "cumul-2"
+prompt = "À 2 % par an, quelle est l'inflation cumulée sur 30 ans, en % ? (Deux décimales.)"
+unit = "%"
+answer = 81.14
+tolerance = 0.01
+solution = "1,02^30 − 1 = **81,14 %**."
+
+[[step]]
+id = "valeur-2"
+prompt = "Que valent alors les 1 000 €, en pouvoir d'achat d'aujourd'hui ? (Deux décimales.)"
+unit = "€"
+answer = 552.07
+tolerance = 0.01
+solution = "1 000 ÷ 1,8114 = **552,07 €**."
+
+[[step]]
+id = "moitie-2"
+prompt = "En combien d'années une inflation de 2 % divise-t-elle le pouvoir d'achat par deux ? (Une décimale.)"
+unit = "ans"
+answer = 35
+tolerance = 0.06
+solution = "ln 2 ÷ ln 1,02 = **35,0 ans**."
+
+[[step]]
+id = "moitie-5"
+prompt = "Et une inflation de 5 % ? (Une décimale.)"
+unit = "ans"
+answer = 14.2
+tolerance = 0.06
+solution = "ln 2 ÷ ln 1,05 = **14,2 ans**."
+
+[[step]]
+id = "france-valeur"
+prompt = "En France, de janvier 1996 à janvier 2026, les prix ont monté de 67,2 %. Que valent 1 000 € de 1996, en pouvoir d'achat ? (Arrondi à l'euro.)"
+unit = "€"
+answer = 598
+tolerance = 0.6
+solution = "1 000 ÷ 1,672 = **598 €** environ. Le calcul exact sur l'indice d'Eurostat donne 598,15 €."
+
+[[step]]
+id = "france-annuel"
+prompt = "À quelle inflation annuelle moyenne cela correspond-il, en % ? (Deux décimales.)"
+unit = "%"
+answer = 1.73
+tolerance = 0.01
+solution = "1,672^(1/30) − 1 = **1,73 %** par an, sous l'objectif de 2 %."

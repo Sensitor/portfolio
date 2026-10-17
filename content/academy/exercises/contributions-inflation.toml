@@ -1,0 +1,57 @@
+id = "contributions-inflation"
+title = "Qui contribue à l'inflation ?"
+context = """
+Un panier simplifié, avec ses poids dans les dépenses et la hausse des prix de chaque poste sur un an :
+
+| Poste | Poids | Hausse sur un an |
+|---|---|---|
+| Énergie | 10 % | 30 % |
+| Alimentation | 20 % | 12 % |
+| Biens hors énergie | 25 % | 5 % |
+| Services | 45 % | 4 % |
+
+Pondérations illustratives, du même ordre que celles de la zone euro ; hausses construites pour l'exercice.
+"""
+conclusion = """
+L'énergie, qui ne pèse que 10 % du panier, apporte plus du tiers de l'inflation : 3 points sur 8,45. Les services, qui ne montent que de 4 %, apportent 1,8 point, plus que les biens. C'est pourquoi on regarde à la fois la hausse et le poids de chaque poste.
+"""
+
+[[step]]
+id = "energie"
+prompt = "Quelle est la contribution de l'énergie à l'inflation, en points ?"
+unit = "points"
+answer = 3
+tolerance = 0.001
+solution = "0,10 × 30 % = **3 points**."
+
+[[step]]
+id = "alimentation"
+prompt = "Et celle de l'alimentation ?"
+unit = "points"
+answer = 2.4
+tolerance = 0.001
+solution = "0,20 × 12 % = **2,4 points**."
+
+[[step]]
+id = "services"
+prompt = "Et celle des services ?"
+unit = "points"
+answer = 1.8
+tolerance = 0.001
+solution = "0,45 × 4 % = **1,8 point**."
+
+[[step]]
+id = "total"
+prompt = "Quelle est l'inflation totale du panier ? (Deux décimales.)"
+unit = "%"
+answer = 8.45
+tolerance = 0.001
+solution = "3 + 2,4 + 0,25 × 5 + 1,8 = 3 + 2,4 + 1,25 + 1,8 = **8,45 %**."
+
+[[step]]
+id = "part-energie"
+prompt = "Quelle part de l'inflation totale vient de l'énergie, en % ? (Une décimale.)"
+unit = "%"
+answer = 35.5
+tolerance = 0.06
+solution = "3 ÷ 8,45 = **35,5 %** : plus du tiers, pour un dixième du panier."

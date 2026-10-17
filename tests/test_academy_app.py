@@ -135,9 +135,12 @@ def fixture_tree() -> str:
     root = Path(tempfile.mkdtemp(prefix="academy-fixture-")) / "academy"
     shutil.copytree(CONTENT_ROOT, root)
     cur = root / "curriculum.toml"
+    import re
     text = cur.read_text()
-    assert 'courses = ["la-monnaie"]' in text
-    cur.write_text(text.replace('courses = ["la-monnaie"]', 'courses = ["la-monnaie", "fixture-monnaie"]'))
+    block = re.search(r'id = "monnaie-inflation".*?courses = \[([^\]]*)\]', text, re.S)
+    assert block, "the Monnaie et Bitcoin path 1 must list its courses"
+    start, end = block.span(1)
+    cur.write_text(text[:start] + block.group(1) + ', "fixture-monnaie"' + text[end:])
     course = root / "courses" / "fixture-monnaie"
     (course / "lessons").mkdir(parents=True)
     (course / "course.toml").write_text(

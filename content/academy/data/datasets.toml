@@ -45,3 +45,65 @@ retrieved = 2026-10-17
 unit = "€"
 columns = ["annee", "interets", "capital", "restant"]
 notes = "Un crédit réel ajoute assurance, frais de dossier et de garantie, que l'exemple ne compte pas."
+
+[[dataset]]
+id = "inflation-zone-euro-france-us"
+title = "Inflation annuelle : zone euro, France, États-Unis, mensuelle depuis 1997"
+kind = "file"
+file = "inflation-zone-euro-france-us.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, taux de variation annuel, ensemble des biens et services), zone euro et France ; U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers (CPIAUCSL, corrigé des variations saisonnières), via FRED, taux annuel calculé par Sensitor"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE) ; données publiques du Bureau of Labor Statistics"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "zone_euro", "france", "etats_unis"]
+notes = "L'indice américain d'octobre 2025 n'a pas été publié : le point manque, il n'est pas interpolé."
+
+[[dataset]]
+id = "inflation-composantes-zone-euro"
+title = "Inflation de la zone euro par composante, mensuelle depuis 2015"
+kind = "file"
+file = "inflation-composantes-zone-euro.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, taux de variation annuel) : ensemble, énergie, alimentation y compris alcool et tabac, biens industriels hors énergie, services, et ensemble hors énergie, alimentation, alcool et tabac"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "ensemble", "energie", "alimentation", "biens", "services", "sous_jacente"]
+
+[[dataset]]
+id = "m3-inflation-zone-euro"
+title = "Croissance de la masse monétaire M3 et inflation, zone euro, depuis 1999"
+kind = "file"
+file = "m3-inflation-zone-euro.csv"
+source = "Banque centrale européenne, Data Portal, série BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A (M3, taux de croissance annuel) ; Eurostat, jeu prc_hicp_minr (IPCH, taux de variation annuel)"
+url = "https://data.ecb.europa.eu/data/datasets/BSI/BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A"
+license = "statistiques BCE réutilisables avec mention de la source ; données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "m3", "inflation"]
+
+[[dataset]]
+id = "pouvoir-achat-france"
+title = "Ce que valent 100 € de janvier 1996, en France, chaque janvier depuis"
+kind = "file"
+file = "pouvoir-achat-france.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, indice base 2025 = 100), France ; valeur réelle calculée par Sensitor : 100 × indice de janvier 1996 ÷ indice du mois"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "€"
+columns = ["mois", "indice", "valeur_reelle_100"]
+
+[[dataset]]
+id = "inflation-taux-etats-unis"
+title = "Inflation et taux des fonds fédéraux aux États-Unis, mensuels, depuis 1960"
+kind = "file"
+file = "inflation-taux-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers (CPIAUCSL, corrigé des variations saisonnières), taux annuel calculé par Sensitor ; Board of Governors of the Federal Reserve System, Federal Funds Effective Rate (FEDFUNDS) ; via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/CPIAUCSL"
+license = "données publiques du Bureau of Labor Statistics et de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "inflation", "fed_funds"]
+notes = "L'indice d'octobre 2025 n'a pas été publié : le point manque."

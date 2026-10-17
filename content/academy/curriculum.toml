@@ -49,7 +49,7 @@ number = 1
 title = "Monnaie, inflation et théorie monétaire"
 summary = "Ce qu'est la monnaie, comment elle est créée, ce qu'est l'inflation et ce qui la provoque, la différence entre rendement nominal et réel, la dette et la politique monétaire, et les grandes écoles de pensée qui en débattent."
 status = "published"
-courses = ["la-monnaie"]
+courses = ["la-monnaie", "l-inflation"]
 topics = ["La monnaie et sa création", "L'inflation et ses causes", "Rendement nominal et réel", "Écoles de pensée"]
 
 [[path]]

@@ -109,3 +109,15 @@ file = "fiche-la-monnaie.md"
 pdf = "fiche-la-monnaie.pdf"
 access = "public"
 lessons = ["fonctions-monnaie", "histoire-monnaie", "monnaie-bancaire", "banque-centrale", "taux-interet", "dette-obligations", "politique-monetaire", "monnaie-liquidite-richesse", "recap-monnaie"]
+
+[[resource]]
+id = "fiche-inflation"
+title = "L'inflation"
+description = "Définitions, mesure, causes, formules et repères chiffrés de l'inflation en zone euro, en France et aux États-Unis : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-inflation.md"
+pdf = "fiche-inflation.pdf"
+access = "public"
+lessons = ["inflation-definition", "mesurer-les-prix", "demande-et-couts", "monnaie-credit-prix", "anticipations-salaires", "episodes-inflation", "ecoles-de-pensee", "pouvoir-achat", "recap-inflation"]

@@ -1,0 +1,73 @@
+id = "check-inflation-definition"
+title = "Contrôle : qu'est-ce que l'inflation ?"
+course = "l-inflation"
+lesson = "inflation-definition"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "def"
+prompt = "Le prix des tomates double en été, les autres prix ne bougent pas. Est-ce de l'inflation ?"
+kind = "single"
+lesson = "inflation-definition"
+
+[[question.option]]
+id = "non"
+text = "Non : c'est un prix relatif qui change, pas une hausse générale."
+correct = true
+explanation = "L'inflation est générale et durable."
+
+[[question.option]]
+id = "oui"
+text = "Oui, puisqu'un prix monte."
+explanation = "Un seul prix ne fait pas l'inflation."
+
+[[question.option]]
+id = "deflation"
+text = "Non, c'est de la déflation."
+explanation = "Aucun prix ne baisse ici."
+
+[[question]]
+id = "desinflation"
+prompt = "L'inflation passe de 6 % à 3 %. Les prix :"
+kind = "single"
+lesson = "inflation-definition"
+
+[[question.option]]
+id = "montent"
+text = "continuent de monter, moins vite : c'est de la désinflation."
+correct = true
+explanation = "Seule la déflation fait baisser les prix."
+
+[[question.option]]
+id = "baissent"
+text = "baissent de 3 %."
+explanation = "Ils montent encore de 3 %."
+
+[[question.option]]
+id = "stables"
+text = "sont stables."
+explanation = "Ils montent de 3 % sur un an."
+
+[[question]]
+id = "pic"
+prompt = "Quel a été le pic de l'inflation dans la zone euro depuis 1997, selon Eurostat ?"
+kind = "single"
+lesson = "inflation-definition"
+
+[[question.option]]
+id = "106"
+text = "10,6 %, en octobre 2022."
+correct = true
+explanation = "C'est ce que montrent les données."
+
+[[question.option]]
+id = "44"
+text = "44,3 %, en mars 2022."
+explanation = "C'est le pic de l'énergie seule."
+
+[[question.option]]
+id = "38"
+text = "3,8 %, en septembre 2026."
+explanation = "C'est le dernier point disponible, pas le pic."

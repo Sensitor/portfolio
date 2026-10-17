@@ -1,0 +1,74 @@
+id = "check-mesurer-les-prix"
+title = "Contrôle : mesurer les prix"
+course = "l-inflation"
+lesson = "mesurer-les-prix"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "indice"
+prompt = "Un indice passe de 105,1 à 114,0 en un an. Quelle est l'inflation ?"
+kind = "single"
+lesson = "mesurer-les-prix"
+
+[[question.option]]
+id = "847"
+text = "8,47 %"
+correct = true
+explanation = "114,0 ÷ 105,1 − 1."
+
+[[question.option]]
+id = "89"
+text = "8,9 %"
+explanation = "C'est l'écart en points d'indice, pas en pourcentage."
+
+[[question.option]]
+id = "14"
+text = "14 %"
+explanation = "C'est l'inflation cumulée depuis la base 100."
+
+[[question]]
+id = "sous-jacente"
+prompt = "Que retire l'inflation sous-jacente de l'indice ?"
+kind = "single"
+lesson = "mesurer-les-prix"
+
+[[question.option]]
+id = "volatils"
+text = "L'énergie et l'alimentation, les postes les plus volatils."
+correct = true
+explanation = "Pour lire la tendance de fond."
+
+[[question.option]]
+id = "services"
+text = "Les services."
+explanation = "Ils restent dans l'inflation sous-jacente."
+
+[[question.option]]
+id = "loyers"
+text = "Les loyers."
+explanation = "Ils restent aussi."
+
+[[question]]
+id = "ressentie"
+prompt = "Pourquoi l'inflation ressentie diffère-t-elle souvent de l'inflation mesurée ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "mesurer-les-prix"
+
+[[question.option]]
+id = "panier"
+text = "Chaque ménage a son propre panier."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "frequents"
+text = "On remarque surtout les prix achetés souvent, comme l'alimentation et le carburant."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "cache"
+text = "Les instituts cachent la vraie inflation."
+explanation = "Les méthodes sont publiées ; le débat porte sur les choix."

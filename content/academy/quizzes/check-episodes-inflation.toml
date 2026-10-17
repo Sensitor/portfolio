@@ -1,0 +1,74 @@
+id = "check-episodes-inflation"
+title = "Contrôle : les grands épisodes"
+course = "l-inflation"
+lesson = "episodes-inflation"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "1980"
+prompt = "Quel a été le pic de l'inflation américaine, selon les données du BLS ?"
+kind = "single"
+lesson = "episodes-inflation"
+
+[[question.option]]
+id = "146"
+text = "14,6 % en mars 1980."
+correct = true
+explanation = "Après le second choc pétrolier."
+
+[[question.option]]
+id = "9"
+text = "9,0 % en juin 2022."
+explanation = "C'est le pic de l'épisode récent."
+
+[[question.option]]
+id = "191"
+text = "19,1 % en juin 1981."
+explanation = "C'est le taux des fonds fédéraux, pas l'inflation."
+
+[[question]]
+id = "volcker"
+prompt = "Comment l'inflation américaine a-t-elle été ramenée vers 4 % au début des années 1980 ?"
+kind = "single"
+lesson = "episodes-inflation"
+
+[[question.option]]
+id = "taux"
+text = "Par une hausse massive des taux de la Réserve fédérale, au prix de récessions."
+correct = true
+explanation = "La désinflation de Volcker."
+
+[[question.option]]
+id = "prix"
+text = "Par un contrôle des prix."
+explanation = "Ce n'est pas la politique menée par Volcker."
+
+[[question.option]]
+id = "seule"
+text = "Elle est retombée seule, sans intervention."
+explanation = "Les taux ont atteint 19,1 % en juin 1981."
+
+[[question]]
+id = "2022"
+prompt = "Lesquelles ont contribué à la poussée d'inflation de 2021 à 2023 en zone euro ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "episodes-inflation"
+
+[[question.option]]
+id = "energie"
+text = "La flambée du gaz et de l'électricité."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "reouverture"
+text = "La réouverture rapide des économies et les ruptures d'approvisionnement."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "unique"
+text = "Une cause unique, la monnaie, sans aucun autre facteur."
+explanation = "Plusieurs causes se superposent."

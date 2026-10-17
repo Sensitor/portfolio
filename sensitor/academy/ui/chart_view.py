@@ -41,7 +41,8 @@ def figure(chart: Chart, dataset: Dataset) -> go.Figure:
     for i, (column, label) in enumerate(chart.series):
         color = PALETTE[i % len(PALETTE)]
         ys = [r[column] for r in rows]
-        text = [f"{_fr(y)} {dataset.unit}".strip() + (" · estimation" if f else "") for y, f in zip(ys, flags)]
+        text = ["" if y is None else f"{_fr(y)} {dataset.unit}".strip() + (" · estimation" if f else "")
+                for y, f in zip(ys, flags)]
         if chart.kind == "bar":
             fig.add_trace(go.Bar(x=xs, y=ys, name=label, text=text, hoverinfo="text+x", textposition="none",
                                  marker=dict(color=color, opacity=[0.45 if f else 0.9 for f in flags],

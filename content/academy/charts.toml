@@ -64,3 +64,100 @@ label = "Intérêts"
 [[chart.series]]
 column = "capital"
 label = "Capital remboursé"
+
+[[chart]]
+id = "inflation-trois-zones"
+dataset = "inflation-zone-euro-france-us"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Hausse des prix sur un an, en %"
+title = "L'inflation sur un an, depuis 1997"
+
+[[chart.series]]
+column = "zone_euro"
+label = "Zone euro"
+
+[[chart.series]]
+column = "france"
+label = "France"
+
+[[chart.series]]
+column = "etats_unis"
+label = "États-Unis"
+
+[[chart]]
+id = "inflation-composantes"
+dataset = "inflation-composantes-zone-euro"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Hausse des prix sur un an, en %"
+title = "Ce qui monte : l'inflation de la zone euro par composante"
+
+[[chart.series]]
+column = "energie"
+label = "Énergie"
+
+[[chart.series]]
+column = "alimentation"
+label = "Alimentation"
+
+[[chart.series]]
+column = "services"
+label = "Services"
+
+[[chart.series]]
+column = "biens"
+label = "Biens hors énergie"
+
+[[chart.series]]
+column = "sous_jacente"
+label = "Inflation sous-jacente"
+
+[[chart]]
+id = "m3-inflation"
+dataset = "m3-inflation-zone-euro"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux de croissance sur un an, en %"
+title = "La masse monétaire et les prix ne bougent pas au même rythme"
+
+[[chart.series]]
+column = "m3"
+label = "Masse monétaire M3"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart]]
+id = "pouvoir-achat-100-euros"
+dataset = "pouvoir-achat-france"
+kind = "area"
+x = "mois"
+x_label = "Janvier de chaque année"
+y_label = "Pouvoir d'achat, en € de janvier 1996"
+title = "100 € gardés en billets depuis janvier 1996"
+
+[[chart.series]]
+column = "valeur_reelle_100"
+label = "Valeur réelle de 100 €"
+
+[[chart]]
+id = "inflation-taux-us"
+dataset = "inflation-taux-etats-unis"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Soixante ans d'inflation et de taux aux États-Unis"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart.series]]
+column = "fed_funds"
+label = "Taux des fonds fédéraux (effectif)"

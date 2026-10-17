@@ -1,0 +1,73 @@
+id = "check-anticipations-salaires"
+title = "Contrôle : anticipations et salaires"
+course = "l-inflation"
+lesson = "anticipations-salaires"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "auto"
+prompt = "Pourquoi des anticipations d'inflation peuvent-elles se réaliser d'elles-mêmes ?"
+kind = "single"
+lesson = "anticipations-salaires"
+
+[[question.option]]
+id = "fixent"
+text = "Parce que prix, loyers et salaires se fixent en fonction de l'inflation attendue."
+correct = true
+explanation = "Si tous anticipent 5 %, tous ajustent de 5 %."
+
+[[question.option]]
+id = "bce"
+text = "Parce que la banque centrale les suit à la lettre."
+explanation = "Elle cherche au contraire à les ramener à 2 %."
+
+[[question.option]]
+id = "non"
+text = "Elles ne le peuvent pas."
+explanation = "C'est un mécanisme central de l'inflation."
+
+[[question]]
+id = "boucle"
+prompt = "Une boucle prix et salaires est-elle automatique après un choc ?"
+kind = "single"
+lesson = "anticipations-salaires"
+
+[[question.option]]
+id = "non"
+text = "Non : elle s'éteint si les salaires ne font que rattraper et si les marges absorbent une partie."
+correct = true
+explanation = "Elle dépend des anticipations."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Elle n'est pas automatique."
+
+[[question.option]]
+id = "jamais"
+text = "Elle n'existe jamais en pratique."
+explanation = "Elle a été observée, notamment dans les années 1970."
+
+[[question]]
+id = "credible"
+prompt = "À quoi sert la crédibilité d'une banque centrale ?"
+kind = "single"
+lesson = "anticipations-salaires"
+
+[[question.option]]
+id = "ancre"
+text = "À ancrer les anticipations, pour qu'une poussée d'inflation ne s'installe pas."
+correct = true
+explanation = "C'est un actif à préserver."
+
+[[question.option]]
+id = "taux"
+text = "À pouvoir garder des taux bas en toutes circonstances."
+explanation = "Elle doit parfois les monter fortement."
+
+[[question.option]]
+id = "rien"
+text = "À rien de mesurable."
+explanation = "Son rôle est central dans l'ancrage."

@@ -1,0 +1,73 @@
+id = "check-demande-et-couts"
+title = "Contrôle : demande et coûts"
+course = "l-inflation"
+lesson = "demande-et-couts"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "couts"
+prompt = "Le prix du pétrole double et les entreprises répercutent la hausse. C'est une inflation :"
+kind = "single"
+lesson = "demande-et-couts"
+
+[[question.option]]
+id = "couts"
+text = "par les coûts."
+correct = true
+explanation = "Produire coûte plus cher."
+
+[[question.option]]
+id = "demande"
+text = "par la demande."
+explanation = "La demande n'a pas changé ici."
+
+[[question.option]]
+id = "monnaie"
+text = "monétaire."
+explanation = "Aucune création monétaire n'est en cause dans cet exemple."
+
+[[question]]
+id = "choc"
+prompt = "Qu'a de particulier un choc d'offre pour la banque centrale ?"
+kind = "single"
+lesson = "demande-et-couts"
+
+[[question.option]]
+id = "dilemme"
+text = "Il fait monter les prix et baisser l'activité à la fois."
+correct = true
+explanation = "Monter les taux freine l'inflation mais aggrave le ralentissement."
+
+[[question.option]]
+id = "facile"
+text = "Il se combat facilement en baissant les taux."
+explanation = "Baisser les taux nourrirait l'inflation."
+
+[[question.option]]
+id = "rien"
+text = "Il n'a aucun effet sur les prix."
+explanation = "Il les fait monter."
+
+[[question]]
+id = "contribution"
+prompt = "Un poste pèse 10 % du panier et ses prix montent de 30 %. Sa contribution :"
+kind = "single"
+lesson = "demande-et-couts"
+
+[[question.option]]
+id = "3"
+text = "3 points d'inflation."
+correct = true
+explanation = "Poids × hausse."
+
+[[question.option]]
+id = "30"
+text = "30 points."
+explanation = "Il faut pondérer par son poids."
+
+[[question.option]]
+id = "10"
+text = "10 points."
+explanation = "C'est son poids, pas sa contribution."

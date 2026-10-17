@@ -706,6 +706,99 @@ def test_money_figures():
     check("the founder's view appears once, framed as an opinion", len(opinion) == 1)
 
 
+def test_inflation_figures():
+    """Course « L'inflation »: exercises recomputed, every figure quoted from the data checked against the files."""
+    print("\nCourse « L'inflation » figures")
+    from sensitor.academy import inflation as I
+    catalog = C.load_catalog()
+
+    ex = {s.id: s.answer for s in catalog.exercise("indices-inflation").steps}
+    r1, r2 = I.rate_from_index(100, 105.1), I.rate_from_index(105.1, 114.0)
+    check("index: 5,1 % then 8,47 %", round(r1 * 100, 2) == ex["taux-2022"] and round(r2 * 100, 2) == ex["taux-2023"])
+    total = I.cumulative([r1, r2])
+    check("index: 14 % over two years", round(total * 100, 2) == ex["cumul"])
+    check("index: 6,77 % a year", round(I.annualised(total, 2) * 100, 2) == ex["annualise"])
+    check("index: 100 € worth 87,72 €", round(I.real_value(100, total), 2) == ex["valeur-reelle"])
+
+    co = {s.id: s.answer for s in catalog.exercise("contributions-inflation").steps}
+    parts = I.contributions({"e": .10, "a": .20, "b": .25, "s": .45}, {"e": .30, "a": .12, "b": .05, "s": .04})
+    check("contributions: 3 / 2,4 / 1,8 points", round(parts["e"] * 100, 3) == co["energie"]
+          and round(parts["a"] * 100, 3) == co["alimentation"] and round(parts["s"] * 100, 3) == co["services"])
+    check("contributions: 8,45 % in total, 35,5 % from energy", round(sum(parts.values()) * 100, 2) == co["total"]
+          and round(parts["e"] / sum(parts.values()) * 100, 1) == co["part-energie"])
+    check("quiz: the unweighted mean would be 12,75 %", (30 + 12 + 5 + 4) / 4 == 12.75)
+
+    pa = {s.id: s.answer for s in catalog.exercise("pouvoir-achat-long").steps}
+    thirty = I.cumulative([0.02] * 30)
+    check("30 years at 2 %: 81,14 %, 552,07 €", round(thirty * 100, 2) == pa["cumul-2"]
+          and round(I.real_value(1000, thirty), 2) == pa["valeur-2"])
+    check("halving: 35 years at 2 %, 14,2 at 5 %", round(I.years_to_halve(0.02), 1) == pa["moitie-2"]
+          and round(I.years_to_halve(0.05), 1) == pa["moitie-5"])
+    check("lesson table: 23,4 years at 3 %, 7,3 at 10 %", round(I.years_to_halve(0.03), 1) == 23.4
+          and round(I.years_to_halve(0.10), 1) == 7.3)
+    check("lesson: five years at 4 % make 21,7 %", round(I.cumulative([0.04] * 5) * 100, 1) == 21.7)
+    check("lesson: 5 % of inflation leaves 95,24 € of 100", round(I.real_value(100, 0.05), 2) == 95.24)
+    check("lesson: M up 8 %, Y up 2 %: prices up 5,9 %; with V down 5 %: 0,6 %",
+          round(I.quantity_growth(.08, 0, .02) * 100, 1) == 5.9 and round(I.quantity_growth(.08, -.05, .02) * 100, 1) == 0.6)
+
+    fr = catalog.dataset("pouvoir-achat-france")
+    rows = {r["mois"][:7]: r for r in fr.rows}
+    rise = rows["2026-01"]["indice"] / rows["1996-01"]["indice"] - 1
+    check("data: French prices up 67,2 % from 1996 to 2026", round(rise * 100, 1) == 67.2)
+    check("data: 100 € of 1996 worth 59,82 € in 2026", rows["2026-01"]["valeur_reelle_100"] == 59.82)
+    check("data: 1,73 % a year on average", round(I.annualised(rise, 30) * 100, 2) == pa["france-annuel"])
+    check("exercise: 1 000 € worth about 598 €", abs(1000 / (1 + rise) - pa["france-valeur"]) < 0.6)
+
+    head = {r["mois"][:7]: r for r in catalog.dataset("inflation-zone-euro-france-us").rows}
+    ea = {m: r["zone_euro"] for m, r in head.items()}
+    window = [v for m, v in ea.items() if "1999-01" <= m <= "2019-12"]
+    check("data: 1,7 % a year in the euro area, 1999 to 2019", round(sum(window) / len(window), 1) == 1.7)
+    peak = max(ea.items(), key=lambda kv: kv[1])
+    check("data: euro area peak 10,6 % in October 2022", peak == ("2022-10", 10.6), str(peak))
+    check("data: September 2026, 3,8 % in the euro area and 3,4 % in France",
+          head["2026-09"]["zone_euro"] == 3.8 and head["2026-09"]["france"] == 3.4)
+    check("data: negative months in 2009, 2014 to 2016 and 2020",
+          {m[:4] for m, v in ea.items() if v < 0} == {"2009", "2014", "2015", "2016", "2020"})
+    check("data: 0,9 % in January 2021, 2,5 % in June 2024", ea["2021-01"] == 0.9 and ea["2024-06"] == 2.5)
+    us = {m: r["etats_unis"] for m, r in head.items() if r["etats_unis"] is not None}
+    check("data: US 9,0 % in June 2022", us["2022-06"] == 9.0 and max(v for m, v in us.items() if m >= "2020") == 9.0)
+    check("data: the unpublished US October 2025 index is a gap, not a zero", head["2025-10"]["etats_unis"] is None)
+
+    comp = {r["mois"][:7]: r for r in catalog.dataset("inflation-composantes-zone-euro").rows}
+    def peak_of(col):
+        return max(((m, r[col]) for m, r in comp.items()), key=lambda kv: kv[1])
+    check("data: energy 44,3 % in March 2022", peak_of("energie") == ("2022-03", 44.3))
+    check("data: food 15,5 % in March 2023", peak_of("alimentation") == ("2023-03", 15.5))
+    check("data: services 5,6 % in July 2023", peak_of("services") == ("2023-07", 5.6))
+
+    m3 = {r["mois"][:7]: r for r in catalog.dataset("m3-inflation-zone-euro").rows}
+    check("data: M3 12,6 % in November 2007, its peak", max(m3.items(), key=lambda kv: kv[1]["m3"])[0] == "2007-11"
+          and m3["2007-11"]["m3"] == 12.6)
+    check("data: M3 12,5 % in January 2021, -1,3 % in August 2023", m3["2021-01"]["m3"] == 12.5
+          and m3["2023-08"]["m3"] == -1.3)
+
+    usr = {r["mois"][:7]: r for r in catalog.dataset("inflation-taux-etats-unis").rows}
+    def us_peak(lo, hi):
+        return max(((m, r["inflation"]) for m, r in usr.items() if lo <= m <= hi and r["inflation"] is not None),
+                   key=lambda kv: kv[1])
+    check("data: US 12,2 % in November 1974", us_peak("1973-01", "1976-12") == ("1974-11", 12.2))
+    check("data: US 14,6 % in March 1980", us_peak("1977-01", "1985-12") == ("1980-03", 14.6))
+    check("data: federal funds 19,1 % in June 1981, the peak",
+          max(usr.items(), key=lambda kv: kv[1]["fed_funds"])[0] == "1981-06" and usr["1981-06"]["fed_funds"] == 19.1)
+    check("data: US 3,8 % at the end of 1983", usr["1983-12"]["inflation"] == 3.8)
+
+    course = catalog.course("l-inflation")
+    check("the inflation course is the second of path 1", [c.id for c in catalog.path("monnaie-inflation").courses]
+          == ["la-monnaie", "l-inflation"])
+    check("every lesson is sourced and dated", all(l.sources and l.updated for l in course.lessons))
+    final = catalog.quiz("inflation-validation")
+    taught = {l.id for l in course.lessons} - {"recap-inflation"}
+    check("validation quiz: covers every lesson", {q.lesson_id for q in final.questions} == taught)
+    for bad in (lambda: I.rate_from_index(0, 1), lambda: I.years_to_halve(0), lambda: I.annualised(0.1, 0),
+                lambda: I.contributions({"a": .5}, {"a": .1}), lambda: I.cumulative([-1])):
+        check("inflation helpers refuse bad input", raises(bad, ValueError))
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -1289,6 +1382,7 @@ def main() -> int:
     test_datasets_and_charts()
     test_access_levels()
     test_money_figures()
+    test_inflation_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()
