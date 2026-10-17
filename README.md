@@ -304,12 +304,12 @@ SENSITOR_TEST_PG=postgresql://… python tests/test_database.py   # the same, on
 python tests/test_auth.py                 #  95 checks — crypto, sessions, lockout
 python tests/test_api.py                  # 176 checks — HTTP, isolation, no maths
 python tests/test_workspace.py            #  20 checks — survives a restart
-python tests/test_sensitor_pages.py       # 176 render checks
+python tests/test_sensitor_pages.py       # 185 render checks
 python tests/test_trading_pages.py        #  82 render checks
-python tests/test_academy.py              # 612 checks — Academy content, quiz, risk maths
-python tests/test_academy_api.py          #  86 checks — Academy and journal over HTTP
-python tests/test_academy_app.py          # 221 checks — platform pages, headless
-python tests/test_platform.py             #  73 checks — spaces registry, brand
+python tests/test_academy.py              # 662 checks — Academy content, quiz, risk maths
+python tests/test_academy_api.py          #  92 checks — Academy and journal over HTTP
+python tests/test_academy_app.py          # 241 checks — platform pages, headless
+python tests/test_platform.py             #  74 checks — spaces registry, brand
 python tests/test_accounts.py             #  42 checks — reset, verification, e-mail
 python -m sensitor.academy.validate       # content check before publishing
 cd mobile && npm run test:integration     #  38 checks against a live server

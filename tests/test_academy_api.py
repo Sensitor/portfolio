@@ -70,9 +70,11 @@ def main() -> int:
     r = client.get("/academy/catalog")
     check("the catalogue is public", r.status_code == 200)
     paths = r.json()["paths"]
-    check("ten paths", len(paths) == 10)
     from sensitor.academy.content import load_catalog
     catalog = load_catalog()
+    check("every path of the curriculum", len(paths) == len(catalog.paths))
+    check("each path names its track and label", all(p["track"] and p["label"].endswith(f"Parcours {p['number']:02d}")
+                                                      for p in paths))
     check("the available paths are the published ones",
           [p["id"] for p in paths if p["available"]] == [p.id for p in catalog.paths if p.is_available])
     check("planned paths list no course",
@@ -276,6 +278,28 @@ def main() -> int:
     params = {p["name"] for route in client.get("/openapi.json").json()["paths"].values()
               for op in route.values() for p in op.get("parameters", [])}
     check("no journal route takes an address", not params & {"email", "user", "user_email"})
+
+    print("\nPremium content")
+    import shutil
+    from pathlib import Path
+    from sensitor.academy.content import CONTENT_ROOT
+    root = Path(tempfile.mkdtemp(prefix="academy-api-fixture-")) / "academy"
+    shutil.copytree(CONTENT_ROOT, root)
+    lesson_file = root / "courses" / "premiers-pas" / "lessons" / "budget-de-risque.md"
+    lesson_file.write_text(lesson_file.read_text().replace('access = "member"', 'access = "premium"'))
+    os.environ["SENSITOR_ACADEMY_CONTENT"] = str(root)
+    try:
+        url = "/academy/courses/premiers-pas/lessons/budget-de-risque"
+        check("premium, anonymous: 401", client.get(url).status_code == 401)
+        check("premium, free account: 403", client.get(url, headers=h(bob)).status_code == 403)
+        Store(os.environ["SENSITOR_DB_PATH"]).upsert_user(BOB, tier="pro")
+        check("premium, pro account: 200", client.get(url, headers=h(bob)).status_code == 200)
+        quiz = client.get("/academy/quizzes/check-budget-de-risque", headers=h(alice))
+        check("its quiz follows the lesson: 403 for a free account", quiz.status_code == 403)
+    finally:
+        os.environ.pop("SENSITOR_ACADEMY_CONTENT", None)
+    check("the real content is untouched", client.get("/academy/courses/premiers-pas/lessons/budget-de-risque",
+                                                      headers=h(alice)).status_code == 200)
 
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:

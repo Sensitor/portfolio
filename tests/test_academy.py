@@ -72,9 +72,21 @@ def test_real_catalog():
           all(p.courses for p in available) and available[0].id == "bases-marches"
           and all(not p.courses for p in catalog.paths if p not in available),
           str([p.id for p in available]))
-    check("ten paths in the curriculum", len(catalog.paths) == 10)
-    check("paths are in programme order",
-          [p.number for p in catalog.paths] == list(range(1, 11)))
+    check("four tracks, Bitcoin first", [t.id for t in catalog.tracks]
+          == ["monnaie-bitcoin", "crypto", "investissement", "trading"])
+    trading = catalog.paths_in("trading")
+    check("the ten trading paths keep their numbers", [p.number for p in trading] == list(range(1, 11)))
+    check("paths are ordered by track, then number",
+          [p.track for p in catalog.paths] == sorted((p.track for p in catalog.paths),
+                                                     key=[t.id for t in catalog.tracks].index))
+    check("every path belongs to a known track", all(catalog.track(p.track) for p in catalog.paths))
+    check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
+          and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
+    check("the new tracks are announced, not open yet",
+          all(p.status == C.PLANNED for t in ("monnaie-bitcoin", "crypto", "investissement")
+              for p in catalog.paths_in(t)) and len(catalog.paths) == 16)
+    check("only the new tracks require sources",
+          {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
     check("planned paths carry no readable course",
           all(not p.courses for p in catalog.paths if p.status == C.PLANNED))
 
@@ -495,6 +507,129 @@ def test_backtest_figures():
     check("no loss, no profit factor", B.summarize([1, 2]).profit_factor is None)
 
 
+def test_bitcoin_issuance():
+    """The issuance schedule, from the protocol rules, in satoshis."""
+    print("\nBitcoin issuance")
+    from sensitor.academy import bitcoin as B
+    check("the total supply is 20 999 999,9769 BTC", B.total_supply() == 2_099_999_997_690_000)
+    check("50 BTC per block at first", B.block_subsidy(0) == 50 * B.COIN and B.block_subsidy(209_999) == 50 * B.COIN)
+    check("25 BTC from block 210 000", B.block_subsidy(210_000) == 25 * B.COIN)
+    check("3,125 BTC since block 840 000", B.block_subsidy(840_000) == 312_500_000)
+    check("the shift reaches zero after 33 epochs", B.block_subsidy(33 * 210_000) == 0
+          and B.block_subsidy(32 * 210_000) == 1)
+    check("zero after the 64th halving", B.block_subsidy(64 * 210_000) == 0)
+    check("half of all bitcoins in the first epoch", B.supply_after(209_999) == 1_050_000_000_000_000)
+    check("19 687 500 BTC before the 2024 halving", B.supply_after(839_999) == 1_968_750_000_000_000)
+    check("supply equals the sum of subsidies on a small range",
+          B.supply_after(5) == 6 * 50 * B.COIN)
+    ep = B.epochs(64)
+    check("33 epochs carry a subsidy", sum(1 for e in ep if e.subsidy) == 33)
+    check("past halving dates are recorded, not estimated",
+          [(e.start_date.isoformat(), e.estimated) for e in ep[1:5]]
+          == [("2012-11-28", False), ("2016-07-09", False), ("2020-05-11", False), ("2024-04-20", False)])
+    check("later dates are flagged as estimates", all(e.estimated for e in ep[5:]))
+    check("an estimated epoch lasts 210 000 blocks of 10 minutes",
+          (ep[6].start_date - ep[5].start_date).days in (1458, 1459))
+    rows = B.issuance_rows()
+    check("the chart rows end at 99,99 % issued", round(rows[-1]["part"], 2) == 99.99 and rows[0]["part"] == 50.0)
+    check("negative heights are refused", raises(lambda: B.block_subsidy(-1), ValueError)
+          and raises(lambda: B.supply_after(-1), ValueError))
+
+
+def test_datasets_and_charts():
+    """Every chart has a dataset, every dataset a source, a licence and a date."""
+    print("\nDatasets and charts")
+    from sensitor.academy import datasets as D
+    from sensitor.academy import markup as M2
+    catalog = C.load_catalog()
+    emission = catalog.dataset("btc-emission")
+    check("the issuance dataset is computed from the protocol", emission and emission.kind == D.COMPUTED
+          and len(emission.rows) == 13)
+    check("its credit line names the source, licence and date",
+          emission.credit.startswith("Calcul : règles du protocole") and "licence" in emission.credit
+          and "17 octobre 2026" in emission.credit)
+    check("the issuance charts exist", {"emission-bitcoin", "recompense-bitcoin"} <= set(catalog.charts))
+    check("a chart directive parses", M2.parse("::: chart emission-bitcoin\nLégende.\n:::")[0].target == "emission-bitcoin")
+    from sensitor.academy.ui import chart_view
+    fig = chart_view.figure(catalog.chart("emission-bitcoin"), emission)
+    check("the step chart draws one series with French separators",
+          len(fig.data) == 1 and fig.data[0].line.shape == "hv" and fig.layout.separators == ", ")
+    bars = chart_view.figure(catalog.chart("recompense-bitcoin"), emission)
+    check("estimated bars are drawn lighter", list(bars.data[0].marker.opacity[:5]) == [0.9] * 5
+          and bars.data[0].marker.opacity[5] == 0.45)
+
+    def broken(edit_data=None, edit_charts=None, files=None):
+        root = _copy_tree()
+        if edit_data:
+            f = root / "data" / "datasets.toml"
+            f.write_text(edit_data(f.read_text()))
+        if edit_charts:
+            f = root / "charts.toml"
+            f.write_text(edit_charts(f.read_text()))
+        for name, text in (files or {}).items():
+            (root / "data" / name).write_text(text)
+        return C.validate(root)
+
+    check("a dataset without a licence is refused", any("license" in p for p in broken(
+        edit_data=lambda t: t.replace('license = "calcul Sensitor, aucune donnée tierce"\n', ""))))
+    check("an unknown generator is refused", any("générateur inconnu" in p for p in broken(
+        edit_data=lambda t: t.replace('generator = "bitcoin-issuance"', 'generator = "devinette"'))))
+    check("a chart on an unknown column is refused", any("absente du jeu" in p for p in broken(
+        edit_charts=lambda t: t.replace('column = "offre"', 'column = "prix"'))))
+    check("a chart on an unknown dataset is refused", any("jeu de données introuvable" in p for p in broken(
+        edit_charts=lambda t: t.replace('dataset = "btc-emission"', 'dataset = "inconnu"', 1))))
+    csv_entry = ('\n[[dataset]]\nid = "ipc-test"\ntitle = "Test"\nkind = "file"\nfile = "ipc.csv"\n'
+                 'source = "Institut de test"\nurl = "https://example.org"\nlicense = "Licence ouverte"\n'
+                 'retrieved = 2026-10-17\ncolumns = ["mois", "indice"]\n')
+    check("a file dataset whose CSV is missing is refused", any("fichier de données introuvable" in p for p in broken(
+        edit_data=lambda t: t + csv_entry)))
+    check("a file dataset with its CSV loads", not broken(edit_data=lambda t: t + csv_entry,
+                                                         files={"ipc.csv": "mois,indice\n2026-01,100\n2026-02,100.4\n"}))
+    check("a declared column absent from the CSV is refused", any("colonne(s) absente(s)" in p for p in broken(
+        edit_data=lambda t: t + csv_entry, files={"ipc.csv": "mois,valeur\n2026-01,100\n"})))
+    synthetic = '\n[[dataset]]\nid = "exemple"\ntitle = "Exemple"\nkind = "file"\nfile = "ex.csv"\nsynthetic = true\n'
+    check("a synthetic example needs no source, and says so", not broken(
+        edit_data=lambda t: t + synthetic, files={"ex.csv": "x,y\n1,2\n"}))
+    root = _copy_tree()
+    f = root / "data" / "datasets.toml"
+    f.write_text(f.read_text() + synthetic)
+    (root / "data" / "ex.csv").write_text("x,y\n1,2\n")
+    check("…and its credit line says it is synthetic",
+          C.load_catalog(root).dataset("exemple").credit.startswith("Exemple synthétique"))
+    root = _copy_tree()
+    lesson = root / "courses" / "premiers-pas" / "lessons" / "budget-de-risque.md"
+    lesson.write_text(lesson.read_text() + "\n::: chart absent\nLégende.\n:::\n")
+    check("a lesson pointing at an unknown chart is refused", any("graphique introuvable" in p for p in C.validate(root)))
+
+
+def test_access_levels():
+    """Public, member and premium, decided in one place."""
+    print("\nAccess levels")
+    from sensitor.academy import access as A
+    catalog = C.load_catalog()
+    lesson = next(l for c in catalog.courses.values() for l in c.lessons if l.access == C.MEMBER)
+    from dataclasses import replace
+    premium = replace(lesson, access=C.PREMIUM)
+    public = replace(lesson, access=C.PUBLIC)
+    check("public: anyone", A.can_read_lesson(public, None))
+    check("member: any account", not A.can_read_lesson(lesson, None) and A.can_read_lesson(lesson, "a@x.fr"))
+    check("premium: not a visitor", not A.can_read_lesson(premium, None, "pro"))
+    check("premium: not a free account", not A.can_read_lesson(premium, "a@x.fr", "free")
+          and not A.can_read_lesson(premium, "a@x.fr"))
+    check("premium: an account with the pro or premium tier", A.can_read_lesson(premium, "a@x.fr", "pro")
+          and A.can_read_lesson(premium, "a@x.fr", " Premium "))
+    check("the lock says what would unlock it",
+          A.lock_reason(C.PREMIUM, None) == A.SIGN_IN and A.lock_reason(C.PREMIUM, "a@x.fr", "free") == A.UPGRADE
+          and A.lock_reason(C.MEMBER, None) == A.SIGN_IN and A.lock_reason(C.PREMIUM, "a@x.fr", "pro") is None)
+    check("an unknown level opens nothing", not A.can_read_lesson(replace(lesson, access="vip"), "a@x.fr", "pro"))
+    check("no published content is premium yet", all(l.access != C.PREMIUM for c in catalog.courses.values()
+                                                     for l in c.lessons))
+    root = _copy_tree()
+    f = root / "courses" / "premiers-pas" / "lessons" / "budget-de-risque.md"
+    f.write_text(f.read_text().replace('access = "member"', 'access = "premium"'))
+    check("a lesson may declare premium", not C.validate(root))
+
+
 def test_risk_path_figures():
     """Path 5: every figure quoted in a lesson, exercise or quiz, recomputed."""
     print("\nPath 5 figures")
@@ -627,6 +762,37 @@ def test_validation_catches_mistakes():
                                                  'quiz = "inexistant"'))
     check("a lesson pointing at an unknown quiz",
           any("quiz « inexistant »" in p for p in C.validate(root)))
+
+    root = _copy_tree()
+    cur = root / "curriculum.toml"
+    cur.write_text(cur.read_text().replace('track = "trading"\nid = "bases-marches"',
+                                           'track = "inconnue"\nid = "bases-marches"'))
+    check("a path in an unknown track is refused", any("filière inconnue" in p for p in C.validate(root)))
+
+    root = _copy_tree()
+    cur = root / "curriculum.toml"
+    cur.write_text(cur.read_text().replace('id = "structure-price-action"\nnumber = 2',
+                                           'id = "structure-price-action"\nnumber = 1'))
+    check("two paths with one number in a track are refused",
+          any("en double dans une filière" in p for p in C.validate(root)))
+
+    root = _copy_tree()
+    cur = root / "curriculum.toml"
+    cur.write_text(cur.read_text().replace('track = "trading"\nid = "bases-marches"\nnumber = 1',
+                                           'track = "crypto"\nid = "bases-marches"\nnumber = 3'))
+    problems = C.validate(root)
+    check("a track that requires sources refuses lessons without them",
+          any("sources manquantes" in p for p in problems) and any("date de mise à jour manquante" in p for p in problems))
+    lessons = root / "courses" / "premiers-pas" / "lessons"
+    for f in lessons.glob("*.md"):
+        f.write_text(f.read_text().replace("+++\n", '+++\nupdated = 2026-10-17\nsources = ["Source de test"]\n', 1))
+    check("…and accepts them once sourced and dated",
+          not any("manquante" in p for p in C.validate(root)), str([p for p in C.validate(root) if "manquante" in p][:2]))
+
+    root = _copy_tree()
+    lesson = root / "courses" / "premiers-pas" / "lessons" / "budget-de-risque.md"
+    lesson.write_text(lesson.read_text().replace("+++\n", '+++\nupdated = "17/10/2026"\n', 1))
+    check("an update date in the wrong format is refused", any("date de mise à jour invalide" in p for p in C.validate(root)))
 
     root = _copy_tree()
     (root / "resources" / "checklist-avant-trade.md").unlink()
@@ -1041,6 +1207,9 @@ def main() -> int:
     test_zone_figures()
     test_psychology_figures()
     test_backtest_figures()
+    test_bitcoin_issuance()
+    test_datasets_and_charts()
+    test_access_levels()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

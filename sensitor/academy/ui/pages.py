@@ -13,6 +13,7 @@ import json
 
 import streamlit as st
 
+from ...platform import spaces
 from ...platform.ui import runtime as rt
 from ...platform.ui.components import (crumbs, date_fr, duration, esc, footer, hexmark, html,
                                        icon, note, notice, numeral, page_header, pill,
@@ -43,6 +44,7 @@ class Member:
     def __init__(self, email: str | None):
         store = rt.get_store()
         self.email = email
+        self.tier = rt.tier(email)
         rows = store.completed_lessons(email) if email and store else []
         self.attempts = store.quiz_attempts(email, limit=10_000) if email and store else []
         self.completed = P.completed_by_course(rows)
@@ -57,7 +59,7 @@ class Member:
 def lesson_state(lesson: Lesson, member: Member, progress: P.CourseProgress) -> str:
     if lesson.id in progress.completed:
         return "done"
-    if not access.can_read_lesson(lesson, member.email):
+    if not access.can_read_lesson(lesson, member.email, member.tier):
         return "locked"
     if progress.next_lesson and progress.next_lesson.id == lesson.id and member.email:
         return "current"
@@ -78,6 +80,8 @@ def lesson_row(lesson: Lesson, state: str, *, flush: bool = False, when: str = "
         badge = pill(f"Terminée{' · ' + when if when else ''}", "done", "check")
     elif lesson.is_public:
         badge = pill("Libre", "free")
+    elif lesson.access == "premium":
+        badge = pill("Premium", "member", "lock")
     else:
         badge = pill("Membres", "member", "lock")
     return (f'<div class="sx-lesson{" flush" if flush else ""}{" locked" if state == "locked" else ""}">'
@@ -113,7 +117,7 @@ def course_feature(catalog: Catalog, course: Course, *, key: str) -> None:
     path = catalog.path(course.path_id)
     tap(key,
         f'<div class="sx-feature"><div class="numeral">{numeral(path.number if path else 1)}</div>'
-        f'<div><div class="sx-kicker">Parcours {path.number if path else ""} · {esc(path.title if path else "")}'
+        f'<div><div class="sx-kicker">{esc(path.label) if path else "Parcours"} · {esc(path.title if path else "")}'
         f'</div><div class="t">{esc(course.title)}</div><div class="s">{esc(course.summary)}</div>'
         f'<div class="sx-meta"><span><b>{len(course.modules)}</b> chapitres</span><span>'
         f'<b>{len(course.lessons)}</b> leçons</span><span>{esc(duration(course.duration_minutes))}'
@@ -132,9 +136,9 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
     courses = catalog.available_courses()
     left, right = st.columns([1.35, 1], gap="large", vertical_alignment="bottom")
     with left:
-        page_header("Espace I · Academy", "Construire une <em>méthode</em>, leçon après leçon.",
-                    "Des parcours ordonnés, des bases jusqu'au processus de trading discipliné. "
-                    "Chaque parcours ouvre lorsque son contenu est rédigé, relu et testé.",
+        page_header(f"Espace {spaces.space('academy').numeral} · Academy", "Comprendre la <em>monnaie</em>, Bitcoin et les marchés.",
+                    "Quatre filières, de la monnaie et de Bitcoin jusqu'au trading discipliné. "
+                    "Chaque parcours ouvre lorsque son contenu est rédigé, sourcé, relu et testé.",
                     display=True)
     with right:
         step = P.next_step(catalog, member.completed, member.passed)
@@ -150,15 +154,25 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
             progress = member.progress(course)
             html(f'<div style="margin-top:.8rem">{progress_bar(progress.fraction, f"{progress.done} / {progress.total} leçons terminées")}</div>')
 
+    total = len(catalog.paths)
     section(2, "Le programme complet",
-            "Dix parcours. Ceux qui sont en préparation sont annoncés ici et ne sont pas lisibles.")
-    cells = []
-    for path in catalog.paths:
-        status = pill("Ouvert", "live") if path.is_available else pill("En préparation", "soon")
-        cells.append(f'<div><span class="n">{path.number:02d} · {numeral(path.number)}</span>'
-                     f'<div class="t">{esc(path.title)}</div><div class="x">{esc(path.summary)}</div>'
-                     f'{status}</div>')
-    html(f'<div class="sx-index">{"".join(cells)}</div>')
+            f"{total} parcours en {len(catalog.tracks) or 1} filières. Ceux qui sont en préparation "
+            "sont annoncés ici et ne sont pas lisibles.")
+    groups = [(t.title, t.summary, catalog.paths_in(t.id)) for t in catalog.tracks] or [("", "", list(catalog.paths))]
+    for title, summary, paths in groups:
+        if not paths:
+            continue
+        if title:
+            opened = sum(1 for p in paths if p.is_available)
+            html(f'<div class="sx-track"><div class="sx-kicker">{esc(title)} · {opened} sur {len(paths)} '
+                 f'ouvert{"s" if opened > 1 else ""}</div><p>{esc(summary)}</p></div>')
+        cells = []
+        for path in paths:
+            status = pill("Ouvert", "live") if path.is_available else pill("En préparation", "soon")
+            cells.append(f'<div><span class="n">{path.number:02d} · {numeral(path.number)}</span>'
+                         f'<div class="t">{esc(path.title)}</div><div class="x">{esc(path.summary)}</div>'
+                         f'{status}</div>')
+        html(f'<div class="sx-index">{"".join(cells)}</div>')
 
     section(3, "Les formats", "Ce qui est disponible aujourd'hui, et ce qui ne l'est pas encore.")
     rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(label)}</span>'
@@ -184,7 +198,7 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
     crumbs("Sensitor", "Academy", course.title)
     left, right = st.columns([1.4, 1], gap="large", vertical_alignment="bottom")
     with left:
-        kicker = f"Parcours {path.number:02d} · {esc(path.title)}" if path else "Parcours"
+        kicker = f"{esc(path.label)} · {esc(path.title)}" if path else "Parcours"
         meta = [f"{icon('clock')}<b>{esc(duration(course.duration_minutes))}</b>",
                 f"<b>{len(course.modules)}</b> chapitres", f"<b>{len(course.lessons)}</b> leçons",
                 f"niveau {esc(course.level_label.lower())}"]
@@ -299,7 +313,9 @@ def lesson_page(catalog: Catalog, email: str | None, route: dict) -> None:
                         lesson=item.id)
         done = lesson.id in progress.completed
         state = (pill("Terminée", "done", "check") if done else
-                 pill("Accès libre", "free") if lesson.is_public else pill("Membres", "member", "lock"))
+                 pill("Accès libre", "free") if lesson.is_public else
+                 pill("Premium", "member", "lock") if lesson.access == "premium" else
+                 pill("Membres", "member", "lock"))
         chapter = f"Chapitre {numeral(module.number)} · {esc(module.title)}" if module else ""
         html(f'<div class="sx-lesson-head"><div class="no">{lesson.number:02d}</div><div>'
              f'<div class="sx-kicker">{chapter}</div><h1 class="sx-title">{esc(lesson.title)}</h1>'
@@ -307,10 +323,22 @@ def lesson_page(catalog: Catalog, email: str | None, route: dict) -> None:
              f'<div class="sx-meta"><span>{icon("clock")}{esc(duration(lesson.duration_minutes))} de '
              f'lecture</span><span>{state}</span>'
              + (f'<span>quiz · {len(catalog.quiz(lesson.quiz_id).questions)} questions</span>'
-                if lesson.quiz_id else "") + '</div>')
+                if lesson.quiz_id else "")
+             + (f'<span>mis à jour le {esc(date_fr(lesson.updated))}</span>' if lesson.updated else "")
+             + '</div>')
 
         lesson_view.render_objectives(lesson)
-        if not access.can_read_lesson(lesson, email):
+        reason = access.lock_reason(lesson.access, email, rt.tier(email))
+        if reason == access.UPGRADE:
+            with st.container(key="navy_locked"):
+                html('<div class="sx-kicker on-navy">Leçon Premium</div>'
+                     '<h2 class="sx-h3 on-navy">Cette leçon fait partie de l\'Academy Premium.</h2>'
+                     '<p>Votre compte donne accès à toutes les leçons gratuites, aux quiz et à votre '
+                     'progression. L\'offre Premium est en préparation : aucun paiement n\'est demandé '
+                     'aujourd\'hui.</p>')
+            footer()
+            return
+        if reason == access.SIGN_IN:
             with st.container(key="navy_locked"):
                 html('<div class="sx-kicker on-navy">Leçon réservée aux membres</div>'
                      '<h2 class="sx-h3 on-navy">Créez un compte gratuit pour lire la suite.</h2>'
@@ -409,7 +437,7 @@ def quiz_page(catalog: Catalog, email: str | None, route: dict) -> None:
 
 def lab(catalog: Catalog, email: str | None, route: dict) -> None:
     crumbs("Sensitor", "Trading Lab")
-    page_header("Espace IV · Trading Lab", "S'exercer <em>sans capital réel</em>.",
+    page_header(f"Espace {spaces.space('lab').numeral} · Trading Lab", "S'exercer <em>sans capital réel</em>.",
                 "Les outils et exercices du programme, réunis au même endroit. Chaque calcul est "
                 "celui des leçons, avec ses hypothèses écrites.", display=True)
 
@@ -444,7 +472,6 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
         note("Aucun exercice publié pour l'instant.")
 
     section(4, "En préparation", "Annoncé pour le Trading Lab, pas encore disponible.")
-    from ...platform import spaces
     rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(p)}</span>'
                    f'{pill("Prévu", "soon")}</li>'
                    for i, p in enumerate(spaces.space("lab").planned, start=1))
@@ -458,7 +485,7 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
 
 def progress_page(catalog: Catalog, email: str | None, route: dict) -> None:
     crumbs("Sensitor", "Progression")
-    page_header("Espace VII · Progression", "Mesurer ce que l'on <em>apprend</em>.",
+    page_header(f"Espace {spaces.space('progress').numeral} · Progression", "Mesurer ce que l'on <em>apprend</em>.",
                 "Vos leçons terminées, vos quiz et les notions à revoir, calculés à partir de ce "
                 "que vous avez réellement fait.")
     if not email:

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from ...platform import spaces
 from ...platform.ui import runtime as rt
 from ...platform.ui.components import (crumbs, esc, footer, hexmark, html, icon, md, note,
                                        page_header, pill, section, tap)
@@ -39,7 +40,7 @@ def book_row(resource: Resource, *, key: str, index: int = 0, compact: bool = Fa
 
 def library(catalog: Catalog, email: str | None, route: dict) -> None:
     crumbs("Sensitor", "Bibliothèque")
-    page_header("Espace II · Bibliothèque", "Des ressources à garder <em>sous la main</em>.",
+    page_header(f"Espace {spaces.space('library').numeral} · Bibliothèque", "Des ressources à garder <em>sous la main</em>.",
                 "Fiches de révision et checklists, rédigées pour accompagner les parcours. Chaque "
                 "document listé existe réellement et se télécharge.", display=True)
     resources = list(catalog.resources.values())
@@ -92,11 +93,11 @@ def resource_page(catalog: Catalog, email: str | None, route: dict) -> None:
     left, right = st.columns([0.8, 1.7], gap="large")
     with left:
         html(_cover(resource, index, big=True))
-        allowed = access.can_download(resource, email)
+        allowed = access.can_download(resource, email, rt.tier(email))
         html('<dl class="sx-facts" style="margin-top:2rem">'
              f'<div><dt>Type</dt><dd>{esc(resource.kind_label)}</dd></div>'
              f'<div><dt>Thème</dt><dd>{esc(resource.category)}</dd></div>'
-             f'<div><dt>Accès</dt><dd>{"Libre" if resource.access == "public" else "Membres"}</dd></div>'
+             f'<div><dt>Accès</dt><dd>{ {"public": "Libre", "premium": "Premium"}.get(resource.access, "Membres") }</dd></div>'
              f'<div><dt>Format</dt><dd>{"PDF et texte" if resource.pdf else "Texte (Markdown)"}</dd></div>'
              f'<div><dt>Auteur</dt><dd>{esc(resource.author)}</dd></div></dl>')
         if allowed:

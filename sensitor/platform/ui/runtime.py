@@ -88,8 +88,20 @@ def get_auth():
 
 
 def catalog() -> Catalog:
-    """Content is the same for everyone; the cache holds no user data."""
-    return cached_catalog()
+    """
+    Content is the same for everyone; the cache holds no user data.
+
+    `SENSITOR_ACADEMY_CONTENT` points the app at another content tree. It exists
+    for the tests, which render fixture lessons; a deployment leaves it unset.
+    """
+    return cached_catalog(os.getenv("SENSITOR_ACADEMY_CONTENT") or None)
+
+
+def tier(email: str | None) -> str:
+    """The signed-in member's tier, read fresh from the store; « free » for a visitor."""
+    store = get_store()
+    user = store.get_user(email) if email and store is not None else None
+    return str((user or {}).get("tier") or "free")
 
 
 def _cookie_token() -> str | None:

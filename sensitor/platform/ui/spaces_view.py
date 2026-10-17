@@ -47,28 +47,49 @@ def preparing(catalog, email, route) -> None:
     footer()
 
 
-def tools(catalog, email, route) -> None:
-    space = spaces.space("tools")
+def _separate(space_id: str, title: str, intro: str, items: tuple[str, ...], page: str,
+              button: str) -> None:
+    """A space that lives in the analytics application, reachable by link when configured."""
+    space = spaces.space(space_id)
     _header(space)
     url = rt.tools_url()
     html(f'<div style="margin-top:1.2rem">{pill(space.status_label, "sep", "external")}</div>')
-    section(1, "Une application à part, pour l'instant",
-            "L'analyse de portefeuille et le journal de trading existent et fonctionnent, dans une "
-            "application distincte. Ils rejoindront cet espace membre dans une étape ultérieure.")
-    html('<ul class="sx-plan">'
-         '<li><span class="n">01</span><span class="x">Analyse de portefeuille : performance, '
-         'risque, allocation, scénarios historiques.</span><span></span></li>'
-         '<li><span class="n">02</span><span class="x">Journal de trading : import MetaTrader 5 '
-         'ou saisie, statistiques par setup et par session.</span><span></span></li>'
-         '<li><span class="n">03</span><span class="x">Les mêmes comptes : l\'adresse et le mot '
-         'de passe utilisés ici fonctionnent aussi là-bas.</span><span></span></li></ul>')
+    section(1, title, intro)
+    rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(x)}</span><span></span></li>'
+                   for i, x in enumerate(items, start=1))
+    html(f'<ul class="sx-plan">{rows}</ul>')
     if url:
-        st.link_button("Ouvrir l'application d'analyse", url)
+        st.link_button(button, f"{url.rstrip('/')}/?page={page}")
     else:
         notice("Lien non configuré",
                "L'adresse de l'application d'analyse n'est pas renseignée pour ce déploiement "
                "(variable SENSITOR_TOOLS_URL).", "info")
     footer()
+
+
+def tools(catalog, email, route) -> None:
+    _separate("tools", "Une application à part, pour l'instant",
+              "L'analyse de portefeuille existe et fonctionne, dans une application distincte. Elle "
+              "rejoindra cet espace membre dans une étape ultérieure.",
+              ("Performance, allocation et contributions, avec Bitcoin et les cryptomonnaies parmi les "
+               "actifs suivis.",
+               "Risque : volatilité, drawdown, VaR, corrélations, concentration et diversification.",
+               "Stress tests historiques, dont l'hiver crypto de 2022, et chocs personnalisés.",
+               "Simulateur Monte Carlo et frontière efficiente.",
+               "Les mêmes comptes : l'adresse et le mot de passe utilisés ici fonctionnent aussi là-bas."),
+              "overview", "Ouvrir l'analyse de portefeuille")
+
+
+def journal(catalog, email, route) -> None:
+    _separate("journal", "Le journal du trader, dans l'application d'analyse",
+              "Le journal de trading existe et fonctionne, dans la même application que le "
+              "portefeuille. Il rejoindra cet espace membre dans une étape ultérieure.",
+              ("Saisie des trades ou synchronisation MetaTrader 5, avec setups, émotions et discipline.",
+               "Performance en R, espérance, profit factor, drawdown et séries.",
+               "Analyse par setup, actif, session, jour et unité de temps.",
+               "Risque, discipline et psychologie, puis revue hebdomadaire exportable.",
+               "Les mêmes comptes : l'adresse et le mot de passe utilisés ici fonctionnent aussi là-bas."),
+              "trading_overview", "Ouvrir le journal de trading")
 
 
 def space_cards(*, key: str, exclude: tuple[str, ...] = ()) -> None:

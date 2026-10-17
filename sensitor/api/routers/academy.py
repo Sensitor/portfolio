@@ -16,6 +16,8 @@ No calculation lives here. Scoring is `academy.quiz`, progress is
 
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse, Response
 from pydantic import BaseModel, Field
@@ -30,7 +32,8 @@ router = APIRouter(prefix="/academy", tags=["academy"])
 
 
 def get_catalog() -> Catalog:
-    return cached_catalog()
+    # Same override as the Streamlit runtime: tests point it at a fixture tree.
+    return cached_catalog(os.getenv("SENSITOR_ACADEMY_CONTENT") or None)
 
 
 def _not_found(what: str) -> HTTPException:
@@ -40,6 +43,18 @@ def _not_found(what: str) -> HTTPException:
 _SIGN_IN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                          detail="sign in to read member content",
                          headers={"WWW-Authenticate": "Bearer"})
+_PREMIUM = HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                         detail="premium content: this account's tier does not include it")
+
+
+def _tier(store: Store, email: str | None) -> str | None:
+    user = store.get_user(email) if email else None
+    return (user or {}).get("tier")
+
+
+def _deny(email: str | None) -> HTTPException:
+    """401 to sign in, 403 when signed in and the content is premium."""
+    return _PREMIUM if email else _SIGN_IN
 
 
 class AttemptRequest(BaseModel):
@@ -100,10 +115,10 @@ def course(course_id: str, catalog: Catalog = Depends(get_catalog),
 
 @router.get("/courses/{course_id}/lessons/{lesson_id}")
 def lesson(course_id: str, lesson_id: str, catalog: Catalog = Depends(get_catalog),
-           email: str | None = Depends(optional_user)) -> dict:
+           email: str | None = Depends(optional_user), store: Store = Depends(get_store)) -> dict:
     found = _lesson_or_404(catalog, course_id, lesson_id)
-    if not access.can_read_lesson(found, email):
-        raise _SIGN_IN
+    if not access.can_read_lesson(found, email, _tier(store, email)):
+        raise _deny(email)
     return views.lesson_view(catalog, found)
 
 
@@ -138,10 +153,10 @@ def _quiz_or_404(catalog: Catalog, quiz_id: str):
 
 @router.get("/quizzes/{quiz_id}")
 def get_quiz(quiz_id: str, catalog: Catalog = Depends(get_catalog),
-             email: str | None = Depends(optional_user)) -> dict:
+             email: str | None = Depends(optional_user), store: Store = Depends(get_store)) -> dict:
     found = _quiz_or_404(catalog, quiz_id)
-    if not access.can_take_quiz(catalog, found, email):
-        raise _SIGN_IN
+    if not access.can_take_quiz(catalog, found, email, _tier(store, email)):
+        raise _deny(email)
     return Q.public_view(found)
 
 
@@ -157,8 +172,8 @@ def submit_attempt(quiz_id: str, body: AttemptRequest,
     graded and forgotten. `stored` says which happened.
     """
     found = _quiz_or_404(catalog, quiz_id)
-    if not access.can_take_quiz(catalog, found, email):
-        raise _SIGN_IN
+    if not access.can_take_quiz(catalog, found, email, _tier(store, email)):
+        raise _deny(email)
     try:
         result = Q.grade(found, body.responses)
     except ValueError as exc:
@@ -212,14 +227,14 @@ def resources(catalog: Catalog = Depends(get_catalog)) -> list[dict]:
 
 @router.get("/resources/{resource_id}/download")
 def download(resource_id: str, catalog: Catalog = Depends(get_catalog),
-             email: str | None = Depends(optional_user),
+             email: str | None = Depends(optional_user), store: Store = Depends(get_store),
              format: str = Query("md", pattern="^(md|pdf)$")) -> Response:
     """The resource file: Markdown by default, `?format=pdf` when a PDF exists."""
     found = catalog.resource(resource_id)
     if found is None:
         raise _not_found("resource")
-    if not access.can_download(found, email):
-        raise _SIGN_IN
+    if not access.can_download(found, email, _tier(store, email)):
+        raise _deny(email)
     if format == "pdf":
         if not found.pdf:
             raise _not_found("pdf for this resource")

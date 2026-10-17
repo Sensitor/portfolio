@@ -81,6 +81,7 @@ ROUTES = [
     {"page": "market"},
     {"page": "community"},
     {"page": "tools"},
+    {"page": "journal"},
     {"page": "reset"},
     {"page": "reset", "token": "invalide"},
     {"page": "verify", "token": "invalide"},
@@ -119,6 +120,81 @@ ROUTES += [r for r in _catalog_routes() if r not in ROUTES]
 
 def label(route: dict) -> str:
     return "/".join(str(v) for v in route.values())
+
+
+def fixture_tree() -> str:
+    """
+    The real content plus one opened Bitcoin-track course: a sourced public
+    lesson using every new block (update date, opinion, debate, chart) and a
+    premium lesson. Rendered through SENSITOR_ACADEMY_CONTENT, so the real
+    curriculum is never touched.
+    """
+    import shutil
+    from pathlib import Path
+    from sensitor.academy.content import CONTENT_ROOT
+    root = Path(tempfile.mkdtemp(prefix="academy-fixture-")) / "academy"
+    shutil.copytree(CONTENT_ROOT, root)
+    cur = root / "curriculum.toml"
+    cur.write_text(cur.read_text().replace(
+        'status = "planned"\ntopics = ["La monnaie et sa création"',
+        'status = "published"\ncourses = ["fixture-monnaie"]\ntopics = ["La monnaie et sa création"'))
+    course = root / "courses" / "fixture-monnaie"
+    (course / "lessons").mkdir(parents=True)
+    (course / "course.toml").write_text(
+        'id = "fixture-monnaie"\npath = "monnaie-inflation"\ntitle = "Cours de démonstration"\n'
+        'summary = "Un cours de test."\nlevel = "debutant"\nstatus = "published"\nversion = 1\n'
+        'objectives = ["Tester."]\n\n[[module]]\nid = "m1"\ntitle = "Module"\n'
+        'lessons = ["lecon-sourcee", "lecon-premium"]\n')
+    body = ('\n## Une section\n\nDu texte.\n\n::: callout opinion\nJe pense que Bitcoin a sa place dans un '
+            'patrimoine.\n:::\n\n::: callout debate\nLes écoles de pensée divergent.\n:::\n\n'
+            '::: chart emission-bitcoin\nL\'offre de Bitcoin par époque.\n:::\n\n::: tool risk-calculator\n:::\n\n'
+            '::: callout recap\n- Retenir.\n:::\n')
+    head = ('+++\nid = "{id}"\ntitle = "{title}"\nsummary = "Résumé."\nduration_minutes = 5\n'
+            'access = "{access}"\nstatus = "published"\nversion = 1\nobjectives = ["Comprendre."]\n'
+            'updated = 2026-10-17\nsources = ["Nakamoto, S. (2008). Bitcoin: A Peer-to-Peer Electronic Cash System."]\n+++\n')
+    (course / "lessons" / "lecon-sourcee.md").write_text(
+        head.format(id="lecon-sourcee", title="Leçon sourcée", access="public") + body)
+    (course / "lessons" / "lecon-premium.md").write_text(
+        head.format(id="lecon-premium", title="Leçon premium", access="premium")
+        + "\nLe contenu premium visible.\n\n::: tool risk-calculator\n:::\n\n::: callout recap\n- Retenir.\n:::\n")
+    return str(root)
+
+
+def test_new_tracks(alice: str) -> None:
+    print("\nNew tracks: sourced lessons, charts, premium")
+    os.environ["SENSITOR_ACADEMY_CONTENT"] = fixture_tree()
+    try:
+        home = run({"page": "academy"})
+        body = text(home)
+        check("the programme is grouped by track, Bitcoin first",
+              body.index("Monnaie et Bitcoin · 1 sur 2") < body.index("Trading · 7 sur 10"))
+        lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
+        body = text(lesson)
+        check("the sourced lesson renders", not lesson.exception, error(lesson))
+        check("its review date is shown", "mis à jour le 17 octobre 2026" in body)
+        check("an opinion is framed as the founder's", "Opinion du fondateur" in body)
+        check("a debate has its own frame", "Débat" in body)
+        check("the chart is drawn", len(lesson.get("plotly_chart")) == 1)
+        check("its source line is printed under it", "Calcul : règles du protocole Bitcoin" in body
+              and "licence : calcul Sensitor" in body)
+        check("its sources are listed", "Nakamoto, S. (2008)" in body)
+        locked = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-premium"})
+        check("premium, visitor: asked to sign in", "Créez un compte gratuit" in text(locked)
+              and "Le contenu premium visible" not in text(locked))
+        free = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-premium"}, alice)
+        check("premium, free member: told it is premium, nothing to pay",
+              "Leçon Premium" in text(free) and "aucun paiement" in text(free)
+              and "Le contenu premium visible" not in text(free))
+        pro = token("pro@example.com")
+        store().upsert_user("pro@example.com", tier="pro")
+        opened = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-premium"}, pro)
+        check("premium, pro member: the lesson opens", "Le contenu premium visible" in text(opened)
+              and not opened.exception, error(opened))
+        course = run({"page": "course", "course": "fixture-monnaie"})
+        check("the outline marks the premium lesson", "Premium" in text(course))
+        check("the course names its track and number", "Monnaie et Bitcoin · Parcours 01" in text(course))
+    finally:
+        os.environ.pop("SENSITOR_ACADEMY_CONTENT", None)
 
 
 def main() -> int:
@@ -246,18 +322,39 @@ def main() -> int:
     check("then deletes the note", store().journal_entries("alice@example.com") == []
           and not page.exception, error(page))
 
+    test_new_tracks(alice)
+
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
-          "Construire une <em>méthode</em>" in text(old))
+          "Comprendre la <em>monnaie</em>" in text(old))
     for page in ("market", "community"):
         app = run({"page": page})
         body = text(app)
         check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)
         check(f"{page}: offers no input of any kind",
               not app.text_input and not app.radio and not app.checkbox and not app.text_area)
+    journal = run({"page": "journal"})
+    check("journal: describes the trading journal, no link without an address",
+          "Le journal du trader" in text(journal) and "Lien non configuré" in text(journal))
+    os.environ["SENSITOR_TOOLS_URL"] = "https://outils.example"
+    try:
+        linked = run({"page": "journal"})
+        check("journal: opens the trading side of the analytics app",
+              any(b.url == "https://outils.example/?page=trading_overview" for b in linked.get("link_button")))
+        linked = run({"page": "tools"})
+        check("tools: opens the portfolio side of the analytics app",
+              any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))
+    finally:
+        os.environ.pop("SENSITOR_TOOLS_URL", None)
+    shell = run({"page": "home"})
+    check("the brand reads Bitcoin, crypto, trading", "BITCOIN · CRYPTO · TRADING" in text(shell))
+    labels = [m.value for m in shell.sidebar.markdown]
+    check("the sidebar is grouped Apprendre, Investir, Trader, Échanger",
+          [g for g in ("APPRENDRE", "INVESTIR", "TRADER", "ÉCHANGER") if any(g in v for v in labels)]
+          == ["APPRENDRE", "INVESTIR", "TRADER", "ÉCHANGER"])
     tools = run({"page": "tools"})
     check("tools: no link when the address is not configured",
           "Lien non configuré" in text(tools))
@@ -267,7 +364,7 @@ def main() -> int:
           [l for l in sidebar if l in {s.label for s in spaces.SPACES}] == [s.label for s in spaces.SPACES],
           str(sidebar))
     unknown = run({"page": "page-inconnue"})
-    check("an unknown page falls back to the home page", "Comprendre le marché." in text(unknown))
+    check("an unknown page falls back to the home page", "Comprendre la monnaie." in text(unknown))
 
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:

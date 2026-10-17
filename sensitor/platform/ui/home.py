@@ -59,12 +59,12 @@ def _landing(catalog) -> None:
     with st.container(key="navy_hero"):
         left, right = st.columns([1.2, 0.8], vertical_alignment="center", gap="large")
         with left:
-            html('<div class="sx-kicker on-navy">Sensitor · Éducation au trading</div>'
-                 '<h1 class="sx-display on-navy">Comprendre le marché.<br><em>Maîtriser ses '
-                 'décisions.</em></h1><p class="sx-lead on-navy">Un espace de formation unique : '
-                 'des parcours structurés, des leçons illustrées, des quiz corrigés et des outils '
-                 'pour apprendre à lire un marché, mesurer son risque et évaluer ses propres '
-                 'décisions.</p>')
+            html('<div class="sx-kicker on-navy">Sensitor · Bitcoin, crypto et trading</div>'
+                 '<h1 class="sx-display on-navy">Comprendre la monnaie.<br><em>Maîtriser ses '
+                 'décisions.</em></h1><p class="sx-lead on-navy">Comprendre la monnaie, l\'inflation '
+                 'et Bitcoin, analyser les cryptomonnaies et son portefeuille, apprendre le trading et '
+                 'documenter ses décisions : des parcours sourcés, des quiz corrigés, des simulateurs '
+                 'et des outils d\'analyse, sur un seul compte.</p>')
             b1, b2, _ = st.columns([1, 1, 0.6])
             with b1:
                 if course:
@@ -81,9 +81,9 @@ def _landing(catalog) -> None:
              f'programme, ouverts un à un</div></div></div>'
              f'<div class="sx-watermark">{brand.monogram_svg(320, color="#ffffff")}</div>')
 
-    section(1, "Un écosystème, un seul compte",
-            "Chaque espace partage la même identité et le même compte. L'Academy est ouverte ; "
-            "les autres espaces ouvrent quand ils sont réellement prêts.")
+    section(1, "Apprendre, investir, trader : un seul compte",
+            "Chaque espace partage la même identité et le même compte. Ceux qui ne sont pas encore "
+            "prêts le disent, et ouvrent quand ils le sont réellement.")
     space_cards(key="home_space")
 
     if course:
@@ -114,7 +114,7 @@ def _feature(catalog, course, *, key: str) -> None:
     path = catalog.path(course.path_id)
     tap(key,
         f'<div class="sx-feature"><div class="numeral">{numeral(path.number if path else 1)}</div>'
-        f'<div><div class="sx-kicker">Parcours {path.number if path else ""} · '
+        f'<div><div class="sx-kicker">{esc(path.label) if path else "Parcours"} · '
         f'{esc(path.title if path else "")}</div><div class="t">{esc(course.title)}</div>'
         f'<div class="s">{esc(course.summary)}</div><div class="sx-meta"><span>'
         f'<b>{len(course.lessons)}</b> leçons</span><span><b>{esc(duration(course.duration_minutes))}'

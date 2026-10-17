@@ -654,6 +654,20 @@ def resolve_tier(email: str) -> str:
 
 
 
+# Pages the Sensitor platform may open directly with `?page=` (its « Portefeuille
+# et risque » and « Journal de trading » spaces). Read once, when the session
+# starts; any other value is ignored and the app opens as before.
+DEEP_LINK_PAGES = {"overview", "trading_overview", "trading_journal"}
+
+
+def _requested_page() -> str | None:
+    try:
+        page = st.query_params.get("page")
+    except Exception:
+        return None
+    return page if page in DEEP_LINK_PAGES else None
+
+
 def init_session_state():
     defaults = {
         'authenticated': False,
@@ -664,7 +678,7 @@ def init_session_state():
         'session_token': "",
         'user_tier': 'free',
         'current_portfolio': None,
-        'page': "overview",
+        'page': _requested_page() or "overview",
         'language': "en",
         'selected_tickers': [],
         'weights': {},

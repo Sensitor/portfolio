@@ -1,0 +1,31 @@
+# Les graphiques interactifs que les leçons appellent avec « ::: chart <id> ».
+# Chaque graphique lit un jeu de données de data/datasets.toml ; sa source
+# s'affiche automatiquement en dessous.
+
+[[chart]]
+id = "emission-bitcoin"
+dataset = "btc-emission"
+kind = "step"
+x = "date"
+x_label = "Début de l'époque"
+y_label = "BTC en circulation"
+highlight = "estimation"
+title = "L'offre de Bitcoin, époque par époque"
+
+[[chart.series]]
+column = "offre"
+label = "Offre en circulation (BTC)"
+
+[[chart]]
+id = "recompense-bitcoin"
+dataset = "btc-emission"
+kind = "bar"
+x = "date"
+x_label = "Début de l'époque"
+y_label = "BTC créés par bloc"
+highlight = "estimation"
+title = "La récompense de bloc, divisée par deux tous les 210 000 blocs"
+
+[[chart.series]]
+column = "recompense"
+label = "Récompense par bloc (BTC)"

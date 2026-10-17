@@ -1,0 +1,22 @@
+# Les données des graphiques de l'Academy.
+#
+# Chaque jeu de données dit d'où il vient, sous quelle licence et à quelle date
+# il a été récupéré ou calculé. Le chargeur refuse un jeu sans ces informations,
+# et la ligne de source affichée sous chaque graphique en est tirée.
+#
+# kind = "file"     : un fichier CSV de ce dossier, tel que récupéré.
+# kind = "computed" : calculé par un générateur Python testé (sensitor/academy).
+# synthetic = true  : exemple construit pour une leçon, signalé comme tel.
+
+[[dataset]]
+id = "btc-emission"
+title = "Émission de Bitcoin par époque de halving"
+kind = "computed"
+generator = "bitcoin-issuance"
+source = "règles du protocole Bitcoin (récompense initiale de 50 BTC, divisée par deux tous les 210 000 blocs, arrondie au satoshi) ; dates des halvings passés relevées sur la chaîne, dates futures estimées à 10 minutes par bloc"
+url = "https://bitcoin.org/bitcoin.pdf"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-17
+unit = "BTC"
+columns = ["annee", "date", "recompense", "offre", "part", "estimation"]
+notes = "Les dates à partir de 2028 sont des estimations : la durée réelle d'une époque dépend du rythme de production des blocs."

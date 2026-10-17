@@ -19,9 +19,9 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 10 paths declared; **paths 1 to 7 published**, 3 marked « en préparation » and not clickable |
+| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Trading paths 1 to 7 published**, the other 9 marked « en préparation » and not clickable |
 | Courses | « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap), 29 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 29 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
 | Quizzes | 43 knowledge checks (immediate feedback) + 7 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
 | Exercises | 15 numeric exercises (EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
 | Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
@@ -91,13 +91,20 @@ database stores only what members do with the content.
 
 1. Add or edit a lesson under `content/academy/courses/<course>/lessons/`. The
    file name is the lesson id. Front matter fields: `id`, `title`, `summary`,
-   `duration_minutes`, `access` (`public` / `member`), `status` (`draft` /
-   `published`), `version`, `objectives`, `quiz`, `resources`, `sources`.
+   `duration_minutes`, `access` (`public` / `member` / `premium`), `status`
+   (`draft` / `published`), `version`, `objectives`, `quiz`, `resources`,
+   `sources` (a list of texts), `updated` (the date of the last substantive
+   review, `2026-10-17`, shown to readers as « mis à jour le … »).
+
+   In a track declared with `require_sources = true` in `curriculum.toml`
+   (Monnaie et Bitcoin, Crypto, Investissement), the validator refuses a
+   published lesson without sources or without `updated`.
 2. List it in the course's `course.toml`, in the module where it belongs.
 3. Body directives:
 
    ```
    ::: callout definition "Titre"      kinds: note definition example warning mistake recap method
+                                       opinion (« Opinion du fondateur ») debate (« Débat »)
    …Markdown…
    :::
    ::: figure mon-schema.svg           file in content/academy/figures/
@@ -110,7 +117,14 @@ database stores only what members do with the content.
    :::
    ::: tool risk-calculator
    :::
+   ::: chart emission-bitcoin          id from content/academy/charts.toml
+   Légende.
+   :::
    ```
+
+   **Opinions and debates.** A founder's conviction goes in `::: callout opinion`,
+   a contested theory in `::: callout debate`; facts stay in the body. The two
+   frames look different on purpose, so a reader always knows which is which.
 
    Write dollar amounts normally (`100 $`): the renderer escapes `$` so it is
    never read as LaTeX. Formulas go in `::: formula`.
@@ -134,6 +148,27 @@ The script (a development tool: Playwright, Chromium, network for the fonts)
 writes the PDFs and `pdf-manifest.toml`, the SHA-256 of each source. The
 validator and the tests refuse a PDF whose source has changed since it was built.
 
+**Tracks and paths.** `curriculum.toml` starts with the `[[track]]` blocks, in
+display order, then the `[[path]]` blocks. Each path names its `track` and its
+`number` within it; the label shown everywhere is « Trading · Parcours 04 ».
+Progress is stored per course and lesson, never per path number, so moving or
+renumbering a path changes nothing for members.
+
+**Data and charts.** Charts never embed numbers: they read a dataset declared
+in `content/academy/data/datasets.toml`, either a CSV file of that folder (as
+retrieved) or a generator in `sensitor/academy` (computed, tested). Every
+dataset carries `source`, `url`, `license` and `retrieved`; the loader refuses
+one without them, and the source line under each chart is generated from them.
+A constructed example sets `synthetic = true` and is labelled « Exemple
+synthétique ». `content/academy/charts.toml` then says what to draw: dataset,
+`x`, series, kind (`line`, `area`, `bar`, `step`), axis titles, and an optional
+boolean column (`highlight`) whose rows are drawn as estimates. Charts are
+Plotly figures in the design system (`sensitor/academy/ui/chart_view.py`).
+
+The first dataset is Bitcoin's issuance, computed from the protocol rules in
+`sensitor/academy/bitcoin.py` (20 999 999,9769 BTC in total; past halving dates
+recorded, future ones estimated and flagged).
+
 **Not built:** an in-app editor. Until there is one, the workflow above is the
 CMS. Nothing in the UI pretends otherwise.
 
@@ -142,12 +177,14 @@ CMS. Nothing in the UI pretends otherwise.
 ## 4. Access and publication
 
 * `status` answers *is it finished?* Drafts are absent from the catalogue.
-* `access` answers *who may read it?* `public` — anyone; `member` — any signed-in
-  account. Enforced server-side in both the Streamlit app and the API through
-  `sensitor/academy/access.py`.
-* There is **no paid tier, no VIP rule, no payment provider and no Telegram
-  link**. These are deliberately deferred. When the access model is agreed it
-  is added to `access.py`; nothing else decides access.
+* `access` answers *who may read it?* `public`: anyone; `member`: any signed-in
+  account; `premium`: a signed-in account whose `users.tier` is `pro` or
+  `premium`. Enforced server-side in both the Streamlit app and the API through
+  `sensitor/academy/access.py` (the API answers 401 without an account, 403
+  without the tier). A quiz follows the access of its lesson.
+* There is **no payment provider, no VIP rule and no Telegram link**: the tier
+  is set by hand until there is demand for an offer, and no content is premium
+  today. A premium lesson tells a free member so, and asks for no payment.
 * The answer key never leaves the server before a submission: the API's
   `GET /academy/quizzes/{id}` omits `correct` and the explanations.
 
@@ -179,10 +216,10 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 612 checks — content, validation, quiz, risk, progress, store
-python tests/test_academy_api.py   #  86 checks — HTTP access policy, isolation, no answer key, journal
-python tests/test_academy_app.py   # 221 checks — every page and space renders, locking, writes per member
-python tests/test_platform.py      #  73 checks — spaces registry, journal rules, renderers, brand asset
+python tests/test_academy.py       # 662 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy_api.py   #  92 checks — HTTP access policy, isolation, no answer key, journal
+python tests/test_academy_app.py   # 241 checks — every page and space renders, locking, writes per member
+python tests/test_platform.py      #  74 checks — spaces registry, journal rules, renderers, brand asset
 python tests/test_accounts.py      #  42 checks — reset, verification, e-mail, export, v8 and v9 upgrades
 python -m sensitor.academy.validate
 ```

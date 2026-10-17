@@ -17,7 +17,8 @@ from .risk import RiskPlan
 
 def path_view(path: LearningPath) -> dict:
     return {
-        "id": path.id, "number": path.number, "title": path.title,
+        "id": path.id, "number": path.number, "track": path.track, "label": path.label,
+        "title": path.title,
         "summary": path.summary, "status": path.status,
         "available": path.is_available, "topics": list(path.topics),
         "courses": [course_summary(c) for c in path.courses],

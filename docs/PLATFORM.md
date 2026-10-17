@@ -26,7 +26,7 @@ place, and each one is reused as it was:
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
-| `portfolio_optimizer_saas.py` | untouched; linked as the « Outils et portefeuille » space |
+| `portfolio_optimizer_saas.py` | kept as it is; linked as the « Portefeuille et risque » and « Journal de trading » spaces |
 
 What moved:
 
@@ -48,16 +48,23 @@ Old URLs keep working: `?page=paths` opens the Academy home.
 `tests/test_platform.py`. The sidebar, the home page's space map and the router
 are all built from it.
 
-| | Space | Status | Pages |
-|---|---|---|---|
-| I | Academy | live | `academy`, `course`, `lesson`, `quiz` |
-| II | Bibliothèque | live | `library`, `resource` |
-| III | Psychologie et discipline | live | `psychology` (private reflection journal and session routine) |
-| IV | Trading Lab | live | `lab` (risk calculator, exercises) |
-| V | Salle des marchés | preparing | `market` |
-| VI | Communauté | preparing | `community` |
-| VII | Progression | live | `progress` |
-| VIII | Outils et portefeuille | separate | `tools` (link to the analytics app) |
+The sidebar groups them in four pillars, in this order: **Apprendre**, **Investir**,
+**Trader**, **Échanger**. The brand reads « Bitcoin · Crypto · Trading ».
+
+| | Space | Group | Status | Pages |
+|---|---|---|---|---|
+| I | Academy | Apprendre | live | `academy`, `course`, `lesson`, `quiz` |
+| II | Bibliothèque | Apprendre | live | `library`, `resource` |
+| III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
+| IV | Progression | Apprendre | live | `progress` |
+| V | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
+| VI | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
+| VII | Journal de trading | Trader | separate | `journal` (opens the analytics app on `?page=trading_overview`) |
+| VIII | Salle des marchés | Trader | preparing | `market` |
+| IX | Communauté | Échanger | preparing | `community` |
+
+The analytics app honours `?page=` only for `overview`, `trading_overview` and
+`trading_journal`, and only when a session starts; any other value is ignored.
 
 **A preparing space** has exactly one page, rendered by one template
 (`spaces_view.preparing`): its status, what is planned, what already exists

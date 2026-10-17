@@ -40,9 +40,13 @@ CALLOUT_KINDS = {
     "mistake": "Erreur fréquente",
     "recap": "Récapitulatif",
     "method": "Hypothèse de méthode",
+    # Separating views from facts is a rule of the Bitcoin and crypto tracks:
+    # a founder's conviction and a debated theory each get their own frame.
+    "opinion": "Opinion du fondateur",
+    "debate": "Débat",
 }
 
-DIRECTIVES = {"callout", "figure", "formula", "exercise", "tool"}
+DIRECTIVES = {"callout", "figure", "formula", "exercise", "tool", "chart"}
 TOOLS = {"risk-calculator", "ruin-simulator"}
 
 _OPEN = re.compile(r"^:::\s*([a-z-]+)\s*(.*)$")
@@ -129,7 +133,7 @@ def _check_args(kind: str, args: tuple[str, ...], number: int) -> None:
         if not args or args[0] not in CALLOUT_KINDS:
             raise MarkupError(f"ligne {number} : type d'encadré attendu parmi "
                               f"{', '.join(sorted(CALLOUT_KINDS))}")
-    elif kind in ("figure", "exercise", "tool"):
+    elif kind in ("figure", "exercise", "tool", "chart"):
         if len(args) != 1:
             raise MarkupError(f"ligne {number} : « {kind} » attend exactement un argument")
         if kind == "tool" and args[0] not in TOOLS:

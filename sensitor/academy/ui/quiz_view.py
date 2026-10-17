@@ -78,7 +78,7 @@ def render(quiz: Quiz, *, scope: str, catalog: Catalog, email: str | None) -> No
              f'<span>{"correction après chaque question" if immediate else "une seule soumission"}'
              f'</span></div>')
 
-        if not access.can_take_quiz(catalog, quiz, email):
+        if not access.can_take_quiz(catalog, quiz, email, rt.tier(email)):
             html('<p class="sx-body" style="margin-top:1rem">Ce quiz est réservé aux membres. Créez '
                  'un compte gratuit pour le passer et garder la trace de vos résultats.</p>')
             rt.link("Se connecter ou créer un compte", "account", key=f"qlock_{scope}_{quiz.id}",

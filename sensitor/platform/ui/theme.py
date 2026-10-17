@@ -322,6 +322,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [class*="st-key-callout_example"] { background: var(--gold-soft); border-left-color: var(--gold); }
 .stApp [class*="st-key-callout_warning"], .stApp [class*="st-key-callout_mistake"] { background: var(--red-soft); border-left-color: var(--red); }
 .stApp [class*="st-key-callout_method"] { background: #e7ecef; border-left-color: var(--blue); }
+.stApp [class*="st-key-callout_opinion"] { background: var(--white); border: 1px solid var(--gold); border-left: 3px solid var(--gold); }
+.stApp [class*="st-key-callout_debate"] { background: var(--paper); border-left-color: var(--muted); border-left-style: double; border-left-width: 4px; }
 .stApp [class*="st-key-callout_recap"] { background-color: var(--ink); background-image: var(--iso); border-left: 0; border-radius: 4px; padding: 1.5rem 1.8rem .7rem; }
 .stApp [class*="st-key-callout_recap"] p, .stApp [class*="st-key-callout_recap"] li,
 .stApp [class*="st-key-callout_recap"] strong { color: var(--on-navy) !important; }
@@ -330,6 +332,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [class*="st-key-callout_example"] .sx-callout-title { color: var(--gold); }
 .stApp [class*="st-key-callout_warning"] .sx-callout-title, .stApp [class*="st-key-callout_mistake"] .sx-callout-title { color: var(--red); }
 .stApp [class*="st-key-callout_definition"] .sx-callout-title { color: var(--ink); }
+.stApp [class*="st-key-callout_opinion"] .sx-callout-title { color: var(--gold); }
+.stApp [class*="st-key-callout_opinion"] .sx-callout-title::before { content: "◆ "; }
+.stApp [class*="st-key-callout_debate"] .sx-callout-title { color: var(--muted); }
 .stApp [class*="st-key-callout_recap"] .sx-callout-title { color: var(--on-navy-accent); }
 
 /* Exercise solutions */
@@ -471,6 +476,18 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-feature .go svg { width: 20px; height: 20px; }
 .stApp [class*="st-key-tap_"]:hover .sx-feature .go { background: var(--ink); color: var(--paper); transform: translateX(3px); }
 
+/* Interactive charts */
+.stApp [class*="st-key-chart_"] { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 1.3rem 1.4rem .9rem; margin: 1.2rem 0 1.4rem; }
+.stApp .sx-chart-title { font: 600 1.05rem/1.35 var(--serif); color: var(--ink); margin-bottom: .2rem; }
+.stApp .sx-chart-foot { border-top: 1px solid var(--line); padding-top: .7rem; }
+.stApp .sx-chart-foot > b { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-right: .6rem; }
+.stApp .sx-chart-foot > span { font-size: 14px; color: var(--text); }
+.stApp .sx-chart-credit { margin: .45rem 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.stApp .sx-chart-credit a { color: var(--blue); }
+.stApp .sx-chart-key { color: var(--faint); }
+.stApp .sx-track { margin: 2.2rem 0 .9rem; }
+.stApp .sx-track:first-of-type { margin-top: .4rem; }
+.stApp .sx-track p { margin: .35rem 0 0; max-width: 46rem; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
 .stApp .sx-index { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); }
 .stApp .sx-index > div { padding: 1.2rem 1.4rem 1.3rem 0; border-bottom: 1px solid var(--line); }
 .stApp .sx-index > div:not(:nth-child(3n+1)) { padding-left: 1.4rem; border-left: 1px solid var(--line); }
@@ -638,7 +655,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-brand { display: flex; align-items: center; gap: .8rem; padding: .1rem .4rem 1.4rem; }
 .stApp .sx-brand svg { flex-shrink: 0; filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
 .stApp .sx-brand-name { font: 700 16px var(--sans); letter-spacing: .24em; color: #f6f3ec; }
-.stApp .sx-brand-sub { font: 400 10px var(--mono); letter-spacing: .2em; color: var(--on-navy-muted); margin-top: 3px; }
+.stApp .sx-brand-sub { font: 400 9px var(--mono); letter-spacing: .09em; white-space: nowrap; color: var(--on-navy-muted); margin-top: 3px; }
 .stApp .sx-side-label { font: 500 10px var(--mono); letter-spacing: .2em; color: #7f93a6; padding: 1.1rem .75rem .35rem; }
 .stApp .sx-side-user { border-top: 1px solid #ffffff14; margin-top: 1.4rem; padding: 1rem .75rem 0; font-size: 12.5px; color: var(--on-navy-muted); line-height: 1.5; }
 .stApp .sx-side-user b { display: block; color: var(--on-navy); font-weight: 600; font-size: 13px; word-break: break-all; }

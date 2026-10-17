@@ -200,6 +200,7 @@ def main() -> int:
     # the store's signatures are actually used.
     checks += _persistence_flow(failures)
     checks += _simulation_flow(failures)
+    checks += _deep_link_flow(failures)
 
     print(f"\n{checks} render checks, {len(failures)} failures")
     for scenario, page, error in failures:
@@ -263,6 +264,24 @@ def _simulation_flow(failures) -> int:
                 failures.append(f"{label}: {detail}")
     finally:
         engine.yf.Ticker = original
+    return checks
+
+
+def _deep_link_flow(failures) -> int:
+    """The platform opens the journal or the portfolio with `?page=`; nothing else is honoured."""
+    checks = 0
+    for requested, expected in (("trading_overview", "trading_overview"), ("trading_journal", "trading_journal"),
+                                ("overview", "overview"), ("advisor", "overview"), ("../../etc", "overview")):
+        app = AppTest.from_file(APP, default_timeout=240)
+        app.query_params["page"] = requested
+        app.run()
+        landed = app.session_state["page"] if "page" in app.session_state else None
+        ok = landed == expected and not app.exception
+        checks += 1
+        label = f"deep link « {requested} » opens « {expected} »"
+        print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+        if not ok:
+            failures.append(f"{label}: got {landed}")
     return checks
 
 

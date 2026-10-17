@@ -1,7 +1,7 @@
 # Sensitor : Bitcoin, Crypto & Trading Intelligence
 
 Plan de mise en œuvre de la vision produit. Rédigé le 17 octobre 2026 après audit du dépôt.
-Rien de ce qui est décrit ici, au-delà de la phase A, n'est encore construit : chaque lot attend une validation.
+Les lots A, B1 et B2 sont terminés ; les suivants sont construits un par un, chacun vérifié avant le suivant.
 
 ## 1. État réel du dépôt (phase A)
 
@@ -159,8 +159,8 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | Lot | Contenu | Nature |
 |---|---|---|
 | **A** ✔ | Stabilisation, correctif « Analyse », audit, ce document, point de sauvegarde | terminé |
-| **B1** | Filières et numérotation par filière, champ `updated` (« Mis à jour le ») et sources obligatoires pour les nouvelles filières, encadrés « Opinion » et « Débat », registre de données sourcées, composant de graphique interactif aux couleurs de la charte | **structurel : validation requise** |
-| **B2** | Sous-titre de marque, accueil et barre latérale en trois piliers | **visible : validation requise** |
+| **B1** ✔ | Filières et numérotation par filière, champ `updated` (« Mis à jour le ») et sources obligatoires pour les nouvelles filières, encadrés « Opinion » et « Débat », registre de données sourcées, composant de graphique interactif aux couleurs de la charte, niveau d'accès Premium sans facturation | terminé |
+| **B2** ✔ | Sous-titre de marque, accueil et barre latérale en quatre groupes (Apprendre, Investir, Trader, Échanger) | terminé |
 | **C1** | M1, cours « La monnaie », avec ses schémas | contenu |
 | **C2** | M1, cours « L'inflation » et écoles de pensée | contenu |
 | **C3** | M1, cours « Inflation et patrimoine », simulateur nominal et réel | contenu et simulateur |

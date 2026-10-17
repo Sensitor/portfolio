@@ -25,10 +25,9 @@ STATUS_LABELS = {LIVE: "Ouvert", PREPARING: "En préparation", SEPARATE: "Applic
 
 GROUPS = (
     ("apprendre", "Apprendre"),
-    ("pratiquer", "Pratiquer"),
+    ("investir", "Investir"),
+    ("trader", "Trader"),
     ("echanger", "Échanger"),
-    ("suivre", "Suivre"),
-    ("outils", "Outils"),
 )
 
 
@@ -56,9 +55,11 @@ class Space:
 
 SPACES: tuple[Space, ...] = (
     Space("academy", "Academy", "apprendre", LIVE,
-          "Parcours structurés, leçons illustrées, quiz corrigés et exercices chiffrés.",
+          "Monnaie, Bitcoin, crypto, investissement et trading : des parcours sourcés, des quiz corrigés "
+          "et des exercices chiffrés.",
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
-          planned=("Vidéos intégrées aux leçons", "Ebooks", "Les parcours suivants du programme")),
+          planned=("Les filières Monnaie et Bitcoin, Crypto et Investissement",
+                   "Vidéos intégrées aux leçons", "Ebooks")),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
           entry="library", pages=("library", "resource"), numeral="II"),
@@ -69,30 +70,36 @@ SPACES: tuple[Space, ...] = (
           related=(("Parcours 6 : Décider sous incertitude", "course:decider-sous-incertitude"),
                    ("La routine de séance", "resource:routine-de-seance"),
                    ("La checklist avant chaque trade", "resource:checklist-avant-trade"))),
-    Space("lab", "Trading Lab", "pratiquer", LIVE,
-          "Le calculateur de risque et les exercices pratiques, sans capital réel.",
-          entry="lab", pages=("lab",), numeral="IV",
+    Space("progress", "Progression", "apprendre", LIVE,
+          "Leçons terminées, historique des quiz et notions à revoir.",
+          entry="progress", pages=("progress",), numeral="IV"),
+    Space("tools", "Portefeuille et risque", "investir", SEPARATE,
+          "Performance, allocation, exposition à Bitcoin et aux cryptomonnaies, risque, stress tests "
+          "et Monte Carlo.",
+          entry="tools", pages=("tools",), numeral="V",
+          planned=("Intégration au même espace membre",)),
+    Space("lab", "Trading Lab", "trader", LIVE,
+          "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
+          entry="lab", pages=("lab",), numeral="VI",
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
-    Space("market", "Salle des marchés", "pratiquer", PREPARING,
+    Space("journal", "Journal de trading", "trader", SEPARATE,
+          "Le journal du trader : import MetaTrader 5, performance en R, analyse par setup et par "
+          "session, discipline et rapports.",
+          entry="journal", pages=("journal",), numeral="VII",
+          planned=("Intégration au même espace membre",)),
+    Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
-          entry="market", pages=("market",), numeral="V",
+          entry="market", pages=("market",), numeral="VIII",
           planned=("Contexte de marché et calendrier économique commentés",
                    "Scénarios avec invalidation, publiés avant la séance",
                    "Bilans pédagogiques après la séance, sans signaux"),
           related=(("Leçon : lire la structure", "lesson:premiers-pas/structure-de-marche"),)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",
-          entry="community", pages=("community",), numeral="VI",
+          entry="community", pages=("community",), numeral="IX",
           planned=("Discussions par thème et par parcours",
                    "Partage d'analyses avec leur invalidation",
                    "Retours d'expérience authentiques, sans résultats mis en scène")),
-    Space("progress", "Progression", "suivre", LIVE,
-          "Leçons terminées, historique des quiz et notions à revoir.",
-          entry="progress", pages=("progress",), numeral="VII"),
-    Space("tools", "Outils et portefeuille", "outils", SEPARATE,
-          "L'analyse de portefeuille et le journal de trading Sensitor.",
-          entry="tools", pages=("tools",), numeral="VIII",
-          planned=("Intégration au même espace membre",)),
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify")

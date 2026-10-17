@@ -116,7 +116,8 @@ _ICONS = {
 }
 
 SPACE_ICONS = {"academy": "book", "library": "library", "psychology": "mind", "lab": "lab",
-               "market": "market", "community": "people", "progress": "progress", "tools": "tools"}
+               "market": "market", "community": "people", "progress": "progress", "tools": "tools",
+               "journal": "file"}
 
 
 def icon(name: str) -> str:

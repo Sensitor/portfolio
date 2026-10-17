@@ -5,7 +5,7 @@ Where content lives
 -------------------
 In version-controlled files under `content/academy/`, not in the database:
 
-    curriculum.toml                 the learning paths, in order
+    curriculum.toml                 the tracks, then the learning paths of each
     courses/<course>/course.toml    a course: objectives, modules, lesson order
     courses/<course>/lessons/*.md   one lesson each — TOML front matter between
                                     `+++` lines, then the body (see `markup`)
@@ -13,6 +13,8 @@ In version-controlled files under `content/academy/`, not in the database:
     exercises/*.toml                numeric practical exercises
     resources/resources.toml        the library, pointing at real files
     figures/*.svg                   original diagrams used by lessons
+    data/datasets.toml, data/*.csv  sourced data, see `datasets`
+    charts.toml                     interactive charts drawn from that data
 
 Files rather than tables because the first authoring workflow is an editor and a
 pull request: every change to a lesson or an answer key is reviewed, versioned
@@ -37,10 +39,12 @@ an answer key is caught by the test suite rather than by a member.
 from __future__ import annotations
 
 import os
+import datetime as _dt
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import datasets as D
 from . import markup
 
 CONTENT_ROOT = Path(__file__).resolve().parents[2] / "content" / "academy"
@@ -53,7 +57,8 @@ PATH_STATUSES = {PUBLISHED, PLANNED}
 
 PUBLIC = "public"
 MEMBER = "member"
-ACCESS = {PUBLIC, MEMBER}
+PREMIUM = "premium"            # a signed-in account whose tier includes premium
+ACCESS = {PUBLIC, MEMBER, PREMIUM}
 
 LEVELS = {"debutant": "Débutant", "intermediaire": "Intermédiaire", "avance": "Avancé"}
 FEEDBACK = {"immediate", "deferred"}
@@ -152,6 +157,7 @@ class Lesson:
     quiz_id: str | None = None
     resources: tuple[str, ...] = ()
     sources: tuple[str, ...] = ()
+    updated: _dt.date | None = None     # last substantive review, shown to readers
 
     @property
     def is_public(self) -> bool:
@@ -219,6 +225,23 @@ class Course:
 
 
 @dataclass(frozen=True)
+class Track:
+    """
+    A family of paths: Monnaie et Bitcoin, Crypto, Investissement, Trading.
+
+    Paths are numbered within their track, so adding a path to one track never
+    renumbers another. `require_sources` makes every published lesson of the
+    track carry its sources and the date of its last review.
+    """
+    id: str
+    title: str
+    short: str
+    code: str
+    summary: str = ""
+    require_sources: bool = False
+
+
+@dataclass(frozen=True)
 class LearningPath:
     id: str
     number: int
@@ -227,6 +250,14 @@ class LearningPath:
     status: str
     courses: tuple[Course, ...]
     topics: tuple[str, ...] = ()
+    track: str = ""
+    track_short: str = ""
+
+    @property
+    def label(self) -> str:
+        """« Trading · Parcours 04 »: how a path is named anywhere it is shown."""
+        prefix = f"{self.track_short} · " if self.track_short else ""
+        return f"{prefix}Parcours {self.number:02d}"
 
     @property
     def is_available(self) -> bool:
@@ -276,6 +307,21 @@ class Catalog:
     figures: dict[str, str]
     root: Path
     include_drafts: bool = False
+    tracks: tuple[Track, ...] = ()
+    datasets: dict = field(default_factory=dict)
+    charts: dict = field(default_factory=dict)
+
+    def chart(self, chart_id: str):
+        return self.charts.get(chart_id)
+
+    def dataset(self, dataset_id: str):
+        return self.datasets.get(dataset_id)
+
+    def track(self, track_id: str) -> Track | None:
+        return next((t for t in self.tracks if t.id == track_id), None)
+
+    def paths_in(self, track_id: str) -> list[LearningPath]:
+        return [p for p in self.paths if p.track == track_id]
 
     def course(self, course_id: str) -> Course | None:
         return self.courses.get(course_id)
@@ -445,15 +491,19 @@ class _Loader:
 
     def load(self) -> Catalog:
         figures = self.load_figures()
+        self.datasets, self.charts = D.load(self.root, self.problem)
         exercises = self.load_exercises()
         quizzes = self.load_quizzes()
         courses = self.load_courses(figures, exercises, quizzes)
-        paths = self.load_paths(courses)
+        tracks = self.load_tracks()
+        paths = self.load_paths(courses, tracks)
         resources = self.load_resources(courses)
         self.check_quiz_links(quizzes, courses)
+        self.check_sourcing(tracks, paths)
         return Catalog(paths=paths, courses=courses, quizzes=quizzes,
                        exercises=exercises, resources=resources, figures=figures,
-                       root=self.root, include_drafts=self.include_drafts)
+                       root=self.root, include_drafts=self.include_drafts, tracks=tracks,
+                       datasets=self.datasets, charts=self.charts)
 
     # ── figures ──────────────────────────────────────────────────────────────
 
@@ -704,12 +754,30 @@ class _Loader:
                 self.problem(where, f"figure introuvable : figures/{block.target}")
             if block.kind == "exercise" and block.target not in exercises:
                 self.problem(where, f"exercice introuvable : {block.target}")
+            if block.kind == "chart" and block.target not in self.charts:
+                self.problem(where, f"graphique introuvable : {block.target}")
 
         quiz_id = meta.get("quiz")
         if quiz_id and quiz_id not in quizzes:
             self.problem(where, f"quiz « {quiz_id} » introuvable ou non publié")
 
         duration = meta.get("duration_minutes")
+        updated = meta.get("updated")
+        if isinstance(updated, str):
+            try:
+                updated = _dt.date.fromisoformat(updated)
+            except ValueError:
+                self.problem(where, f"date de mise à jour invalide « {updated} » (attendu AAAA-MM-JJ)")
+                updated = None
+        elif isinstance(updated, _dt.datetime):
+            updated = updated.date()
+        elif updated is not None and not isinstance(updated, _dt.date):
+            self.problem(where, "date de mise à jour invalide (attendu AAAA-MM-JJ)")
+            updated = None
+        sources = meta.get("sources", [])
+        if not isinstance(sources, list) or not all(isinstance(x, str) and x.strip() for x in sources):
+            self.problem(where, "les sources doivent être une liste de textes non vides")
+            sources = []
         return Lesson(id=lesson_id, course_id=course_id, module_id=module_id,
                       number=number, title=str(meta.get("title", "")),
                       summary=str(meta.get("summary", "")).strip(),
@@ -719,13 +787,51 @@ class _Loader:
                       blocks=tuple(blocks),
                       quiz_id=quiz_id if quiz_id in quizzes else None,
                       resources=tuple(meta.get("resources", [])),
-                      sources=tuple(meta.get("sources", [])))
+                      sources=tuple(s.strip() for s in sources), updated=updated)
 
     # ── paths ────────────────────────────────────────────────────────────────
 
-    def load_paths(self, courses: dict[str, Course]) -> tuple[LearningPath, ...]:
+    def load_tracks(self) -> tuple[Track, ...]:
+        data = self.read_toml(self.root / "curriculum.toml")
+        tracks = []
+        for raw in data.get("track", []):
+            where = f"curriculum.toml · filière {raw.get('id', '?')}"
+            for key in ("id", "title", "short", "code"):
+                if not str(raw.get(key, "")).strip():
+                    self.problem(where, f"champ « {key} » manquant")
+            tracks.append(Track(id=str(raw.get("id", "")), title=str(raw.get("title", "")),
+                                short=str(raw.get("short", "")), code=str(raw.get("code", "")),
+                                summary=str(raw.get("summary", "")).strip(),
+                                require_sources=bool(raw.get("require_sources", False))))
+        ids = [t.id for t in tracks]
+        if len(ids) != len(set(ids)):
+            self.problem("curriculum.toml", "identifiants de filière en double")
+        codes = [t.code for t in tracks]
+        if len(codes) != len(set(codes)):
+            self.problem("curriculum.toml", "codes de filière en double")
+        return tuple(tracks)
+
+    def check_sourcing(self, tracks: tuple[Track, ...], paths: tuple[LearningPath, ...]) -> None:
+        """In a track that requires it, every published lesson names its sources and its review date."""
+        strict = {t.id for t in tracks if t.require_sources}
+        for path in paths:
+            if path.track not in strict:
+                continue
+            for course in path.courses:
+                for lesson in course.lessons:
+                    if lesson.status != PUBLISHED:
+                        continue
+                    where = f"courses/{course.id}/lessons/{lesson.id}.md"
+                    if not lesson.sources:
+                        self.problem(where, "sources manquantes (obligatoires dans cette filière)")
+                    if lesson.updated is None:
+                        self.problem(where, "date de mise à jour manquante (obligatoire dans cette filière)")
+
+    def load_paths(self, courses: dict[str, Course],
+                   tracks: tuple[Track, ...] = ()) -> tuple[LearningPath, ...]:
         meta_path = self.root / "curriculum.toml"
         data = self.read_toml(meta_path)
+        by_id = {t.id: t for t in tracks}
         paths = []
         claimed: set[str] = set()
         for raw in data.get("path", []):
@@ -747,17 +853,23 @@ class _Loader:
                 members.append(course)
             if status == PUBLISHED and not members:
                 self.problem(where, "parcours publié sans cours disponible")
+            track = by_id.get(str(raw.get("track", "")))
+            if tracks and track is None:
+                self.problem(where, f"filière inconnue « {raw.get('track', '')} »")
             paths.append(LearningPath(id=str(raw["id"]), number=int(raw.get("number", 0)),
                                       title=str(raw.get("title", "")),
                                       summary=str(raw.get("summary", "")).strip(),
                                       status=status, courses=tuple(members),
-                                      topics=tuple(raw.get("topics", []))))
+                                      topics=tuple(raw.get("topics", [])),
+                                      track=track.id if track else "",
+                                      track_short=track.short if track else ""))
         for course_id in sorted(set(courses) - claimed):
             self.problem("curriculum.toml", f"le cours « {course_id} » n'appartient à aucun parcours")
-        numbers = [p.number for p in paths]
+        numbers = [(p.track, p.number) for p in paths]
         if len(numbers) != len(set(numbers)):
-            self.problem("curriculum.toml", "numéros de parcours en double")
-        return tuple(sorted(paths, key=lambda p: p.number))
+            self.problem("curriculum.toml", "numéros de parcours en double dans une filière")
+        order = {t.id: i for i, t in enumerate(tracks)}
+        return tuple(sorted(paths, key=lambda p: (order.get(p.track, len(order)), p.number)))
 
     # ── resources ────────────────────────────────────────────────────────────
 
