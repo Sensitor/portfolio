@@ -2802,24 +2802,11 @@ def main():
                         user_profile=st.session_state.user_profile,
                     )
                     if _fetch_with_progress(analyzer):
-                        # A holding can be *valued* without being *analysable*:
-                        # a hand-typed price gives a figure for today and no
-                        # history, so the analyzer drops it. Left alone, its
-                        # money stayed in `initial_value` and was attributed
-                        # across the survivors — the analysed book came out
-                        # larger than the holdings that were actually in it.
-                        analysed = sum(asset_values[t] for t in analyzer.tickers
-                                       if t in asset_values)
-                        excluded = {t: v for t, v in asset_values.items()
-                                    if t not in analyzer.tickers}
-                        if excluded and analysed > 0:
-                            analyzer.initial_value = analysed
-                            analyzer.portfolio_values = (
-                                analysed * (1 + analyzer.portfolio_returns).cumprod())
-                        st.session_state.real_portfolio_total_value = (
-                            analysed if excluded else total_value)
-                        st.session_state["unanalysed_holdings"] = excluded
-
+                        # A simulation is weights only: no holdings, no hand-typed
+                        # prices, so nothing can be valued without being analysed.
+                        # A notice left over from a real portfolio would describe
+                        # a different book.
+                        st.session_state["unanalysed_holdings"] = {}
                         st.session_state.current_portfolio = analyzer
                         st.success(t("analysis_done", lang))
                         st.session_state.page = "overview"
