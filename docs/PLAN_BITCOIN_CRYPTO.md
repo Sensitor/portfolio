@@ -1,7 +1,7 @@
 # Sensitor : Bitcoin, Crypto & Trading Intelligence
 
 Plan de mise en œuvre de la vision produit. Rédigé le 17 octobre 2026 après audit du dépôt.
-Les lots A, B1, B2, C1 et C2 sont terminés ; les suivants sont construits un par un, chacun vérifié avant le suivant.
+Les lots A, B1, B2, C1, C2 et C3 sont terminés ; les suivants sont construits un par un, chacun vérifié avant le suivant.
 
 ## 1. État réel du dépôt (phase A)
 
@@ -164,7 +164,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **B2** ✔ | Sous-titre de marque, accueil et barre latérale en quatre groupes (Apprendre, Investir, Trader, Échanger) | terminé |
 | **C1** ✔ | M1, cours « La monnaie » : 9 leçons sourcées, 5 schémas, données de taux BCE et Fed, 3 exercices | terminé |
 | **C2** ✔ | M1, cours « L'inflation » : 9 leçons sourcées, données Eurostat, BCE et américaines, écoles de pensée, 3 exercices | terminé |
-| **C3** | M1, cours « Inflation et patrimoine », simulateur nominal et réel | contenu et simulateur |
+| **C3** ✔ | M1, cours « Inflation et patrimoine » : 8 leçons, simulateur d'épargne nominal et réel, taux réel BCE, diversification, Bitcoin avec ses objections | terminé |
 | **C4** | M2, cours « Origines et fonctionnement », émission calculée | contenu et visualisation |
 | **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |

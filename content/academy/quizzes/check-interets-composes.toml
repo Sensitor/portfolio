@@ -1,0 +1,73 @@
+id = "check-interets-composes"
+title = "Contrôle : intérêts composés et volatilité"
+course = "inflation-et-patrimoine"
+lesson = "interets-composes"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "72"
+prompt = "À 6 % par an, en combien d'années environ un capital double-t-il ?"
+kind = "single"
+lesson = "interets-composes"
+
+[[question.option]]
+id = "12"
+text = "Environ 12 ans."
+correct = true
+explanation = "72 ÷ 6 ; le calcul exact donne 11,9 ans."
+
+[[question.option]]
+id = "6"
+text = "6 ans."
+explanation = "Ce serait à 12 %."
+
+[[question.option]]
+id = "17"
+text = "Environ 17 ans."
+explanation = "C'est 100 ÷ 6, sans composition."
+
+[[question]]
+id = "drag"
+prompt = "Un placement gagne 50 % puis perd 50 %. Résultat ?"
+kind = "single"
+lesson = "interets-composes"
+
+[[question.option]]
+id = "moins25"
+text = "Une perte de 25 %."
+correct = true
+explanation = "100 → 150 → 75."
+
+[[question.option]]
+id = "zero"
+text = "Aucun changement."
+explanation = "La perte s'applique à un capital plus grand."
+
+[[question.option]]
+id = "plus"
+text = "Un gain."
+explanation = "C'est une perte."
+
+[[question]]
+id = "moyenne"
+prompt = "Quelle moyenne mesure ce que l'on a réellement gagné sur plusieurs années ?"
+kind = "single"
+lesson = "interets-composes"
+
+[[question.option]]
+id = "geo"
+text = "La moyenne géométrique."
+correct = true
+explanation = "Le taux constant qui donne le même résultat final."
+
+[[question.option]]
+id = "arith"
+text = "La moyenne arithmétique."
+explanation = "Elle surestime le rendement quand les résultats sont dispersés."
+
+[[question.option]]
+id = "max"
+text = "La meilleure année."
+explanation = "Ce n'est pas une moyenne."

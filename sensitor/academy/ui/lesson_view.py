@@ -14,7 +14,7 @@ import streamlit as st
 from ...platform.ui.components import diagram, esc, html, md
 from ..content import Catalog, Lesson
 from ..markup import CALLOUT_KINDS
-from . import chart_view, exercise_view, quiz_view, risk_view
+from . import chart_view, exercise_view, quiz_view, risk_view, savings_view
 
 
 def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> None:
@@ -47,6 +47,8 @@ def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> Non
             risk_view.render(scope=f"lesson_{lesson.id}", compact=True)
         elif block.kind == "tool" and block.target == "ruin-simulator":
             risk_view.render_ruin(scope=f"lesson_{lesson.id}")
+        elif block.kind == "tool" and block.target == "savings-simulator":
+            savings_view.render(scope=f"lesson_{lesson.id}")
 
 
 def render_objectives(lesson: Lesson) -> None:

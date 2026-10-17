@@ -1,0 +1,228 @@
+id = "patrimoine-validation"
+title = "Quiz de validation : Inflation et patrimoine"
+course = "inflation-et-patrimoine"
+lesson = "recap-patrimoine"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "reel"
+prompt = "Un livret à 2 % quand l'inflation est de 2,5 % :"
+kind = "single"
+lesson = "rendement-nominal-reel"
+
+[[question.option]]
+id = "perd"
+text = "fait perdre du pouvoir d'achat, environ 0,5 % par an."
+correct = true
+explanation = "1,02 ÷ 1,025 − 1."
+
+[[question.option]]
+id = "gagne"
+text = "fait gagner 2 %."
+explanation = "En euros, pas en pouvoir d'achat."
+
+[[question.option]]
+id = "neutre"
+text = "est neutre."
+explanation = "Le rendement est sous l'inflation."
+
+[[question]]
+id = "fisher"
+prompt = "La relation de Fisher dit :"
+kind = "single"
+lesson = "rendement-nominal-reel"
+
+[[question.option]]
+id = "formule"
+text = "(1 + réel) = (1 + nominal) ÷ (1 + inflation)."
+correct = true
+explanation = "C'est la formule exacte."
+
+[[question.option]]
+id = "somme"
+text = "réel = nominal + inflation."
+explanation = "On retranche l'inflation, on ne l'ajoute pas."
+
+[[question.option]]
+id = "produit"
+text = "réel = nominal × inflation."
+explanation = "Ce n'est pas la relation."
+
+[[question]]
+id = "compose"
+prompt = "10 000 € à 7 % pendant 30 ans deviennent environ :"
+kind = "single"
+lesson = "interets-composes"
+
+[[question.option]]
+id = "76"
+text = "76 123 €."
+correct = true
+explanation = "10 000 × 1,07^30."
+
+[[question.option]]
+id = "31"
+text = "31 000 €."
+explanation = "C'est le calcul sans composition."
+
+[[question.option]]
+id = "21"
+text = "21 000 €."
+explanation = "Bien en dessous."
+
+[[question]]
+id = "volatilite"
+prompt = "+30 %, −20 %, +25 %, −30 % : que deviennent 100 € ?"
+kind = "single"
+lesson = "interets-composes"
+
+[[question.option]]
+id = "91"
+text = "91 €."
+correct = true
+explanation = "La moyenne arithmétique positive cache une perte."
+
+[[question.option]]
+id = "105"
+text = "105 €."
+explanation = "On ne fait pas la somme des rendements."
+
+[[question.option]]
+id = "100"
+text = "100 €."
+explanation = "Le capital a baissé."
+
+[[question]]
+id = "versements"
+prompt = "Dans le simulateur, 10 000 € plus 200 € par mois à 5 % pendant 30 ans, inflation 2 % : pouvoir d'achat final ?"
+kind = "single"
+lesson = "simulateur-epargne"
+
+[[question.option]]
+id = "113"
+text = "Environ 113 889 €, pour 82 000 € versés."
+correct = true
+explanation = "La valeur affichée, 206 295 €, inclut trente ans d'inflation."
+
+[[question.option]]
+id = "206"
+text = "206 295 €."
+explanation = "C'est la valeur affichée, pas le pouvoir d'achat."
+
+[[question.option]]
+id = "82"
+text = "82 000 €."
+explanation = "Ce sont les sommes versées."
+
+[[question]]
+id = "frais"
+prompt = "Pourquoi 1,5 % de frais annuels coûtent-ils plus d'un tiers du capital sur trente ans ?"
+kind = "single"
+lesson = "frais-impots"
+
+[[question.option]]
+id = "compose"
+text = "Parce qu'ils se composent : ils sont prélevés chaque année sur un capital qui grossit, et ce qu'ils prennent ne rapporte plus."
+correct = true
+explanation = "Exactement comme le rendement, mais dans l'autre sens."
+
+[[question.option]]
+id = "cumul"
+text = "Parce que 1,5 % × 30 = 45 %."
+explanation = "Ce n'est pas une simple multiplication."
+
+[[question.option]]
+id = "faux"
+text = "Ils ne coûtent pas autant."
+explanation = "L'exercice montre 36,5 % de moins."
+
+[[question]]
+id = "risques"
+prompt = "Lequel de ces placements évite à la fois la perte nominale et la perte réelle, en toutes circonstances ?"
+kind = "single"
+lesson = "risques-epargne"
+
+[[question.option]]
+id = "aucun"
+text = "Aucun : chaque placement expose à au moins un de ces risques."
+correct = true
+explanation = "Choisir, c'est décider lesquels on accepte."
+
+[[question.option]]
+id = "billets"
+text = "Les billets."
+explanation = "Ils exposent à la perte réelle."
+
+[[question.option]]
+id = "actions"
+text = "Les actions."
+explanation = "Elles exposent à la perte nominale."
+
+[[question]]
+id = "diversification"
+prompt = "Deux actifs à 15 % et 60 % de volatilité, à parts égales, corrélation 1 : volatilité ?"
+kind = "single"
+lesson = "diversification"
+
+[[question.option]]
+id = "375"
+text = "37,5 %, la moyenne pondérée : aucune diversification."
+correct = true
+explanation = "Avec ρ = 1, les volatilités s'additionnent."
+
+[[question.option]]
+id = "3235"
+text = "32,35 %."
+explanation = "C'est le cas d'une corrélation de 0,2."
+
+[[question.option]]
+id = "15"
+text = "15 %."
+explanation = "C'est la volatilité du premier actif seul."
+
+[[question]]
+id = "emis"
+prompt = "Quelle part des bitcoins avait été émise le 17 octobre 2026 ?"
+kind = "single"
+lesson = "bitcoin-patrimoine"
+
+[[question.option]]
+id = "957"
+text = "Environ 95,7 %."
+correct = true
+explanation = "20 099 725 BTC sur 20 999 999,9769."
+
+[[question.option]]
+id = "50"
+text = "Environ 50 %."
+explanation = "C'était le cas fin 2012."
+
+[[question.option]]
+id = "100"
+text = "100 %."
+explanation = "L'émission se poursuivra jusqu'au XXIIe siècle."
+
+[[question]]
+id = "bitcoin"
+prompt = "Comment le cours présente-t-il Bitcoin comme réserve de valeur ?"
+kind = "single"
+lesson = "bitcoin-patrimoine"
+
+[[question.option]]
+id = "debat"
+text = "Comme une thèse avec des arguments et des objections, à examiner sur les données."
+correct = true
+explanation = "Aucune conclusion n'est imposée."
+
+[[question.option]]
+id = "garantie"
+text = "Comme une protection garantie contre l'inflation."
+explanation = "Le cours dit le contraire."
+
+[[question.option]]
+id = "rejet"
+text = "Comme une idée sans aucun argument."
+explanation = "Il présente aussi ses arguments."

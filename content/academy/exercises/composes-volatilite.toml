@@ -1,0 +1,60 @@
+id = "composes-volatilite"
+title = "Composer et encaisser la volatilité"
+context = """
+**1.** 10 000 € sont placés à **7 %** par an, intérêts réinvestis.
+
+**2.** Un autre placement connaît quatre années de suite : **+30 %**, **−20 %**, **+25 %** et **−30 %**.
+
+Valeurs construites pour l'exercice.
+"""
+conclusion = """
+Les intérêts composés font plus que doubler le capital en dix ans et le multiplient par plus de sept en trente. Mais quatre années à +1,25 % de moyenne arithmétique ont fait perdre 9 % : avec des rendements dispersés, c'est la moyenne géométrique qui dit la vérité.
+"""
+
+[[step]]
+id = "dix-ans"
+prompt = "Que deviennent les 10 000 € après 10 ans ? (Deux décimales.)"
+unit = "€"
+answer = 19671.51
+tolerance = 0.01
+solution = "10 000 × 1,07^10 = **19 671,51 €**."
+
+[[step]]
+id = "trente-ans"
+prompt = "Et après 30 ans ?"
+unit = "€"
+answer = 76122.55
+tolerance = 0.01
+solution = "10 000 × 1,07^30 = **76 122,55 €**."
+
+[[step]]
+id = "doublement"
+prompt = "En combien d'années le capital double-t-il, calcul exact ? (Deux décimales.)"
+unit = "ans"
+answer = 10.24
+tolerance = 0.006
+solution = "ln 2 ÷ ln 1,07 = **10,24 ans** ; la règle de 72 donne 72 ÷ 7 = 10,29."
+
+[[step]]
+id = "moyenne"
+prompt = "Quelle est la moyenne arithmétique des quatre rendements, en % ? (Deux décimales.)"
+unit = "%"
+answer = 1.25
+tolerance = 0.006
+solution = "(30 − 20 + 25 − 30) ÷ 4 = **1,25 %**."
+
+[[step]]
+id = "resultat"
+prompt = "Que deviennent 100 € après les quatre années ?"
+unit = "€"
+answer = 91
+tolerance = 0.01
+solution = "100 × 1,30 × 0,80 × 1,25 × 0,70 = **91 €** : une perte de 9 %."
+
+[[step]]
+id = "geometrique"
+prompt = "Quel est le rendement composé, par an, en % ? (Deux décimales.)"
+unit = "%"
+answer = -2.33
+tolerance = 0.006
+solution = "0,91^(1/4) − 1 = **−2,33 %** par an, alors que la moyenne arithmétique est positive."

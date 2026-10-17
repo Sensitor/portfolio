@@ -121,3 +121,15 @@ file = "fiche-inflation.md"
 pdf = "fiche-inflation.pdf"
 access = "public"
 lessons = ["inflation-definition", "mesurer-les-prix", "demande-et-couts", "monnaie-credit-prix", "anticipations-salaires", "episodes-inflation", "ecoles-de-pensee", "pouvoir-achat", "recap-inflation"]
+
+[[resource]]
+id = "fiche-patrimoine"
+title = "Inflation et patrimoine"
+description = "Rendement réel, intérêts composés, coût de la volatilité, frais, diversification et les quatre risques d'une épargne, avec les repères chiffrés du cours."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-patrimoine.md"
+pdf = "fiche-patrimoine.pdf"
+access = "public"
+lessons = ["rendement-nominal-reel", "interets-composes", "simulateur-epargne", "frais-impots", "risques-epargne", "diversification", "bitcoin-patrimoine", "recap-patrimoine"]

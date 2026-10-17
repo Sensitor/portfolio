@@ -19,13 +19,14 @@ written and published, and what is not built yet.
 
 | Area | State |
 |---|---|
-| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Monnaie et Bitcoin path 1** (two of its three courses) **and Trading paths 1 to 7 published**, the other 8 marked « en préparation » and not clickable |
-| Courses | « La monnaie » (9 lessons, sourced, with ECB and Federal Reserve rate data), « L'inflation » (9 lessons, with Eurostat, ECB and US data), « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
-| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 37 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
-| Quizzes | 59 knowledge checks (immediate feedback) + 9 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
-| Exercises | 21 numeric exercises (a bank balance sheet, the cost of a mortgage, a bond when rates move, reading a price index, contributions to inflation, purchasing power over thirty years, EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
+| Curriculum | 4 tracks (Monnaie et Bitcoin, Crypto, Investissement, Trading) and 16 paths numbered within their track; **Trading paths 1 to 7 and Monnaie et Bitcoin path 1** (its three courses) **published**, the other 8 marked « en préparation » and not clickable |
+| Courses | « La monnaie » (9 lessons, sourced, with ECB and Federal Reserve rate data), « L'inflation » (9 lessons, with Eurostat, ECB and US data), « Inflation et patrimoine » (8 lessons, with a savings simulator), « Premiers pas sur les marchés » (6 lessons), « Lire la structure du marché » (7 lessons), « Liquidité et scénarios » (7 lessons), « Zones d'intérêt et entrées » (7 lessons), « Gérer le risque dans la durée » (7 lessons), « Décider sous incertitude » (8 lessons), « Tester une stratégie » (8 lessons), each in 4 chapters |
+| Lessons | Markdown + callouts (definition, example, warning, mistake, method, recap, opinion, debate), sources and review date, interactive charts on sourced data, 39 original SVG diagrams and charts (path 5 charts are computed), KaTeX formulas |
+| Quizzes | 66 knowledge checks (immediate feedback) + 10 validation quizzes (10 questions each, deferred correction, pass at 7 / 10) |
+| Exercises | 24 numeric exercises (compounding and volatility drag, fees and tax over thirty years, two-asset diversification, a bank balance sheet, the cost of a mortgage, a bond when rates move, reading a price index, contributions to inflation, purchasing power over thirty years, EURUSD sizing, swings, GBPUSD structure case, equal highs, XAUUSD sweep case, FVG, OTE, GBPUSD entry case, drawdown series, prop-firm limits, revenge trade, overtrading costs, a 20-trade backtest, the interval of an expectancy, a 120-trade case) with worked solutions |
+| Simulators | savings simulator (nominal and real value, contributions, fees, tax), in the lesson « Le simulateur » of « Inflation et patrimoine » |
 | Trading Lab | risk calculator (size only with a contract spec, losing streaks) and expectancy / risk-of-ruin simulator (exact, no random simulation) |
-| Library | 10 real resources, each as Markdown and as a typeset PDF |
+| Library | 11 real resources, each as Markdown and as a typeset PDF |
 | Progress | lesson completion, quiz attempt history, mistakes to review, JSON export |
 | Accounts | the existing `Auth` and `Store` — one account works in both the Academy and the portfolio app |
 | API | `/academy/*` routes on the existing FastAPI app |
@@ -60,6 +61,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   backtest.py  series summary, interval of an expectancy, multiple testing, degradation (path 7)
   money.py     bank balance sheets, loan instalments and schedules, bond prices (« La monnaie »)
   inflation.py rates from an index, cumulative and annualised inflation, purchasing power, contributions
+  savings.py   real return, monthly savings projection, compounding, volatility drag, two-asset volatility
   bitcoin.py   Bitcoin's issuance from the protocol rules
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
@@ -118,7 +120,7 @@ database stores only what members do with the content.
    :::
    ::: exercise cas-eurusd             id from content/academy/exercises/
    :::
-   ::: tool risk-calculator
+   ::: tool risk-calculator           also ruin-simulator, savings-simulator
    :::
    ::: chart emission-bitcoin          id from content/academy/charts.toml
    Légende.
@@ -227,9 +229,9 @@ resolved and described in [PLATFORM.md](PLATFORM.md#7-accounts). Remaining:
 ## 7. Tests
 
 ```bash
-python tests/test_academy.py       # 813 checks — content, validation, quiz, risk, progress, store
+python tests/test_academy.py       # 886 checks — content, validation, quiz, risk, progress, store
 python tests/test_academy_api.py   #  92 checks — HTTP access policy, isolation, no answer key, journal
-python tests/test_academy_app.py   # 285 checks — every page and space renders, locking, writes per member
+python tests/test_academy_app.py   # 309 checks — every page and space renders, locking, writes per member
 python tests/test_platform.py      #  74 checks — spaces registry, journal rules, renderers, brand asset
 python tests/test_accounts.py      #  42 checks — reset, verification, e-mail, export, v8 and v9 upgrades
 python -m sensitor.academy.validate

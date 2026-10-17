@@ -1,0 +1,40 @@
+id = "inflation-et-patrimoine"
+path = "monnaie-inflation"
+title = "Inflation et patrimoine"
+summary = "Huit leçons pour passer de l'inflation à son épargne : rendement nominal et réel, intérêts composés et coût de la volatilité, un simulateur qui compare valeur affichée et pouvoir d'achat, le poids des frais et de l'impôt, les risques d'une épargne, la diversification, puis la place que certains donnent à Bitcoin, avec ses arguments et ses objections."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Calculer un rendement réel et dire si une épargne gagne ou perd en pouvoir d'achat.",
+  "Mesurer l'effet des intérêts composés, des frais, de l'impôt et de la volatilité sur la durée.",
+  "Utiliser un simulateur d'épargne en lisant ses hypothèses et ses limites.",
+  "Distinguer perte nominale et perte réelle, liquidité, concentration et horizon.",
+  "Présenter les arguments en faveur de Bitcoin comme réserve de valeur et leurs objections, sans conclure à sa place.",
+]
+prerequisites = ["La monnaie", "L'inflation"]
+final_quiz = "patrimoine-validation"
+
+[[module]]
+id = "reel"
+title = "Nominal et réel"
+summary = "Ce que rapporte vraiment une épargne, et comment le temps et la volatilité changent le résultat."
+lessons = ["rendement-nominal-reel", "interets-composes"]
+
+[[module]]
+id = "simuler"
+title = "Simuler une épargne"
+summary = "Le simulateur, puis ce que coûtent les frais et l'impôt sur la durée."
+lessons = ["simulateur-epargne", "frais-impots"]
+
+[[module]]
+id = "proteger"
+title = "Protéger un patrimoine"
+summary = "Les risques d'une épargne, la diversification, et la place que certains donnent à Bitcoin."
+lessons = ["risques-epargne", "diversification", "bitcoin-patrimoine"]
+
+[[module]]
+id = "bilan"
+title = "Faire le point"
+summary = "Le récapitulatif du parcours, puis le quiz de validation."
+lessons = ["recap-patrimoine"]

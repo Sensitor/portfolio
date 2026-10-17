@@ -1,0 +1,73 @@
+id = "check-rendement-reel"
+title = "Contrôle : rendement nominal et réel"
+course = "inflation-et-patrimoine"
+lesson = "rendement-nominal-reel"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "fisher"
+prompt = "Un placement rapporte 3 % et l'inflation est de 5 %. Rendement réel ?"
+kind = "single"
+lesson = "rendement-nominal-reel"
+
+[[question.option]]
+id = "negatif"
+text = "Environ −1,9 %."
+correct = true
+explanation = "1,03 ÷ 1,05 − 1 : le pouvoir d'achat baisse."
+
+[[question.option]]
+id = "3"
+text = "3 %."
+explanation = "C'est le rendement nominal."
+
+[[question.option]]
+id = "8"
+text = "8 %."
+explanation = "On ne les additionne pas."
+
+[[question]]
+id = "exact"
+prompt = "Un placement à 5 % avec 2 % d'inflation : rendement réel exact ?"
+kind = "single"
+lesson = "rendement-nominal-reel"
+
+[[question.option]]
+id = "294"
+text = "2,94 %"
+correct = true
+explanation = "1,05 ÷ 1,02 − 1."
+
+[[question.option]]
+id = "3"
+text = "Exactement 3 %."
+explanation = "C'est l'approximation par différence."
+
+[[question.option]]
+id = "7"
+text = "7 %"
+explanation = "On n'additionne pas l'inflation."
+
+[[question]]
+id = "bce"
+prompt = "Depuis 1999, le taux réel de la BCE (dépôt moins inflation) a été négatif :"
+kind = "single"
+lesson = "rendement-nominal-reel"
+
+[[question.option]]
+id = "72"
+text = "dans environ 72 % des mois."
+correct = true
+explanation = "C'est ce que montrent les données."
+
+[[question.option]]
+id = "jamais"
+text = "jamais."
+explanation = "Il est descendu jusqu'à −9,85 %."
+
+[[question.option]]
+id = "2022"
+text = "seulement en 2022."
+explanation = "Il l'a été la plupart du temps."

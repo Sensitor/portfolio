@@ -306,9 +306,9 @@ python tests/test_api.py                  # 176 checks — HTTP, isolation, no m
 python tests/test_workspace.py            #  20 checks — survives a restart
 python tests/test_sensitor_pages.py       # 185 render checks
 python tests/test_trading_pages.py        #  82 render checks
-python tests/test_academy.py              # 813 checks — Academy content, quiz, risk maths
+python tests/test_academy.py              # 886 checks — Academy content, quiz, risk maths
 python tests/test_academy_api.py          #  92 checks — Academy and journal over HTTP
-python tests/test_academy_app.py          # 285 checks — platform pages, headless
+python tests/test_academy_app.py          # 309 checks — platform pages, headless
 python tests/test_platform.py             #  74 checks — spaces registry, brand
 python tests/test_accounts.py             #  42 checks — reset, verification, e-mail
 python -m sensitor.academy.validate       # content check before publishing

@@ -788,7 +788,7 @@ def test_inflation_figures():
     check("data: US 3,8 % at the end of 1983", usr["1983-12"]["inflation"] == 3.8)
 
     course = catalog.course("l-inflation")
-    check("the inflation course is the second of path 1", [c.id for c in catalog.path("monnaie-inflation").courses]
+    check("the inflation course is the second of path 1", [c.id for c in catalog.path("monnaie-inflation").courses][:2]
           == ["la-monnaie", "l-inflation"])
     check("every lesson is sourced and dated", all(l.sources and l.updated for l in course.lessons))
     final = catalog.quiz("inflation-validation")
@@ -797,6 +797,92 @@ def test_inflation_figures():
     for bad in (lambda: I.rate_from_index(0, 1), lambda: I.years_to_halve(0), lambda: I.annualised(0.1, 0),
                 lambda: I.contributions({"a": .5}, {"a": .1}), lambda: I.cumulative([-1])):
         check("inflation helpers refuse bad input", raises(bad, ValueError))
+
+
+def test_savings_figures():
+    """Course « Inflation et patrimoine »: the simulator's arithmetic and every quoted figure, recomputed."""
+    print("\nCourse « Inflation et patrimoine » figures")
+    from sensitor.academy import bitcoin as B
+    from sensitor.academy import savings as S
+    catalog = C.load_catalog()
+
+    check("Fisher: 5 % with 2 % inflation is 2,94 % real", round(S.real_rate(.05, .02) * 100, 2) == 2.94)
+    check("Fisher: 3 % with 5 % inflation is -1,90 % real", round(S.real_rate(.03, .05) * 100, 2) == -1.90)
+    check("Fisher: 2 % with 2,5 % inflation loses about 0,5 %", round(S.real_rate(.02, .025) * 100, 1) == -0.5)
+
+    ex = {s.id: s.answer for s in catalog.exercise("composes-volatilite").steps}
+    check("compound: 19 671,51 and 76 122,55", round(S.compound(10_000, .07, 10), 2) == ex["dix-ans"]
+          and round(S.compound(10_000, .07, 30), 2) == ex["trente-ans"])
+    check("doubling at 7 %: 10,24 years, rule of 72 gives 10,29", round(S.doubling_time(.07), 2) == ex["doublement"]
+          and round(S.rule_of_72(.07), 2) == 10.29)
+    check("doubling at 6 %: 11,9 years, rule 12", round(S.doubling_time(.06), 1) == 11.9 and S.rule_of_72(.06) == 12)
+    seq = [.30, -.20, .25, -.30]
+    check("drag: +1,25 % arithmetic, 91 € left, -2,33 % compounded", round(sum(seq) / 4 * 100, 2) == ex["moyenne"]
+          and round(100 * 1.3 * .8 * 1.25 * .7, 2) == ex["resultat"] and round(S.geometric_mean(seq) * 100, 2) == ex["geometrique"])
+    check("figure: +50 % then -50 % loses 25 %, -13,4 % a year", round(S.geometric_mean([.5, -.5]) * 100, 1) == -13.4)
+
+    def last(*args, **kw):
+        return S.project(*args, **kw)[-1]
+    cash, prudent, risky = last(10_000, 30, 0, .02), last(10_000, 30, .02, .02), last(10_000, 30, .05, .02)
+    check("scenario cash: 10 000 shown, 5 521 real", cash.nominal == 10_000 and round(cash.real) == 5521)
+    check("scenario prudent: 18 114 shown, 10 000 real", round(prudent.nominal) == 18114 and round(prudent.real) == 10000)
+    check("scenario 5 %: 43 219 shown, 23 860 real", round(risky.nominal) == 43219 and round(risky.real) == 23860)
+    plan = last(10_000, 30, .05, .02, monthly_contribution=200)
+    check("with 200 € a month: 82 000 paid, 206 295 shown, 113 889 real", plan.contributed == 82_000
+          and round(plan.nominal) == 206295 and round(plan.real) == 113889)
+    check("the projection starts at year 0 with the capital", S.project(500, 1, .1, .02)[0].nominal == 500)
+
+    fe = {s.id: s.answer for s in catalog.exercise("frais-epargne").steps}
+    free, fee, taxed = last(10_000, 30, .06, .02), last(10_000, 30, .06, .02, annual_fee=.015), \
+        last(10_000, 30, .06, .02, annual_fee=.015, tax_on_gains=.30)
+    check("fees: 57 434,91 without", abs(free.nominal - fe["sans-frais"]) < 0.01)
+    check("fees: 36 497,48 with 1,5 %", abs(fee.nominal - fe["avec-frais"]) < 0.01)
+    check("fees: 36,5 % less", round((1 - fee.nominal / free.nominal) * 100, 1) == fe["ecart"])
+    check("fees: 9 302,38 paid", abs(fee.fees - fe["frais-payes"]) < 0.01)
+    check("tax: 28 548,24 after 30 % on the gains, 15 760,65 real", abs(taxed.nominal - fe["apres-impot"]) < 0.01
+          and abs(taxed.real - fe["reel"]) < 0.01)
+    check("lesson: about 1,5 % real a year, net of everything", round(((taxed.real / 10_000) ** (1 / 30) - 1) * 100, 1) == 1.5)
+    check("lesson: 1 % of fees cuts 26 % at 5 % over 30 years",
+          round((1 - last(10_000, 30, .05, .02, annual_fee=.01).nominal / risky.nominal) * 100) == 26)
+
+    dv = {s.id: s.answer for s in catalog.exercise("diversification-deux-actifs").steps}
+    vol = lambda w, r: round(S.portfolio_volatility(w, .15, .60, r) * 100, 2)
+    check("diversification: 32,35 / 15,83 / 15,14 %", vol(.5, .2) == dv["moitie"] and vol(.9, .2) == dv["dix"]
+          and vol(.95, .2) == dv["cinq"])
+    check("diversification: 37,5 % if perfectly correlated, 30,92 % if independent",
+          vol(.5, 1) == dv["correle"] and vol(.5, 0) == dv["independant"])
+    check("quiz: the weighted mean at 95/5 would be 17,25 %", round(.95 * 15 + .05 * 60, 2) == 17.25)
+
+    real = {r["mois"][:7]: r for r in catalog.dataset("taux-reel-bce").rows}
+    negative = sum(1 for r in real.values() if r["taux_reel"] < 0) / len(real)
+    check("data: the real ECB rate is negative in 72 % of months", round(negative * 100) == 72)
+    low = min(real.items(), key=lambda kv: kv[1]["taux_reel"])
+    high = max(real.items(), key=lambda kv: kv[1]["taux_reel"])
+    check("data: its low is -9,85 % in October 2022, deposit rate 0,75 %", low[0] == "2022-10"
+          and low[1]["taux_reel"] == -9.85 and low[1]["taux_nominal"] == 0.75)
+    check("data: its high is 1,8 % in September 2024", high[0] == "2024-09" and high[1]["taux_reel"] == 1.8)
+    check("data: real = nominal minus inflation, every month",
+          all(abs(r["taux_reel"] - (r["taux_nominal"] - r["inflation"])) < 0.006 for r in real.values()))
+
+    check("Bitcoin: 93,75 % issued at the April 2024 halving", round(B.supply_after(839_999) / B.total_supply() * 100, 2) == 93.75)
+    check("Bitcoin: 20 099 725 BTC at block 971 911, 95,7 %", B.supply_after(971_911) == 2_009_972_500_000_000
+          and round(B.supply_after(971_911) / B.total_supply() * 100, 1) == 95.7)
+    check("Bitcoin: the last subsidy falls in the 22nd century",
+          B.epochs(33)[-1].start_date.year >= 2100 and B.epochs(34)[-1].subsidy == 0)
+
+    from sensitor.academy.ui import savings_view
+    fig = savings_view.figure(S.project(10_000, 30, .05, .02, monthly_contribution=200))
+    check("the simulator draws three curves over 31 points", len(fig.data) == 3 and len(fig.data[0].x) == 31)
+    course = catalog.course("inflation-et-patrimoine")
+    check("the course closes path 1", [c.id for c in catalog.path("monnaie-inflation").courses][-1] == course.id)
+    check("every lesson is sourced and dated", all(l.sources and l.updated for l in course.lessons))
+    final = catalog.quiz("patrimoine-validation")
+    taught = {l.id for l in course.lessons} - {"recap-patrimoine"}
+    check("validation quiz: covers every lesson", {q.lesson_id for q in final.questions} == taught)
+    for bad in (lambda: S.project(-1, 10, .05, .02), lambda: S.project(100, 0, .05, .02),
+                lambda: S.project(100, 10, .05, .02, annual_fee=1), lambda: S.portfolio_volatility(1.2, .1, .2, 0),
+                lambda: S.doubling_time(0), lambda: S.real_rate(.05, -1)):
+        check("savings helpers refuse bad input", raises(bad, ValueError))
 
 
 def test_risk_path_figures():
@@ -1383,6 +1469,7 @@ def main() -> int:
     test_access_levels()
     test_money_figures()
     test_inflation_figures()
+    test_savings_figures()
     test_risk_path_figures()
     test_printable()
     test_validation_catches_mistakes()

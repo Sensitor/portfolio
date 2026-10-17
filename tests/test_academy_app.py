@@ -277,6 +277,19 @@ def main() -> int:
     total = sum(len(c.lessons) for c in load_catalog().available_courses())
     check("the dashboard reads the real progress", f"<b>1</b> / {total}" in text(dash))
 
+    print("\nThe savings simulator")
+    sim = run({"page": "lesson", "course": "inflation-et-patrimoine", "lesson": "simulateur-epargne"}, alice)
+    check("the simulator renders in its lesson", not sim.exception and len(sim.get("plotly_chart")) >= 1, error(sim))
+    def plain(app):
+        return text(app).replace("\u202f", " ").replace("\xa0", " ")
+    check("its defaults: 206 295 € shown, 113 889 € of purchasing power",
+          "206 295 €" in plain(sim) and "113 889 €" in plain(sim))
+    sim.number_input(key="savings_lesson_simulateur-epargne_rate").set_value(0.0)
+    sim.number_input(key="savings_lesson_simulateur-epargne_monthly").set_value(0.0)
+    sim.run()
+    check("set to cash: 10 000 € shown, 5 521 € of purchasing power",
+          "10 000 €" in plain(sim) and "5 521 €" in plain(sim) and not sim.exception, error(sim))
+
     print("\nThe reflection journal")
     visitor = run({"page": "psychology"})
     check("visitor: the space is open and explains the journal",

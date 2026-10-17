@@ -161,3 +161,24 @@ label = "Inflation"
 [[chart.series]]
 column = "fed_funds"
 label = "Taux des fonds fédéraux (effectif)"
+
+[[chart]]
+id = "taux-reel"
+dataset = "taux-reel-bce"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Rémunération nominale, inflation et taux réel en zone euro"
+
+[[chart.series]]
+column = "taux_nominal"
+label = "Taux de dépôt de la BCE (nominal)"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart.series]]
+column = "taux_reel"
+label = "Taux réel (nominal moins inflation)"

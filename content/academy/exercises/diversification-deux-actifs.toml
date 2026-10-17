@@ -1,0 +1,52 @@
+id = "diversification-deux-actifs"
+title = "Diversifier avec deux actifs"
+context = """
+Un actif **A**, de volatilité **15 %** par an, et un actif **B** très volatil, de volatilité **60 %**. Leur corrélation est de **0,2**, sauf mention contraire.
+
+Rappel : σ = √(w₁²σ₁² + w₂²σ₂² + 2 w₁ w₂ ρ σ₁ σ₂).
+
+Hypothèses construites pour l'exercice : les volatilités et les corrélations réelles changent dans le temps.
+"""
+conclusion = """
+Avec une corrélation faible, 5 % de l'actif très volatil ne fait monter la volatilité totale que de 15 % à 15,14 %, et 10 % à 15,83 %. À parts égales, la corrélation change tout : 30,9 % si elle est nulle, 37,5 % si elle vaut 1. La diversification travaille d'autant plus que les actifs bougent indépendamment.
+"""
+
+[[step]]
+id = "moitie"
+prompt = "Volatilité d'un portefeuille 50 % A, 50 % B ? (Deux décimales.)"
+unit = "%"
+answer = 32.35
+tolerance = 0.01
+solution = "√(0,5² × 0,15² + 0,5² × 0,60² + 2 × 0,5 × 0,5 × 0,2 × 0,15 × 0,60) = **32,35 %**."
+
+[[step]]
+id = "dix"
+prompt = "Et d'un portefeuille 90 % A, 10 % B ?"
+unit = "%"
+answer = 15.83
+tolerance = 0.01
+solution = "√(0,9² × 0,0225 + 0,1² × 0,36 + 2 × 0,9 × 0,1 × 0,2 × 0,15 × 0,60) = **15,83 %**."
+
+[[step]]
+id = "cinq"
+prompt = "Et 95 % A, 5 % B ?"
+unit = "%"
+answer = 15.14
+tolerance = 0.01
+solution = "**15,14 %** : à peine plus que les 15 % de l'actif A seul."
+
+[[step]]
+id = "correle"
+prompt = "À parts égales, si la corrélation valait 1, quelle serait la volatilité ?"
+unit = "%"
+answer = 37.5
+tolerance = 0.01
+solution = "Avec ρ = 1, la volatilité est la moyenne pondérée : 0,5 × 15 + 0,5 × 60 = **37,5 %**. Aucune diversification."
+
+[[step]]
+id = "independant"
+prompt = "Et si la corrélation était nulle ? (Deux décimales.)"
+unit = "%"
+answer = 30.92
+tolerance = 0.01
+solution = "√(0,5² × 0,0225 + 0,5² × 0,36) = **30,92 %**."

@@ -107,3 +107,16 @@ retrieved = 2026-10-17
 unit = "%"
 columns = ["mois", "inflation", "fed_funds"]
 notes = "L'indice d'octobre 2025 n'a pas été publié : le point manque."
+
+[[dataset]]
+id = "taux-reel-bce"
+title = "Taux de la facilité de dépôt de la BCE, inflation de la zone euro et taux réel, depuis 1999"
+kind = "file"
+file = "taux-reel-bce.csv"
+source = "Banque centrale européenne, Data Portal, série FM.D.U2.EUR.4F.KR.DFR.LEV (fin de mois) ; Eurostat, jeu prc_hicp_minr (IPCH, taux de variation annuel, zone euro) ; taux réel calculé par Sensitor : taux nominal moins inflation sur un an"
+url = "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV"
+license = "statistiques BCE réutilisables avec mention de la source ; données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "taux_nominal", "inflation", "taux_reel"]
+notes = "Le taux réel est calculé avec l'inflation passée sur un an, par simple différence ; les économistes utilisent souvent l'inflation attendue, qui n'est pas observée directement."

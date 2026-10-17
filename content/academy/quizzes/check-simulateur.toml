@@ -1,0 +1,73 @@
+id = "check-simulateur"
+title = "Contrôle : le simulateur"
+course = "inflation-et-patrimoine"
+lesson = "simulateur-epargne"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "billets"
+prompt = "10 000 € gardés en billets 30 ans avec 2 % d'inflation : pouvoir d'achat final ?"
+kind = "single"
+lesson = "simulateur-epargne"
+
+[[question.option]]
+id = "5521"
+text = "Environ 5 521 €."
+correct = true
+explanation = "10 000 ÷ 1,02^30."
+
+[[question.option]]
+id = "10000"
+text = "10 000 €."
+explanation = "C'est la valeur affichée, pas le pouvoir d'achat."
+
+[[question.option]]
+id = "4000"
+text = "4 000 €."
+explanation = "On ne retire pas 2 % du capital initial chaque année."
+
+[[question]]
+id = "egal"
+prompt = "Un placement dont le rendement égale l'inflation :"
+kind = "single"
+lesson = "simulateur-epargne"
+
+[[question.option]]
+id = "conserve"
+text = "conserve le pouvoir d'achat, sans l'augmenter."
+correct = true
+explanation = "Rendement réel nul."
+
+[[question.option]]
+id = "double"
+text = "double le pouvoir d'achat."
+explanation = "Il ne fait que le maintenir."
+
+[[question.option]]
+id = "perd"
+text = "le fait baisser."
+explanation = "Il le maintient."
+
+[[question]]
+id = "limite"
+prompt = "Quelle est la principale limite du simulateur ?"
+kind = "single"
+lesson = "simulateur-epargne"
+
+[[question.option]]
+id = "constant"
+text = "Il suppose des rendements et une inflation constants."
+correct = true
+explanation = "La réalité varie d'une année à l'autre."
+
+[[question.option]]
+id = "frais"
+text = "Il ignore les frais."
+explanation = "Il les prend en compte."
+
+[[question.option]]
+id = "versements"
+text = "Il ignore les versements."
+explanation = "Il les prend en compte."
