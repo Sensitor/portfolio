@@ -136,9 +136,10 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
     courses = catalog.available_courses()
     left, right = st.columns([1.35, 1], gap="large", vertical_alignment="bottom")
     with left:
-        page_header(f"Espace {spaces.space('academy').numeral} · Academy", "Comprendre la <em>monnaie</em>, Bitcoin et les marchés.",
-                    "Quatre filières, de la monnaie et de Bitcoin jusqu'au trading discipliné. "
-                    "Chaque parcours ouvre lorsque son contenu est rédigé, sourcé, relu et testé.",
+        page_header(f"Espace {spaces.space('academy').numeral} · Academy", "Apprendre le <em>trading</em>, comprendre la monnaie.",
+                    "Le trading d'abord, de la première bougie au processus discipliné ; puis la monnaie, "
+                    "Bitcoin et la crypto, pour comprendre ce qui porte les marchés. Chaque parcours ouvre "
+                    "lorsque son contenu est rédigé, sourcé, relu et testé.",
                     display=True)
     with right:
         step = P.next_step(catalog, member.completed, member.passed)

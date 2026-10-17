@@ -49,7 +49,7 @@ def _sidebar(page: str, email: str | None, catalog) -> None:
     with st.sidebar:
         html(f'<div class="sx-brand">{brand.mark_svg(42, uid="side")}<div>'
              f'<div class="sx-brand-name">SENSITOR</div>'
-             f'<div class="sx-brand-sub">BITCOIN · CRYPTO · TRADING</div></div></div>')
+             f'<div class="sx-brand-sub">TRADING · BITCOIN · CRYPTO</div></div></div>')
         rt.link("Vue d'ensemble", "home", key="nav_home",
                 kind="primary" if page == "home" else "secondary", width="stretch")
         for label, members in spaces.by_group():

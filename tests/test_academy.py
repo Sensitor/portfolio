@@ -69,11 +69,11 @@ def test_real_catalog():
 
     available = [p for p in catalog.paths if p.is_available]
     check("the open paths are exactly those with published courses",
-          all(p.courses for p in available) and available[0].id == "monnaie-inflation"
+          all(p.courses for p in available) and available[0].id == "bases-marches"
           and all(not p.courses for p in catalog.paths if p not in available),
           str([p.id for p in available]))
-    check("four tracks, Bitcoin first", [t.id for t in catalog.tracks]
-          == ["monnaie-bitcoin", "crypto", "investissement", "trading"])
+    check("four tracks, trading first, completed by money, Bitcoin and crypto", [t.id for t in catalog.tracks]
+          == ["trading", "monnaie-bitcoin", "crypto", "investissement"])
     trading = catalog.paths_in("trading")
     check("the ten trading paths keep their numbers", [p.number for p in trading] == list(range(1, 11)))
     check("paths are ordered by track, then number",
@@ -1246,8 +1246,8 @@ def test_progress_logic():
     check("final quiz passed", everything.final_quiz_passed is True)
 
     step = P.next_step(catalog, {}, set())
-    check("a new member starts with the first course of the programme", step.kind == "lesson"
-          and step.lesson.id == "fonctions-monnaie")
+    check("a new member starts with the first trading course", step.kind == "lesson"
+          and step.lesson.id == "fonctionnement-marche")
     step = P.next_step(catalog, {"premiers-pas": {"fonctionnement-marche"}}, set())
     check("a started member is sent to the next lesson", step.lesson.id == "ordres-et-couts")
     step = P.next_step(catalog, {"premiers-pas": {l.id for l in course.lessons}}, set())

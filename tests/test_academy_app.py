@@ -169,8 +169,8 @@ def test_new_tracks(alice: str) -> None:
     try:
         home = run({"page": "academy"})
         body = text(home)
-        check("the programme is grouped by track, Bitcoin first",
-              body.index("Monnaie et Bitcoin · 1 sur 2") < body.index("Trading · 7 sur 10"))
+        check("the programme is grouped by track, trading first",
+              body.index("Trading · 7 sur 10") < body.index("Monnaie et Bitcoin · 1 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -332,7 +332,7 @@ def main() -> int:
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
-          "Comprendre la <em>monnaie</em>" in text(old))
+          "Apprendre le <em>trading</em>" in text(old))
     for page in ("market", "community"):
         app = run({"page": page})
         body = text(app)
@@ -353,11 +353,13 @@ def main() -> int:
     finally:
         os.environ.pop("SENSITOR_TOOLS_URL", None)
     shell = run({"page": "home"})
-    check("the brand reads Bitcoin, crypto, trading", "BITCOIN · CRYPTO · TRADING" in text(shell))
+    check("the brand reads trading, Bitcoin, crypto", "TRADING · BITCOIN · CRYPTO" in text(shell))
     labels = [m.value for m in shell.sidebar.markdown]
-    check("the sidebar is grouped Apprendre, Investir, Trader, Échanger",
-          [g for g in ("APPRENDRE", "INVESTIR", "TRADER", "ÉCHANGER") if any(g in v for v in labels)]
-          == ["APPRENDRE", "INVESTIR", "TRADER", "ÉCHANGER"])
+    order = [g for g in ("APPRENDRE", "TRADER", "INVESTIR", "ÉCHANGER") for v in labels if g in v]
+    check("the sidebar is grouped Apprendre, Trader, Investir, Échanger",
+          order == ["APPRENDRE", "TRADER", "INVESTIR", "ÉCHANGER"], str(order))
+    check("the visitor's landing speaks of trading first",
+          "Apprendre le trading." in text(run({"page": "home"})))
     tools = run({"page": "tools"})
     check("tools: no link when the address is not configured",
           "Lien non configuré" in text(tools))
@@ -367,7 +369,7 @@ def main() -> int:
           [l for l in sidebar if l in {s.label for s in spaces.SPACES}] == [s.label for s in spaces.SPACES],
           str(sidebar))
     unknown = run({"page": "page-inconnue"})
-    check("an unknown page falls back to the home page", "Comprendre la monnaie." in text(unknown))
+    check("an unknown page falls back to the home page", "Apprendre le trading." in text(unknown))
 
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:

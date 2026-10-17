@@ -1,6 +1,7 @@
 # Le programme Sensitor Academy.
 #
-# Quatre filières, dans l'ordre où l'Academy les présente. Chaque parcours
+# Quatre filières, dans l'ordre où l'Academy les présente : le trading d'abord,
+# complété par la monnaie, Bitcoin, la crypto et l'investissement. Chaque parcours
 # appartient à une filière et y est numéroté ; la progression des membres est
 # enregistrée par cours et par leçon, jamais par numéro de parcours.
 #
@@ -10,6 +11,13 @@
 #
 # `require_sources = true` : chaque leçon publiée de la filière doit citer ses
 # sources et porter la date de sa dernière relecture (`updated`).
+
+[[track]]
+id = "trading"
+title = "Trading"
+short = "Trading"
+code = "T"
+summary = "Price action, liquidité, zones, gestion du risque, psychologie et backtesting : la méthode du trader, de la première bougie au processus discipliné."
 
 [[track]]
 id = "monnaie-bitcoin"
@@ -34,13 +42,6 @@ short = "Investissement"
 code = "I"
 summary = "Construire et évaluer une stratégie d'investissement crypto cohérente avec son horizon et sa tolérance au risque."
 require_sources = true
-
-[[track]]
-id = "trading"
-title = "Trading"
-short = "Trading"
-code = "T"
-summary = "Price action, liquidité, zones, gestion du risque, psychologie et backtesting : la méthode du trader, de la première bougie au processus discipliné."
 
 [[path]]
 id = "monnaie-inflation"

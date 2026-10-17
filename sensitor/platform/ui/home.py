@@ -59,12 +59,13 @@ def _landing(catalog) -> None:
     with st.container(key="navy_hero"):
         left, right = st.columns([1.2, 0.8], vertical_alignment="center", gap="large")
         with left:
-            html('<div class="sx-kicker on-navy">Sensitor · Bitcoin, crypto et trading</div>'
-                 '<h1 class="sx-display on-navy">Comprendre la monnaie.<br><em>Maîtriser ses '
-                 'décisions.</em></h1><p class="sx-lead on-navy">Comprendre la monnaie, l\'inflation '
-                 'et Bitcoin, analyser les cryptomonnaies et son portefeuille, apprendre le trading et '
-                 'documenter ses décisions : des parcours sourcés, des quiz corrigés, des simulateurs '
-                 'et des outils d\'analyse, sur un seul compte.</p>')
+            html('<div class="sx-kicker on-navy">Sensitor · Trading, Bitcoin et crypto</div>'
+                 '<h1 class="sx-display on-navy">Apprendre le trading.<br><em>Maîtriser ses '
+                 'décisions.</em></h1><p class="sx-lead on-navy">Des parcours structurés pour apprendre '
+                 'à lire un marché, mesurer son risque et évaluer ses décisions, complétés par une filière '
+                 'sur la monnaie, Bitcoin et la crypto pour comprendre ce qui porte les marchés et '
+                 'préserver un patrimoine. Leçons sourcées, quiz corrigés, simulateurs et outils '
+                 'd\'analyse, sur un seul compte.</p>')
             b1, b2, _ = st.columns([1, 1, 0.6])
             with b1:
                 if course:
@@ -81,7 +82,7 @@ def _landing(catalog) -> None:
              f'programme, ouverts un à un</div></div></div>'
              f'<div class="sx-watermark">{brand.monogram_svg(320, color="#ffffff")}</div>')
 
-    section(1, "Apprendre, investir, trader : un seul compte",
+    section(1, "Apprendre, trader, investir : un seul compte",
             "Chaque espace partage la même identité et le même compte. Ceux qui ne sont pas encore "
             "prêts le disent, et ouvrent quand ils le sont réellement.")
     space_cards(key="home_space")

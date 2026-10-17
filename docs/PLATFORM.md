@@ -48,8 +48,9 @@ Old URLs keep working: `?page=paths` opens the Academy home.
 `tests/test_platform.py`. The sidebar, the home page's space map and the router
 are all built from it.
 
-The sidebar groups them in four pillars, in this order: **Apprendre**, **Investir**,
-**Trader**, **Échanger**. The brand reads « Bitcoin · Crypto · Trading ».
+The sidebar groups them in four pillars, in this order: **Apprendre**, **Trader**,
+**Investir**, **Échanger**. The brand reads « Trading · Bitcoin · Crypto »: trading leads,
+the money, Bitcoin and crypto tracks complete it.
 
 | | Space | Group | Status | Pages |
 |---|---|---|---|---|
@@ -57,10 +58,10 @@ The sidebar groups them in four pillars, in this order: **Apprendre**, **Investi
 | II | Bibliothèque | Apprendre | live | `library`, `resource` |
 | III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
 | IV | Progression | Apprendre | live | `progress` |
-| V | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
-| VI | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
-| VII | Journal de trading | Trader | separate | `journal` (opens the analytics app on `?page=trading_overview`) |
-| VIII | Salle des marchés | Trader | preparing | `market` |
+| V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
+| VI | Journal de trading | Trader | separate | `journal` (opens the analytics app on `?page=trading_overview`) |
+| VII | Salle des marchés | Trader | preparing | `market` |
+| VIII | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
 | IX | Communauté | Échanger | preparing | `community` |
 
 The analytics app honours `?page=` only for `overview`, `trading_overview` and

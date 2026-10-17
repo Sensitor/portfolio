@@ -25,8 +25,8 @@ STATUS_LABELS = {LIVE: "Ouvert", PREPARING: "En préparation", SEPARATE: "Applic
 
 GROUPS = (
     ("apprendre", "Apprendre"),
-    ("investir", "Investir"),
     ("trader", "Trader"),
+    ("investir", "Investir"),
     ("echanger", "Échanger"),
 )
 
@@ -55,8 +55,8 @@ class Space:
 
 SPACES: tuple[Space, ...] = (
     Space("academy", "Academy", "apprendre", LIVE,
-          "Monnaie, Bitcoin, crypto, investissement et trading : des parcours sourcés, des quiz corrigés "
-          "et des exercices chiffrés.",
+          "Le trading de la première bougie au processus discipliné, complété par la monnaie, Bitcoin et "
+          "la crypto : des parcours sourcés, des quiz corrigés et des exercices chiffrés.",
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
           planned=("Les filières Monnaie et Bitcoin, Crypto et Investissement",
                    "Vidéos intégrées aux leçons", "Ebooks")),
@@ -73,27 +73,27 @@ SPACES: tuple[Space, ...] = (
     Space("progress", "Progression", "apprendre", LIVE,
           "Leçons terminées, historique des quiz et notions à revoir.",
           entry="progress", pages=("progress",), numeral="IV"),
-    Space("tools", "Portefeuille et risque", "investir", SEPARATE,
-          "Performance, allocation, exposition à Bitcoin et aux cryptomonnaies, risque, stress tests "
-          "et Monte Carlo.",
-          entry="tools", pages=("tools",), numeral="V",
-          planned=("Intégration au même espace membre",)),
     Space("lab", "Trading Lab", "trader", LIVE,
           "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
-          entry="lab", pages=("lab",), numeral="VI",
+          entry="lab", pages=("lab",), numeral="V",
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
     Space("journal", "Journal de trading", "trader", SEPARATE,
           "Le journal du trader : import MetaTrader 5, performance en R, analyse par setup et par "
           "session, discipline et rapports.",
-          entry="journal", pages=("journal",), numeral="VII",
+          entry="journal", pages=("journal",), numeral="VI",
           planned=("Intégration au même espace membre",)),
     Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
-          entry="market", pages=("market",), numeral="VIII",
+          entry="market", pages=("market",), numeral="VII",
           planned=("Contexte de marché et calendrier économique commentés",
                    "Scénarios avec invalidation, publiés avant la séance",
                    "Bilans pédagogiques après la séance, sans signaux"),
           related=(("Leçon : lire la structure", "lesson:premiers-pas/structure-de-marche"),)),
+    Space("tools", "Portefeuille et risque", "investir", SEPARATE,
+          "Performance, allocation, exposition à Bitcoin et aux cryptomonnaies, risque, stress tests "
+          "et Monte Carlo.",
+          entry="tools", pages=("tools",), numeral="VIII",
+          planned=("Intégration au même espace membre",)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",
           entry="community", pages=("community",), numeral="IX",

@@ -59,13 +59,13 @@ Ceux marqués ✔ ont été vérifiés dans le code ; les autres sont rapportés
 
 ## 3. Organisation proposée de l'Academy
 
-### Quatre filières, Bitcoin en tête
+### Quatre filières, le trading en tête
 
 Le programme actuel numérote dix parcours de trading de 1 à 10. Je propose de le regrouper en **filières**, sans toucher aux contenus :
 
 | Filière | Parcours | État |
 |---|---|---|
-| **Monnaie et Bitcoin** (le cœur éditorial) | M1 Monnaie, inflation et théorie monétaire · M2 Bitcoin en profondeur | à créer |
+| **Monnaie et Bitcoin** (le complément du trading) | M1 Monnaie, inflation et théorie monétaire · M2 Bitcoin en profondeur | à créer |
 | **Crypto** | C1 Blockchain, wallets et sécurité · C2 Altcoins et analyse crypto | à créer |
 | **Investissement** | I1 Stratégies d'investissement crypto · I2 La méthode du fondateur | à créer |
 | **Trading** | T1 à T7, les sept parcours publiés · T8 Macroéconomie et actualité · T9 La méthode Sensitor · T10 Processus discipliné | conservés tels quels |
@@ -142,7 +142,8 @@ Chaque jeu de données vivra dans un dossier dédié, avec un manifeste (source,
 
 ## 5. Navigation et positionnement
 
-- **Sous-titre de la marque :** « Trading · Éducation » devient « Bitcoin · Crypto · Trading ». Le logo et la charte ne changent pas.
+- **Sous-titre de la marque :** « Trading · Éducation » devient « Trading · Bitcoin · Crypto ». Le logo et la charte ne changent pas.
+- **Décision du 17 octobre 2026 :** le trading reste la porte d'entrée et la filière la plus mise en avant ; la monnaie, Bitcoin et la crypto viennent le compléter. Filière Trading en tête du programme, accueil et Academy centrés sur le trading, groupe « Trader » avant « Investir ».
 - **Barre latérale en trois piliers :** Apprendre (Academy, Bibliothèque, Psychologie, Progression), Investir (le portefeuille), Trader (Trading Lab et journal).
 - **Le portefeuille et le journal restent dans leur application** jusqu'à la phase F. Les intégrer directement dans la plateforme est un chantier à part : deux chartes graphiques coexistent, et l'audit a relevé des dépendances entre leurs pages. Je ne le lancerai qu'après validation.
 
