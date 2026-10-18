@@ -142,8 +142,10 @@ Chaque jeu de données vivra dans un dossier dédié, avec un manifeste (source,
 
 ## 5. Navigation et positionnement
 
-- **Sous-titre de la marque :** « Trading · Éducation » devient « Trading · Bitcoin · Crypto ». Le logo et la charte ne changent pas.
-- **Décision du 17 octobre 2026 :** le trading reste la porte d'entrée et la filière la plus mise en avant ; la monnaie, Bitcoin et la crypto viennent le compléter. Filière Trading en tête du programme, accueil et Academy centrés sur le trading, groupe « Trader » avant « Investir ».
+- **Sous-titre de la marque :** « Trading · Éducation » est devenu « Trading · Bitcoin · Crypto », puis « Trading · Monnaie · Crypto » le 18 octobre 2026. Le logo et la charte ne changent pas.
+- **Décision du 17 octobre 2026 :** le trading reste la porte d'entrée ; la monnaie, Bitcoin et la crypto viennent le compléter. Filière Trading en tête du programme, groupe « Trader » avant « Investir ».
+- **Décision du 18 octobre 2026, qui précise la précédente :** Sensitor se présente comme un seul écosystème en deux univers complémentaires, sans que l'un passe avant l'autre : apprendre le trading, comprendre la monnaie, diversifier ses investissements avec la crypto. L'accueil et l'Academy présentent les deux univers côte à côte.
+- **Identité de chaque univers dans l'Academy :** chaque filière déclare son univers dans `curriculum.toml` (`universe = "trading"` ou `"monnaie"`). L'univers Trading garde l'accent bleu et les titres en Playfair Display ; l'univers Monnaie et crypto (filières Monnaie et Bitcoin, Crypto, Investissement) prend un accent cuivre et des titres en Space Grotesk. Les pages d'un cours, de ses leçons et de son quiz portent un badge d'univers et changent d'accent dans toute la colonne principale ; les cartes de cours, le programme et les graphiques suivent la même règle.
 - **Barre latérale en trois piliers :** Apprendre (Academy, Bibliothèque, Psychologie, Progression), Investir (le portefeuille), Trader (Trading Lab et journal).
 - **Le portefeuille et le journal restent dans leur application** jusqu'à la phase F. Les intégrer directement dans la plateforme est un chantier à part : deux chartes graphiques coexistent, et l'audit a relevé des dépendances entre leurs pages. Je ne le lancerai qu'après validation.
 
@@ -165,6 +167,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **C1** ✔ | M1, cours « La monnaie » : 9 leçons sourcées, 5 schémas, données de taux BCE et Fed, 3 exercices | terminé |
 | **C2** ✔ | M1, cours « L'inflation » : 9 leçons sourcées, données Eurostat, BCE et américaines, écoles de pensée, 3 exercices | terminé |
 | **C3** ✔ | M1, cours « Inflation et patrimoine » : 8 leçons, simulateur d'épargne nominal et réel, taux réel BCE, diversification, Bitcoin avec ses objections | terminé |
+| **B3** ✔ | Écosystème en deux univers : accueil et Academy recadrés, couleur et typographie propres à l'univers Monnaie et crypto | terminé |
 | **C4** | M2, cours « Origines et fonctionnement », émission calculée | contenu et visualisation |
 | **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |

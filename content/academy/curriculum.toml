@@ -1,7 +1,8 @@
 # Le programme Sensitor Academy.
 #
-# Quatre filières, dans l'ordre où l'Academy les présente : le trading d'abord,
-# complété par la monnaie, Bitcoin, la crypto et l'investissement. Chaque parcours
+# Quatre filières en deux univers complémentaires : le trading, et la monnaie avec
+# Bitcoin, la crypto et l'investissement. `universe = "trading"` ou "monnaie"
+# donne aux pages d'un cours la couleur et la police de son univers. Chaque parcours
 # appartient à une filière et y est numéroté ; la progression des membres est
 # enregistrée par cours et par leçon, jamais par numéro de parcours.
 #
@@ -17,6 +18,7 @@ id = "trading"
 title = "Trading"
 short = "Trading"
 code = "T"
+universe = "trading"
 summary = "Price action, liquidité, zones, gestion du risque, psychologie et backtesting : la méthode du trader, de la première bougie au processus discipliné."
 
 [[track]]
@@ -24,6 +26,7 @@ id = "monnaie-bitcoin"
 title = "Monnaie et Bitcoin"
 short = "Monnaie et Bitcoin"
 code = "M"
+universe = "monnaie"
 summary = "Comprendre la monnaie, l'inflation et ce qui a conduit à Bitcoin, puis Bitcoin lui-même : son fonctionnement, sa politique monétaire, ses arguments et ses limites."
 require_sources = true
 
@@ -32,6 +35,7 @@ id = "crypto"
 title = "Crypto"
 short = "Crypto"
 code = "C"
+universe = "monnaie"
 summary = "Les bases techniques pour utiliser les cryptomonnaies en sécurité, puis l'analyse des protocoles, des tokens et des données on-chain."
 require_sources = true
 
@@ -40,6 +44,7 @@ id = "investissement"
 title = "Investissement"
 short = "Investissement"
 code = "I"
+universe = "monnaie"
 summary = "Construire et évaluer une stratégie d'investissement crypto cohérente avec son horizon et sa tolérance au risque."
 require_sources = true
 

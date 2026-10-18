@@ -14,20 +14,30 @@ from ...academy import progress as P
 from .. import brand
 from . import runtime as rt
 from .components import (crumbs, date_fr, duration, esc, footer, hexmark, html, icon,
-                         note, numeral, page_header, progress_bar, section, tap)
+                         note, page_header, progress_bar, section, tap)
 from .spaces_view import space_cards
+from ...academy.ui import universes
 
-STRUCTURE_ART = """
-<svg viewBox="0 0 440 260" role="img" aria-label="Une tendance haussière décrite par ses sommets et ses creux de swing">
-<g stroke="#ffffff14"><line x1="0" y1="50" x2="440" y2="50"/><line x1="0" y1="115" x2="440" y2="115"/>
-<line x1="0" y1="180" x2="440" y2="180"/><line x1="0" y1="245" x2="440" y2="245"/></g>
-<polyline points="12,232 88,152 130,192 214,104 256,148 340,64 382,100 432,30" fill="none" stroke="#a9c6e2" stroke-width="2.2" stroke-linejoin="round"/>
-<g stroke="#a9c6e2" stroke-opacity=".4" stroke-dasharray="3 5"><line x1="88" y1="152" x2="214" y2="152"/>
-<line x1="214" y1="104" x2="340" y2="104"/><line x1="130" y1="192" x2="256" y2="192"/><line x1="256" y1="148" x2="382" y2="148"/></g>
-<g fill="#0f1b26" stroke="#a9c6e2" stroke-width="1.6"><circle cx="88" cy="152" r="4.5"/><circle cx="214" cy="104" r="4.5"/><circle cx="340" cy="64" r="4.5"/></g>
-<g fill="#a9c6e2"><circle cx="130" cy="192" r="4.5"/><circle cx="256" cy="148" r="4.5"/><circle cx="382" cy="100" r="4.5"/></g>
-<g font-family="DM Mono, monospace" font-size="11.5" fill="#a9b7c4"><text x="76" y="137">S1</text><text x="202" y="89">S2</text>
-<text x="328" y="49">S3</text><text x="120" y="215">C1</text><text x="246" y="171">C2</text><text x="372" y="123">C3</text></g>
+# Two panels, one per universe: a market structure above (Trading, blue), the
+# programmed supply of Bitcoin below (Monnaie et crypto, copper). The supply
+# curve follows the halvings: supply grows linearly within an epoch, and each
+# epoch adds half of what the previous one did.
+ECOSYSTEM_ART = """
+<svg viewBox="0 0 440 300" role="img" aria-label="En haut, une tendance décrite par ses sommets et ses creux ; en bas, l'offre programmée de Bitcoin, qui tend vers 21 millions">
+<g font-family="DM Mono, monospace" font-size="12.5" letter-spacing="1.4"><text x="0" y="12" fill="#a9c6e2">TRADING · STRUCTURE</text>
+<text x="0" y="172" fill="#e6b98e">MONNAIE ET CRYPTO · OFFRE PROGRAMMÉE</text></g>
+<g stroke="#ffffff14"><line x1="0" y1="42" x2="440" y2="42"/><line x1="0" y1="92" x2="440" y2="92"/><line x1="0" y1="142" x2="440" y2="142"/>
+<line x1="0" y1="200" x2="440" y2="200"/><line x1="0" y1="250" x2="440" y2="250"/><line x1="0" y1="292" x2="440" y2="292"/></g>
+<polyline points="12,136 88,92 130,114 214,66 256,90 340,40 382,60 432,24" fill="none" stroke="#a9c6e2" stroke-width="2.2" stroke-linejoin="round"/>
+<g stroke="#a9c6e2" stroke-opacity=".4" stroke-dasharray="3 5"><line x1="88" y1="92" x2="214" y2="92"/><line x1="214" y1="66" x2="340" y2="66"/>
+<line x1="130" y1="114" x2="256" y2="114"/><line x1="256" y1="90" x2="382" y2="90"/></g>
+<g fill="#0f1b26" stroke="#a9c6e2" stroke-width="1.6"><circle cx="88" cy="92" r="4"/><circle cx="214" cy="66" r="4"/><circle cx="340" cy="40" r="4"/></g>
+<g fill="#a9c6e2"><circle cx="130" cy="114" r="4"/><circle cx="256" cy="90" r="4"/><circle cx="382" cy="60" r="4"/></g>
+<line x1="0" y1="200" x2="440" y2="200" stroke="#e6b98e" stroke-opacity=".55" stroke-dasharray="4 5"/>
+<text x="440" y="194" text-anchor="end" font-family="DM Mono, monospace" font-size="12" fill="#e6b98e">21 M</text>
+<polyline points="12,292 92,246 172,223 252,211.5 332,205.8 412,202.9 432,202.5"
+ fill="none" stroke="#e6b98e" stroke-linejoin="round" stroke-width="2.2"/>
+<g fill="#0f1b26" stroke="#e6b98e" stroke-width="1.6"><circle cx="92" cy="246" r="4"/><circle cx="172" cy="223" r="4"/><circle cx="252" cy="211.5" r="4"/><circle cx="332" cy="205.8" r="4"/></g>
 </svg>
 """
 
@@ -54,27 +64,29 @@ def _counts(catalog) -> tuple[int, int, int]:
 
 def _landing(catalog) -> None:
     lessons, questions, paths = _counts(catalog)
-    course = next(iter(catalog.available_courses()), None)
+    firsts = [c[0] for c in (universes.courses_in(catalog, u) for u in universes.UNIVERSES) if c]
+    course = firsts[0] if firsts else None
 
     with st.container(key="navy_hero"):
-        left, right = st.columns([1.2, 0.8], vertical_alignment="center", gap="large")
+        left, right = st.columns([1.3, 0.7], vertical_alignment="center", gap="large")
         with left:
-            html('<div class="sx-kicker on-navy">Sensitor · Trading, Bitcoin et crypto</div>'
-                 '<h1 class="sx-display on-navy">Apprendre le trading.<br><em>Maîtriser ses '
-                 'décisions.</em></h1><p class="sx-lead on-navy">Des parcours structurés pour apprendre '
-                 'à lire un marché, mesurer son risque et évaluer ses décisions, complétés par une filière '
-                 'sur la monnaie, Bitcoin et la crypto pour comprendre ce qui porte les marchés et '
-                 'préserver un patrimoine. Leçons sourcées, quiz corrigés, simulateurs et outils '
-                 'd\'analyse, sur un seul compte.</p>')
+            html('<div class="sx-kicker on-navy">L\'écosystème Sensitor</div>'
+                 '<h1 class="sx-display on-navy sx-eco">Apprendre le <em>trading</em>.<br>'
+                 'Comprendre la <em class="cu">monnaie</em>.<br>Diversifier avec la '
+                 '<em class="cu">crypto</em>.</h1><p class="sx-lead on-navy">Deux '
+                 'univers qui se complètent, sur un seul compte : le trading, pour lire un marché, '
+                 'mesurer son risque et décider avec méthode ; la monnaie, Bitcoin et la crypto, pour '
+                 'comprendre ce qui fait la valeur de l\'argent et diversifier ses investissements dans '
+                 'le temps. Leçons sourcées, quiz corrigés, simulateurs et outils d\'analyse.</p>')
             b1, b2, _ = st.columns([1, 1, 0.6])
             with b1:
                 if course:
-                    rt.link("Commencer le parcours", "course", key="hero_start",
+                    rt.link("Commencer gratuitement", "course", key="hero_start",
                             kind="primary", course=course.id)
             with b2:
                 rt.link("Créer un compte gratuit", "account", key="hero_account")
         with right:
-            html(f'<div class="sx-hero-art">{STRUCTURE_ART}</div>')
+            html(f'<div class="sx-hero-art">{ECOSYSTEM_ART}</div>')
         html('<div class="sx-figures-navy">'
              f'<div><div class="v">{lessons}</div><div class="l">leçons publiées</div></div>'
              f'<div><div class="v">{questions}</div><div class="l">questions corrigées</div></div>'
@@ -82,24 +94,28 @@ def _landing(catalog) -> None:
              f'programme, ouverts un à un</div></div></div>'
              f'<div class="sx-watermark">{brand.monogram_svg(320, color="#ffffff")}</div>')
 
-    section(1, "Apprendre, trader, investir : un seul compte",
+    section(1, "Un écosystème, deux univers",
+            "Le trading et la monnaie ne s'opposent pas : l'un apprend à agir sur les marchés, l'autre "
+            "à comprendre ce qui les porte et à diversifier ce que l'on construit.")
+    universes.cards(catalog, key="home_universe")
+
+    section(2, "Apprendre, trader, investir : un seul compte",
             "Chaque espace partage la même identité et le même compte. Ceux qui ne sont pas encore "
             "prêts le disent, et ouvrent quand ils le sont réellement.")
     space_cards(key="home_space")
 
-    if course:
-        section(2, "Le premier parcours", course.summary)
-        _feature(catalog, course, key="home_feature")
-        public = [l for l in course.lessons if l.is_public]
-        if public:
-            html('<div class="sx-kicker muted" style="margin:2rem 0 .3rem">En accès libre, sans '
-                 'compte</div>')
-            for lesson in public:
+    if firsts:
+        section(3, "Par où commencer",
+                "Le premier cours de chaque univers, avec ses leçons en accès libre, sans compte.")
+        for first in firsts:
+            _feature(catalog, first, key=f"home_feature_{first.id}")
+            for lesson in (l for l in first.lessons if l.is_public):
                 tap(f"home_free_{lesson.id}", _lesson_row(lesson, "todo", flush=True),
                     f"Leçon {lesson.number} : {lesson.title}", "lesson",
-                    course=course.id, lesson=lesson.id)
+                    course=first.id, lesson=lesson.id)
+            html('<div style="height:1.2rem"></div>')
 
-    section(3, "Une boucle d'apprentissage",
+    section(4, "Une boucle d'apprentissage",
             "Chaque leçon suit le même cycle, du concept à la correction de vos propres réponses.")
     steps = "".join(f'<div><span class="hx">{hexmark(f"{i:02d}", "current" if i == 1 else "todo")}'
                     f'</span><div class="t">{esc(t)}</div><div class="x">{esc(x)}</div></div>'
@@ -108,13 +124,14 @@ def _landing(catalog) -> None:
 
     html('<p class="sx-note" style="margin-top:3rem">Sensitor est un service de formation. Aucun '
          'contenu ne constitue un conseil en investissement ni une promesse de résultat. Le trading '
-         'comporte un risque de perte en capital.</p>')
+         'et les crypto-actifs comportent un risque de perte en capital.</p>')
 
 
 def _feature(catalog, course, *, key: str) -> None:
     path = catalog.path(course.path_id)
     tap(key,
-        f'<div class="sx-feature"><div class="numeral">{numeral(path.number if path else 1)}</div>'
+        f'<div class="sx-feature uni-{catalog.universe_of(course)}"><div class="numeral">'
+        f'{universes.path_mark(catalog, path)}</div>'
         f'<div><div class="sx-kicker">{esc(path.label) if path else "Parcours"} · '
         f'{esc(path.title if path else "")}</div><div class="t">{esc(course.title)}</div>'
         f'<div class="s">{esc(course.summary)}</div><div class="sx-meta"><span>'

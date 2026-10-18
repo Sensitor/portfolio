@@ -80,6 +80,13 @@ def test_real_catalog():
           [p.track for p in catalog.paths] == sorted((p.track for p in catalog.paths),
                                                      key=[t.id for t in catalog.tracks].index))
     check("every path belongs to a known track", all(catalog.track(p.track) for p in catalog.paths))
+    check("two universes: trading, then money with Bitcoin, crypto and investing",
+          [t.universe for t in catalog.tracks] == ["trading", "monnaie", "monnaie", "monnaie"]
+          and catalog.track("crypto").universe_label == "Monnaie et crypto")
+    check("a course takes the universe of its track",
+          catalog.universe_of(catalog.course("premiers-pas")) == "trading"
+          and catalog.universe_of(catalog.course("la-monnaie")) == "monnaie"
+          and catalog.universe_of(None) == "trading")
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
     check("Monnaie et Bitcoin opens with path 1; the rest of the new tracks is announced",
@@ -1023,6 +1030,12 @@ def test_validation_catches_mistakes():
     cur.write_text(cur.read_text().replace('track = "trading"\nid = "bases-marches"',
                                            'track = "inconnue"\nid = "bases-marches"'))
     check("a path in an unknown track is refused", any("filière inconnue" in p for p in C.validate(root)))
+
+    root = _copy_tree()
+    cur = root / "curriculum.toml"
+    cur.write_text(cur.read_text().replace('code = "C"\nuniverse = "monnaie"', 'code = "C"\nuniverse = "defi"'))
+    check("a track in an unknown universe is refused",
+          any("univers « defi » inconnu" in p for p in C.validate(root)))
 
     root = _copy_tree()
     cur = root / "curriculum.toml"

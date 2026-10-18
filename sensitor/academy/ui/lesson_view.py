@@ -19,6 +19,7 @@ from . import chart_view, exercise_view, quiz_view, risk_view, savings_view
 
 def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> None:
     figure = 0
+    universe = catalog.universe_of(catalog.course(lesson.course_id))
     for index, block in enumerate(lesson.blocks):
         if block.kind == "markdown":
             md(block.text)
@@ -36,7 +37,7 @@ def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> Non
             if chart and dataset:
                 figure += 1
                 chart_view.render(chart, dataset, caption=block.text, number=figure,
-                                  key=f"{lesson.id}_{index}")
+                                  key=f"{lesson.id}_{index}", universe=universe)
         elif block.kind == "formula":
             st.latex(block.text)
         elif block.kind == "exercise":

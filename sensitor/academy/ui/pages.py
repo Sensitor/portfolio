@@ -17,11 +17,11 @@ from ...platform import spaces
 from ...platform.ui import runtime as rt
 from ...platform.ui.components import (crumbs, date_fr, duration, esc, footer, hexmark, html,
                                        icon, note, notice, numeral, page_header, pill,
-                                       progress_bar, section, tap)
+                                       progress_bar, section, tap, universe_tag)
 from .. import access, progress as P
 from .. import quiz as Q
-from ..content import Catalog, Course, Lesson
-from . import lesson_view, quiz_view, risk_view
+from ..content import UNIVERSES, Catalog, Course, Lesson
+from . import lesson_view, quiz_view, risk_view, universes
 from .library import book_row
 
 FORMATS = (
@@ -91,7 +91,7 @@ def lesson_row(lesson: Lesson, state: str, *, flush: bool = False, when: str = "
             f'<span class="arrow">{icon("arrow")}</span></div>')
 
 
-def start_card(course: Course, member: Member, *, key: str) -> None:
+def start_card(course: Course, member: Member, *, key: str, universe: str = "") -> None:
     """The navy starting point: where to begin or resume, as one link."""
     progress = member.progress(course)
     target = progress.next_lesson or course.lessons[0]
@@ -106,7 +106,8 @@ def start_card(course: Course, member: Member, *, key: str) -> None:
     foot = (f"{progress.done} / {progress.total} leçons terminées" if member.email
             else f"{esc(duration(target.duration_minutes))} · sans compte")
     tap(key,
-        f'<div class="sx-start"><div class="sx-kicker on-navy">{kicker}</div>'
+        f'<div class="sx-start{f" uni-{universe}" if universe else ""}"><div class="sx-kicker on-navy">'
+        f'{kicker}</div>'
         f'<div class="t">{esc(target.title)}</div><div class="s">{esc(target.summary)}</div>'
         f'<div class="bar"><i style="width:{progress.fraction * 100:.0f}%"></i></div>'
         f'<div class="foot"><span>{foot}</span><span class="go">{verb} {icon("arrow")}</span></div></div>',
@@ -116,7 +117,7 @@ def start_card(course: Course, member: Member, *, key: str) -> None:
 def course_feature(catalog: Catalog, course: Course, *, key: str) -> None:
     path = catalog.path(course.path_id)
     tap(key,
-        f'<div class="sx-feature"><div class="numeral">{numeral(path.number if path else 1)}</div>'
+        f'<div class="sx-feature uni-{catalog.universe_of(course)}"><div class="numeral">{universes.path_mark(catalog, path)}</div>'
         f'<div><div class="sx-kicker">{esc(path.label) if path else "Parcours"} · {esc(path.title if path else "")}'
         f'</div><div class="t">{esc(course.title)}</div><div class="s">{esc(course.summary)}</div>'
         f'<div class="sx-meta"><span><b>{len(course.modules)}</b> chapitres</span><span>'
@@ -136,36 +137,53 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
     courses = catalog.available_courses()
     left, right = st.columns([1.35, 1], gap="large", vertical_alignment="bottom")
     with left:
-        page_header(f"Espace {spaces.space('academy').numeral} · Academy", "Apprendre le <em>trading</em>, comprendre la monnaie.",
-                    "Le trading d'abord, de la première bougie au processus discipliné ; puis la monnaie, "
-                    "Bitcoin et la crypto, pour comprendre ce qui porte les marchés. Chaque parcours ouvre "
-                    "lorsque son contenu est rédigé, sourcé, relu et testé.",
+        page_header(f"Espace {spaces.space('academy').numeral} · Academy",
+                    'Apprendre le <em>trading</em>, comprendre la <em class="cu">monnaie</em>.',
+                    "Apprendre le trading pour lire un marché et décider avec méthode ; comprendre la "
+                    "monnaie, l'inflation, Bitcoin et la crypto pour diversifier ses investissements avec "
+                    "recul. Chaque parcours ouvre lorsque son contenu est rédigé, sourcé, relu et testé.",
                     display=True)
     with right:
         step = P.next_step(catalog, member.completed, member.passed)
         target = step.course or (courses[0] if courses else None)
         if target:
-            start_card(target, member, key="academy_start")
+            start_card(target, member, key="academy_start", universe=catalog.universe_of(target))
 
-    section(1, "Les parcours ouverts",
+    section(1, "Deux univers, un seul programme",
+            "Chacun a sa couleur et sa typographie, pour savoir à tout moment où l'on se trouve. "
+            "On peut suivre l'un, l'autre, ou les deux en parallèle.")
+    universes.cards(catalog, key="academy_universe")
+
+    section(2, "Les parcours ouverts",
             "Un parcours est une suite de chapitres et de leçons, conclue par un quiz de validation.")
-    for course in courses:
-        course_feature(catalog, course, key=f"academy_course_{course.id}")
-        if email:
-            progress = member.progress(course)
-            html(f'<div style="margin-top:.8rem">{progress_bar(progress.fraction, f"{progress.done} / {progress.total} leçons terminées")}</div>')
+    for index, universe in enumerate(u for u in UNIVERSES if universes.courses_in(catalog, u)):
+        opened = universes.courses_in(catalog, universe)
+        universes.head(universe, f"{len(opened)} cours ouvert{'s' if len(opened) > 1 else ''}",
+                       first=index == 0)
+        for course in opened:
+            course_feature(catalog, course, key=f"academy_course_{course.id}")
+            if email:
+                progress = member.progress(course)
+                html(f'<div style="margin-top:.8rem">{progress_bar(progress.fraction, f"{progress.done} / {progress.total} leçons terminées")}</div>')
 
     total = len(catalog.paths)
-    section(2, "Le programme complet",
-            f"{total} parcours en {len(catalog.tracks) or 1} filières. Ceux qui sont en préparation "
-            "sont annoncés ici et ne sont pas lisibles.")
-    groups = [(t.title, t.summary, catalog.paths_in(t.id)) for t in catalog.tracks] or [("", "", list(catalog.paths))]
-    for title, summary, paths in groups:
-        if not paths:
-            continue
+    section(3, "Le programme complet",
+            f"{total} parcours en {len(catalog.tracks) or 1} filières, réparties en deux univers. Ceux "
+            "qui sont en préparation sont annoncés ici et ne sont pas lisibles.")
+    groups = ([(t.universe, t.title, t.summary, catalog.paths_in(t.id)) for t in catalog.tracks]
+              or [("", "", "", list(catalog.paths))])
+    groups = [g for g in groups if g[3]]
+    shown = None
+    for universe, title, summary, paths in groups:
+        uni = f" uni-{universe}" if universe else ""
+        if universe and universe != shown:
+            tracks = [g for g in groups if g[0] == universe]
+            universes.head(universe, f"{len(tracks)} filière{'s' if len(tracks) > 1 else ''} · "
+                           f"{sum(len(g[3]) for g in tracks)} parcours", first=shown is None)
+            shown = universe
         if title:
             opened = sum(1 for p in paths if p.is_available)
-            html(f'<div class="sx-track"><div class="sx-kicker">{esc(title)} · {opened} sur {len(paths)} '
+            html(f'<div class="sx-track{uni}"><div class="sx-kicker">{esc(title)} · {opened} sur {len(paths)} '
                  f'ouvert{"s" if opened > 1 else ""}</div><p>{esc(summary)}</p></div>')
         cells = []
         for path in paths:
@@ -173,9 +191,9 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
             cells.append(f'<div><span class="n">{path.number:02d} · {numeral(path.number)}</span>'
                          f'<div class="t">{esc(path.title)}</div><div class="x">{esc(path.summary)}</div>'
                          f'{status}</div>')
-        html(f'<div class="sx-index">{"".join(cells)}</div>')
+        html(f'<div class="sx-index{uni}">{"".join(cells)}</div>')
 
-    section(3, "Les formats", "Ce qui est disponible aujourd'hui, et ce qui ne l'est pas encore.")
+    section(4, "Les formats", "Ce qui est disponible aujourd'hui, et ce qui ne l'est pas encore.")
     rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(label)}</span>'
                    f'{pill("Disponible", "live") if kind == "live" else pill("En préparation", "soon")}</li>'
                    for i, (label, kind) in enumerate(FORMATS, start=1))
@@ -195,11 +213,13 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
     member = Member(email)
     progress = member.progress(course)
     path = catalog.path(course.path_id)
+    universe = catalog.universe_of(course)
 
-    crumbs("Sensitor", "Academy", course.title)
+    crumbs("Sensitor", "Academy", course.title, universe=universe)
     left, right = st.columns([1.4, 1], gap="large", vertical_alignment="bottom")
     with left:
-        kicker = f"{esc(path.label)} · {esc(path.title)}" if path else "Parcours"
+        kicker = universe_tag(universe, UNIVERSES[universe]) + (
+            f"{esc(path.label)} · {esc(path.title)}" if path else "Parcours")
         meta = [f"{icon('clock')}<b>{esc(duration(course.duration_minutes))}</b>",
                 f"<b>{len(course.modules)}</b> chapitres", f"<b>{len(course.lessons)}</b> leçons",
                 f"niveau {esc(course.level_label.lower())}"]
@@ -207,7 +227,7 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
             meta.append("quiz de validation")
         page_header(kicker, esc(course.title), course.summary, meta)
     with right:
-        start_card(course, member, key="course_start")
+        start_card(course, member, key="course_start", universe=universe)
 
     section(1, "Ce que vous saurez faire",
             "Les objectifs du parcours. Le quiz de validation vérifie chacun d'eux.")
@@ -221,7 +241,7 @@ def course_page(catalog: Catalog, email: str | None, route: dict) -> None:
             + (f"{free} leçon se lit sans compte" if free == 1 else f"{free} leçons se lisent sans compte")
             + " ; les suivantes demandent un compte gratuit.")
     for module in course.modules:
-        html(f'<div class="sx-chapter"><div class="numeral">{numeral(module.number)}.</div><div>'
+        html(f'<div class="sx-chapter"><div class="numeral">{universes.chapter_mark(module.number, universe)}</div><div>'
              f'<div class="k">Chapitre {numeral(module.number)} · {len(module.lessons)} '
              f'leçon{"s" if len(module.lessons) > 1 else ""} · {esc(duration(module.duration_minutes))}'
              f'</div><h3>{esc(module.title)}</h3><p>{esc(module.summary)}</p></div></div>')
@@ -288,13 +308,15 @@ def lesson_page(catalog: Catalog, email: str | None, route: dict) -> None:
     member = Member(email)
     progress = member.progress(course)
     module = course.module_of(lesson)
+    universe = catalog.universe_of(course)
 
-    crumbs("Sensitor", "Academy", course.title, f"Leçon {lesson.number:02d}")
+    crumbs("Sensitor", "Academy", course.title, f"Leçon {lesson.number:02d}", universe=universe)
     outline, body = st.columns([0.85, 2.75], gap="large")
     with outline:
         with st.container(key=f"outline_{lesson.id}"):
             rt.link("← Le parcours", "course", key="lesson_back", kind="tertiary", course=course.id)
-            html(f'<div class="sx-outline-head">Plan du parcours<b>{esc(course.title)}</b></div>')
+            html(f'<div class="sx-outline-head">{universe_tag(universe, UNIVERSES[universe])}'
+                 f'Plan du parcours<b>{esc(course.title)}</b></div>')
             for item in course.lessons:
                 state = _outline_state(item, lesson, member, progress)
                 tap(f"outline_{item.id}",
@@ -319,7 +341,8 @@ def lesson_page(catalog: Catalog, email: str | None, route: dict) -> None:
                  pill("Membres", "member", "lock"))
         chapter = f"Chapitre {numeral(module.number)} · {esc(module.title)}" if module else ""
         html(f'<div class="sx-lesson-head"><div class="no">{lesson.number:02d}</div><div>'
-             f'<div class="sx-kicker">{chapter}</div><h1 class="sx-title">{esc(lesson.title)}</h1>'
+             f'<div class="sx-kicker">{universe_tag(universe, UNIVERSES[universe])}{chapter}</div>'
+             f'<h1 class="sx-title">{esc(lesson.title)}</h1>'
              f'</div></div><p class="sx-lead" style="margin-top:1rem">{esc(lesson.summary)}</p>'
              f'<div class="sx-meta"><span>{icon("clock")}{esc(duration(lesson.duration_minutes))} de '
              f'lecture</span><span>{state}</span>'
@@ -424,7 +447,8 @@ def quiz_page(catalog: Catalog, email: str | None, route: dict) -> None:
         _not_found("Ce quiz n'existe pas ou n'est pas encore publié.")
         return
     course = catalog.course(route.get("course") or quiz.course_id or "")
-    crumbs("Sensitor", "Academy", *( [course.title] if course else []), "Quiz de validation")
+    crumbs("Sensitor", "Academy", *( [course.title] if course else []), "Quiz de validation",
+           universe=catalog.universe_of(course) if course else "")
     if course:
         rt.link("← Le parcours", "course", key="quiz_back", kind="tertiary", course=course.id)
     page_header("Évaluation finale", esc(quiz.title), quiz.intro)
@@ -514,8 +538,10 @@ def progress_page(catalog: Catalog, email: str | None, route: dict) -> None:
     section(1, "Par parcours")
     for course in courses:
         progress = member.progress(course)
-        html(f'<div class="sx-kicker muted" style="margin:.4rem 0 .6rem">{esc(course.title)} · '
-             f'{progress.done} / {progress.total}</div>{progress_bar(progress.fraction)}')
+        universe = catalog.universe_of(course)
+        html(f'<div class="uni-{universe}"><div class="sx-kicker muted" style="margin:.4rem 0 .6rem">'
+             f'{universe_tag(universe, UNIVERSES[universe])}{esc(course.title)} · {progress.done} / '
+             f'{progress.total}</div>{progress_bar(progress.fraction)}</div>')
         for lesson in course.lessons:
             state = lesson_state(lesson, member, progress)
             when = date_fr(member.completed_at.get((course.id, lesson.id), ""))

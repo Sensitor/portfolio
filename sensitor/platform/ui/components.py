@@ -128,7 +128,11 @@ _ICONS = {
     "external": '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
     "dot": '<circle cx="12" cy="12" r="3"/>',
     "info": '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
+    "candle": '<path d="M7 3v4M7 15v6M17 5v3M17 17v2"/><rect x="5" y="7" width="4" height="8" rx=".6"/><rect x="15" y="8" width="4" height="9" rx=".6"/>',
+    "coin": '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5.5"/><path d="M12 9.2v5.6"/>',
 }
+
+UNIVERSE_ICONS = {"trading": "candle", "monnaie": "coin"}
 
 SPACE_ICONS = {"academy": "book", "library": "library", "psychology": "mind", "lab": "lab",
                "market": "market", "community": "people", "progress": "progress", "tools": "tools",
@@ -159,6 +163,12 @@ def pill(text: str, kind: str = "", icon_name: str | None = None) -> str:
     return f'<span class="sx-pill {kind}">{glyph}{esc(text)}</span>'
 
 
+def universe_tag(universe: str, label: str) -> str:
+    """The badge naming a universe: Trading in blue, Monnaie et crypto in copper."""
+    return (f'<span class="sx-uni uni-{esc(universe)}">{icon(UNIVERSE_ICONS.get(universe, "dot"))}'
+            f'{esc(label)}</span>')
+
+
 def progress_bar(fraction: float, label: str = "") -> str:
     width = max(0.0, min(1.0, fraction)) * 100
     bar = (f'<div class="sx-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" '
@@ -168,10 +178,12 @@ def progress_bar(fraction: float, label: str = "") -> str:
 
 # ── Page furniture ───────────────────────────────────────────────────────────
 
-def crumbs(*parts: str) -> None:
+def crumbs(*parts: str, universe: str = "") -> None:
+    """`universe` marks the page as part of one; the stylesheet then recolours its main column."""
     items = '<i>/</i>'.join(f"<b>{esc(p)}</b>" if i == len(parts) - 1 else esc(p)
                             for i, p in enumerate(parts))
-    html(f'<nav class="sx-crumbs" aria-label="Fil d\'Ariane">{items}</nav>')
+    scope = f'<span class="sx-scope uni-{esc(universe)}" hidden></span>' if universe else ""
+    html(f'<nav class="sx-crumbs" aria-label="Fil d\'Ariane">{items}{scope}</nav>')
 
 
 def page_header(kicker: str, title_html: str, lead: str = "", meta: list[str] | None = None,

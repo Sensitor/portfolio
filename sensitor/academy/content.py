@@ -60,6 +60,12 @@ MEMBER = "member"
 PREMIUM = "premium"            # a signed-in account whose tier includes premium
 ACCESS = {PUBLIC, MEMBER, PREMIUM}
 
+# The two universes of the Academy. Each track belongs to one; the pages of a
+# course take the colours and title face of its universe.
+TRADING = "trading"
+MONNAIE = "monnaie"
+UNIVERSES = {TRADING: "Trading", MONNAIE: "Monnaie et crypto"}
+
 LEVELS = {"debutant": "Débutant", "intermediaire": "Intermédiaire", "avance": "Avancé"}
 FEEDBACK = {"immediate", "deferred"}
 QUESTION_KINDS = {"single", "multiple"}
@@ -231,7 +237,9 @@ class Track:
 
     Paths are numbered within their track, so adding a path to one track never
     renumbers another. `require_sources` makes every published lesson of the
-    track carry its sources and the date of its last review.
+    track carry its sources and the date of its last review. `universe` is
+    « trading » or « monnaie » : the two halves of the programme, told apart on
+    screen by their accent colour and their title face.
     """
     id: str
     title: str
@@ -239,6 +247,11 @@ class Track:
     code: str
     summary: str = ""
     require_sources: bool = False
+    universe: str = TRADING
+
+    @property
+    def universe_label(self) -> str:
+        return UNIVERSES.get(self.universe, "")
 
 
 @dataclass(frozen=True)
@@ -322,6 +335,12 @@ class Catalog:
 
     def paths_in(self, track_id: str) -> list[LearningPath]:
         return [p for p in self.paths if p.track == track_id]
+
+    def universe_of(self, course: Course | None) -> str:
+        """The universe a course belongs to, through its path and track; trading by default."""
+        path = self.path(course.path_id) if course else None
+        track = self.track(path.track) if path else None
+        return track.universe if track else TRADING
 
     def course(self, course_id: str) -> Course | None:
         return self.courses.get(course_id)
@@ -802,7 +821,11 @@ class _Loader:
             tracks.append(Track(id=str(raw.get("id", "")), title=str(raw.get("title", "")),
                                 short=str(raw.get("short", "")), code=str(raw.get("code", "")),
                                 summary=str(raw.get("summary", "")).strip(),
-                                require_sources=bool(raw.get("require_sources", False))))
+                                require_sources=bool(raw.get("require_sources", False)),
+                                universe=str(raw.get("universe", TRADING))))
+            if tracks[-1].universe not in UNIVERSES:
+                self.problem(where, f"univers « {tracks[-1].universe} » inconnu "
+                                    f"(attendu : {', '.join(UNIVERSES)})")
         ids = [t.id for t in tracks]
         if len(ids) != len(set(ids)):
             self.problem("curriculum.toml", "identifiants de filière en double")

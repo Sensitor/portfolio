@@ -20,6 +20,9 @@ from ...platform.ui.theme import TOKENS
 from ..datasets import Chart, Dataset
 
 PALETTE = (TOKENS["blue"], TOKENS["gold"], TOKENS["green"], TOKENS["red"], TOKENS["ink-3"])
+# The Monnaie et crypto universe leads with its copper accent.
+PALETTES = {"trading": PALETTE,
+            "monnaie": (TOKENS["copper-2"], TOKENS["blue"], TOKENS["green"], TOKENS["gold"], TOKENS["ink-3"])}
 FONT = "DM Sans, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
 MONO = "DM Mono, SFMono-Regular, Consolas, monospace"
 
@@ -33,13 +36,14 @@ def _fr(value) -> str:
     return str(value)
 
 
-def figure(chart: Chart, dataset: Dataset) -> go.Figure:
+def figure(chart: Chart, dataset: Dataset, *, universe: str = "trading") -> go.Figure:
+    palette = PALETTES.get(universe, PALETTE)
     rows = list(dataset.rows)
     xs = [r[chart.x] for r in rows]
     flags = [bool(r.get(chart.highlight)) for r in rows] if chart.highlight else [False] * len(rows)
     fig = go.Figure()
     for i, (column, label) in enumerate(chart.series):
-        color = PALETTE[i % len(PALETTE)]
+        color = palette[i % len(palette)]
         ys = [r[column] for r in rows]
         text = ["" if y is None else f"{_fr(y)} {dataset.unit}".strip() + (" · estimation" if f else "")
                 for y, f in zip(ys, flags)]
@@ -84,11 +88,12 @@ def style(fig: go.Figure, *, x_label: str = "", y_label: str = "", legend: bool 
     return fig
 
 
-def render(chart: Chart, dataset: Dataset, *, caption: str = "", number: int | None = None, key: str) -> None:
+def render(chart: Chart, dataset: Dataset, *, caption: str = "", number: int | None = None, key: str,
+           universe: str = "trading") -> None:
     with st.container(key=f"chart_{key}"):
         if chart.title:
             html(f'<div class="sx-chart-title">{esc(chart.title)}</div>')
-        st.plotly_chart(figure(chart, dataset), key=f"plot_{key}", theme=None,
+        st.plotly_chart(figure(chart, dataset, universe=universe), key=f"plot_{key}", theme=None,
                         config={"displayModeBar": False, "responsive": True})
         label = f"Figure {number}" if number else "Figure"
         flag = '<span class="sx-pill soon">Exemple synthétique</span> ' if dataset.synthetic else ""

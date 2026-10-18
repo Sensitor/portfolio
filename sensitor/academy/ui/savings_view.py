@@ -22,8 +22,8 @@ def figure(rows: list[S.Year]) -> go.Figure:
     years = [r.year for r in rows]
     fig = go.Figure()
     for label, values, color, dash in (
-            ("Valeur affichée (nominale)", [r.nominal for r in rows], TOKENS["blue"], "solid"),
-            ("Pouvoir d'achat (réel, en euros de départ)", [r.real for r in rows], TOKENS["gold"], "solid"),
+            ("Valeur affichée (nominale)", [r.nominal for r in rows], TOKENS["copper-2"], "solid"),
+            ("Pouvoir d'achat (réel, en euros de départ)", [r.real for r in rows], TOKENS["blue"], "solid"),
             ("Sommes versées", [r.contributed for r in rows], TOKENS["muted"], "dot")):
         fig.add_trace(go.Scatter(x=years, y=values, name=label, mode="lines",
                                  line=dict(color=color, width=2.4 if dash == "solid" else 1.6, dash=dash),

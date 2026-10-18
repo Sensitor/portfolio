@@ -55,10 +55,11 @@ class Space:
 
 SPACES: tuple[Space, ...] = (
     Space("academy", "Academy", "apprendre", LIVE,
-          "Le trading de la première bougie au processus discipliné, complété par la monnaie, Bitcoin et "
-          "la crypto : des parcours sourcés, des quiz corrigés et des exercices chiffrés.",
+          "Deux univers qui se complètent : le trading, de la première bougie au processus discipliné, "
+          "et la monnaie, Bitcoin et la crypto, pour comprendre la valeur de l'argent et diversifier. "
+          "Des parcours sourcés, des quiz corrigés et des exercices chiffrés.",
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
-          planned=("Les filières Monnaie et Bitcoin, Crypto et Investissement",
+          planned=("La suite des filières Monnaie et Bitcoin, Crypto et Investissement",
                    "Vidéos intégrées aux leçons", "Ebooks")),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",

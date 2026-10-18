@@ -18,6 +18,11 @@ Type contrast does the hierarchy: Playfair Display for titles (italic for the
 accent word), DM Sans for reading, DM Mono for every label and figure — so a
 title, a chapter, a lesson and its metadata can never be confused.
 
+Two universes share the system. Trading keeps the blue accent and Playfair
+titles; Monnaie et crypto takes a copper accent and Space Grotesk titles. A
+page of that universe swaps the accent tokens of its main column, so every
+numeral, rule, marker and bar follows without a rule of its own.
+
 Streamlit's theme colours are overridden everywhere a widget is used, so the
 pages look the same whether the visitor's system is light or dark. Muted text
 keeps at least 4.5:1 contrast on its surface.
@@ -36,11 +41,15 @@ TOKENS = {
     "on-navy": "#e9eef2", "on-navy-muted": "#a9b7c4", "on-navy-accent": "#a9c6e2",
     "green": "#2c5c45", "green-soft": "#e1ece4", "red": "#8c3a31", "red-soft": "#f4e2dc",
     "gold": "#86672f", "gold-soft": "#efe4ce",
+    # The Monnaie et crypto universe: copper where Trading has blue.
+    "copper": "#7e3c13", "copper-2": "#9c4a1a", "copper-soft": "#f4e2d4", "copper-line": "#dcb79a",
+    "on-navy-copper": "#e6b98e",
 }
 
 FONTS = ("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500"
          "&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700"
-         "&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap")
+         "&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600"
+         "&family=Space+Grotesk:wght@400;500;600;700&display=swap")
 
 ISO_GRID = ("repeating-linear-gradient(30deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
             "repeating-linear-gradient(150deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
@@ -52,6 +61,7 @@ CSS = """
   --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --sans: 'DM Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
   --mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
+  --grotesk: 'Space Grotesk', 'DM Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
   --iso: __ISO__;
   --ease: cubic-bezier(.2,.7,.2,1);
 }
@@ -699,6 +709,60 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-cover.big .ck { font-size: 10px; }
 .stApp .sx-cover.big .ct { font-size: 1.5rem; line-height: 1.15; }
 
+/* ═══ Universes ════════════════════════════════════════════════════════════ */
+/* A copper card, or a whole page marked by crumbs(universe="monnaie"). */
+.stApp .uni-monnaie,
+.stApp:has(.sx-scope.uni-monnaie) [data-testid="stMain"] {
+  --blue: var(--copper); --blue-2: var(--copper-2); --blue-soft: var(--copper-soft);
+  --on-navy-accent: var(--on-navy-copper); --serif: var(--grotesk);
+}
+/* Space Grotesk has no italic: accent words and numerals stay upright, in copper. */
+.stApp:has(.sx-scope.uni-monnaie) [data-testid="stMain"] :is(.sx-display em, .sx-title em, .numeral, .no, .q),
+.stApp .uni-monnaie :is(.numeral, .t em), .stApp .uni-monnaie.numeral { font-style: normal; }
+.stApp:has(.sx-scope.uni-monnaie) [data-testid="stMain"] :is(.sx-display, .sx-title, .sx-section h2, .sx-chapter h3) { letter-spacing: -.035em; }
+.stApp:has(.sx-scope.uni-monnaie) .sx-pill.member { border-color: var(--copper-line); }
+.stApp .sx-uni { display: inline-flex; align-items: center; gap: .45rem; font: 500 10.5px var(--mono); letter-spacing: .14em;
+  text-transform: uppercase; padding: 4px 9px 4px 7px; border-radius: 2px; border: 1px solid; white-space: nowrap; vertical-align: 1px; }
+.stApp .sx-uni svg { width: 14px; height: 14px; }
+.stApp .sx-uni.uni-trading { color: var(--blue); background: var(--blue-soft); border-color: #b4c6d7; }
+.stApp .sx-uni.uni-monnaie { color: var(--copper); background: var(--copper-soft); border-color: var(--copper-line); }
+.stApp .sx-kicker .sx-uni { display: flex; width: fit-content; margin: 0 0 .75rem; }
+.stApp .sx-outline-head .sx-uni { display: flex; width: fit-content; margin-bottom: .8rem; }
+/* The landing headline names both universes, each word in its own accent. */
+.stApp .sx-display.sx-eco { font-size: clamp(2.2rem, 3.4vw, 3.3rem); line-height: 1.1; }
+.stApp .sx-display em.cu { color: var(--copper-2); font-family: var(--grotesk); font-style: normal; font-weight: 600; letter-spacing: -.045em; }
+.stApp .sx-display.on-navy em.cu { color: var(--on-navy-copper); }
+/* The head of a universe in the Academy lists */
+.stApp .sx-uhead { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin: 2.6rem 0 1rem;
+  padding-bottom: .75rem; border-bottom: 2px solid var(--blue-2); }
+.stApp .sx-uhead.first { margin-top: .6rem; }
+.stApp .sx-uhead svg { width: 24px; height: 24px; color: var(--blue-2); }
+.stApp .sx-uhead b { font: 600 1.55rem/1.2 var(--serif); color: var(--ink); letter-spacing: -.015em; }
+.stApp .sx-uhead span { margin-left: auto; font: 400 12px var(--mono); letter-spacing: .05em; color: var(--muted); }
+.stApp .sx-index[class*="uni-"] { border-top: 2px solid var(--blue-2); }
+/* The two universe cards */
+.stApp .sx-ucard { height: 100%; display: flex; flex-direction: column; gap: .45rem; background: var(--white);
+  border: 1px solid var(--line); border-top: 4px solid var(--blue-2); border-radius: 0 0 4px 4px; padding: 1.6rem 1.7rem 1.35rem;
+  transition: border-color .2s, transform .22s var(--ease), box-shadow .22s var(--ease); }
+.stApp [class*="st-key-tap_"]:hover .sx-ucard { border-color: var(--blue-2); transform: translateY(-2px);
+  box-shadow: 0 16px 36px -26px rgba(15,27,38,.5); }
+.stApp .sx-ucard .top { display: flex; align-items: center; justify-content: space-between; }
+.stApp .sx-ucard .top > svg { width: 34px; height: 34px; color: var(--blue-2); }
+/* Side by side, the two cards keep the same rhythm whatever the length of their text. */
+.stApp .sx-ucard .t { font: 600 1.7rem/1.16 var(--serif); color: var(--ink); letter-spacing: -.02em; margin-top: .7rem; min-height: 2.32em; }
+.stApp .sx-ucard .s { font-size: 15px; line-height: 1.65; color: var(--muted); flex: 1; min-height: 4.95em; }
+.stApp .sx-ucard .topics { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+.stApp .sx-ucard .topics span { font: 500 10.5px var(--mono); letter-spacing: .06em; color: var(--blue); background: var(--blue-soft);
+  padding: 3px 7px; border-radius: 2px; }
+.stApp .sx-ucard .foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem 1rem;
+  border-top: 1px solid var(--line); padding-top: .9rem; margin-top: .9rem; font: 400 12px var(--mono); color: var(--muted); }
+.stApp .sx-ucard .foot b { color: var(--ink); font-weight: 500; }
+.stApp .sx-ucard .go { display: inline-flex; align-items: center; gap: .5rem; font: 600 14px var(--sans); color: var(--blue-2); }
+.stApp .sx-ucard .go svg { width: 17px; height: 17px; transition: transform .2s var(--ease); }
+.stApp [class*="st-key-tap_"]:hover .sx-ucard .go svg { transform: translateX(4px); }
+.stApp .sx-ujoin { margin: 1.2rem auto 0; max-width: 46rem; text-align: center; font-size: 15px; line-height: 1.65; color: var(--muted); }
+.stApp .sx-ujoin b { color: var(--ink); font-weight: 600; }
+
 /* ═══ Responsive ═══════════════════════════════════════════════════════════ */
 @media (max-width: 1000px) {
   [data-testid="stMainBlockContainer"] { padding: 3.4rem 1.15rem 4rem; }
@@ -737,6 +801,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   .stApp .sx-result { grid-template-columns: 1fr; gap: .6rem; }
   .stApp .sx-lesson-head .no { font-size: 3.4rem; }
   .stApp .sx-lesson-head { gap: 0 1rem; }
+  .stApp .sx-ucard .t, .stApp .sx-ucard .s { min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .stApp * { transition: none !important; } }
 """

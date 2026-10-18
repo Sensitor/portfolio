@@ -49,8 +49,17 @@ Old URLs keep working: `?page=paths` opens the Academy home.
 are all built from it.
 
 The sidebar groups them in four pillars, in this order: **Apprendre**, **Trader**,
-**Investir**, **Échanger**. The brand reads « Trading · Bitcoin · Crypto »: trading leads,
-the money, Bitcoin and crypto tracks complete it.
+**Investir**, **Échanger**. The brand reads « Trading · Monnaie · Crypto »: one ecosystem
+in two universes that complete each other, neither placed above the other.
+
+**The two universes.** Each Academy track names its universe in `curriculum.toml`
+(`universe = "trading"` or `"monnaie"`). Trading keeps the blue accent and Playfair
+Display titles; Monnaie et crypto (the Monnaie et Bitcoin, Crypto and Investissement
+tracks) takes a copper accent and Space Grotesk titles. `crumbs(..., universe=...)`
+marks a course, lesson or quiz page; the stylesheet then swaps the accent tokens of
+the main column (`--blue`, `--blue-2`, `--blue-soft`, `--on-navy-accent`, `--serif`),
+so numerals, rules, markers, bars and charts follow. A card carries the class
+`uni-monnaie` for the same effect in a mixed list. `sx-uni` is the universe badge.
 
 | | Space | Group | Status | Pages |
 |---|---|---|---|---|

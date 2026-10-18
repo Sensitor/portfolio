@@ -200,6 +200,50 @@ def test_new_tracks(alice: str) -> None:
         os.environ.pop("SENSITOR_ACADEMY_CONTENT", None)
 
 
+def test_universes() -> None:
+    print("\nOne ecosystem, two universes")
+    landing = text(run({"page": "home"}))
+    check("the landing presents one ecosystem", "L'écosystème Sensitor" in landing
+          and "Apprendre le <em>trading</em>." in landing
+          and 'Comprendre la <em class="cu">monnaie</em>.' in landing
+          and 'Diversifier avec la <em class="cu">crypto</em>.' in landing)
+    check("…with both universes side by side, trading not placed above money",
+          'sx-ucard uni-trading' in landing and 'sx-ucard uni-monnaie' in landing)
+    check("…and the first course of each universe to start with",
+          "Par où commencer" in landing and 'sx-feature uni-trading' in landing
+          and 'sx-feature uni-monnaie' in landing)
+    academy = text(run({"page": "academy"}))
+    check("the Academy opens on its two universes", "Deux univers, un seul programme" in academy
+          and 'comprendre la <em class="cu">monnaie</em>' in academy)
+    check("open courses are listed under the head of their universe",
+          academy.index('sx-uhead uni-trading') < academy.index('sx-feature uni-trading')
+          < academy.index('sx-uhead uni-monnaie') < academy.index('sx-feature uni-monnaie'))
+    for page, route in (("course", {"course": "premiers-pas"}),
+                        ("lesson", {"course": "premiers-pas", "lesson": "fonctionnement-marche"})):
+        app = run({"page": page, **route})
+        body = text(app)
+        check(f"trading {page}: marked trading, in blue", 'sx-scope uni-trading' in body
+              and 'sx-uni uni-trading' in body and 'sx-scope uni-monnaie' not in body, error(app))
+    for page, route in (("course", {"course": "la-monnaie"}),
+                        ("lesson", {"course": "la-monnaie", "lesson": "fonctions-monnaie"}),
+                        ("quiz", {"quiz": "monnaie-validation", "course": "la-monnaie"})):
+        app = run({"page": page, **route})
+        body = text(app)
+        check(f"money {page}: marked Monnaie et crypto, in copper", 'sx-scope uni-monnaie' in body
+              and not app.exception and (page == "quiz" or "Monnaie et crypto" in body), error(app))
+    from sensitor.platform.ui import theme
+    css = theme.stylesheet()
+    check("the stylesheet recolours a money page and changes its title face",
+          '.stApp:has(.sx-scope.uni-monnaie) [data-testid="stMain"]' in css
+          and "--serif: var(--grotesk)" in css and "Space+Grotesk" in css)
+    from sensitor.academy import content as C
+    from sensitor.academy.ui import chart_view
+    catalog = C.load_catalog()
+    chart = catalog.chart("taux-bce-fed")
+    fig = chart_view.figure(chart, catalog.dataset(chart.dataset), universe="monnaie")
+    check("a money chart leads with copper", fig.data[0].line.color == theme.TOKENS["copper-2"])
+
+
 def main() -> int:
     alice = token("alice@example.com")
 
@@ -339,13 +383,14 @@ def main() -> int:
           and not page.exception, error(page))
 
     test_new_tracks(alice)
+    test_universes()
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
-          "Apprendre le <em>trading</em>" in text(old))
+          'comprendre la <em class="cu">monnaie</em>' in text(old))
     for page in ("market", "community"):
         app = run({"page": page})
         body = text(app)
@@ -366,13 +411,13 @@ def main() -> int:
     finally:
         os.environ.pop("SENSITOR_TOOLS_URL", None)
     shell = run({"page": "home"})
-    check("the brand reads trading, Bitcoin, crypto", "TRADING · BITCOIN · CRYPTO" in text(shell))
+    check("the brand reads trading, money, crypto", "TRADING · MONNAIE · CRYPTO" in text(shell))
     labels = [m.value for m in shell.sidebar.markdown]
     order = [g for g in ("APPRENDRE", "TRADER", "INVESTIR", "ÉCHANGER") for v in labels if g in v]
     check("the sidebar is grouped Apprendre, Trader, Investir, Échanger",
           order == ["APPRENDRE", "TRADER", "INVESTIR", "ÉCHANGER"], str(order))
-    check("the visitor's landing speaks of trading first",
-          "Apprendre le trading." in text(run({"page": "home"})))
+    check("the visitor's landing speaks of trading and of money",
+          "Apprendre le <em>trading</em>." in text(run({"page": "home"})))
     tools = run({"page": "tools"})
     check("tools: no link when the address is not configured",
           "Lien non configuré" in text(tools))
@@ -382,7 +427,7 @@ def main() -> int:
           [l for l in sidebar if l in {s.label for s in spaces.SPACES}] == [s.label for s in spaces.SPACES],
           str(sidebar))
     unknown = run({"page": "page-inconnue"})
-    check("an unknown page falls back to the home page", "Apprendre le trading." in text(unknown))
+    check("an unknown page falls back to the home page", "L'écosystème Sensitor" in text(unknown))
 
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
     for failure in FAILURES:
