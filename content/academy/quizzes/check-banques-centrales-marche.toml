@@ -1,0 +1,73 @@
+id = "check-banques-centrales-marche"
+title = "Contrôle : les banques centrales et le marché"
+course = "trader-l-actualite"
+lesson = "banques-centrales-marche"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "implicite"
+prompt = "Un contrat à terme sur les fonds fédéraux cote 95,50. Quel taux moyen contient-il ?"
+kind = "single"
+lesson = "banques-centrales-marche"
+
+[[question.option]]
+id = "450"
+text = "4,50 %"
+correct = true
+explanation = "Oui : 100 − 95,50."
+
+[[question.option]]
+id = "9550"
+text = "95,50 %"
+explanation = "Le contrat se cote 100 moins le taux."
+
+[[question.option]]
+id = "050"
+text = "0,50 %"
+explanation = "C'est l'écart à 96, pas le taux attendu."
+
+[[question]]
+id = "deux-ans"
+prompt = "Que montre le rendement à 2 ans entre juin 2021 et février 2022 ?"
+kind = "single"
+lesson = "banques-centrales-marche"
+
+[[question.option]]
+id = "anticipe"
+text = "Il monte de 0,20 % à 1,44 % avant la première hausse de la Fed, en mars 2022."
+correct = true
+explanation = "Oui : le marché a anticipé la politique monétaire."
+
+[[question.option]]
+id = "suit"
+text = "Il suit la Fed avec plusieurs mois de retard."
+explanation = "C'est l'inverse : il la devance."
+
+[[question.option]]
+id = "baisse"
+text = "Il baisse, comme le taux directeur."
+explanation = "Le taux directeur ne bouge pas encore, le 2 ans monte."
+
+[[question]]
+id = "conference"
+prompt = "Une baisse de taux est attendue à 95 % par le marché. Qu'est-ce qui décidera surtout de la réaction ?"
+kind = "single"
+lesson = "banques-centrales-marche"
+
+[[question.option]]
+id = "suite"
+text = "Ce que la banque centrale dit de la suite, en conférence de presse."
+correct = true
+explanation = "Oui : la décision elle-même est déjà dans les prix."
+
+[[question.option]]
+id = "decision"
+text = "La décision elle-même."
+explanation = "Attendue à 95 %, elle ne surprend presque personne."
+
+[[question.option]]
+id = "heure"
+text = "L'heure exacte du communiqué."
+explanation = "L'heure compte pour l'exécution, pas pour le sens."

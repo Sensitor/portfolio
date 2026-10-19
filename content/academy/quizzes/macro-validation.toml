@@ -1,0 +1,228 @@
+id = "macro-validation"
+title = "Quiz de validation : Trader avec l'actualité économique"
+course = "trader-l-actualite"
+lesson = "recap-macro"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "surprise"
+prompt = "Qu'est-ce qui fait surtout réagir un marché à une publication ?"
+kind = "single"
+lesson = "attentes-et-surprises"
+
+[[question.option]]
+id = "ecart"
+text = "L'écart entre le chiffre publié et le consensus."
+correct = true
+explanation = "Oui : le prix contenait déjà l'attente."
+
+[[question.option]]
+id = "niveau"
+text = "Le niveau du chiffre publié."
+explanation = "Le niveau était déjà en grande partie attendu."
+
+[[question.option]]
+id = "precedent"
+text = "Le chiffre du mois précédent."
+explanation = "Il est connu ; seule sa révision apporte une information."
+
+[[question]]
+id = "revision"
+prompt = "Un mois correct est publié avec une forte révision à la baisse des deux précédents. Lecture probable ?"
+kind = "single"
+lesson = "indicateurs-majeurs"
+
+[[question.option]]
+id = "faible"
+text = "Un rapport plutôt faible."
+correct = true
+explanation = "Oui : le marché découvre moins d'emplois qu'il ne le croyait."
+
+[[question.option]]
+id = "fort"
+text = "Un rapport fort, seul le mois nouveau compte."
+explanation = "Les révisions font partie de l'information."
+
+[[question.option]]
+id = "neutre"
+text = "Un rapport sans importance."
+explanation = "Une forte révision est une surprise à part entière."
+
+[[question]]
+id = "probabilite"
+prompt = "Taux actuel 4,375 %, taux implicite 4,25 %. Dans un modèle à deux issues, probabilité d'une baisse d'un quart de point ?"
+kind = "single"
+lesson = "banques-centrales-marche"
+
+[[question.option]]
+id = "50"
+text = "50 %"
+correct = true
+explanation = "Oui : 0,125 ÷ 0,25."
+
+[[question.option]]
+id = "12"
+text = "12,5 %"
+explanation = "C'est l'écart en points, pas en part d'un quart de point."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Il faudrait un taux implicite de 4,125 %."
+
+[[question]]
+id = "deux-ans"
+prompt = "En septembre 2026, rendement à 2 ans 4,65 %, fonds fédéraux 3,75 %. Lecture de première approche ?"
+kind = "single"
+lesson = "banques-centrales-marche"
+
+[[question.option]]
+id = "hausse"
+text = "Le marché attend des taux plus élevés sur les deux ans à venir."
+correct = true
+explanation = "Oui, à la prime de risque près."
+
+[[question.option]]
+id = "baisse"
+text = "Le marché attend des baisses de taux."
+explanation = "Le 2 ans serait alors sous le taux directeur."
+
+[[question.option]]
+id = "rien"
+text = "Aucune information sur les attentes."
+explanation = "Le 2 ans reflète les taux attendus sur deux ans."
+
+[[question]]
+id = "courbe"
+prompt = "Que retenir de l'inversion de la courbe américaine comme indicateur ?"
+kind = "single"
+lesson = "taux-devises-actions"
+
+[[question.option]]
+id = "indicateur"
+text = "Les longues inversions ont précédé les récessions de 1980 à 2009, mais le signal s'est parfois trompé et ne donne pas de timing."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "infaillible"
+text = "C'est un signal infaillible de récession dans les six mois."
+explanation = "Les délais ont varié, et 2022-2024 n'a pas été suivie d'une hausse marquée du chômage."
+
+[[question.option]]
+id = "inutile"
+text = "Elle n'a jamais rien précédé."
+explanation = "Elle a précédé les récessions de 1980, 1981-1982, 1990-1991, 2001 et 2007-2009."
+
+[[question]]
+id = "canal"
+prompt = "Par quel canal principal une hausse des taux attendus pèse-t-elle sur les actions ?"
+kind = "single"
+lesson = "taux-devises-actions"
+
+[[question.option]]
+id = "actualisation"
+text = "Les bénéfices futurs valent moins aujourd'hui, actualisés à un taux plus élevé."
+correct = true
+explanation = "Oui, surtout pour les valeurs de croissance."
+
+[[question.option]]
+id = "dividendes"
+text = "Les entreprises doivent verser plus de dividendes."
+explanation = "Ce n'est pas le canal principal."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun canal : les actions ne dépendent pas des taux."
+explanation = "L'actualisation relie directement taux et valorisation."
+
+[[question]]
+id = "heure"
+prompt = "Une semaine ordinaire, à quelle heure de Paris tombe la décision de la Réserve fédérale ?"
+kind = "single"
+lesson = "calendrier-economique"
+
+[[question.option]]
+id = "20"
+text = "20 h 00"
+correct = true
+explanation = "Oui : 14 h 00 à Washington."
+
+[[question.option]]
+id = "1415"
+text = "14 h 15"
+explanation = "C'est l'heure de la décision de la BCE."
+
+[[question.option]]
+id = "14"
+text = "14 h 00"
+explanation = "C'est l'heure de Washington."
+
+[[question]]
+id = "glissement"
+prompt = "Pourquoi ajouter le glissement à la distance au stop un jour de publication ?"
+kind = "single"
+lesson = "volatilite-evenementielle"
+
+[[question.option]]
+id = "perte"
+text = "Parce que le stop peut être exécuté au-delà de son niveau : sans cela, la perte réelle dépasse le budget."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "spread"
+text = "Parce que le spread diminue."
+explanation = "Il s'élargit au contraire."
+
+[[question.option]]
+id = "gain"
+text = "Pour augmenter la taille."
+explanation = "Ajouter le glissement réduit la taille."
+
+[[question]]
+id = "choix"
+prompt = "Lequel de ces choix n'est pas une façon défendable de traiter une publication ?"
+kind = "single"
+lesson = "plan-publication"
+
+[[question.option]]
+id = "deviner"
+text = "Prendre position juste avant le chiffre en pariant sur son sens."
+correct = true
+explanation = "Exact : c'est un pari sans avantage mesurable, avec une exécution dégradée."
+
+[[question.option]]
+id = "ecart"
+text = "Rester à l'écart de quelques minutes avant à quelques minutes après."
+explanation = "C'est un choix défendable, par défaut."
+
+[[question.option]]
+id = "attendre"
+text = "Attendre 15 à 30 minutes, puis appliquer sa méthode."
+explanation = "C'est un choix défendable."
+
+[[question]]
+id = "multiple"
+prompt = "Taille habituelle 10,4 contrats, stop de 30 points plus 5 de glissement, 1 dollar par point, budget 125 dollars. Combien coûterait le stop ?"
+kind = "single"
+lesson = "cas-inflation-us"
+
+[[question.option]]
+id = "364"
+text = "364 dollars, 2,9 fois le budget."
+correct = true
+explanation = "Oui : 10,4 × 35."
+
+[[question.option]]
+id = "125"
+text = "125 dollars, le budget."
+explanation = "Ce serait le cas avec la taille réduite de 3,57 contrats."
+
+[[question.option]]
+id = "312"
+text = "312 dollars."
+explanation = "C'est sans le glissement : 10,4 × 30."

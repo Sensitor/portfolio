@@ -1,0 +1,73 @@
+id = "check-plan-publication"
+title = "Contrôle : trois façons de traiter une publication"
+course = "trader-l-actualite"
+lesson = "plan-publication"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "quand"
+prompt = "Quand faut-il choisir comment traiter une publication ?"
+kind = "single"
+lesson = "plan-publication"
+
+[[question.option]]
+id = "veille"
+text = "La veille, ou au moins avant la publication."
+correct = true
+explanation = "Oui : dans la minute qui suit, le prix bouge trop vite pour décider calmement."
+
+[[question.option]]
+id = "apres"
+text = "Juste après le chiffre, selon la réaction."
+explanation = "C'est le moment où la peur de rater un mouvement décide à votre place."
+
+[[question.option]]
+id = "jamais"
+text = "Inutile de choisir, le stop protège."
+explanation = "Le stop peut glisser : il ne remplace pas un plan."
+
+[[question]]
+id = "deviner"
+prompt = "Pourquoi « parier sur le chiffre » n'est-il pas une stratégie ?"
+kind = "single"
+lesson = "plan-publication"
+
+[[question.option]]
+id = "inconnu"
+text = "Personne ne connaît le chiffre avant sa publication, et l'exécution est plus coûteuse à ce moment-là."
+correct = true
+explanation = "Oui : c'est une pièce, avec spread et glissement en plus."
+
+[[question.option]]
+id = "interdit"
+text = "Parce que c'est interdit par la loi."
+explanation = "Ce n'est pas interdit, seulement sans avantage mesurable."
+
+[[question.option]]
+id = "lent"
+text = "Parce que les chiffres sortent trop lentement."
+explanation = "Ils sortent à l'heure dite, à la seconde."
+
+[[question]]
+id = "attendre"
+prompt = "Après un délai d'attente, qu'est-ce qui change dans l'application de la méthode habituelle ?"
+kind = "single"
+lesson = "plan-publication"
+
+[[question.option]]
+id = "stop-taille"
+text = "Un stop plus large et donc une taille plus petite, pour le même budget."
+correct = true
+explanation = "Oui : la volatilité reste élevée une partie de la séance."
+
+[[question.option]]
+id = "budget"
+text = "Un budget de risque plus élevé, pour profiter du mouvement."
+explanation = "Le budget ne change pas ; c'est la taille qui s'adapte."
+
+[[question.option]]
+id = "rien"
+text = "Rien du tout."
+explanation = "Le stop et la taille s'adaptent à la volatilité."

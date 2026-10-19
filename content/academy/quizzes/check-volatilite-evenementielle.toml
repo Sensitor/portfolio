@@ -1,0 +1,73 @@
+id = "check-volatilite-evenementielle"
+title = "Contrôle : ce qui change au moment d'une publication"
+course = "trader-l-actualite"
+lesson = "volatilite-evenementielle"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "stop"
+prompt = "Pourquoi un stop peut-il être exécuté bien au-delà de son niveau au moment d'une publication ?"
+kind = "single"
+lesson = "volatilite-evenementielle"
+
+[[question.option]]
+id = "marche"
+text = "Il devient un ordre au marché, exécuté au premier prix disponible, dans un carnet vide."
+correct = true
+explanation = "Oui : c'est le glissement."
+
+[[question.option]]
+id = "annule"
+text = "Parce que le courtier l'annule."
+explanation = "Le stop est exécuté, mais pas au prix prévu."
+
+[[question.option]]
+id = "limite"
+text = "Parce qu'un stop est un ordre limite."
+explanation = "Un stop devient un ordre au marché quand son niveau est touché."
+
+[[question]]
+id = "mouvement"
+prompt = "Prix 1,0850, volatilité implicite 12 % par an, horizon d'un jour. Mouvement attendu ?"
+kind = "single"
+lesson = "volatilite-evenementielle"
+
+[[question.option]]
+id = "68"
+text = "Environ 68 pips."
+correct = true
+explanation = "Oui : 1,0850 × 0,12 × √(1/365)."
+
+[[question.option]]
+id = "1302"
+text = "Environ 1 302 pips."
+explanation = "C'est le mouvement sur un an, sans la racine du temps."
+
+[[question.option]]
+id = "12"
+text = "12 pips."
+explanation = "La volatilité est un pourcentage annuel, pas un nombre de pips."
+
+[[question]]
+id = "taille"
+prompt = "Budget 200 dollars, stop 40 pips, glissement 10 pips, 10 dollars par pip et par lot. Quelle taille ?"
+kind = "single"
+lesson = "volatilite-evenementielle"
+
+[[question.option]]
+id = "040"
+text = "0,40 lot"
+correct = true
+explanation = "Oui : 200 ÷ (50 × 10)."
+
+[[question.option]]
+id = "050"
+text = "0,50 lot"
+explanation = "C'est la taille sans compter le glissement."
+
+[[question.option]]
+id = "100"
+text = "1,00 lot"
+explanation = "C'est la taille du stop habituel de 20 pips."

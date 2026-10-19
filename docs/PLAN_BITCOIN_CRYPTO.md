@@ -68,7 +68,7 @@ Le programme actuel numérote dix parcours de trading de 1 à 10. Je propose de 
 | **Monnaie et Bitcoin** (le complément du trading) | M1 Monnaie, inflation et théorie monétaire · M2 Bitcoin en profondeur | à créer |
 | **Crypto** | C1 Blockchain, wallets et sécurité · C2 Altcoins et analyse crypto | à créer |
 | **Investissement** | I1 Stratégies d'investissement crypto · I2 La méthode du fondateur | à créer |
-| **Trading** | T1 à T7, les sept parcours publiés · T8 Macroéconomie et actualité · T9 La méthode Sensitor · T10 Processus discipliné | conservés tels quels |
+| **Trading** | T1 à T8, les huit parcours publiés · T9 La méthode Sensitor · T10 Processus discipliné | conservés tels quels |
 
 Changement technique : un champ `track` dans `curriculum.toml` et une numérotation affichée par filière (« Bitcoin · M2 », « Trading · T4 »).
 
@@ -168,6 +168,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **C2** ✔ | M1, cours « L'inflation » : 9 leçons sourcées, données Eurostat, BCE et américaines, écoles de pensée, 3 exercices | terminé |
 | **C3** ✔ | M1, cours « Inflation et patrimoine » : 8 leçons, simulateur d'épargne nominal et réel, taux réel BCE, diversification, Bitcoin avec ses objections | terminé |
 | **B3** ✔ | Écosystème en deux univers : accueil et Academy recadrés, couleur et typographie propres à l'univers Monnaie et crypto | terminé |
+| **T8** ✔ | Trading, parcours 8 « Macroéconomie et actualité » : 9 leçons, données d'emploi, de taux et de courbe américaines (BLS et Réserve fédérale, via FRED), 5 exercices, fiche de révision | terminé |
 | **C4** | M2, cours « Origines et fonctionnement », émission calculée | contenu et visualisation |
 | **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |

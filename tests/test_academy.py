@@ -516,6 +516,118 @@ def test_backtest_figures():
     check("no loss, no profit factor", B.summarize([1, 2]).profit_factor is None)
 
 
+def test_macro_figures():
+    """Path 8: every figure of the lessons and exercises, recomputed from the data and macro.py."""
+    print("\nPath 8 figures")
+    from datetime import date, time
+    from sensitor.academy import macro as MA
+    catalog = C.load_catalog()
+    course = catalog.course("trader-l-actualite")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+
+    rows = catalog.dataset("emploi-etats-unis").rows
+    by_year = {}
+    for r in rows:
+        by_year.setdefault(r["mois"][:4], []).append(r["creations"])
+    means = {y: round(sum(v) / len(v)) for y, v in by_year.items()}
+    check("jobs: +210 000, +122 000, +10 000 and +68 000 a month", means == {"2023": 210, "2024": 122, "2025": 10, "2026": 68}
+          and len(by_year["2026"]) == 9, str(means))
+    negative = [r["mois"] for r in rows if r["mois"] >= "2025-01" and r["creations"] < 0]
+    check("jobs: seven negative months since January 2025", len(negative) == 7, str(negative))
+    unemployment = {r["mois"][:7]: r["chomage"] for r in catalog.dataset("chomage-etats-unis").rows}
+    known = {m: v for m, v in unemployment.items() if v is not None}
+    check("unemployment: 14,8 % in April 2020, the series high since 1948",
+          max(known.values()) == 14.8 and known["2020-04"] == 14.8 and min(unemployment) == "1948-01")
+    check("unemployment: the previous record, 10,8 % in December 1982",
+          max(v for m, v in known.items() if m < "2020") == 10.8 and known["1982-12"] == 10.8)
+    since = [v for m, v in known.items() if m >= "2022-01"]
+    check("unemployment: between 3,4 % and 4,5 % since 2022", min(since) == 3.4 and max(since) == 4.5)
+    check("unemployment: October 2025 missing, not interpolated", unemployment["2025-10"] is None)
+    check("lesson 2 quotes them", all(t in text["indicateurs-majeurs"] for t in
+          ("+210 000", "+122 000", "+10 000", "+68 000", "14,8 %", "10,8 %", "3,4 % et 4,5 %")))
+
+    two = {r["mois"][:7]: (r["deux_ans"], r["fed_funds"]) for r in catalog.dataset("taux-2-ans-fed").rows}
+    check("2 years: 0,20 % in June 2021, 1,44 % in February 2022, funds at 0,08 %",
+          two["2021-06"] == (0.20, 0.08) and two["2022-02"] == (1.44, 0.08))
+    check("2 years: the first hike shows in March 2022", two["2022-02"][1] == 0.08 and two["2022-03"][1] > 0.08)
+    peak = max((v[0], m) for m, v in two.items() if "2023" <= m < "2025")
+    check("2 years: peak of 5,07 % in October 2023", peak == (5.07, "2023-10"))
+    check("2 years: 3,97 % in August 2024 with funds at 5,33 %, the cut shows in September",
+          two["2024-08"] == (3.97, 5.33) and two["2024-09"][1] < 5.33)
+    check("2 years: 4,65 % against 3,75 % in September 2026, 0,90 point",
+          two["2026-09"] == (4.65, 3.75) and round(two["2026-09"][0] - two["2026-09"][1], 2) == 0.90)
+
+    curve = catalog.dataset("courbe-taux-us").rows
+    runs = MA.inverted_runs([r["mois"][:7] for r in curve], [r["ecart"] for r in curve])
+    check("curve: twelve inversions since 1977", len(runs) == 12 and curve[0]["mois"].startswith("1977"), str(len(runs)))
+    longest = max(runs, key=lambda r: r.months)
+    check("curve: the longest, 26 months, July 2022 to August 2024",
+          (longest.start, longest.end, longest.months) == ("2022-07", "2024-08", 26))
+    check("curve: low of -2,13 points in March 1980", min((r["ecart"], r["mois"]) for r in curve) == (-2.13, "1980-03-01"))
+    check("curve: a single month in June 1998", any(r.start == r.end == "1998-06" for r in runs))
+    check("curve: every spread is 10 years minus 2 years",
+          all(abs(r["ecart"] - MA.curve_spread(r["dix_ans"], r["deux_ans"])) < 0.006 for r in curve))
+    check("curve: the -0,93 of July 2023 is the low since 2000",
+          min((r["ecart"], r["mois"]) for r in curve if r["mois"] >= "2000") == (-0.93, "2023-07-01"))
+
+    cv = ex("courbe-taux-reel")
+    by_month = {r["mois"][:7]: r for r in curve}
+    us = {r["mois"][:7]: r["inflation"] for r in catalog.dataset("inflation-taux-etats-unis").rows}
+    check("exercise curve: -0,93 and +0,34", close(MA.curve_spread(3.90, 4.83), cv["ecart-2023"])
+          and close(MA.curve_spread(4.99, 4.65), cv["ecart-2026"])
+          and (by_month["2023-07"]["dix_ans"], by_month["2023-07"]["deux_ans"]) == (3.90, 4.83)
+          and (by_month["2026-09"]["dix_ans"], by_month["2026-09"]["deux_ans"]) == (4.99, 4.65))
+    check("exercise curve: real rate 0,95 with the 3,7 % of the inflation series",
+          us["2026-09"] == 3.7 and close(MA.real_rate(4.65, us["2026-09"]), cv["reel"]))
+    check("exercise curve: 26 months", cv["duree"] == longest.months)
+
+    se = ex("surprise-emploi")
+    check("exercise jobs: -110, -1,47, -40, -150, +0,1", MA.surprise(40, 150) == se["surprise"]
+          and abs(-110 / 75 - se["normalisee"]) < 0.005 and 80 - 120 == se["revision"]
+          and se["surprise"] + se["revision"] == se["total"] and close(MA.surprise(4.4, 4.3), se["chomage"], 1e-9))
+    check("standardized surprise: divided by the sample deviation",
+          close(MA.standardized_surprise(40, 150, [75, -75]), -110 / math.sqrt(11250)))
+    check("monthly changes: a gap stays a gap", MA.monthly_changes([1, 3, None, 4]) == [2, None, None])
+
+    ta = ex("taux-anticipes")
+    check("exercise rates: 4,20 %, -0,175, 0,70 cut, 70 %", close(MA.implied_rate(95.80), ta["implicite"], 1e-9)
+          and close(MA.implied_rate(95.80) - 4.375, ta["ecart"], 1e-9)
+          and close(abs(MA.priced_moves(MA.implied_rate(95.80), 4.375)), ta["quarts"], 1e-9)
+          and close(MA.move_probability(MA.implied_rate(95.80), 4.375) * 100, ta["probabilite"], 1e-9))
+    check("probability: capped at 100 %", MA.move_probability(3.9, 4.375) == 1.0)
+
+    ma = ex("mouvement-attendu")
+    move = MA.expected_move(1.0850, 12, 1) * 10_000
+    check("exercise move: 68 pips, 136 for two deviations", round(move) == ma["mouvement"] and 2 * ma["mouvement"] == ma["fourchette"])
+    check("exercise move: 1,00 lot, 0,40 lot, 500 dollars", close(200 / (20 * 10), ma["taille-normale"])
+          and close(MA.event_size(200, 40, 10, 10), ma["taille-publication"])
+          and close(MA.loss_at_stop(1.0, 40, 10, 10), ma["perte"]))
+    check("lesson 6 quotes the 68 pips", "**68 pips**" in text["volatilite-evenementielle"])
+
+    case = ex("cas-inflation-us")
+    spec = R.InstrumentSpec(contract_size=1, lot_step=0.1)
+    sized = R.position_size(125, 30 + 5, spec)
+    usual = R.position_size(125, 12, spec)
+    check("case: +0,2 surprise, +2,0 deviations, 75 points", close(MA.surprise(0.5, 0.3), case["surprise"], 1e-9)
+          and close(0.2 / 0.1, case["normalisee"], 1e-9) and round(MA.expected_move(6000, 24, 1)) == case["mouvement"])
+    check("case: 3,5 contracts for 122,50 dollars", close(sized.lots, case["taille"]) and close(sized.effective_risk, case["risque"]))
+    check("case: the usual 10,4 contracts would lose 2,9 times the budget", close(usual.lots, 10.4)
+          and round(MA.loss_at_stop(usual.lots, 30, 5, 1) / 125, 1) == case["multiple"])
+    check("case: 90 points, beyond one deviation, inside two", 75 < 90 < 2 * MA.expected_move(6000, 24, 1))
+
+    paris = lambda d, h=8, m=30: MA.release_time_paris(d, h, m)
+    check("calendar: 8 h 30 in Washington is 14 h 30 in Paris most weeks",
+          paris(date(2026, 1, 9)) == time(14, 30) and paris(date(2026, 11, 6)) == time(14, 30))
+    check("calendar: 13 h 30 on Friday 13 March and Friday 30 October 2026",
+          paris(date(2026, 3, 13)) == time(13, 30) and paris(date(2026, 10, 30)) == time(13, 30)
+          and date(2026, 3, 13).weekday() == 4 and date(2026, 10, 30).weekday() == 4)
+    check("calendar: the Fed at 20 h 00, 19 h 00 in the shifted weeks",
+          paris(date(2026, 6, 17), 14, 0) == time(20, 0) and paris(date(2026, 3, 18), 14, 0) == time(19, 0))
+    check("expected move: refuses a zero horizon", raises(lambda: MA.expected_move(100, 10, 0), ValueError))
+    check("the course is in the trading universe", catalog.universe_of(course) == "trading")
+
+
 def test_bitcoin_issuance():
     """The issuance schedule, from the protocol rules, in satoshis."""
     print("\nBitcoin issuance")
@@ -1477,6 +1589,7 @@ def main() -> int:
     test_zone_figures()
     test_psychology_figures()
     test_backtest_figures()
+    test_macro_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

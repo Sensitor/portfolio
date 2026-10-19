@@ -178,7 +178,8 @@ id = "macro-actualite"
 number = 8
 title = "Macroéconomie et actualité"
 summary = "Inflation, emploi, banques centrales, attentes et publications, volatilité événementielle."
-status = "planned"
+status = "published"
+courses = ["trader-l-actualite"]
 topics = ["CPI, PPI, emploi", "Banques centrales", "Calendrier économique"]
 
 [[path]]

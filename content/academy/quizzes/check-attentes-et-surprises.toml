@@ -1,0 +1,73 @@
+id = "check-attentes-et-surprises"
+title = "Contrôle : attentes et surprises"
+course = "trader-l-actualite"
+lesson = "attentes-et-surprises"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "surprise"
+prompt = "Consensus +150 000 emplois, publié +250 000. Quelle est la surprise ?"
+kind = "single"
+lesson = "attentes-et-surprises"
+
+[[question.option]]
+id = "plus-cent"
+text = "+100 000"
+correct = true
+explanation = "Oui : 250 000 − 150 000."
+
+[[question.option]]
+id = "plus-250"
+text = "+250 000"
+explanation = "C'est le chiffre publié, pas l'écart avec l'attente."
+
+[[question.option]]
+id = "moins-cent"
+text = "−100 000"
+explanation = "Le signe est inversé : publié moins consensus."
+
+[[question]]
+id = "prix"
+prompt = "Pourquoi un chiffre conforme au consensus fait-il souvent peu bouger le prix ?"
+kind = "single"
+lesson = "attentes-et-surprises"
+
+[[question.option]]
+id = "integre"
+text = "Parce que le prix contenait déjà ce scénario."
+correct = true
+explanation = "Oui : seule une surprise apporte une information nouvelle."
+
+[[question.option]]
+id = "ignore"
+text = "Parce que le marché ignore les statistiques."
+explanation = "Au contraire : il les a intégrées avant leur publication."
+
+[[question.option]]
+id = "ferme"
+text = "Parce que le marché est fermé à l'heure des publications."
+explanation = "Les grandes publications tombent pendant les heures de cotation."
+
+[[question]]
+id = "baisse"
+prompt = "Un emploi plus solide que prévu fait baisser un indice d'actions. L'explication la plus probable ?"
+kind = "single"
+lesson = "attentes-et-surprises"
+
+[[question.option]]
+id = "taux"
+text = "Le marché en déduit des taux élevés plus longtemps, dans une économie où l'inflation inquiète."
+correct = true
+explanation = "Oui : le sens de la réaction dépend de la lecture du moment."
+
+[[question.option]]
+id = "erreur"
+text = "Le chiffre a forcément été mal publié."
+explanation = "Rien ne l'indique : la réaction passe par les taux."
+
+[[question.option]]
+id = "hasard"
+text = "C'est le hasard, la publication n'a rien à voir."
+explanation = "La réaction dans les minutes qui suivent est bien liée à la surprise."

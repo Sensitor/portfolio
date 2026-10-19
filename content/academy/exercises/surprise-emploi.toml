@@ -1,0 +1,52 @@
+id = "surprise-emploi"
+title = "Lire un rapport sur l'emploi"
+context = """
+Le rapport mensuel sur l'emploi américain vient de paraître. *Chiffres construits pour l'exercice.*
+
+- Emplois créés : consensus **+150 000**, publié **+40 000**.
+- Mois précédent : annoncé à **+120 000**, révisé à **+80 000**.
+- Taux de chômage : consensus **4,3 %**, publié **4,4 %**.
+- Écart type des surprises passées sur les créations d'emplois : **75 000**.
+"""
+conclusion = """
+La surprise est de −110 000 emplois, soit −1,47 écart type : nettement sous l'attente, sans être hors norme. Avec la révision de −40 000, le marché découvre 150 000 emplois de moins que ce qu'il croyait savoir. Le chômage, en hausse de 0,1 point au-dessus du consensus, va dans le même sens : un rapport lu comme faible.
+"""
+
+[[step]]
+id = "surprise"
+prompt = "Quelle est la surprise sur les créations d'emplois, en milliers ?"
+unit = "milliers"
+answer = -110
+tolerance = 0.5
+solution = "40 − 150 = **−110** milliers."
+
+[[step]]
+id = "normalisee"
+prompt = "Quelle est la surprise normalisée ? (Deux décimales.)"
+answer = -1.47
+tolerance = 0.006
+solution = "−110 000 ÷ 75 000 = **−1,47** écart type."
+
+[[step]]
+id = "revision"
+prompt = "De combien le mois précédent a-t-il été révisé, en milliers ?"
+unit = "milliers"
+answer = -40
+tolerance = 0.5
+solution = "80 − 120 = **−40** milliers."
+
+[[step]]
+id = "total"
+prompt = "Au total, combien d'emplois de moins que ce que le marché croyait savoir, en milliers ?"
+unit = "milliers"
+answer = -150
+tolerance = 0.5
+solution = "Surprise du mois plus révision : −110 + (−40) = **−150** milliers."
+
+[[step]]
+id = "chomage"
+prompt = "Quelle est la surprise sur le taux de chômage, en points ?"
+unit = "points"
+answer = 0.1
+tolerance = 0.001
+solution = "4,4 − 4,3 = **+0,1** point : plus de chômage que prévu, ce qui confirme la lecture d'un rapport faible."

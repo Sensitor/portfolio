@@ -120,3 +120,54 @@ retrieved = 2026-10-17
 unit = "%"
 columns = ["mois", "taux_nominal", "inflation", "taux_reel"]
 notes = "Le taux réel est calculé avec l'inflation passée sur un an, par simple différence ; les économistes utilisent souvent l'inflation attendue, qui n'est pas observée directement."
+
+[[dataset]]
+id = "emploi-etats-unis"
+title = "Créations d'emplois mensuelles aux États-Unis, depuis 2023"
+kind = "file"
+file = "emploi-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, All Employees, Total Nonfarm (PAYEMS, en milliers, corrigé des variations saisonnières), via FRED, Federal Reserve Bank of St. Louis ; variation d'un mois sur l'autre calculée par Sensitor"
+url = "https://fred.stlouisfed.org/series/PAYEMS"
+license = "données publiques du Bureau of Labor Statistics, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "milliers"
+columns = ["mois", "creations"]
+notes = "Les chiffres sont ceux de la dernière révision, pas ceux annoncés le jour de la publication : chaque mois est révisé deux fois, puis une fois par an."
+
+[[dataset]]
+id = "chomage-etats-unis"
+title = "Taux de chômage aux États-Unis, mensuel, depuis 1948"
+kind = "file"
+file = "chomage-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, Unemployment Rate (UNRATE, corrigé des variations saisonnières), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/UNRATE"
+license = "données publiques du Bureau of Labor Statistics, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "chomage"]
+notes = "Le taux d'octobre 2025 n'a pas été publié : le point manque, il n'est pas interpolé."
+
+[[dataset]]
+id = "taux-2-ans-fed"
+title = "Rendement du Trésor américain à 2 ans et taux des fonds fédéraux, mensuels, depuis 2015"
+kind = "file"
+file = "taux-2-ans-fed.csv"
+source = "Board of Governors of the Federal Reserve System, Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity (GS2, moyenne mensuelle) et Federal Funds Effective Rate (FEDFUNDS), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/GS2"
+license = "données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "deux_ans", "fed_funds"]
+
+[[dataset]]
+id = "courbe-taux-us"
+title = "Rendements du Trésor américain à 10 et 2 ans, et leur écart, mensuels, depuis 1977"
+kind = "file"
+file = "courbe-taux-us.csv"
+source = "Board of Governors of the Federal Reserve System, Market Yield on U.S. Treasury Securities at 10-Year et 2-Year Constant Maturity (GS10 et GS2, moyennes mensuelles), via FRED, Federal Reserve Bank of St. Louis ; écart calculé par Sensitor"
+url = "https://fred.stlouisfed.org/series/GS10"
+license = "données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "dix_ans", "deux_ans", "ecart"]
+notes = "Écart en points de pourcentage : 10 ans moins 2 ans. Négatif, la courbe est dite inversée."

@@ -84,7 +84,7 @@ level = "intermediaire"
 file = "routine-de-seance.md"
 pdf = "routine-de-seance.pdf"
 access = "member"
-lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie"]
+lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie", "plan-publication"]
 
 [[resource]]
 id = "fiche-backtest"
@@ -133,3 +133,15 @@ file = "fiche-patrimoine.md"
 pdf = "fiche-patrimoine.pdf"
 access = "public"
 lessons = ["rendement-nominal-reel", "interets-composes", "simulateur-epargne", "frais-impots", "risques-epargne", "diversification", "bitcoin-patrimoine", "recap-patrimoine"]
+
+[[resource]]
+id = "fiche-macro"
+title = "Trader avec l'actualité économique"
+description = "Surprise et surprise normalisée, indicateurs majeurs, heures de publication à Paris et semaines décalées, taux implicites, courbe des taux, mouvement attendu et taille de position : le parcours 8 sur une page."
+kind = "fiche"
+category = "Macroéconomie et actualité"
+level = "intermediaire"
+file = "fiche-macro.md"
+pdf = "fiche-macro.pdf"
+access = "member"
+lessons = ["attentes-et-surprises", "indicateurs-majeurs", "banques-centrales-marche", "taux-devises-actions", "calendrier-economique", "volatilite-evenementielle", "plan-publication", "cas-inflation-us", "recap-macro"]

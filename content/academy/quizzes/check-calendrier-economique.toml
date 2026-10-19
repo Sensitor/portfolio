@@ -1,0 +1,73 @@
+id = "check-calendrier-economique"
+title = "Contrôle : lire un calendrier économique"
+course = "trader-l-actualite"
+lesson = "calendrier-economique"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "heure"
+prompt = "En général, à quelle heure de Paris sort le rapport sur l'emploi américain ?"
+kind = "single"
+lesson = "calendrier-economique"
+
+[[question.option]]
+id = "1430"
+text = "14 h 30"
+correct = true
+explanation = "Oui : 8 h 30 à Washington."
+
+[[question.option]]
+id = "0830"
+text = "8 h 30"
+explanation = "C'est l'heure de Washington."
+
+[[question.option]]
+id = "2000"
+text = "20 h 00"
+explanation = "C'est l'heure habituelle de la décision de la Fed."
+
+[[question]]
+id = "decale"
+prompt = "Le vendredi 13 mars 2026, à quelle heure de Paris tombait une publication américaine de 8 h 30 ?"
+kind = "single"
+lesson = "calendrier-economique"
+
+[[question.option]]
+id = "1330"
+text = "13 h 30"
+correct = true
+explanation = "Oui : les États-Unis étaient déjà à l'heure d'été, pas l'Europe."
+
+[[question.option]]
+id = "1430"
+text = "14 h 30"
+explanation = "C'est l'heure habituelle, pas celle des semaines décalées."
+
+[[question.option]]
+id = "1530"
+text = "15 h 30"
+explanation = "Le décalage réduit l'écart, il ne l'augmente pas."
+
+[[question]]
+id = "normalisee"
+prompt = "Surprise de −110 000, écart type des surprises passées 75 000. Surprise normalisée ?"
+kind = "single"
+lesson = "calendrier-economique"
+
+[[question.option]]
+id = "147"
+text = "−1,47"
+correct = true
+explanation = "Oui : −110 000 ÷ 75 000."
+
+[[question.option]]
+id = "068"
+text = "−0,68"
+explanation = "C'est l'inverse du rapport."
+
+[[question.option]]
+id = "35"
+text = "−35 000"
+explanation = "La normalisation divise, elle ne soustrait pas."

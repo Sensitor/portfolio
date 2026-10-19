@@ -1,0 +1,41 @@
+id = "taux-anticipes"
+title = "Ce que le marché attend de la Réserve fédérale"
+context = """
+La fourchette des fonds fédéraux est de **4,25 à 4,50 %** : son milieu, **4,375 %**, sert de taux actuel. Le contrat à terme sur les fonds fédéraux du mois qui suit la prochaine réunion cote **95,80**. *Chiffres construits pour l'exercice.*
+
+On admet que deux issues seulement sont possibles : aucun changement, ou une baisse d'un quart de point (0,25).
+"""
+conclusion = """
+Le contrat contient un taux moyen attendu de 4,20 %, soit 0,175 point sous le taux actuel : 0,70 baisse d'un quart de point. Dans ce modèle à deux issues, le marché donne 70 % de chances à une baisse. Si la Réserve fédérale baisse ses taux, la décision ne surprendra presque pas ; si elle ne bouge pas, c'est une surprise.
+"""
+
+[[step]]
+id = "implicite"
+prompt = "Quel taux moyen le contrat contient-il, en % ? (Deux décimales.)"
+unit = "%"
+answer = 4.20
+tolerance = 0.001
+solution = "100 − 95,80 = **4,20 %**."
+
+[[step]]
+id = "ecart"
+prompt = "Quel est l'écart entre ce taux et le taux actuel, en points ? (Trois décimales.)"
+unit = "points"
+answer = -0.175
+tolerance = 0.0005
+solution = "4,20 − 4,375 = **−0,175** point."
+
+[[step]]
+id = "quarts"
+prompt = "Combien de baisses d'un quart de point cet écart représente-t-il ? (Deux décimales.)"
+answer = 0.70
+tolerance = 0.001
+solution = "0,175 ÷ 0,25 = **0,70** baisse."
+
+[[step]]
+id = "probabilite"
+prompt = "Quelle probabilité le marché donne-t-il à une baisse, en % ?"
+unit = "%"
+answer = 70
+tolerance = 0.1
+solution = "Avec deux issues possibles, 0,70 baisse attendue équivaut à **70 %** de chances d'une baisse d'un quart de point."

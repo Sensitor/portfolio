@@ -1,0 +1,73 @@
+id = "check-cas-inflation-us"
+title = "Contrôle : le cas de l'inflation américaine"
+course = "trader-l-actualite"
+lesson = "cas-inflation-us"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "normalisee"
+prompt = "Consensus +0,3 %, publié +0,5 %, écart type des surprises 0,1 point. Surprise normalisée ?"
+kind = "single"
+lesson = "cas-inflation-us"
+
+[[question.option]]
+id = "deux"
+text = "+2,0"
+correct = true
+explanation = "Oui : +0,2 ÷ 0,1."
+
+[[question.option]]
+id = "zero2"
+text = "+0,2"
+explanation = "C'est la surprise brute, en points."
+
+[[question.option]]
+id = "cinq"
+text = "+5,0"
+explanation = "On divise la surprise, pas le chiffre publié."
+
+[[question]]
+id = "taille"
+prompt = "Budget 125 dollars, stop 30 points, glissement 5, 1 dollar par point, pas de 0,1. Quelle taille ?"
+kind = "single"
+lesson = "cas-inflation-us"
+
+[[question.option]]
+id = "35"
+text = "3,5 contrats"
+correct = true
+explanation = "Oui : 125 ÷ 35 = 3,57, arrondi vers le bas."
+
+[[question.option]]
+id = "36"
+text = "3,6 contrats"
+explanation = "Arrondi vers le haut, le risque dépasserait le budget."
+
+[[question.option]]
+id = "104"
+text = "10,4 contrats"
+explanation = "C'est la taille d'un jour ordinaire, avec un stop de 12 points."
+
+[[question]]
+id = "entree"
+prompt = "Pourquoi le trader n'entre-t-il pas à 14 h 31 ?"
+kind = "single"
+lesson = "cas-inflation-us"
+
+[[question.option]]
+id = "regle"
+text = "Sa règle prévoit 20 minutes d'attente, et le prix a fait un aller-retour de 40 points juste après."
+correct = true
+explanation = "Oui : une entrée immédiate aurait été arrêtée."
+
+[[question.option]]
+id = "ferme"
+text = "Parce que le marché est fermé."
+explanation = "Il est ouvert, et très actif."
+
+[[question.option]]
+id = "chiffre"
+text = "Parce que le chiffre était conforme au consensus."
+explanation = "Il était bien au-dessus : +0,5 % contre +0,3 %."

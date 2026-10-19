@@ -1,0 +1,47 @@
+id = "courbe-taux-reel"
+title = "La courbe et le taux réel américains"
+context = """
+Rendements du Trésor américain, moyennes mensuelles (Réserve fédérale, via FRED) :
+
+| Mois | 10 ans | 2 ans |
+|---|---|---|
+| Juillet 2023 | 3,90 % | 4,83 % |
+| Septembre 2026 | 4,99 % | 4,65 % |
+
+L'inflation américaine sur un an était de **3,7 %** en septembre 2026 (Bureau of Labor Statistics, calcul Sensitor).
+"""
+conclusion = """
+En juillet 2023, la courbe était inversée de 0,93 point, son creux depuis 2000. En septembre 2026, elle est redevenue positive de 0,34 point. Le taux réel à 2 ans, 0,95 point, reste positif : prêter deux ans à l'État américain rapporte un peu plus que l'inflation du moment.
+"""
+
+[[step]]
+id = "ecart-2023"
+prompt = "Quel est l'écart 10 ans moins 2 ans en juillet 2023, en points ?"
+unit = "points"
+answer = -0.93
+tolerance = 0.001
+solution = "3,90 − 4,83 = **−0,93** point : la courbe est inversée."
+
+[[step]]
+id = "ecart-2026"
+prompt = "Et en septembre 2026 ?"
+unit = "points"
+answer = 0.34
+tolerance = 0.001
+solution = "4,99 − 4,65 = **+0,34** point : la courbe monte de nouveau."
+
+[[step]]
+id = "reel"
+prompt = "Quel est le taux réel à 2 ans en septembre 2026, au sens simple (taux moins inflation), en points ?"
+unit = "points"
+answer = 0.95
+tolerance = 0.001
+solution = "4,65 − 3,7 = **0,95** point."
+
+[[step]]
+id = "duree"
+prompt = "L'inversion a duré de juillet 2022 à août 2024 inclus. Combien de mois ?"
+unit = "mois"
+answer = 26
+tolerance = 0
+solution = "Six mois en 2022, douze en 2023, huit en 2024 : **26 mois**, la plus longue inversion depuis 1977."

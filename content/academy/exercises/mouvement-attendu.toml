@@ -1,0 +1,50 @@
+id = "mouvement-attendu"
+title = "Le mouvement attendu et la taille un jour d'emploi américain"
+context = """
+EURUSD cote **1,0850**. La volatilité implicite sur un jour atteint **12 % par an** à la veille du rapport sur l'emploi. Un pip vaut 0,0001 ; sur ce compte en dollars, **1 lot** vaut **10 dollars par pip**. *Chiffres construits pour l'exercice.*
+
+Le budget de risque est de **200 dollars**. Le stop habituel de la stratégie est de **20 pips** ; un jour de publication, le trader l'élargit à **40 pips** et estime le glissement possible à **10 pips**.
+"""
+conclusion = """
+Le mouvement attendu, environ 68 pips, triple le stop habituel. En tenant compte du stop élargi et du glissement, la taille passe de 1,00 à 0,40 lot pour le même budget. Garder la taille habituelle avec le stop élargi et le glissement aurait exposé à une perte de 500 dollars, deux fois et demie le budget.
+"""
+
+[[step]]
+id = "mouvement"
+prompt = "Quel est le mouvement attendu sur un jour, en pips ? (Arrondi à l'entier.)"
+unit = "pips"
+answer = 68
+tolerance = 0.5
+solution = "1,0850 × 0,12 × √(1/365) = 0,00681, soit **68 pips**."
+
+[[step]]
+id = "fourchette"
+prompt = "Quel mouvement correspond à deux écarts types, en pips ?"
+unit = "pips"
+answer = 136
+tolerance = 1
+solution = "2 × 68 = **136 pips** : environ une fois sur vingt, le mouvement de la journée dépasse cette valeur."
+
+[[step]]
+id = "taille-normale"
+prompt = "Quelle est la taille habituelle, avec le stop de 20 pips, en lots ?"
+unit = "lots"
+answer = 1.00
+tolerance = 0.001
+solution = "200 ÷ (20 × 10) = **1,00 lot**."
+
+[[step]]
+id = "taille-publication"
+prompt = "Quelle est la taille un jour de publication, avec le stop de 40 pips et 10 pips de glissement ?"
+unit = "lots"
+answer = 0.40
+tolerance = 0.001
+solution = "200 ÷ ((40 + 10) × 10) = **0,40 lot**."
+
+[[step]]
+id = "perte"
+prompt = "Avec la taille habituelle, que coûterait le stop de 40 pips exécuté avec 10 pips de glissement, en dollars ?"
+unit = "$"
+answer = 500
+tolerance = 0.5
+solution = "1,00 × (40 + 10) × 10 = **500 dollars**, deux fois et demie le budget de 200 dollars."

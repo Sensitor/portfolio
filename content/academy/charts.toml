@@ -182,3 +182,59 @@ label = "Inflation"
 [[chart.series]]
 column = "taux_reel"
 label = "Taux réel (nominal moins inflation)"
+
+[[chart]]
+id = "creations-emplois"
+dataset = "emploi-etats-unis"
+kind = "bar"
+x = "mois"
+x_label = "Mois"
+y_label = "Emplois créés, en milliers"
+title = "Les créations d'emplois aux États-Unis, mois par mois"
+
+[[chart.series]]
+column = "creations"
+label = "Emplois salariés non agricoles, variation mensuelle"
+
+[[chart]]
+id = "chomage-us"
+dataset = "chomage-etats-unis"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux de chômage, en %"
+title = "Le taux de chômage américain depuis 1948"
+
+[[chart.series]]
+column = "chomage"
+label = "Taux de chômage"
+
+[[chart]]
+id = "deux-ans-fed"
+dataset = "taux-2-ans-fed"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Le marché anticipe : le rendement à 2 ans devance la Réserve fédérale"
+
+[[chart.series]]
+column = "deux_ans"
+label = "Rendement du Trésor à 2 ans"
+
+[[chart.series]]
+column = "fed_funds"
+label = "Taux des fonds fédéraux (effectif)"
+
+[[chart]]
+id = "courbe-us"
+dataset = "courbe-taux-us"
+kind = "area"
+x = "mois"
+x_label = "Mois"
+y_label = "10 ans moins 2 ans, en points"
+title = "L'écart entre taux à 10 ans et à 2 ans aux États-Unis, depuis 1977"
+
+[[chart.series]]
+column = "ecart"
+label = "Écart 10 ans moins 2 ans"
