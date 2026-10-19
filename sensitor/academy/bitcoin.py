@@ -15,6 +15,7 @@ target spacing of ten minutes per block, flagged as such wherever they are used.
 from __future__ import annotations
 
 import datetime as _dt
+import math
 from dataclasses import dataclass
 
 COIN = 100_000_000                  # satoshis per bitcoin
@@ -111,3 +112,81 @@ def issuance_rows() -> list[dict]:
              "part": round(e.share_issued * 100, 4),
              "estimation": e.estimated}
             for e in epochs(13)]
+
+
+# =============================================================================
+# DIFFICULTY, SECURITY AND FEES
+# =============================================================================
+
+RETARGET_INTERVAL = 2016            # blocks between two difficulty adjustments
+RETARGET_SECONDS = RETARGET_INTERVAL * TARGET_SPACING_MINUTES * 60   # two weeks
+MAX_RETARGET_FACTOR = 4
+
+
+def retarget(difficulty: float, actual_seconds: float) -> float:
+    """
+    The difficulty after an adjustment period that took `actual_seconds`. Faster
+    than two weeks, difficulty rises; slower, it falls. The protocol caps the
+    change at a factor of four in either direction.
+    """
+    if difficulty <= 0 or actual_seconds <= 0:
+        raise ValueError("difficulty and duration must be positive")
+    bounded = min(max(actual_seconds, RETARGET_SECONDS / MAX_RETARGET_FACTOR),
+                  RETARGET_SECONDS * MAX_RETARGET_FACTOR)
+    return difficulty * RETARGET_SECONDS / bounded
+
+
+def minutes_between_blocks(hashrate_share: float) -> float:
+    """How long, on average, a miner holding this share of the hashrate waits for a block."""
+    if not 0 < hashrate_share <= 1:
+        raise ValueError("a share is between 0 (excluded) and 1")
+    return TARGET_SPACING_MINUTES / hashrate_share
+
+
+def attacker_success(q: float, z: int) -> float:
+    """
+    The probability that an attacker with a share `q` of the hashrate ever
+    catches up from `z` blocks behind, as computed in section 11 of the white
+    paper (Nakamoto, 2008). With q of one half or more, the attacker always
+    succeeds eventually.
+    """
+    if not 0 <= q < 1 or z < 0:
+        raise ValueError("q is between 0 and 1, z is not negative")
+    p = 1 - q
+    if q >= p:
+        return 1.0
+    lam = z * q / p
+    total = 1.0
+    poisson = math.exp(-lam)
+    for k in range(z + 1):
+        if k:
+            poisson *= lam / k
+        total -= poisson * (1 - (q / p) ** (z - k))
+    return total
+
+
+def confirmations_needed(q: float, threshold: float = 0.001) -> int:
+    """The smallest number of confirmations for which the attacker's chance falls under `threshold`."""
+    if q >= 0.5:
+        raise ValueError("no number of confirmations protects against a majority")
+    z = 0
+    while attacker_success(q, z) >= threshold:
+        z += 1
+    return z
+
+
+def catch_up_rows(shares=(0.10, 0.20, 0.30), depth: int = 24) -> list[dict]:
+    """The attacker's chance after 0 to `depth` confirmations, for the chart of the security lesson."""
+    return [{"confirmations": z, **{f"q{round(q * 100)}": attacker_success(q, z) for q in shares}}
+            for z in range(depth + 1)]
+
+
+def fee_sats(vbytes: int, sats_per_vbyte: float) -> float:
+    """A transaction pays for its size, not for the amount it moves."""
+    return vbytes * sats_per_vbyte
+
+
+def estimated_date(from_height: int, from_date: _dt.date, target_height: int) -> _dt.date:
+    """When a future block should be mined, at ten minutes per block from a known one."""
+    minutes = (target_height - from_height) * TARGET_SPACING_MINUTES
+    return from_date + _dt.timedelta(minutes=minutes)

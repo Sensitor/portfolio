@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Une transaction : entrées, sorties et frais</title>
+<desc id="d">Alice dépense deux sorties de 0,5 et 0,3 BTC. La transaction, signée par sa clé, crée une sortie de 0,6 BTC pour Bob, une sortie de monnaie rendue de 0,19997492 BTC pour Alice, et laisse 0,00002508 BTC de frais au mineur.</desc>
+<text x="110" y="30" font-size="12" fill="#5b646b" font-weight="700" text-anchor="middle">Entrées</text>
+<text x="320" y="30" font-size="12" fill="#5b646b" font-weight="700" text-anchor="middle">Transaction</text>
+<text x="530" y="30" font-size="12" fill="#5b646b" font-weight="700" text-anchor="middle">Sorties</text>
+<rect x="30" y="60" width="160" height="50" rx="4" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.4"/>
+<text x="110" y="82" font-size="14" fill="#1b2733" font-weight="700" text-anchor="middle">0,5 BTC</text>
+<text x="110" y="99" font-size="10.5" fill="#5b646b" text-anchor="middle">sortie reçue par Alice</text>
+<rect x="30" y="140" width="160" height="50" rx="4" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.4"/>
+<text x="110" y="162" font-size="14" fill="#1b2733" font-weight="700" text-anchor="middle">0,3 BTC</text>
+<text x="110" y="179" font-size="10.5" fill="#5b646b" text-anchor="middle">sortie reçue par Alice</text>
+<rect x="250" y="80" width="140" height="90" rx="4" fill="#fbfaf6" stroke="#9c4a1a" stroke-width="1.8"/>
+<text x="320" y="112" font-size="11.5" fill="#5b646b" text-anchor="middle">signée par</text>
+<text x="320" y="129" font-size="12.5" fill="#9c4a1a" font-weight="700" text-anchor="middle">la clé d'Alice</text>
+<text x="320" y="150" font-size="11" fill="#5b646b" text-anchor="middle" font-family="DM Mono, Menlo, monospace">209 vB</text>
+<line x1="190" y1="85" x2="248" y2="110" stroke="#1b2733" stroke-width="1.6"/><path d="M240.0 110.3 L248 110 L242.8 104.0" fill="none" stroke="#1b2733" stroke-width="1.6"/>
+<line x1="190" y1="165" x2="248" y2="140" stroke="#1b2733" stroke-width="1.6"/><path d="M242.8 146.0 L248 140 L240.0 139.7" fill="none" stroke="#1b2733" stroke-width="1.6"/>
+<rect x="450" y="50" width="160" height="46" rx="4" fill="#fbfaf6" stroke="#284764" stroke-width="1.4"/>
+<text x="530" y="71" font-size="14" fill="#284764" font-weight="700" text-anchor="middle">0,6 BTC</text>
+<text x="530" y="87" font-size="10.5" fill="#5b646b" text-anchor="middle">pour Bob</text>
+<rect x="450" y="110" width="160" height="46" rx="4" fill="#fbfaf6" stroke="#3f6553" stroke-width="1.4"/>
+<text x="530" y="131" font-size="13" fill="#3f6553" font-weight="700" text-anchor="middle">0,19997492 BTC</text>
+<text x="530" y="147" font-size="10.5" fill="#5b646b" text-anchor="middle">monnaie rendue à Alice</text>
+<rect x="450" y="170" width="160" height="40" rx="4" fill="none" stroke="#86672f" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="530" y="189" font-size="12" fill="#86672f" font-weight="700" text-anchor="middle">0,00002508 BTC</text>
+<text x="530" y="203" font-size="10.5" fill="#5b646b" text-anchor="middle">frais, pour le mineur</text>
+<line x1="390" y1="100" x2="448" y2="73" stroke="#284764" stroke-width="1.6"/><path d="M442.9 79.2 L448 73 L440.0 72.9" fill="none" stroke="#284764" stroke-width="1.6"/>
+<line x1="390" y1="125" x2="448" y2="133" stroke="#3f6553" stroke-width="1.6"/><path d="M440.4 135.5 L448 133 L441.3 128.6" fill="none" stroke="#3f6553" stroke-width="1.6"/>
+<line x1="390" y1="150" x2="448" y2="188" stroke="#86672f" stroke-width="1.6" stroke-dasharray="5 4"/><path d="M440.1 187.0 L448 188 L443.9 181.1" fill="none" stroke="#86672f" stroke-width="1.6"/>
+<text x="320" y="240" font-size="12" fill="#1b2733" font-weight="700" text-anchor="middle">Entrées : 0,8 BTC  =  sorties : 0,79997492 BTC  +  frais : 0,00002508 BTC</text>
+<text x="30" y="268" font-size="11" fill="#7b8389" text-anchor="start">Une entrée se dépense en entier : la différence revient à l'expéditeur, moins les frais.</text>
+</svg>

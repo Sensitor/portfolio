@@ -171,3 +171,16 @@ retrieved = 2026-10-19
 unit = "%"
 columns = ["mois", "dix_ans", "deux_ans", "ecart"]
 notes = "Écart en points de pourcentage : 10 ans moins 2 ans. Négatif, la courbe est dite inversée."
+
+[[dataset]]
+id = "rattrapage-attaquant"
+title = "Probabilité qu'un attaquant rattrape la chaîne honnête, selon le nombre de confirmations"
+kind = "computed"
+generator = "bitcoin-catch-up"
+source = "formule de la section 11 du livre blanc de Bitcoin (Nakamoto, 2008), calculée par Sensitor pour un attaquant détenant 10 %, 20 % ou 30 % de la puissance de calcul"
+url = "https://bitcoin.org/bitcoin.pdf"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-19
+unit = ""
+columns = ["confirmations", "q10", "q20", "q30"]
+notes = "Le modèle suppose une puissance constante et un attaquant qui prépare sa chaîne en secret ; il ne tient pas compte du coût de l'attaque."

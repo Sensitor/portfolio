@@ -1,0 +1,73 @@
+id = "check-cles-et-transactions"
+title = "Contrôle : clés et transactions"
+course = "bitcoin-fonctionnement"
+lesson = "cles-et-transactions"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "phrase"
+prompt = "Un « support technique » vous demande votre phrase de récupération pour débloquer un compte. Que faire ?"
+kind = "single"
+lesson = "cles-et-transactions"
+
+[[question.option]]
+id = "refuser"
+text = "Refuser : aucun service légitime ne la demande, c'est une tentative de vol."
+correct = true
+explanation = "Oui. Sensitor ne vous la demandera jamais non plus."
+
+[[question.option]]
+id = "donner"
+text = "La donner, puisque c'est le support."
+explanation = "Qui détient la phrase détient les bitcoins."
+
+[[question.option]]
+id = "moitie"
+text = "N'en donner que la moitié."
+explanation = "Une partie de la phrase aide déjà un voleur."
+
+[[question]]
+id = "frais"
+prompt = "Entrées 0,8 BTC, sorties 0,79997492 BTC. Quels sont les frais ?"
+kind = "single"
+lesson = "cles-et-transactions"
+
+[[question.option]]
+id = "2508"
+text = "0,00002508 BTC"
+correct = true
+explanation = "Oui : entrées moins sorties."
+
+[[question.option]]
+id = "zero"
+text = "Aucun frais."
+explanation = "La différence entre entrées et sorties est le frais."
+
+[[question.option]]
+id = "08"
+text = "0,8 BTC"
+explanation = "C'est le total des entrées."
+
+[[question]]
+id = "depend"
+prompt = "De quoi dépendent les frais d'une transaction ?"
+kind = "single"
+lesson = "cles-et-transactions"
+
+[[question.option]]
+id = "taille"
+text = "De sa taille en octets virtuels et de la demande d'espace dans les blocs."
+correct = true
+explanation = "Oui : pas du montant envoyé."
+
+[[question.option]]
+id = "montant"
+text = "Du montant envoyé."
+explanation = "Un gros montant peut coûter autant qu'un petit."
+
+[[question.option]]
+id = "distance"
+text = "De la distance entre l'expéditeur et le destinataire."
+explanation = "Le réseau ne connaît pas de distance."

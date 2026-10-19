@@ -1,0 +1,58 @@
+id = "emission-halving"
+title = "L'émission d'une époque"
+context = """
+La récompense de bloc était de **50 BTC** au lancement, divisée par deux à chaque halving. Le quatrième halving a eu lieu en avril 2024, au bloc 840 000. On compte **144 blocs par jour** et **365 jours** par an.
+
+Le 17 octobre 2026, au bloc **971 911**, **20 099 725 BTC** avaient été émis. Le cinquième halving aura lieu au bloc **1 050 000**.
+"""
+conclusion = """
+Depuis avril 2024, 450 BTC naissent chaque jour, environ 164 250 par an : 0,82 % de l'offre existante, un rythme connu à l'avance et qui diminue. Le cinquième halving, dans 542 jours environ à partir du 17 octobre 2026, la divisera par deux. Ces dates restent des estimations : le rythme réel des blocs varie autour de dix minutes.
+"""
+
+[[step]]
+id = "recompense"
+prompt = "Quelle est la récompense de bloc après le quatrième halving, en BTC ?"
+unit = "BTC"
+answer = 3.125
+tolerance = 0.0001
+solution = "50 ÷ 2⁴ = 50 ÷ 16 = **3,125 BTC**."
+
+[[step]]
+id = "par-jour"
+prompt = "Combien de BTC sont créés chaque jour ?"
+unit = "BTC"
+answer = 450
+tolerance = 0.01
+solution = "3,125 × 144 = **450 BTC**."
+
+[[step]]
+id = "par-an"
+prompt = "Et chaque année ?"
+unit = "BTC"
+answer = 164250
+tolerance = 1
+solution = "450 × 365 = **164 250 BTC**."
+
+[[step]]
+id = "taux"
+prompt = "Que représente cette émission annuelle par rapport à l'offre de 20 099 725 BTC, en % ? (Deux décimales.)"
+unit = "%"
+answer = 0.82
+tolerance = 0.006
+solution = "164 250 ÷ 20 099 725 × 100 = **0,82 %**."
+
+[[step]]
+id = "suivante"
+prompt = "Quelle sera la récompense après le cinquième halving, en BTC ?"
+unit = "BTC"
+answer = 1.5625
+tolerance = 0.00001
+solution = "3,125 ÷ 2 = **1,5625 BTC**."
+
+[[step]]
+id = "jours"
+prompt = "Combien de jours restent, à dix minutes par bloc, entre le bloc 971 911 et le bloc 1 050 000 ? (Arrondi à l'entier.)"
+unit = "jours"
+answer = 542
+tolerance = 0.5
+solution = "(1 050 000 − 971 911) ÷ 144 = 78 089 ÷ 144 = **542 jours**, vers le 11 avril 2028."

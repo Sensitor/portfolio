@@ -238,3 +238,25 @@ title = "L'écart entre taux à 10 ans et à 2 ans aux États-Unis, depuis 1977"
 [[chart.series]]
 column = "ecart"
 label = "Écart 10 ans moins 2 ans"
+
+[[chart]]
+id = "rattrapage"
+dataset = "rattrapage-attaquant"
+kind = "line"
+x = "confirmations"
+x_label = "Confirmations attendues"
+y_label = "Probabilité de succès de l'attaquant"
+y_log = true
+title = "Chaque confirmation divise les chances d'un attaquant minoritaire"
+
+[[chart.series]]
+column = "q10"
+label = "Attaquant à 10 % de la puissance"
+
+[[chart.series]]
+column = "q20"
+label = "Attaquant à 20 %"
+
+[[chart.series]]
+column = "q30"
+label = "Attaquant à 30 %"

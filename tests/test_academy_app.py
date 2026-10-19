@@ -170,7 +170,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 8 sur 10") < body.index("Monnaie et Bitcoin · 1 sur 2"))
+              body.index("Trading · 8 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -242,6 +242,25 @@ def test_universes() -> None:
     chart = catalog.chart("taux-bce-fed")
     fig = chart_view.figure(chart, catalog.dataset(chart.dataset), universe="monnaie")
     check("a money chart leads with copper", fig.data[0].line.color == theme.TOKENS["copper-2"])
+
+
+def test_hash_demo(tok: str) -> None:
+    print("\nThe hash demonstration")
+    from sensitor.academy import hashing as H
+    page = run({"page": "lesson", "course": "bitcoin-fonctionnement", "lesson": "preuve-de-travail"}, tok)
+    check("the lesson renders with its demonstration", not page.exception
+          and any(t.label == "Texte" for t in page.text_input), error(page))
+    check("the digest of the default text is shown", H.digest("Alice paie 1 BTC à Bob") in text(page))
+    next(t for t in page.text_input if t.label == "Texte").set_value("Sensitor").run()
+    check("a new text gives a new digest", H.digest("Sensitor") in text(page))
+    next(b for b in page.button if b.label == "Chercher le nonce").click().run()
+    mined = H.mine("Sensitor", 3)
+    body = text(page)
+    check("the nonce found is the first that works, and its digest starts with 000",
+          "Nonce trouvé" in body and f"{mined.nonce:,}".replace(",", "\u202f") in body
+          and mined.digest[3:] in body and not page.exception, error(page))
+    check("no key or seed phrase is asked for", all("phrase" not in t.label.lower() and "clé" not in t.label.lower()
+                                                   for t in page.text_input))
 
 
 def main() -> int:
@@ -384,6 +403,7 @@ def main() -> int:
 
     test_new_tracks(alice)
     test_universes()
+    test_hash_demo(alice)
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)

@@ -38,6 +38,7 @@ CHART_KINDS = {"line", "area", "bar", "step"}
 GENERATORS: dict[str, Callable[[], list[dict]]] = {
     "bitcoin-issuance": bitcoin.issuance_rows,
     "loan-amortisation": money.example_amortisation_rows,
+    "bitcoin-catch-up": bitcoin.catch_up_rows,
 }
 
 

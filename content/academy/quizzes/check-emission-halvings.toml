@@ -1,0 +1,73 @@
+id = "check-emission-halvings"
+title = "Contrôle : l'émission et les halvings"
+course = "bitcoin-fonctionnement"
+lesson = "emission-halvings"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "recompense"
+prompt = "Quelle est la récompense de bloc depuis le halving d'avril 2024 ?"
+kind = "single"
+lesson = "emission-halvings"
+
+[[question.option]]
+id = "3125"
+text = "3,125 BTC"
+correct = true
+explanation = "Oui : 50 ÷ 2⁴."
+
+[[question.option]]
+id = "625"
+text = "6,25 BTC"
+explanation = "C'était la récompense de mai 2020 à avril 2024."
+
+[[question.option]]
+id = "50"
+text = "50 BTC"
+explanation = "C'était la récompense au lancement."
+
+[[question]]
+id = "total"
+prompt = "Combien de bitcoins existeront au total ?"
+kind = "single"
+lesson = "emission-halvings"
+
+[[question.option]]
+id = "20999999"
+text = "20 999 999,9769 BTC"
+correct = true
+explanation = "Oui : un peu moins de 21 millions, à cause de l'arrondi au satoshi."
+
+[[question.option]]
+id = "21"
+text = "Exactement 21 000 000 BTC"
+explanation = "L'arrondi au satoshi en retire 0,0231 BTC."
+
+[[question.option]]
+id = "illimite"
+text = "Le nombre n'est pas limité."
+explanation = "L'émission s'arrête après 33 époques."
+
+[[question]]
+id = "halving-prix"
+prompt = "Le halving fait-il mécaniquement monter le prix ?"
+kind = "single"
+lesson = "emission-halvings"
+
+[[question.option]]
+id = "non"
+text = "Non : il réduit l'émission, connue d'avance ; le prix dépend de la demande."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Rien ne garantit l'évolution de la demande."
+
+[[question.option]]
+id = "baisse"
+text = "Non, il fait toujours baisser le prix."
+explanation = "Il n'y a pas de règle dans un sens ou dans l'autre."

@@ -1,0 +1,228 @@
+id = "bitcoin-fonctionnement-validation"
+title = "Quiz de validation : Bitcoin, origines et fonctionnement"
+course = "bitcoin-fonctionnement"
+lesson = "recap-bitcoin-fonctionnement"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "double"
+prompt = "Quel problème Bitcoin résout-il sans tiers de confiance ?"
+kind = "single"
+lesson = "double-depense"
+
+[[question.option]]
+id = "double"
+text = "La double dépense d'une monnaie numérique."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "inflation"
+text = "L'inflation de toutes les monnaies."
+explanation = "Ce n'est pas le problème posé par le livre blanc."
+
+[[question.option]]
+id = "frais"
+text = "Les frais bancaires."
+explanation = "Bitcoin a lui aussi des frais."
+
+[[question]]
+id = "assemble"
+prompt = "Qu'apporte le livre blanc de 2008 aux travaux qui l'ont précédé ?"
+kind = "single"
+lesson = "precurseurs-bitcoin"
+
+[[question.option]]
+id = "assemblage"
+text = "Un assemblage qui fonctionne : preuve de travail, chaîne horodatée, registre public, chaîne la plus travaillée."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "hash"
+text = "L'invention des fonctions de hachage."
+explanation = "Elles existaient bien avant."
+
+[[question.option]]
+id = "signature"
+text = "L'invention de la signature numérique."
+explanation = "Elle existait aussi."
+
+[[question]]
+id = "cle"
+prompt = "Que possède réellement un détenteur de bitcoins ?"
+kind = "single"
+lesson = "cles-et-transactions"
+
+[[question.option]]
+id = "cle"
+text = "Une clé privée capable de signer des transactions."
+correct = true
+explanation = "Oui : les bitcoins restent inscrits dans le registre."
+
+[[question.option]]
+id = "fichier"
+text = "Un fichier stocké dans son téléphone."
+explanation = "Il n'y a pas de fichier de bitcoins."
+
+[[question.option]]
+id = "compte"
+text = "Un compte ouvert chez Bitcoin."
+explanation = "Il n'y a pas d'organisation qui ouvre des comptes."
+
+[[question]]
+id = "monnaie"
+prompt = "Alice dépense une entrée de 1 BTC pour payer 0,4 BTC et oublie la sortie de monnaie rendue. Que se passe-t-il ?"
+kind = "single"
+lesson = "cles-et-transactions"
+
+[[question.option]]
+id = "frais"
+text = "Les 0,6 BTC de différence partent en frais au mineur."
+correct = true
+explanation = "Oui : frais = entrées − sorties."
+
+[[question.option]]
+id = "retour"
+text = "Les 0,6 BTC lui reviennent automatiquement."
+explanation = "Seule une sortie vers son adresse les lui rendrait."
+
+[[question.option]]
+id = "refus"
+text = "Le réseau refuse la transaction."
+explanation = "Elle est valide, seulement très chère."
+
+[[question]]
+id = "chaine"
+prompt = "On modifie une transaction d'un bloc ancien. Que voit-on ?"
+kind = "single"
+lesson = "blocs-et-chaine"
+
+[[question.option]]
+id = "suite"
+text = "Son empreinte change, et le bloc suivant ne s'y rattache plus."
+correct = true
+explanation = "Oui : il faudrait refaire tous les blocs suivants."
+
+[[question.option]]
+id = "rien"
+text = "Rien, la modification passe inaperçue."
+explanation = "Le chaînage la rend visible."
+
+[[question.option]]
+id = "seul"
+text = "Seul ce bloc change, les autres restent valides."
+explanation = "Le bloc suivant contient l'ancienne empreinte."
+
+[[question]]
+id = "difficulte"
+prompt = "À quoi sert l'ajustement de difficulté ?"
+kind = "single"
+lesson = "preuve-de-travail"
+
+[[question.option]]
+id = "dix"
+text = "À garder un bloc toutes les dix minutes en moyenne, quelle que soit la puissance."
+correct = true
+explanation = "Oui, tous les 2 016 blocs."
+
+[[question.option]]
+id = "prix"
+text = "À stabiliser le prix du bitcoin."
+explanation = "Il ne vise pas le prix."
+
+[[question.option]]
+id = "frais"
+text = "À fixer les frais."
+explanation = "Les frais dépendent de la demande d'espace."
+
+[[question]]
+id = "confirmations"
+prompt = "Combien de confirmations pour rester sous 0,1 % face à un attaquant à 10 % de la puissance ?"
+kind = "single"
+lesson = "consensus-securite"
+
+[[question.option]]
+id = "cinq"
+text = "5"
+correct = true
+explanation = "Oui : 0,091 % après cinq."
+
+[[question.option]]
+id = "une"
+text = "1"
+explanation = "Après une confirmation, il lui reste 20,5 %."
+
+[[question.option]]
+id = "cent"
+text = "100"
+explanation = "Bien moins suffisent face à un attaquant à 10 %."
+
+[[question]]
+id = "noeuds"
+prompt = "Qui vérifie les règles de Bitcoin, dont l'émission ?"
+kind = "single"
+lesson = "consensus-securite"
+
+[[question.option]]
+id = "noeuds"
+text = "Chaque nœud du réseau, indépendamment."
+correct = true
+explanation = "Oui : n'importe qui peut en faire tourner un."
+
+[[question.option]]
+id = "mineurs"
+text = "Les mineurs seuls."
+explanation = "Ils proposent des blocs ; les nœuds vérifient."
+
+[[question.option]]
+id = "fondation"
+text = "Une fondation centrale."
+explanation = "Aucune organisation ne contrôle les règles."
+
+[[question]]
+id = "emission"
+prompt = "Récompense de 3,125 BTC, 144 blocs par jour, 365 jours. Émission annuelle ?"
+kind = "single"
+lesson = "emission-halvings"
+
+[[question.option]]
+id = "164250"
+text = "164 250 BTC"
+correct = true
+explanation = "Oui : 450 par jour."
+
+[[question.option]]
+id = "450"
+text = "450 BTC"
+explanation = "C'est l'émission d'une journée."
+
+[[question.option]]
+id = "328500"
+text = "328 500 BTC"
+explanation = "C'était l'émission annuelle avant le halving de 2024."
+
+[[question]]
+id = "securite"
+prompt = "Pourquoi la sécurité à très long terme est-elle débattue ?"
+kind = "single"
+lesson = "emission-halvings"
+
+[[question.option]]
+id = "frais"
+text = "Parce que la récompense diminue, et que les frais devront payer de plus en plus la puissance du réseau."
+correct = true
+explanation = "Oui : la question reste ouverte."
+
+[[question.option]]
+id = "21m"
+text = "Parce qu'il y aura plus de 21 millions de bitcoins."
+explanation = "L'offre est limitée à 20 999 999,9769 BTC."
+
+[[question.option]]
+id = "aucun"
+text = "Elle ne l'est pas : la question est réglée."
+explanation = "Plusieurs économistes la jugent ouverte."

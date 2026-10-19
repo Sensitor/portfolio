@@ -169,7 +169,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **C3** ✔ | M1, cours « Inflation et patrimoine » : 8 leçons, simulateur d'épargne nominal et réel, taux réel BCE, diversification, Bitcoin avec ses objections | terminé |
 | **B3** ✔ | Écosystème en deux univers : accueil et Academy recadrés, couleur et typographie propres à l'univers Monnaie et crypto | terminé |
 | **T8** ✔ | Trading, parcours 8 « Macroéconomie et actualité » : 9 leçons, données d'emploi, de taux et de courbe américaines (BLS et Réserve fédérale, via FRED), 5 exercices, fiche de révision | terminé |
-| **C4** | M2, cours « Origines et fonctionnement », émission calculée | contenu et visualisation |
+| **C4** ✔ | M2, cours « Bitcoin : origines et fonctionnement » : 8 leçons sourcées, émission calculée, probabilité de rattrapage du livre blanc recalculée, démonstration d'empreinte et de preuve de travail jouet, 4 exercices | terminé |
 | **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |
 | **D** | C1 : chaîne de hash, preuve de travail jouet, explorateur, sécurité | contenu et démonstrations |

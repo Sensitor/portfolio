@@ -89,10 +89,9 @@ def test_real_catalog():
           and catalog.universe_of(None) == "trading")
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
-    check("Monnaie et Bitcoin opens with path 1; the rest of the new tracks is announced",
-          catalog.path("monnaie-inflation").is_available
-          and all(p.status == C.PLANNED for p in catalog.paths
-                  if p.track in ("crypto", "investissement") or p.id == "bitcoin")
+    check("Monnaie et Bitcoin opens paths 1 and 2; Crypto and Investissement are announced",
+          catalog.path("monnaie-inflation").is_available and catalog.path("bitcoin").is_available
+          and all(p.status == C.PLANNED for p in catalog.paths if p.track in ("crypto", "investissement"))
           and len(catalog.paths) == 16)
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
@@ -626,6 +625,88 @@ def test_macro_figures():
           paris(date(2026, 6, 17), 14, 0) == time(20, 0) and paris(date(2026, 3, 18), 14, 0) == time(19, 0))
     check("expected move: refuses a zero horizon", raises(lambda: MA.expected_move(100, 10, 0), ValueError))
     check("the course is in the trading universe", catalog.universe_of(course) == "trading")
+
+
+def test_bitcoin_course_figures():
+    """« Bitcoin : origines et fonctionnement » : the white paper's table, the exercises, the figures."""
+    print("\nBitcoin course figures")
+    import datetime as dt
+    from sensitor.academy import bitcoin as B
+    from sensitor.academy import hashing as H
+    catalog = C.load_catalog()
+    course = catalog.course("bitcoin-fonctionnement")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+
+    paper = {0.1: [1.0, 0.2045873, 0.0509779, 0.0131722, 0.0034552, 0.0009137, 0.0002428, 0.0000647,
+                   0.0000173, 0.0000046, 0.0000012],
+             0.3: {0: 1.0, 5: 0.1773523, 10: 0.0416605, 15: 0.0101008, 20: 0.0024804, 25: 0.0006132,
+                   30: 0.0001522, 35: 0.0000379, 40: 0.0000095, 45: 0.0000024, 50: 0.0000006}}
+    check("white paper, q = 0,1: z = 0 to 10, to seven decimals",
+          [round(B.attacker_success(0.1, z), 7) for z in range(11)] == paper[0.1])
+    check("white paper, q = 0,3: z = 0 to 50 by 5, to seven decimals",
+          all(round(B.attacker_success(0.3, z), 7) == v for z, v in paper[0.3].items()))
+    check("white paper: confirmations for P < 0,1 %",
+          {q: B.confirmations_needed(q) for q in (0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45)}
+          == {0.10: 5, 0.15: 8, 0.20: 11, 0.25: 15, 0.30: 24, 0.35: 41, 0.40: 89, 0.45: 340})
+    check("a majority always catches up", B.attacker_success(0.5, 6) == 1.0
+          and raises(lambda: B.confirmations_needed(0.5), ValueError))
+    check("lesson 6 quotes 20,5 %, 0,09 %, 0,024 % and 13,2 %",
+          all(t in text["consensus-securite"] for t in ("20,5 %", "0,09 %", "0,024 %", "13,2 %"))
+          and round(B.attacker_success(0.3, 6) * 100, 1) == 13.2)
+    rows = catalog.dataset("rattrapage-attaquant").rows
+    check("the chart's rows come from the same formula", len(rows) == 25
+          and close(rows[6]["q10"], B.attacker_success(0.1, 6)) and close(rows[24]["q30"], B.attacker_success(0.3, 24)))
+
+    ca = ex("confirmations-attaquant")
+    check("exercise confirmations: 0,024 %, 5, 50 minutes, 4 hours",
+          abs(B.attacker_success(0.1, 6) * 100 - ca["six"]) < 0.0006 and B.confirmations_needed(0.1) == ca["seuil-10"]
+          and ca["seuil-10"] * 10 == ca["duree"] and B.confirmations_needed(0.3) * 10 / 60 == ca["seuil-30"])
+
+    ad = ex("ajustement-difficulte")
+    check("retarget: 14 days, x 1,111, +11,1 %, 156 200 billion",
+          B.RETARGET_SECONDS / 86400 == ad["duree"] and abs(B.retarget(1, 12.6 * 86400) - ad["facteur"]) < 0.0006
+          and abs((B.retarget(1, 12.6 * 86400) - 1) * 100 - ad["hausse"]) < 0.06
+          and abs(B.retarget(140_580, 12.6 * 86400) - ad["nouvelle"]) < 60)
+    check("retarget: capped at a factor of four", B.retarget(100, 1) == 400 and B.retarget(100, 10 ** 9) == 25)
+    check("a 2 % miner: 500 minutes, 2,88 blocks a day", B.minutes_between_blocks(0.02) == ad["minutes"]
+          and close(24 * 60 / B.TARGET_SPACING_MINUTES * 0.02, ad["par-jour"]))
+    check("lesson 5: 86 390 to 140 580 billion is +63 %, about 6 x 10^23 tries a block",
+          round((140_580 / 86_390 - 1) * 100) == 63 and round(140_577_680_051_919.62 * 2 ** 32 / 1e23) == 6
+          and "63 %" in text["preuve-de-travail"])
+
+    tx = ex("transaction-utxo")
+    fee = B.fee_sats(209, 12)
+    check("exercise transaction: 0,8 in, 2 508 sats, change 0,19997492, 0,2 lost without change",
+          close(0.5 + 0.3, tx["entrees"]) and fee == tx["frais-sats"] and close(fee / B.COIN, tx["frais-btc"])
+          and (80_000_000 - 60_000_000 - fee) / B.COIN == tx["monnaie"] and close(0.8 - 0.6, tx["oubli"]))
+
+    em = ex("emission-halving")
+    check("exercise issuance: 3,125, 450 a day, 164 250 a year, 0,82 %",
+          B.block_subsidy(840_000) / B.COIN == em["recompense"] and em["recompense"] * 144 == em["par-jour"]
+          and em["par-jour"] * 365 == em["par-an"]
+          and abs(em["par-an"] / (B.supply_after(971_911) / B.COIN) * 100 - em["taux"]) < 0.006)
+    check("exercise issuance: 1,5625 next, 542 days, around 11 April 2028",
+          B.block_subsidy(1_050_000) / B.COIN == em["suivante"] and round((1_050_000 - 971_911) / 144) == em["jours"]
+          and B.estimated_date(971_911, dt.date(2026, 10, 17), 1_050_000) == dt.date(2028, 4, 11))
+    last = max(h for h in range(0, 64 * B.HALVING_INTERVAL, B.HALVING_INTERVAL) if B.block_subsidy(h) > 0) + B.HALVING_INTERVAL - 1
+    check("the last fraction around 2140, block 6 929 999", last == 6_929_999
+          and B.estimated_date(971_911, dt.date(2026, 10, 17), last).year == 2140 and "6 929 999" in text["emission-halvings"])
+    check("lesson 7 quotes 20 099 725 BTC and 95,7 %", B.supply_after(971_911) == 20_099_725 * B.COIN
+          and round(B.supply_after(971_911) / B.total_supply() * 100, 1) == 95.7 and "95,7 %" in text["emission-halvings"])
+
+    check("SHA-256 of « abc », the FIPS 180-4 example",
+          H.digest("abc") == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+    mined = H.mine("Sensitor", 3)
+    check("toy proof of work: three leading zeros, checked in one hash", mined.digest.startswith("000")
+          and H.digest(f"Sensitor{mined.nonce}") == mined.digest and mined.tries == mined.nonce + 1)
+    check("toy proof of work: refuses more than five zeros", raises(lambda: H.mine("x", 6), ValueError))
+    honest = H.chain(["Alice paie Bob", "Bob paie Carol", "Carol paie Dan"])
+    svg = catalog.figures["chaine-blocs.svg"]
+    forged = H.digest(honest[0].digest + "Bob paie Eve" + "0")
+    check("the chain figure prints the real digests", all(h.digest[:10] in svg for h in honest) and forged[:10] in svg
+          and forged != honest[1].digest)
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 
 def test_bitcoin_issuance():
@@ -1590,6 +1671,7 @@ def main() -> int:
     test_psychology_figures()
     test_backtest_figures()
     test_macro_figures()
+    test_bitcoin_course_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

@@ -27,7 +27,14 @@ FONT = "DM Sans, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
 MONO = "DM Mono, SFMono-Regular, Consolas, monospace"
 
 
+_SUPERSCRIPT = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
+
+
 def _fr(value) -> str:
+    if isinstance(value, float) and value and abs(value) < 1e-4:
+        # A probability of 9e-8 must not read as « 0 ».
+        mantissa, exponent = f"{value:.2e}".split("e")
+        return f"{mantissa.replace('.', ',')} × 10{str(int(exponent)).translate(_SUPERSCRIPT)}"
     if isinstance(value, float):
         text = f"{value:,.4f}".rstrip("0").rstrip(".")
         return text.replace(",", " ").replace(".", ",")
@@ -83,7 +90,10 @@ def style(fig: go.Figure, *, x_label: str = "", y_label: str = "", legend: bool 
         hoverlabel=dict(bgcolor=TOKENS["white"], bordercolor=TOKENS["line-strong"],
                         font=dict(family=FONT, color=TOKENS["ink"])),
         xaxis=dict(xaxis, title=dict(text=x_label, standoff=12)),
-        yaxis=dict(axis, title=dict(text=y_label, standoff=14), type="log" if y_log else "linear"),
+        yaxis=dict(axis, title=dict(text=y_label, standoff=14), type="log" if y_log else "linear",
+                   # On a log axis, powers of ten read better than long decimals.
+                   **({"tickformat": "", "exponentformat": "power", "showexponent": "all", "dtick": 2}
+                      if y_log else {})),
     )
     return fig
 

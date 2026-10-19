@@ -63,7 +63,9 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   money.py     bank balance sheets, loan instalments and schedules, bond prices (« La monnaie »)
   inflation.py rates from an index, cumulative and annualised inflation, purchasing power, contributions
   savings.py   real return, monthly savings projection, compounding, volatility drag, two-asset volatility
-  bitcoin.py   Bitcoin's issuance from the protocol rules
+  bitcoin.py   Bitcoin's issuance from the protocol rules, difficulty retarget, the white paper's
+               catch-up probability, fees, estimated block dates
+  hashing.py   SHA-256 digests, a toy proof of work and a hash chain (the hash demonstration)
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"
@@ -121,7 +123,7 @@ database stores only what members do with the content.
    :::
    ::: exercise cas-eurusd             id from content/academy/exercises/
    :::
-   ::: tool risk-calculator           also ruin-simulator, savings-simulator
+   ::: tool risk-calculator           also ruin-simulator, savings-simulator, hash-demo
    :::
    ::: chart emission-bitcoin          id from content/academy/charts.toml
    Légende.

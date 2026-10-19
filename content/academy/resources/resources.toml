@@ -145,3 +145,16 @@ file = "fiche-macro.md"
 pdf = "fiche-macro.pdf"
 access = "member"
 lessons = ["attentes-et-surprises", "indicateurs-majeurs", "banques-centrales-marche", "taux-devises-actions", "calendrier-economique", "volatilite-evenementielle", "plan-publication", "cas-inflation-us", "recap-macro"]
+
+[[resource]]
+id = "fiche-bitcoin-fonctionnement"
+title = "Bitcoin : origines et fonctionnement"
+description = "La double dépense, les précurseurs et les dates clés, les transactions et la phrase de récupération, les blocs, la preuve de travail, la sécurité des confirmations et l'émission : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-bitcoin-fonctionnement.md"
+pdf = "fiche-bitcoin-fonctionnement.pdf"
+access = "member"
+lessons = ["double-depense", "precurseurs-bitcoin", "cles-et-transactions", "blocs-et-chaine", "preuve-de-travail", "consensus-securite", "emission-halvings", "recap-bitcoin-fonctionnement"]
+

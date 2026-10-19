@@ -47,7 +47,7 @@ CALLOUT_KINDS = {
 }
 
 DIRECTIVES = {"callout", "figure", "formula", "exercise", "tool", "chart"}
-TOOLS = {"risk-calculator", "ruin-simulator", "savings-simulator"}
+TOOLS = {"risk-calculator", "ruin-simulator", "savings-simulator", "hash-demo"}
 
 _OPEN = re.compile(r"^:::\s*([a-z-]+)\s*(.*)$")
 _CLOSE = re.compile(r"^:::\s*$")

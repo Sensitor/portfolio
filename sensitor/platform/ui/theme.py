@@ -760,6 +760,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-ucard .go { display: inline-flex; align-items: center; gap: .5rem; font: 600 14px var(--sans); color: var(--blue-2); }
 .stApp .sx-ucard .go svg { width: 17px; height: 17px; transition: transform .2s var(--ease); }
 .stApp [class*="st-key-tap_"]:hover .sx-ucard .go svg { transform: translateX(4px); }
+.stApp code.sx-hash { display: block; font: 400 13px/1.6 var(--mono); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line); border-radius: 3px; padding: .6rem .8rem; overflow-wrap: anywhere; word-break: break-all; }
+.stApp code.sx-hash b { color: var(--blue-2); font-weight: 600; }
 .stApp .sx-ujoin { margin: 1.2rem auto 0; max-width: 46rem; text-align: center; font-size: 15px; line-height: 1.65; color: var(--muted); }
 .stApp .sx-ujoin b { color: var(--ink); font-weight: 600; }
 

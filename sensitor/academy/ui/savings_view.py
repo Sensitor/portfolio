@@ -80,6 +80,6 @@ def render(*, scope: str) -> None:
         st.plotly_chart(figure(rows), key=f"plot_{k}", theme=None,
                         config={"displayModeBar": False, "responsive": True})
         html('<p class="sx-note">Le pouvoir d\'achat divise la valeur affichée par la hausse des prix '
-             'accumulée. Si la courbe dorée passe sous les sommes versées, l\'épargne a perdu en réel '
+             'accumulée. Si la courbe bleue du pouvoir d\'achat passe sous les sommes versées, l\'épargne a perdu en réel '
              'même si elle a gagné en euros. Ni les rendements ni l\'inflation ne sont constants en '
              'réalité ; aucun résultat de ce simulateur n\'est un conseil en investissement.</p>')

@@ -1,0 +1,57 @@
+id = "ajustement-difficulte"
+title = "L'ajustement de la difficulté"
+context = """
+La difficulté du réseau vaut **140 580 milliards** au début d'une période. Les **2 016 blocs** de la période sont trouvés en **12,6 jours** au lieu des 14 prévus, parce que de nouvelles machines se sont mises à miner. *Chiffres construits pour l'exercice.*
+
+Un mineur détient **2 %** de la puissance de calcul du réseau.
+"""
+conclusion = """
+Les blocs sont arrivés 10 % trop vite : la difficulté monte de 11,1 %, à 156 200 milliards environ, et le rythme revient à dix minutes. Le mineur à 2 % trouve en moyenne un bloc toutes les 500 minutes, soit environ 2,9 blocs par jour : sa part de puissance donne la même part des blocs.
+"""
+
+[[step]]
+id = "duree"
+prompt = "Combien de jours la période devrait-elle durer, à dix minutes par bloc ?"
+unit = "jours"
+answer = 14
+tolerance = 0.01
+solution = "2 016 × 10 minutes = 20 160 minutes, soit **14 jours**."
+
+[[step]]
+id = "facteur"
+prompt = "Quel est le facteur d'ajustement ? (Trois décimales.)"
+answer = 1.111
+tolerance = 0.0006
+solution = "14 ÷ 12,6 = **1,111**."
+
+[[step]]
+id = "hausse"
+prompt = "De combien la difficulté augmente-t-elle, en % ? (Une décimale.)"
+unit = "%"
+answer = 11.1
+tolerance = 0.06
+solution = "(1,111 − 1) × 100 = **+11,1 %**."
+
+[[step]]
+id = "nouvelle"
+prompt = "Quelle est la nouvelle difficulté, en milliards ? (Arrondi à la centaine.)"
+unit = "milliards"
+answer = 156200
+tolerance = 60
+solution = "140 580 × 14 ÷ 12,6 = 156 200 milliards **environ**."
+
+[[step]]
+id = "minutes"
+prompt = "En moyenne, combien de minutes le mineur à 2 % attend-il entre deux de ses blocs ?"
+unit = "minutes"
+answer = 500
+tolerance = 0.5
+solution = "10 ÷ 0,02 = **500 minutes**, environ 8 heures 20."
+
+[[step]]
+id = "par-jour"
+prompt = "Combien de blocs trouve-t-il par jour, en moyenne ? (Deux décimales.)"
+unit = "blocs"
+answer = 2.88
+tolerance = 0.006
+solution = "144 blocs par jour × 0,02 = **2,88 blocs**."

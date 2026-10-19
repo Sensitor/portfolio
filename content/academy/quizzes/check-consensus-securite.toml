@@ -1,0 +1,73 @@
+id = "check-consensus-securite"
+title = "Contrôle : le consensus et la sécurité"
+course = "bitcoin-fonctionnement"
+lesson = "consensus-securite"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "noeuds"
+prompt = "Un mineur majoritaire produit un bloc qui crée 100 bitcoins de trop. Que se passe-t-il ?"
+kind = "single"
+lesson = "consensus-securite"
+
+[[question.option]]
+id = "rejet"
+text = "Les nœuds le rejettent : il viole les règles."
+correct = true
+explanation = "Oui : la puissance ne permet pas de changer les règles."
+
+[[question.option]]
+id = "accepte"
+text = "Il est accepté, puisque le mineur est majoritaire."
+explanation = "Les nœuds vérifient chaque règle, quelle que soit la puissance."
+
+[[question.option]]
+id = "vote"
+text = "Un vote décide."
+explanation = "Il n'y a pas de vote : la règle est vérifiée par chaque nœud."
+
+[[question]]
+id = "six"
+prompt = "Avec 10 % de la puissance, quelles chances a un attaquant après 6 confirmations ?"
+kind = "single"
+lesson = "consensus-securite"
+
+[[question.option]]
+id = "0024"
+text = "Environ 0,024 %"
+correct = true
+explanation = "Oui : 0,0002428."
+
+[[question.option]]
+id = "10"
+text = "10 %"
+explanation = "C'est sa part de la puissance, pas sa probabilité de succès."
+
+[[question.option]]
+id = "205"
+text = "Environ 20,5 %"
+explanation = "C'est après une seule confirmation."
+
+[[question]]
+id = "majoritaire"
+prompt = "Que ne peut pas faire un attaquant majoritaire ?"
+kind = "single"
+lesson = "consensus-securite"
+
+[[question.option]]
+id = "voler"
+text = "Dépenser les bitcoins des autres sans leur clé."
+correct = true
+explanation = "Exact : il lui faudrait leurs signatures."
+
+[[question.option]]
+id = "annuler"
+text = "Annuler ses propres paiements récents."
+explanation = "Il le peut, c'est le risque d'une attaque majoritaire."
+
+[[question.option]]
+id = "censurer"
+text = "Refuser d'inclure certaines transactions."
+explanation = "Il le peut, tant qu'il reste majoritaire."
