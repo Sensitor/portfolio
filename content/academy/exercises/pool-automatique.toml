@@ -1,0 +1,58 @@
+id = "pool-automatique"
+title = "Acheter dans un pool à produit constant"
+context = """
+Un pool détient **100 ETH** et **300 000 USDC**. Un acheteur dépose **30 000 USDC** pour obtenir de l'ether. *Chiffres construits pour l'exercice.*
+
+Rappel : le produit des réserves reste constant ; reçu = y × montant déposé ÷ (x + montant déposé), où x est la réserve du jeton déposé et y celle du jeton reçu. On ignore d'abord la commission du pool.
+"""
+conclusion = """
+Le pool affichait 3 000 USDC par ether ; l'acheteur paie en moyenne 3 300 USDC, 10 % de plus, parce que son ordre représente 10 % de la réserve de USDC. Avec la commission de 0,30 %, il reçoit un peu moins : 9,07 ETH. Fractionné ou placé dans un pool plus grand, le même achat aurait coûté beaucoup moins d'impact.
+"""
+
+[[step]]
+id = "prix"
+prompt = "Quel est le prix affiché par le pool avant l'achat, en USDC par ETH ?"
+unit = "USDC"
+answer = 3000
+tolerance = 0.5
+solution = "300 000 ÷ 100 = **3 000 USDC**."
+
+[[step]]
+id = "constante"
+prompt = "Quel est le produit constant k, en millions ?"
+unit = "millions"
+answer = 30
+tolerance = 0.001
+solution = "100 × 300 000 = 30 000 000, soit **30 millions**."
+
+[[step]]
+id = "recu"
+prompt = "Combien d'ETH l'acheteur reçoit-il, sans commission ? (Deux décimales.)"
+unit = "ETH"
+answer = 9.09
+tolerance = 0.006
+solution = "100 × 30 000 ÷ (300 000 + 30 000) = **9,09 ETH**."
+
+[[step]]
+id = "moyen"
+prompt = "Quel prix moyen paie-t-il, en USDC par ETH ?"
+unit = "USDC"
+answer = 3300
+tolerance = 1
+solution = "30 000 ÷ 9,0909 = **3 300 USDC**."
+
+[[step]]
+id = "impact"
+prompt = "Quel est l'impact sur le prix, en % ?"
+unit = "%"
+answer = 10
+tolerance = 0.05
+solution = "3 300 ÷ 3 000 − 1 = **10 %**, la part de son dépôt dans la réserve de USDC."
+
+[[step]]
+id = "commission"
+prompt = "Avec une commission de 0,30 % prélevée sur le dépôt, combien d'ETH reçoit-il ? (Deux décimales.)"
+unit = "ETH"
+answer = 9.07
+tolerance = 0.006
+solution = "Dépôt effectif : 30 000 × 0,997 = 29 910 USDC ; 100 × 29 910 ÷ 329 910 = **9,07 ETH**."

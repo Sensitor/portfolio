@@ -1,0 +1,73 @@
+id = "check-au-dela-de-bitcoin"
+title = "Contrôle : réseaux et jetons"
+course = "crypto-en-securite"
+lesson = "au-dela-de-bitcoin"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "frais"
+prompt = "Avec quoi paie-t-on les frais d'un transfert de jeton sur Ethereum ?"
+kind = "single"
+lesson = "au-dela-de-bitcoin"
+
+[[question.option]]
+id = "ether"
+text = "En ether, la monnaie native du réseau."
+correct = true
+explanation = "Oui : il faut de l'ether pour déplacer un jeton."
+
+[[question.option]]
+id = "jeton"
+text = "Avec le jeton lui-même."
+explanation = "Les frais du réseau se paient dans sa monnaie native."
+
+[[question.option]]
+id = "rien"
+text = "Les transferts de jetons sont gratuits."
+explanation = "Ils consomment du gaz, payé en ether."
+
+[[question]]
+id = "contrat"
+prompt = "Qu'est-ce qui définit un jeton sur un réseau programmable ?"
+kind = "single"
+lesson = "au-dela-de-bitcoin"
+
+[[question.option]]
+id = "contrat"
+text = "Le contrat qui l'émet et tient ses soldes."
+correct = true
+explanation = "Oui : ce contrat décide de ce que le jeton permet."
+
+[[question.option]]
+id = "nom"
+text = "Son nom et son logo."
+explanation = "N'importe qui peut copier un nom et un logo."
+
+[[question.option]]
+id = "prix"
+text = "Son prix sur les plateformes."
+explanation = "Le prix ne définit pas le jeton."
+
+[[question]]
+id = "merge"
+prompt = "Quel mécanisme protège Ethereum depuis le 15 septembre 2022 ?"
+kind = "single"
+lesson = "au-dela-de-bitcoin"
+
+[[question.option]]
+id = "enjeu"
+text = "La preuve d'enjeu."
+correct = true
+explanation = "Oui : les validateurs immobilisent de l'ether en garantie."
+
+[[question.option]]
+id = "travail"
+text = "La preuve de travail."
+explanation = "Ethereum l'a abandonnée en septembre 2022."
+
+[[question.option]]
+id = "autorite"
+text = "Une autorité centrale."
+explanation = "Aucune autorité centrale ne valide les blocs."

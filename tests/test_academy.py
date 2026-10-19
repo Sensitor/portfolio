@@ -89,9 +89,11 @@ def test_real_catalog():
           and catalog.universe_of(None) == "trading")
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
-    check("Monnaie et Bitcoin opens paths 1 and 2; Crypto and Investissement are announced",
+    check("Monnaie et Bitcoin opens paths 1 and 2, Crypto path 1; the rest is announced",
           catalog.path("monnaie-inflation").is_available and catalog.path("bitcoin").is_available
-          and all(p.status == C.PLANNED for p in catalog.paths if p.track in ("crypto", "investissement"))
+          and catalog.path("blockchain-securite").is_available
+          and all(p.status == C.PLANNED for p in catalog.paths
+                  if p.track == "investissement" or (p.track == "crypto" and p.number > 1))
           and len(catalog.paths) == 16)
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
@@ -707,6 +709,62 @@ def test_bitcoin_course_figures():
     check("the chain figure prints the real digests", all(h.digest[:10] in svg for h in honest) and forged[:10] in svg
           and forged != honest[1].digest)
     check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
+
+
+def test_crypto_course_figures():
+    """« Utiliser la crypto en sécurité » : pools, gas, backups and depegs, recomputed."""
+    print("\nCrypto course figures")
+    import re
+    from sensitor.academy import crypto as K
+    catalog = C.load_catalog()
+    course = catalog.course("crypto-en-securite")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+
+    pool = ex("pool-automatique")
+    check("pool: 3 000 USDC an ether, k = 30 million", K.pool_price(300_000, 100) == pool["prix"]
+          and 300_000 * 100 / 1e6 == pool["constante"])
+    received = K.amm_out(300_000, 100, 30_000, fee=0)
+    check("pool: 9,09 ETH at 3 300 on average, 10 % impact", abs(received - pool["recu"]) < 0.006
+          and abs(30_000 / received - pool["moyen"]) < 1e-6
+          and abs(K.price_impact(300_000, 100, 30_000) * 100 - pool["impact"]) < 1e-9)
+    check("pool: 9,07 ETH with the 0,30 % fee", abs(K.amm_out(300_000, 100, 30_000) - pool["commission"]) < 0.006)
+    check("pool: the impact equals the deposit's share of the reserve",
+          all(abs(K.price_impact(300_000, 100, 300_000 * f) - f) < 1e-12 for f in (0.01, 0.1, 0.5)))
+    check("pool: the product stays constant", abs((300_000 + 30_000) * (100 - received) - 30_000_000) < 1e-6)
+    svg = catalog.figures["produit-constant.svg"]
+    check("pool figure: 90,91 ETH after, 9,09 received at 3 300", "90,91 ETH" in svg and "9,09 ETH" in svg
+          and "3 300 USDC" in svg and abs(100 - received - 90.91) < 0.005)
+
+    gas = ex("frais-ethereum")
+    check("gas: 420 000 gwei, 0,00042 ETH, 1,26 dollar, 3,90 for a token",
+          21_000 * 20 == gas["gwei"] and close(K.gas_fee_eth(21_000, 20), gas["eth"])
+          and close(K.gas_fee_eth(21_000, 20) * 3000, gas["dollars"]) and close(K.gas_fee_eth(65_000, 20) * 3000, gas["jeton"]))
+
+    seed = ex("securite-phrase")
+    years = K.years_to_try(K.entropy_bits(12), 1e12)
+    check("seed: 132 bits with the checksum, 128 of secret, 256 for 24 words",
+          12 * 11 == seed["bits"] and K.entropy_bits(12) == 128 and K.entropy_bits(24) == 256)
+    check("seed: 3,4 x 10^38, 3,4 x 10^26 seconds, 1,1 x 10^19 years",
+          f"{2 ** 128:.1e}" == "3.4e+38" and int(f"{2 ** 128:.1e}".split("e")[1]) == seed["exposant"]
+          and int(f"{2 ** 128 / 1e12:.1e}".split("e")[1]) == seed["secondes"]
+          and f"{years:.1e}" == "1.1e+19" and int(f"{years:.1e}".split("e")[1]) == seed["annees"])
+    check("seed: hundreds of millions of times the age of the universe", 1e8 < years / 13.8e9 < 1e9)
+    check("seed: a BIP 39 phrase has 12 to 24 words", raises(lambda: K.entropy_bits(13), ValueError))
+
+    dp = ex("decrochage-stablecoin")
+    check("depeg: 22 000 dollars, 3 000 lost, 12 %, 13,6 % to recover", K.depeg_value(25_000, 0.88) == dp["valeur"]
+          and 25_000 - K.depeg_value(25_000, 0.88) == dp["perte"] and close(3000 / 25_000 * 100, dp["pourcentage"])
+          and abs((1 / 0.88 - 1) * 100 - dp["remontee"]) < 0.06)
+    check("lesson 2: 10 000 USDC worth 8 800 at 0,88", K.depeg_value(10_000, 0.88) == 8800 and "8 800" in text["stablecoins"])
+
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
+    for path in sorted((catalog.root / "courses" / "crypto-en-securite" / "lessons").glob("*.md")) + \
+            sorted((catalog.root / "courses" / "bitcoin-fonctionnement" / "lessons").glob("*.md")):
+        body = path.read_text(encoding="utf-8").lower()
+        if re.search(r"(entrez|saisissez|tapez|indiquez|communiquez)[^.]{0,40}(phrase de récupération|clé privée|seed)", body):
+            check(f"{path.stem}: never asks for a seed or a key", False)
+    check("no lesson asks the reader to enter a seed phrase or a private key", True)
 
 
 def test_bitcoin_issuance():
@@ -1672,6 +1730,7 @@ def main() -> int:
     test_backtest_figures()
     test_macro_figures()
     test_bitcoin_course_figures()
+    test_crypto_course_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

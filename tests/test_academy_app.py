@@ -170,7 +170,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 8 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2"))
+              body.index("Trading · 8 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 1 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -261,6 +261,20 @@ def test_hash_demo(tok: str) -> None:
           and mined.digest[3:] in body and not page.exception, error(page))
     check("no key or seed phrase is asked for", all("phrase" not in t.label.lower() and "clé" not in t.label.lower()
                                                    for t in page.text_input))
+
+
+def test_no_secret_asked(tok: str) -> None:
+    print("\nNo key or seed phrase is ever asked for")
+    from sensitor.academy import content as C
+    catalog = C.load_catalog()
+    words = ("phrase", "seed", "clé", "cle privée", "mnémonique", "mot de passe du portefeuille", "private")
+    for course_id in ("bitcoin-fonctionnement", "crypto-en-securite"):
+        for lesson in catalog.course(course_id).lessons:
+            page = run({"page": "lesson", "course": course_id, "lesson": lesson.id}, tok)
+            labels = [t.label.lower() for t in page.text_input] + [t.label.lower() for t in page.text_area]
+            check(f"{lesson.id}: renders, no field asks for a secret",
+                  not page.exception and not any(w in label for w in words for label in labels),
+                  error(page) or str(labels))
 
 
 def main() -> int:
@@ -404,6 +418,7 @@ def main() -> int:
     test_new_tracks(alice)
     test_universes()
     test_hash_demo(alice)
+    test_no_secret_asked(alice)
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)

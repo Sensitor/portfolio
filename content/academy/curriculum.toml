@@ -74,7 +74,8 @@ track = "crypto"
 number = 1
 title = "Blockchain, wallets et sécurité"
 summary = "Blocs, hash, signatures et consensus ; wallets, seed phrase et sauvegarde ; exchanges, ordres, frais et stablecoins ; les arnaques et les erreurs qui font perdre des fonds."
-status = "planned"
+status = "published"
+courses = ["crypto-en-securite"]
 topics = ["Blocs et hash", "Wallets et seed phrase", "Exchanges et opérations", "Arnaques et erreurs"]
 
 [[path]]

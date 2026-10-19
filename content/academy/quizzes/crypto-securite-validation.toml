@@ -1,0 +1,228 @@
+id = "crypto-securite-validation"
+title = "Quiz de validation : Utiliser la crypto en sécurité"
+course = "crypto-en-securite"
+lesson = "recap-crypto-securite"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "native"
+prompt = "Pourquoi faut-il de l'ether pour envoyer un stablecoin sur Ethereum ?"
+kind = "single"
+lesson = "au-dela-de-bitcoin"
+
+[[question.option]]
+id = "frais"
+text = "Parce que les frais du réseau se paient dans sa monnaie native."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "change"
+text = "Parce que le stablecoin doit être converti en ether."
+explanation = "Il n'est pas converti, seuls les frais sont en ether."
+
+[[question.option]]
+id = "faux"
+text = "Ce n'est pas nécessaire."
+explanation = "Sans ether, le transfert ne peut pas payer son gaz."
+
+[[question]]
+id = "reserves"
+prompt = "De quoi dépend la valeur d'un stablecoin adossé à des réserves ?"
+kind = "single"
+lesson = "stablecoins"
+
+[[question.option]]
+id = "reserves"
+text = "De la qualité, de la garde et de la transparence de ses réserves."
+correct = true
+explanation = "Oui : l'USDC l'a montré en mars 2023."
+
+[[question.option]]
+id = "rien"
+text = "De rien : il vaut toujours un dollar."
+explanation = "Il a déjà valu 0,88 dollar."
+
+[[question.option]]
+id = "garantie"
+text = "De la garantie des dépôts bancaires."
+explanation = "Un stablecoin n'est pas couvert par cette garantie."
+
+[[question]]
+id = "cles"
+prompt = "Qui détient les fonds ?"
+kind = "single"
+lesson = "portefeuilles"
+
+[[question.option]]
+id = "cles"
+text = "Celui qui détient les clés."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "adresse"
+text = "Celui qui connaît l'adresse."
+explanation = "Une adresse ne donne accès à rien."
+
+[[question.option]]
+id = "logiciel"
+text = "L'éditeur du logiciel de portefeuille."
+explanation = "Pas s'il ne détient pas les clés."
+
+[[question]]
+id = "plateforme"
+prompt = "Que deviennent des fonds laissés sur une plateforme qui fait faillite ?"
+kind = "single"
+lesson = "portefeuilles"
+
+[[question.option]]
+id = "creance"
+text = "Une créance dans une procédure de faillite."
+correct = true
+explanation = "Oui, comme chez Mt. Gox ou FTX."
+
+[[question.option]]
+id = "rendus"
+text = "Ils sont rendus immédiatement."
+explanation = "Les clients de Mt. Gox ont attendu des années."
+
+[[question.option]]
+id = "garantis"
+text = "Ils sont garantis par l'État."
+explanation = "Aucune garantie publique ne les couvre."
+
+[[question]]
+id = "sauvegarde"
+prompt = "Quelle sauvegarde de phrase est correcte ?"
+kind = "single"
+lesson = "phrase-de-recuperation"
+
+[[question.option]]
+id = "papier"
+text = "Deux exemplaires sur papier ou sur métal, dans deux lieux sûrs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "mail"
+text = "Un courriel envoyé à soi-même."
+explanation = "Jamais de copie numérique."
+
+[[question.option]]
+id = "photo"
+text = "Une photo dans le téléphone."
+explanation = "Jamais de copie numérique."
+
+[[question]]
+id = "reseau"
+prompt = "Un actif est envoyé sur un réseau que la plateforme de destination ne prend pas en charge. Risque ?"
+kind = "single"
+lesson = "envoyer-recevoir"
+
+[[question.option]]
+id = "perte"
+text = "Il peut être perdu ou très difficile à récupérer."
+correct = true
+explanation = "Oui : le réseau se vérifie autant que l'adresse."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, il est converti automatiquement."
+explanation = "Rien ne le convertit automatiquement."
+
+[[question.option]]
+id = "frais"
+text = "Seulement des frais un peu plus élevés."
+explanation = "Le risque est le montant entier."
+
+[[question]]
+id = "essai"
+prompt = "Pourquoi envoyer d'abord une petite somme ?"
+kind = "single"
+lesson = "envoyer-recevoir"
+
+[[question.option]]
+id = "verifier"
+text = "Pour vérifier que l'adresse et le réseau sont les bons avant un montant important."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "frais"
+text = "Pour payer moins de frais."
+explanation = "Deux transactions coûtent plus de frais qu'une."
+
+[[question.option]]
+id = "obligatoire"
+text = "Parce que le réseau l'exige."
+explanation = "Aucun réseau ne l'exige ; c'est une précaution."
+
+[[question]]
+id = "pool"
+prompt = "Pool de 100 ETH et 300 000 USDC, dépôt de 30 000 USDC sans commission. ETH reçus ?"
+kind = "single"
+lesson = "plateformes-echange"
+
+[[question.option]]
+id = "909"
+text = "9,09 ETH"
+correct = true
+explanation = "Oui : 100 × 30 000 ÷ 330 000."
+
+[[question.option]]
+id = "10"
+text = "10 ETH"
+explanation = "Ce serait sans impact sur le prix."
+
+[[question.option]]
+id = "11"
+text = "11 ETH"
+explanation = "Le prix monte pendant l'achat : on reçoit moins de 10."
+
+[[question]]
+id = "signer"
+prompt = "Un site demande de connecter votre portefeuille et de signer une autorisation illimitée. Risque ?"
+kind = "single"
+lesson = "arnaques"
+
+[[question.option]]
+id = "vider"
+text = "Il peut obtenir le droit de dépenser le jeton, et vider le portefeuille de ce jeton."
+correct = true
+explanation = "Oui : ne signez que sur des sites vérifiés."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, signer ne coûte rien."
+explanation = "Une autorisation peut donner un droit de dépense."
+
+[[question.option]]
+id = "frais"
+text = "Seulement des frais de réseau."
+explanation = "Le risque est le solde entier du jeton."
+
+[[question]]
+id = "sensitor"
+prompt = "Sensitor peut-il vous demander votre phrase de récupération pour un exercice ?"
+kind = "single"
+lesson = "arnaques"
+
+[[question.option]]
+id = "jamais"
+text = "Jamais : aucun exercice ne la demande, et toute demande est une tentative de vol."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "exercice"
+text = "Oui, pour un exercice pratique."
+explanation = "Aucun exercice ne demande de vrai portefeuille ni de phrase."
+
+[[question.option]]
+id = "premium"
+text = "Oui, pour les membres Premium."
+explanation = "Jamais, quel que soit l'accès."

@@ -158,3 +158,15 @@ pdf = "fiche-bitcoin-fonctionnement.pdf"
 access = "member"
 lessons = ["double-depense", "precurseurs-bitcoin", "cles-et-transactions", "blocs-et-chaine", "preuve-de-travail", "consensus-securite", "emission-halvings", "recap-bitcoin-fonctionnement"]
 
+[[resource]]
+id = "fiche-crypto-securite"
+title = "Utiliser la crypto en sécurité"
+description = "Jetons et stablecoins, portefeuilles et risque de contrepartie, sauvegarde de la phrase de récupération, procédure d'envoi, pools automatiques et signaux d'alerte des arnaques : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "debutant"
+file = "fiche-crypto-securite.md"
+pdf = "fiche-crypto-securite.pdf"
+access = "public"
+lessons = ["au-dela-de-bitcoin", "stablecoins", "portefeuilles", "phrase-de-recuperation", "envoyer-recevoir", "plateformes-echange", "arnaques", "recap-crypto-securite"]
+

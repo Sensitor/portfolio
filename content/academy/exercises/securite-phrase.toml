@@ -1,0 +1,39 @@
+id = "securite-phrase"
+title = "Pourquoi personne ne devine une phrase de récupération"
+context = """
+Une phrase de récupération de **12 mots** est tirée d'une liste de **2 048 mots** (norme BIP 39). Chaque mot porte 11 bits ; une partie sert de somme de contrôle, et le secret lui-même compte **128 bits**.
+
+Un attaquant dispose d'une puissance hors du commun : **mille milliards** (10¹²) d'essais par seconde. Une année compte environ 3,156 × 10⁷ secondes.
+"""
+conclusion = """
+Il y a environ 3,4 × 10³⁸ phrases possibles. Même à mille milliards d'essais par seconde, il faudrait de l'ordre de 10¹⁹ ans pour toutes les essayer. Personne ne devine une phrase : on la vole, on la fait révéler par ruse, ou son propriétaire la perd.
+"""
+
+[[step]]
+id = "bits"
+prompt = "Combien de bits portent les 12 mots, somme de contrôle comprise ?"
+unit = "bits"
+answer = 132
+tolerance = 0
+solution = "12 × 11 = **132 bits**, dont 128 de secret et 4 de somme de contrôle."
+
+[[step]]
+id = "exposant"
+prompt = "2¹²⁸ vaut environ 3,4 × 10 puissance combien ?"
+answer = 38
+tolerance = 0
+solution = "2¹²⁸ ≈ **3,4 × 10³⁸**."
+
+[[step]]
+id = "secondes"
+prompt = "À 10¹² essais par seconde, combien de secondes pour tout essayer ? Donnez l'exposant de 10 (3,4 × 10 puissance ?)."
+answer = 26
+tolerance = 0
+solution = "3,4 × 10³⁸ ÷ 10¹² = **3,4 × 10²⁶** secondes."
+
+[[step]]
+id = "annees"
+prompt = "Et en années ? Donnez l'exposant de 10 (environ 1,1 × 10 puissance ?)."
+answer = 19
+tolerance = 0
+solution = "3,4 × 10²⁶ ÷ 3,156 × 10⁷ ≈ **1,1 × 10¹⁹ ans**."

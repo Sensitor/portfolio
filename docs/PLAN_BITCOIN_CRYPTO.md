@@ -172,7 +172,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **C4** ✔ | M2, cours « Bitcoin : origines et fonctionnement » : 8 leçons sourcées, émission calculée, probabilité de rattrapage du livre blanc recalculée, démonstration d'empreinte et de preuve de travail jouet, 4 exercices | terminé |
 | **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |
-| **D** | C1 : chaîne de hash, preuve de travail jouet, explorateur, sécurité | contenu et démonstrations |
+| **D** ✔ | C1, cours « Utiliser la crypto en sécurité » : 8 leçons sourcées (jetons, stablecoins, portefeuilles, phrase de récupération, envoi, pools automatiques, arnaques), 4 exercices, fiche en accès libre. La chaîne de hash et la preuve de travail jouet sont dans le cours Bitcoin (C4) ; l'explorateur interactif n'est pas fait, remplacé par le schéma et l'exercice d'une transaction | terminé |
 | **E** | C2 et I1 : altcoins, DeFi, DCA et VCA, simulateurs | contenu et simulateurs |
 | **F** | Portefeuille et trading : référence Bitcoin, option 365 jours pour la crypto (avec tests et justification), liens Academy vers les outils, niveaux d'accès unifiés, rapprochement des chartes | modifications d'outils existants, une par une |
 | **G** | Tests avec des utilisateurs, retours, priorisation | validation |

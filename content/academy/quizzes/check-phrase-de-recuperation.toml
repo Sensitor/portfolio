@@ -1,0 +1,73 @@
+id = "check-phrase-de-recuperation"
+title = "Contrôle : la phrase de récupération"
+course = "crypto-en-securite"
+lesson = "phrase-de-recuperation"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "risque"
+prompt = "Quel est le vrai risque pour une phrase de 12 mots ?"
+kind = "single"
+lesson = "phrase-de-recuperation"
+
+[[question.option]]
+id = "vol"
+text = "La perte, le vol ou la ruse, pas le hasard."
+correct = true
+explanation = "Oui : 2¹²⁸ possibilités, personne ne la devine."
+
+[[question.option]]
+id = "deviner"
+text = "Qu'un ordinateur la devine."
+explanation = "Il faudrait de l'ordre de 10¹⁹ ans à mille milliards d'essais par seconde."
+
+[[question.option]]
+id = "expire"
+text = "Qu'elle expire."
+explanation = "Une phrase n'expire pas."
+
+[[question]]
+id = "photo"
+prompt = "Peut-on photographier sa phrase pour la retrouver facilement ?"
+kind = "single"
+lesson = "phrase-de-recuperation"
+
+[[question.option]]
+id = "non"
+text = "Non : jamais de copie numérique."
+correct = true
+explanation = "Une photo part souvent dans une sauvegarde en ligne."
+
+[[question.option]]
+id = "oui"
+text = "Oui, si le téléphone a un code."
+explanation = "Le téléphone ou le compte en ligne peut être compromis."
+
+[[question.option]]
+id = "cloud"
+text = "Oui, si on la range dans le cloud."
+explanation = "C'est exactement ce qu'il faut éviter."
+
+[[question]]
+id = "verifier"
+prompt = "Comment vérifier sa sauvegarde ?"
+kind = "single"
+lesson = "phrase-de-recuperation"
+
+[[question.option]]
+id = "restaurer"
+text = "Restaurer le portefeuille à partir de la phrase et retrouver la même adresse."
+correct = true
+explanation = "Oui, avant d'y déposer une somme importante."
+
+[[question.option]]
+id = "envoyer"
+text = "L'envoyer à un ami pour qu'il la vérifie."
+explanation = "La phrase ne se communique jamais."
+
+[[question.option]]
+id = "support"
+text = "La faire vérifier par le support de la plateforme."
+explanation = "Aucun support légitime ne la demande."
