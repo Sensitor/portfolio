@@ -184,3 +184,16 @@ retrieved = 2026-10-19
 unit = ""
 columns = ["confirmations", "q10", "q20", "q30"]
 notes = "Le modèle suppose une puissance constante et un attaquant qui prépare sa chaîne en secret ; il ne tient pas compte du coût de l'attaque."
+
+[[dataset]]
+id = "mois-de-trading"
+title = "Un mois de trading, trade par trade : la courbe réalisée et celle du plan seul"
+kind = "computed"
+generator = "process-case-month"
+source = "journal construit pour la leçon : 24 trades en R, dont 6 qui enfreignent une règle du plan ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-19
+synthetic = true
+unit = "R"
+columns = ["trade", "realise", "plan", "ecart"]
+notes = "La courbe du plan seul compte zéro pour chaque trade qui enfreint une règle : c'est ce qu'aurait donné le mois si ces trades n'avaient pas été pris, toutes choses égales par ailleurs."

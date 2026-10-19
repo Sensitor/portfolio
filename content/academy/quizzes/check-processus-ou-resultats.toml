@@ -1,0 +1,73 @@
+id = "check-processus-ou-resultats"
+title = "Contrôle : un processus plutôt que des trades"
+course = "processus-de-trading"
+lesson = "processus-ou-resultats"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "journee"
+prompt = "Une journée gagnante a été obtenue avec deux trades hors plan. Comment la juger ?"
+kind = "single"
+lesson = "processus-ou-resultats"
+
+[[question.option]]
+id = "mauvaise"
+text = "Comme une mauvaise journée de processus, malgré le gain."
+correct = true
+explanation = "Oui : le gain venait d'écarts au plan."
+
+[[question.option]]
+id = "bonne"
+text = "Comme une bonne journée, puisqu'elle gagne."
+explanation = "Le résultat d'une journée est en partie du hasard."
+
+[[question.option]]
+id = "neutre"
+text = "Elle ne se juge pas."
+explanation = "Elle se juge, sur le respect des règles."
+
+[[question]]
+id = "mesure"
+prompt = "Laquelle est une mesure de processus ?"
+kind = "single"
+lesson = "processus-ou-resultats"
+
+[[question.option]]
+id = "respect"
+text = "La part des trades qui ont respecté toutes les règles."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "gain"
+text = "Le gain de la semaine."
+explanation = "C'est une mesure de résultat."
+
+[[question.option]]
+id = "haut"
+text = "Le plus haut du compte."
+explanation = "C'est une mesure de résultat."
+
+[[question]]
+id = "etapes"
+prompt = "Quelles sont les cinq étapes du processus ?"
+kind = "single"
+lesson = "processus-ou-resultats"
+
+[[question.option]]
+id = "cinq"
+text = "Plan, préparation, exécution, journal, revue."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "signaux"
+text = "Signal, entrée, gain, retrait, réinvestissement."
+explanation = "Ce n'est pas le processus du parcours."
+
+[[question.option]]
+id = "analyse"
+text = "Analyse, intuition, entrée, sortie, oubli."
+explanation = "L'intuition et l'oubli n'ont pas leur place dans un processus."

@@ -1,0 +1,48 @@
+id = "limites-perte"
+title = "Chiffrer ses limites"
+context = """
+Un compte de **20 000 €**, un risque de **1 %** par trade. Le plan fixe une limite de séance à **−2 %** et une limite de semaine à **−5 %**, mesurées depuis le solde de début de séance ou de semaine. Au-delà de **10 %** de baisse depuis le plus haut du compte, le risque par trade est divisé par deux. *Chiffres construits pour l'exercice.*
+"""
+conclusion = """
+Deux pertes complètes arrêtent la séance, cinq la semaine. À 18 000 €, après une baisse de 10 %, le risque passe à 90 € par trade : la baisse se poursuit deux fois moins vite si la mauvaise période continue. Il faudra un gain de 11,1 % pour revenir au plus haut, un peu plus que la baisse elle-même.
+"""
+
+[[step]]
+id = "risque"
+prompt = "Quel montant représente le risque par trade, en € ?"
+unit = "€"
+answer = 200
+tolerance = 0.5
+solution = "1 % × 20 000 = **200 €**."
+
+[[step]]
+id = "seance"
+prompt = "Combien de pertes complètes atteignent la limite de séance ?"
+unit = "pertes"
+answer = 2
+tolerance = 0
+solution = "2 % ÷ 1 % = **2 pertes complètes**, soit 400 €."
+
+[[step]]
+id = "semaine"
+prompt = "Et la limite de semaine ?"
+unit = "pertes"
+answer = 5
+tolerance = 0
+solution = "5 % ÷ 1 % = **5 pertes complètes**, soit 1 000 €."
+
+[[step]]
+id = "risque-reduit"
+prompt = "Le compte est à 18 000 €, 10 % sous son plus haut. Quel est le nouveau risque par trade, en € ?"
+unit = "€"
+answer = 90
+tolerance = 0.5
+solution = "Risque divisé par deux : 0,5 % × 18 000 = **90 €**."
+
+[[step]]
+id = "rattrapage"
+prompt = "Quel gain faut-il pour revenir de 18 000 à 20 000 €, en % ? (Une décimale.)"
+unit = "%"
+answer = 11.1
+tolerance = 0.06
+solution = "1 ÷ (1 − 0,10) − 1 = **11,1 %**."

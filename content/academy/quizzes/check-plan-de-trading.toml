@@ -1,0 +1,73 @@
+id = "check-plan-de-trading"
+title = "Contrôle : le plan de trading"
+course = "processus-de-trading"
+lesson = "plan-de-trading"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "objectif"
+prompt = "« Gagner 5 % par mois » a-t-il sa place dans un plan ?"
+kind = "single"
+lesson = "plan-de-trading"
+
+[[question.option]]
+id = "non"
+text = "Non : un objectif de gain ne se contrôle pas, et pousse à forcer les trades."
+correct = true
+explanation = "Oui : on se fixe des objectifs de processus."
+
+[[question.option]]
+id = "oui"
+text = "Oui, c'est le cœur du plan."
+explanation = "Le résultat mensuel ne se contrôle pas."
+
+[[question.option]]
+id = "parfois"
+text = "Oui, les bons mois seulement."
+explanation = "Un objectif qui change selon le mois n'est pas une règle."
+
+[[question]]
+id = "remplacant"
+prompt = "Que dit le test du remplaçant ?"
+kind = "single"
+lesson = "plan-de-trading"
+
+[[question.option]]
+id = "question"
+text = "Un autre trader doit pouvoir suivre le plan une semaine sans poser de question."
+correct = true
+explanation = "Oui : chaque question révèle une règle manquante."
+
+[[question.option]]
+id = "delegation"
+text = "Qu'il faut confier son compte à un autre trader."
+explanation = "C'est un test de précision du plan, pas une délégation."
+
+[[question.option]]
+id = "copie"
+text = "Qu'il faut copier le plan d'un autre trader."
+explanation = "Le plan reste personnel."
+
+[[question]]
+id = "version"
+prompt = "Pourquoi dater chaque version du plan ?"
+kind = "single"
+lesson = "plan-de-trading"
+
+[[question.option]]
+id = "mesurer"
+text = "Pour savoir sous quelle version chaque trade a été pris, et ce qu'une règle a produit."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "legal"
+text = "Parce que la loi l'exige."
+explanation = "C'est une bonne pratique, pas une obligation légale."
+
+[[question.option]]
+id = "rien"
+text = "Ce n'est pas utile."
+explanation = "Sans version, on ne peut pas mesurer l'effet d'un changement."

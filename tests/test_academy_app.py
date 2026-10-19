@@ -170,7 +170,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 8 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 1 sur 2"))
+              body.index("Trading · 9 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 1 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))

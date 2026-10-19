@@ -1,0 +1,73 @@
+id = "check-revue-amelioration"
+title = "Contrôle : la revue"
+course = "processus-de-trading"
+lesson = "revue-amelioration"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "hebdo"
+prompt = "Quelle est la question de la revue hebdomadaire ?"
+kind = "single"
+lesson = "revue-amelioration"
+
+[[question.option]]
+id = "suivi"
+text = "Ai-je suivi mon plan ?"
+correct = true
+explanation = "Oui ; la revue mensuelle demande si le plan fonctionne."
+
+[[question.option]]
+id = "gain"
+text = "Combien ai-je gagné ?"
+explanation = "C'est une question de résultat."
+
+[[question.option]]
+id = "changer"
+text = "Quelle stratégie adopter ?"
+explanation = "Une semaine ne permet pas de juger une stratégie."
+
+[[question]]
+id = "une"
+prompt = "Pourquoi ne changer qu'une règle à la fois ?"
+kind = "single"
+lesson = "revue-amelioration"
+
+[[question.option]]
+id = "effet"
+text = "Pour savoir quel changement a produit l'effet."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "temps"
+text = "Pour gagner du temps."
+explanation = "C'est une question de mesure, pas de temps."
+
+[[question.option]]
+id = "interdit"
+text = "Parce que la plateforme l'impose."
+explanation = "Aucune plateforme ne l'impose."
+
+[[question]]
+id = "trades"
+prompt = "Écart type 1,3R, précision voulue ±0,10R. Trades nécessaires ?"
+kind = "single"
+lesson = "revue-amelioration"
+
+[[question.option]]
+id = "650"
+text = "Environ 650"
+correct = true
+explanation = "Oui : (1,96 × 1,3 ÷ 0,10)²."
+
+[[question.option]]
+id = "30"
+text = "30"
+explanation = "L'intervalle irait alors de −0,32 à +0,62R."
+
+[[question.option]]
+id = "100"
+text = "100"
+explanation = "C'est encore trop peu pour cette précision."

@@ -1,0 +1,73 @@
+id = "check-journal-mesures"
+title = "Contrôle : le journal"
+course = "processus-de-trading"
+lesson = "journal-mesures"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "respect"
+prompt = "Sept trades conformes sur dix. Taux de respect ?"
+kind = "single"
+lesson = "journal-mesures"
+
+[[question.option]]
+id = "70"
+text = "70 %"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "30"
+text = "30 %"
+explanation = "C'est la part des écarts."
+
+[[question.option]]
+id = "7"
+text = "7 %"
+explanation = "On divise par le nombre de trades."
+
+[[question]]
+id = "cout"
+prompt = "Trois écarts à −1,5R, −1R et −1R. Coût des écarts ?"
+kind = "single"
+lesson = "journal-mesures"
+
+[[question.option]]
+id = "35"
+text = "−3,5R"
+correct = true
+explanation = "Oui : leur somme."
+
+[[question.option]]
+id = "117"
+text = "−1,17R"
+explanation = "C'est leur moyenne."
+
+[[question.option]]
+id = "15"
+text = "−1,5R"
+explanation = "C'est le résultat d'un seul d'entre eux."
+
+[[question]]
+id = "echantillon"
+prompt = "Dix trades suffisent-ils à juger l'espérance d'une stratégie ?"
+kind = "single"
+lesson = "journal-mesures"
+
+[[question.option]]
+id = "non"
+text = "Non, mais ils suffisent à voir les règles enfreintes."
+correct = true
+explanation = "Oui : un écart se corrige sans statistique."
+
+[[question.option]]
+id = "oui"
+text = "Oui, dix trades suffisent."
+explanation = "Il en faut des centaines, comme au parcours 7."
+
+[[question.option]]
+id = "jamais"
+text = "Le journal ne sert à rien avant 1 000 trades."
+explanation = "Le taux de respect se travaille dès la première semaine."

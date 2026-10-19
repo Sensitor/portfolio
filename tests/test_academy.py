@@ -767,6 +767,66 @@ def test_crypto_course_figures():
     check("no lesson asks the reader to enter a seed phrase or a private key", True)
 
 
+def test_process_figures():
+    """Path 10: limits, journals, sample sizes and the case month, recomputed."""
+    print("\nPath 10 figures")
+    from sensitor.academy import backtest as B
+    from sensitor.academy import discipline as D
+    from sensitor.academy import expectancy as X
+    catalog = C.load_catalog()
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+
+    lim = ex("limites-perte")
+    check("limits: 200 €, 2 losses a session, 5 a week", R.risk_amount(20_000, 1) == lim["risque"]
+          and X.losses_to_limit(2, 1) == lim["seance"] and X.losses_to_limit(5, 1) == lim["semaine"])
+    check("limits: 90 € after a 10 % drawdown, 11,1 % to recover",
+          close(R.risk_amount(18_000, D.risk_after_drawdown(1, 0.10)), lim["risque-reduit"])
+          and abs(R.recovery_needed(0.10) * 100 - lim["rattrapage"]) < 0.06
+          and D.risk_after_drawdown(1, 0.09) == 1 and close(R.recovery_needed(0.20), 0.25))
+
+    week = [D.JournalTrade(2, True), D.JournalTrade(-1, True), D.JournalTrade(-1, True), D.JournalTrade(-1.5, False),
+            D.JournalTrade(1.8, True), D.JournalTrade(-1, False), D.JournalTrade(-1, True), D.JournalTrade(2.2, True),
+            D.JournalTrade(-1, True), D.JournalTrade(-1, False)]
+    js = ex("journal-semaine")
+    followed = D.results(week, followed=True)
+    check("week: -1,5R, 70 %, +2,0R conform, +0,29R, -3,5R of departures",
+          close(sum(t.result_r for t in week), js["total"]) and close(D.compliance_rate(week) * 100, js["respect"])
+          and close(sum(followed), js["conformes"]) and abs(D.mean(followed) - js["esperance"]) < 0.006
+          and close(D.cost_of_departures(week), js["cout"]))
+    table = catalog.exercise("journal-semaine").context
+    check("week: the table of the exercise is the same journal",
+          all(f"{abs(t.result_r):.1f}".replace(".", ",") + "R" in table for t in week) and table.count("| non") == 3)
+
+    rv = ex("revue-echantillon")
+    iv = B.mean_interval(0.15, 1.3, 30)
+    check("review: SE 0,24, -0,32 to +0,62 on 30 trades, 650 for 0,10R",
+          abs(B.standard_error(1.3, 30) - rv["erreur"]) < 0.006 and abs(iv.low - rv["bas"]) < 0.006
+          and abs(iv.high - rv["haut"]) < 0.006 and B.trades_needed(1.3, 0.10) == rv["trades"])
+
+    month = D.CASE_MONTH
+    cm = ex("cas-mois")
+    check("case: 24 trades, 75 % compliance, -6,4R of departures, -0,6R for the month",
+          len(month) == 24 and close(D.compliance_rate(month) * 100, cm["respect"])
+          and close(D.cost_of_departures(month), cm["cout"]) and close(sum(t.result_r for t in month), cm["mois"]))
+    check("case: +0,32R conform, -1,07R departures", abs(D.mean(D.results(month, followed=True)) - cm["esperance-plan"]) < 0.006
+          and abs(D.mean(D.results(month, followed=False)) - cm["esperance-ecarts"]) < 0.006
+          and close(sum(D.results(month, followed=True)), 5.8))
+    by_tag = {}
+    for t in month:
+        if not t.followed:
+            by_tag.setdefault(t.tag, []).append(t.result_r)
+    check("case: the lesson's table by broken rule", {k: round(sum(v), 1) for k, v in by_tag.items()}
+          == {"revanche": -2.0, "stop déplacé": -1.8, "hors zone": -1.0, "taille doublée": -2.2, "sortie anticipée": 0.6}
+          and len(by_tag["revanche"]) == 2)
+    after_loss = sum(1 for i, t in enumerate(month) if not t.followed and i and month[i - 1].result_r < 0)
+    check("case: four departures out of six follow a loss", after_loss == 4)
+    rows = catalog.dataset("mois-de-trading").rows
+    check("case chart: ends at -0,6R traded and +5,8R for the plan alone, flagged as synthetic",
+          close(rows[-1]["realise"], -0.6) and close(rows[-1]["plan"], 5.8) and catalog.dataset("mois-de-trading").synthetic)
+    check("the risk halves from 10 % of drawdown, not before", D.risk_after_drawdown(1, 0.10) == 0.5 and D.risk_after_drawdown(1, 0.099) == 1)
+    check("the course is in the trading universe", catalog.universe_of(catalog.course("processus-de-trading")) == "trading")
+
+
 def test_bitcoin_issuance():
     """The issuance schedule, from the protocol rules, in satoshis."""
     print("\nBitcoin issuance")
@@ -1731,6 +1791,7 @@ def main() -> int:
     test_macro_figures()
     test_bitcoin_course_figures()
     test_crypto_course_figures()
+    test_process_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

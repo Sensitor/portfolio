@@ -1,0 +1,73 @@
+id = "check-executer-seance"
+title = "Contrôle : exécuter et gérer"
+course = "processus-de-trading"
+lesson = "executer-seance"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "stop"
+prompt = "Le prix approche du stop. Que dit la règle habituelle ?"
+kind = "single"
+lesson = "executer-seance"
+
+[[question.option]]
+id = "immobile"
+text = "Le stop reste où il est."
+correct = true
+explanation = "Oui : l'éloigner est l'écart le plus coûteux."
+
+[[question.option]]
+id = "eloigner"
+text = "L'éloigner pour laisser respirer le trade."
+explanation = "C'est l'effet de disposition."
+
+[[question.option]]
+id = "doubler"
+text = "Ajouter à la position pour améliorer le prix moyen."
+explanation = "C'est augmenter le risque d'un trade perdant."
+
+[[question]]
+id = "erreur"
+prompt = "Un achat a été passé au lieu d'une vente, et il gagne. Que faire ?"
+kind = "single"
+lesson = "executer-seance"
+
+[[question.option]]
+id = "fermer"
+text = "Le fermer et le noter : il n'aurait pas dû exister."
+correct = true
+explanation = "Oui : une erreur ne devient pas un trade."
+
+[[question.option]]
+id = "garder"
+text = "Le garder puisqu'il gagne."
+explanation = "Il apprend à recommencer ; le jour où il perd, il coûte plus que prévu."
+
+[[question.option]]
+id = "doubler"
+text = "Le renforcer."
+explanation = "C'est aggraver l'erreur."
+
+[[question]]
+id = "journal"
+prompt = "Quand remplir le journal ?"
+kind = "single"
+lesson = "executer-seance"
+
+[[question.option]]
+id = "avant"
+text = "Avant de quitter l'écran, tant que les faits sont frais."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "weekend"
+text = "Le week-end."
+explanation = "La mémoire a déjà réécrit la semaine."
+
+[[question.option]]
+id = "pertes"
+text = "Seulement après une perte."
+explanation = "Un journal incomplet donne des chiffres faux."

@@ -199,5 +199,6 @@ id = "processus-professionnel"
 number = 10
 title = "Processus de trading discipliné"
 summary = "Plan personnel, préparation, revue de session, journal, limites de risque et amélioration continue."
-status = "planned"
+status = "published"
+courses = ["processus-de-trading"]
 topics = ["Plan de trading", "Revue", "Amélioration continue"]

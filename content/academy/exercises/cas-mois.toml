@@ -1,0 +1,48 @@
+id = "cas-mois"
+title = "Le mois au crible"
+context = """
+Reprenez le tableau de la leçon : 24 trades, dont 18 conformes au plan pour **+5,8R** au total, et 6 écarts : deux revanches à −1R chacune, un stop éloigné à −1,8R, une entrée hors zone à −1R, une taille doublée à −2,2R, une sortie anticipée à +0,6R.
+"""
+conclusion = """
+Le taux de respect est de 75 %. Les trades conformes ont une espérance de +0,32R ; les écarts, de −1,07R. Les écarts ont coûté 6,4R, plus que tout le gain du plan. À elle seule, la taille doublée a effacé l'équivalent d'un des meilleurs trades du mois. Le plan n'est pas en cause : c'est son exécution après une perte.
+"""
+
+[[step]]
+id = "respect"
+prompt = "Quel est le taux de respect du plan, en % ?"
+unit = "%"
+answer = 75
+tolerance = 0.1
+solution = "18 ÷ 24 = **75 %**."
+
+[[step]]
+id = "cout"
+prompt = "Quel est le coût des écarts, en R ?"
+unit = "R"
+answer = -6.4
+tolerance = 0.001
+solution = "−1 − 1 − 1,8 − 1 − 2,2 + 0,6 = **−6,4R**."
+
+[[step]]
+id = "mois"
+prompt = "Quel est le résultat du mois, en R ?"
+unit = "R"
+answer = -0.6
+tolerance = 0.001
+solution = "+5,8 − 6,4 = **−0,6R**."
+
+[[step]]
+id = "esperance-plan"
+prompt = "Quelle est l'espérance des trades conformes, en R ? (Deux décimales.)"
+unit = "R"
+answer = 0.32
+tolerance = 0.006
+solution = "5,8 ÷ 18 = **+0,32R**."
+
+[[step]]
+id = "esperance-ecarts"
+prompt = "Et celle des écarts ? (Deux décimales.)"
+unit = "R"
+answer = -1.07
+tolerance = 0.006
+solution = "−6,4 ÷ 6 = **−1,07R**."

@@ -1,0 +1,39 @@
+id = "processus-de-trading"
+path = "processus-professionnel"
+title = "Construire son processus de trading"
+summary = "Neuf leçons pour assembler tout le programme en un processus que l'on suit chaque jour : un plan de trading écrit, des limites de risque qui s'appliquent d'elles-mêmes, une préparation et une exécution sans improvisation, un journal qui mesure le respect des règles, et une revue qui améliore le plan sans le défaire. Avec un mois de trading complet à analyser."
+level = "avance"
+status = "published"
+version = 1
+objectives = [
+  "Écrire un plan de trading complet, qui tient sur quelques pages et se suit sans interprétation.",
+  "Fixer des limites de perte et une règle de réduction du risque, et les chiffrer.",
+  "Tenir un journal qui mesure le respect des règles et le coût des écarts.",
+  "Mener une revue qui change le plan une règle à la fois, avec un échantillon suffisant.",
+]
+prerequisites = ["Gérer le risque dans la durée", "Décider sous incertitude", "Tester une stratégie"]
+final_quiz = "processus-validation"
+
+[[module]]
+id = "plan"
+title = "Le plan"
+summary = "Pourquoi juger un processus plutôt qu'un résultat, ce que contient un plan écrit, et les limites qui protègent le compte."
+lessons = ["processus-ou-resultats", "plan-de-trading", "limites-de-risque"]
+
+[[module]]
+id = "seance"
+title = "La séance"
+summary = "Préparer une séance pour ne rien décider dans l'urgence, puis exécuter et gérer les trades comme le plan le prévoit."
+lessons = ["preparer-seance", "executer-seance"]
+
+[[module]]
+id = "revue"
+title = "La revue"
+summary = "Ce qu'il faut noter, ce qu'il faut mesurer, et comment faire évoluer le plan sans le défaire."
+lessons = ["journal-mesures", "revue-amelioration"]
+
+[[module]]
+id = "cas"
+title = "Un cas complet"
+summary = "Un mois de trading analysé de bout en bout, puis le quiz de validation du parcours."
+lessons = ["cas-mois-de-trading", "recap-processus"]

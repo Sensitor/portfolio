@@ -260,3 +260,20 @@ label = "Attaquant à 20 %"
 [[chart.series]]
 column = "q30"
 label = "Attaquant à 30 %"
+
+[[chart]]
+id = "mois-de-trading"
+dataset = "mois-de-trading"
+kind = "line"
+x = "trade"
+x_label = "Trade du mois"
+y_label = "Résultat cumulé, en R"
+title = "Le même mois, avec et sans les écarts au plan"
+
+[[chart.series]]
+column = "realise"
+label = "Résultat réalisé"
+
+[[chart.series]]
+column = "plan"
+label = "Trades conformes au plan seulement"

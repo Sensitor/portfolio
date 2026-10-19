@@ -1,0 +1,73 @@
+id = "check-limites-de-risque"
+title = "Contrôle : les limites"
+course = "processus-de-trading"
+lesson = "limites-de-risque"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "deux"
+prompt = "Risque de 1 % par trade, limite de séance de −2 %. Combien de pertes complètes avant l'arrêt ?"
+kind = "single"
+lesson = "limites-de-risque"
+
+[[question.option]]
+id = "deux"
+text = "2"
+correct = true
+explanation = "Oui : 2 % ÷ 1 %."
+
+[[question.option]]
+id = "une"
+text = "1"
+explanation = "Ce serait avec un risque de 2 %."
+
+[[question.option]]
+id = "quatre"
+text = "4"
+explanation = "Il faudrait un risque de 0,5 %."
+
+[[question]]
+id = "renegocier"
+prompt = "La limite du jour est atteinte, et un excellent setup apparaît. Que faire ?"
+kind = "single"
+lesson = "limites-de-risque"
+
+[[question.option]]
+id = "arreter"
+text = "Arrêter : une limite ne se renégocie pas."
+correct = true
+explanation = "Oui : c'est le moment où elle protège le plus."
+
+[[question.option]]
+id = "dernier"
+text = "Prendre ce dernier trade, à demi-taille."
+explanation = "C'est une renégociation."
+
+[[question.option]]
+id = "demain"
+text = "Prendre le trade et réduire demain."
+explanation = "C'est aussi une renégociation."
+
+[[question]]
+id = "rattrapage"
+prompt = "Quel gain rattrape une baisse de 20 % ?"
+kind = "single"
+lesson = "limites-de-risque"
+
+[[question.option]]
+id = "25"
+text = "25 %"
+correct = true
+explanation = "Oui : 1 ÷ 0,8 − 1."
+
+[[question.option]]
+id = "20"
+text = "20 %"
+explanation = "Il faut plus que la baisse pour la rattraper."
+
+[[question.option]]
+id = "40"
+text = "40 %"
+explanation = "C'est trop : 0,8 × 1,25 = 1."

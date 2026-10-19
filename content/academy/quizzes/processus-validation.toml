@@ -1,0 +1,228 @@
+id = "processus-validation"
+title = "Quiz de validation : Construire son processus de trading"
+course = "processus-de-trading"
+lesson = "recap-processus"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "controle"
+prompt = "Sur quoi un processus de trading se juge-t-il au quotidien ?"
+kind = "single"
+lesson = "processus-ou-resultats"
+
+[[question.option]]
+id = "controle"
+text = "Sur ce que l'on contrôle : préparation, respect des règles, limites, journal."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "resultat"
+text = "Sur le résultat du jour."
+explanation = "Le résultat d'un jour est en partie du hasard."
+
+[[question.option]]
+id = "prix"
+text = "Sur la direction du marché."
+explanation = "On ne la contrôle pas."
+
+[[question]]
+id = "parties"
+prompt = "Laquelle n'est pas une partie du plan de trading ?"
+kind = "single"
+lesson = "plan-de-trading"
+
+[[question.option]]
+id = "objectif-gain"
+text = "Un objectif de gain mensuel."
+correct = true
+explanation = "Exact : il ne se contrôle pas."
+
+[[question.option]]
+id = "limites"
+text = "Les limites de perte."
+explanation = "C'est la partie 5 du plan."
+
+[[question.option]]
+id = "revue"
+text = "La procédure de revue."
+explanation = "C'est la partie 7 du plan."
+
+[[question]]
+id = "exception"
+prompt = "Une règle dit « sauf si le marché est très bon ». Problème ?"
+kind = "single"
+lesson = "plan-de-trading"
+
+[[question.option]]
+id = "floue"
+text = "C'est une exception floue : elle se décidera pendant la séance."
+correct = true
+explanation = "Oui : une exception s'écrit comme une règle, ou n'existe pas."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, c'est du bon sens."
+explanation = "Le test du remplaçant échouerait."
+
+[[question.option]]
+id = "legal"
+text = "C'est interdit par la loi."
+explanation = "Ce n'est pas une question légale."
+
+[[question]]
+id = "reduire"
+prompt = "Compte à 18 000 € après −10 %, règle : risque divisé par deux de 1 % à 0,5 %. Risque par trade ?"
+kind = "single"
+lesson = "limites-de-risque"
+
+[[question.option]]
+id = "90"
+text = "90 €"
+correct = true
+explanation = "Oui : 0,5 % × 18 000."
+
+[[question.option]]
+id = "180"
+text = "180 €"
+explanation = "C'est 1 % de 18 000, sans réduction."
+
+[[question.option]]
+id = "200"
+text = "200 €"
+explanation = "C'est 1 % du plus haut."
+
+[[question]]
+id = "preparation"
+prompt = "Qu'est-ce qui figure dans la préparation écrite ?"
+kind = "single"
+lesson = "preparer-seance"
+
+[[question.option]]
+id = "cinq"
+text = "L'état, le calendrier, le contexte, les scénarios avec invalidation, les limites du jour."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "gain"
+text = "Le gain visé du jour."
+explanation = "On ne vise pas un gain."
+
+[[question.option]]
+id = "rumeurs"
+text = "Les avis lus sur les réseaux sociaux."
+explanation = "Ils n'ont pas leur place dans le plan."
+
+[[question]]
+id = "disposition"
+prompt = "Qu'est-ce que l'effet de disposition ?"
+kind = "single"
+lesson = "executer-seance"
+
+[[question.option]]
+id = "disposition"
+text = "Vendre trop tôt ce qui gagne, garder trop longtemps ce qui perd."
+correct = true
+explanation = "Oui (Shefrin et Statman, 1985)."
+
+[[question.option]]
+id = "humeur"
+text = "Trader selon son humeur du jour."
+explanation = "C'est un autre biais."
+
+[[question.option]]
+id = "rien"
+text = "Une règle de gestion recommandée."
+explanation = "C'est un biais, que les règles écrites corrigent."
+
+[[question]]
+id = "champ"
+prompt = "Quel champ du journal est la mesure centrale du processus ?"
+kind = "single"
+lesson = "journal-mesures"
+
+[[question.option]]
+id = "respect"
+text = "Toutes les règles respectées : oui ou non."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "emotion"
+text = "L'émotion ressentie à la sortie."
+explanation = "Elle est utile, mais secondaire."
+
+[[question.option]]
+id = "heure"
+text = "L'heure de l'entrée."
+explanation = "Elle sert à retrouver le trade."
+
+[[question]]
+id = "mensuelle"
+prompt = "Que peut changer la revue mensuelle ?"
+kind = "single"
+lesson = "revue-amelioration"
+
+[[question.option]]
+id = "une"
+text = "Une seule règle du plan, avec une raison écrite et un test."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "tout"
+text = "Toute la stratégie, si le mois est perdant."
+explanation = "Un mois perdant est souvent de la variance."
+
+[[question.option]]
+id = "rien"
+text = "Rien, le plan est figé à vie."
+explanation = "Le plan évolue, une règle à la fois."
+
+[[question]]
+id = "variance"
+prompt = "Une stratégie d'espérance +0,25R a un mois de 20 trades négatif. Faut-il l'abandonner ?"
+kind = "single"
+lesson = "revue-amelioration"
+
+[[question.option]]
+id = "non"
+text = "Non : c'est la variance attendue ; c'est un changement durable qui doit alerter."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, elle ne marche plus."
+explanation = "Vingt trades ne permettent pas de le dire."
+
+[[question.option]]
+id = "doubler"
+text = "Non, il faut doubler la taille pour se refaire."
+explanation = "C'est l'écart qui coûte le plus."
+
+[[question]]
+id = "cas"
+prompt = "Dans le cas du mois, quel est le taux de respect du plan ?"
+kind = "single"
+lesson = "cas-mois-de-trading"
+
+[[question.option]]
+id = "75"
+text = "75 %"
+correct = true
+explanation = "Oui : 18 trades conformes sur 24."
+
+[[question.option]]
+id = "25"
+text = "25 %"
+explanation = "C'est la part des écarts."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Six trades ont enfreint une règle."

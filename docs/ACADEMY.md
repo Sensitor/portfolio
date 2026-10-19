@@ -60,6 +60,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   zones.py     FVGs, order blocks, retracements, OTE band, zone overlap (path 4)
   backtest.py  series summary, interval of an expectancy, multiple testing, degradation (path 7)
   macro.py     surprises, release times in Paris, implied rates, curve inversions, expected move, event sizing (path 8)
+  discipline.py plan compliance, cost of departures, de-risking after a drawdown, the case month (path 10)
   money.py     bank balance sheets, loan instalments and schedules, bond prices (« La monnaie »)
   inflation.py rates from an index, cumulative and annualised inflation, purchasing power, contributions
   savings.py   real return, monthly savings projection, compounding, volatility drag, two-asset volatility

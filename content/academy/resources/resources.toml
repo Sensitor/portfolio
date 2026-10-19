@@ -24,7 +24,7 @@ level = "debutant"
 file = "checklist-avant-trade.md"
 pdf = "checklist-avant-trade.pdf"
 access = "member"
-lessons = ["budget-de-risque", "cas-pratique", "recapitulatif"]
+lessons = ["budget-de-risque", "cas-pratique", "recapitulatif", "executer-seance"]
 
 [[resource]]
 id = "fiche-lire-la-structure"
@@ -84,7 +84,7 @@ level = "intermediaire"
 file = "routine-de-seance.md"
 pdf = "routine-de-seance.pdf"
 access = "member"
-lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie", "plan-publication"]
+lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie", "plan-publication", "preparer-seance"]
 
 [[resource]]
 id = "fiche-backtest"
@@ -169,4 +169,16 @@ file = "fiche-crypto-securite.md"
 pdf = "fiche-crypto-securite.pdf"
 access = "public"
 lessons = ["au-dela-de-bitcoin", "stablecoins", "portefeuilles", "phrase-de-recuperation", "envoyer-recevoir", "plateformes-echange", "arnaques", "recap-crypto-securite"]
+
+[[resource]]
+id = "modele-plan-de-trading"
+title = "Modèle de plan de trading"
+description = "Les sept parties d'un plan de trading à remplir : objectif, marchés, stratégies en six parties, risque, limites, routine, revue, avec le test du remplaçant. Le parcours 10 en un document de travail."
+kind = "guide"
+category = "Processus de trading"
+level = "avance"
+file = "modele-plan-de-trading.md"
+pdf = "modele-plan-de-trading.pdf"
+access = "member"
+lessons = ["processus-ou-resultats", "plan-de-trading", "limites-de-risque", "preparer-seance", "executer-seance", "journal-mesures", "revue-amelioration", "cas-mois-de-trading", "recap-processus"]
 
