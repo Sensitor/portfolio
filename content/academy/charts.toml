@@ -277,3 +277,30 @@ label = "Résultat réalisé"
 [[chart.series]]
 column = "plan"
 label = "Trades conformes au plan seulement"
+
+[[chart]]
+id = "puissance-reseau"
+dataset = "reseau-bitcoin"
+kind = "line"
+x = "date"
+x_label = "Début de la période de 2 016 blocs"
+y_label = "Puissance de calcul, en EH/s"
+y_log = true
+title = "La puissance de calcul du réseau Bitcoin, mesurée sur la chaîne depuis 2009"
+
+[[chart.series]]
+column = "puissance"
+label = "Puissance estimée (exahashes par seconde)"
+
+[[chart]]
+id = "duree-periodes"
+dataset = "reseau-bitcoin"
+kind = "bar"
+x = "date"
+x_label = "Début de la période de 2 016 blocs"
+y_label = "Durée de la période, en jours"
+title = "Quatorze jours visés : la durée réelle de chaque période de difficulté"
+
+[[chart.series]]
+column = "jours"
+label = "Durée réelle de la période"

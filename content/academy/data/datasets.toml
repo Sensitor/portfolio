@@ -197,3 +197,16 @@ synthetic = true
 unit = "R"
 columns = ["trade", "realise", "plan", "ecart"]
 notes = "La courbe du plan seul compte zéro pour chaque trade qui enfreint une règle : c'est ce qu'aurait donné le mois si ces trades n'avaient pas été pris, toutes choses égales par ailleurs."
+
+[[dataset]]
+id = "reseau-bitcoin"
+title = "Difficulté, durée des périodes et puissance de calcul du réseau Bitcoin, depuis 2009"
+kind = "file"
+file = "reseau-bitcoin.csv"
+source = "données publiques de la chaîne Bitcoin : en-tête du premier bloc de chaque période de 2 016 blocs (horodatage et champ bits), relevé via l'API publique de mempool.space et identique sur tout nœud Bitcoin ; difficulté décodée du champ bits, durée des périodes et puissance de calcul calculées par Sensitor"
+url = "https://mempool.space/docs/api/rest"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-19
+unit = "EH/s"
+columns = ["date", "hauteur", "horodatage", "bits", "horodatage_suivant", "hauteur_suivante", "difficulte", "jours", "puissance"]
+notes = "La puissance de calcul est une estimation : difficulté × 2³² ÷ temps moyen entre deux blocs de la période. Les horodatages des blocs sont fixés par les mineurs et peuvent s'écarter de quelques minutes ou heures de l'heure réelle."

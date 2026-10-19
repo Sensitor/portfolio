@@ -135,8 +135,9 @@ Un espace éditorial : convictions, indicateurs suivis, critères, règles de ri
 | Émission de Bitcoin, halvings | règles du protocole, calcul exact ; dates passées des halvings | aucun |
 | Inflation France, zone euro, États-Unis | INSEE (IPC), Eurostat (IPCH), BLS (CPI) : données publiques réutilisables avec attribution | accès réseau ouvert le 17 octobre 2026 (sauf api.insee.fr) |
 | Taux directeurs | BCE, Réserve fédérale | même point réseau |
-| Prix historique de Bitcoin | à choisir | **licence à vérifier** : plusieurs jeux gratuits (dont Coin Metrics Community) sont, à ma connaissance, sous licence non commerciale |
-| Indicateurs on-chain (MVRV, SOPR, NUPL…) | fournisseur spécialisé, généralement payant | **décision d'achat ou de licence** avant toute courbe historique |
+| Prix historique de Bitcoin | **licence à acheter** | vérifié le 19 octobre 2026 : aucune source gratuite n'autorise l'usage commercial. Coin Metrics Community (CC BY-NC 4.0), CoinGecko Demo, mempool.space, Blockchain.com, Kraken, Coinbase, CryptoCompare et la série FRED CBBTCUSD l'interdisent ou n'accordent aucune licence |
+| Indicateurs on-chain sans prix (puissance, difficulté, frais, transactions, offre, âge des pièces, HODL waves) | **calcul Sensitor depuis la chaîne** | faits publics de la chaîne, sans licence tierce. Fait : difficulté, durée des périodes et puissance depuis 2009, à partir des en-têtes de blocs. Le reste demande un nœud Bitcoin (ou Esplora) hébergé par Sensitor |
+| Indicateurs on-chain avec prix (prix réalisé, MVRV, NUPL, SOPR, Puell) | **calcul Sensitor + prix sous licence**, ou fournisseur | soit un prix sous licence commerciale combiné aux données du nœud, soit une licence d'affichage chez un fournisseur (BGeometrics, LookIntoBitcoin Enterprise, Coin Metrics, Glassnode avec droits de redistribution) |
 
 Chaque jeu de données vivra dans un dossier dédié, avec un manifeste (source, URL, licence, date de récupération, unités) contrôlé par le validateur. Un graphique dont la donnée n'a pas de source ne pourra pas être publié, et chaque graphique affichera automatiquement sa source et sa date.
 

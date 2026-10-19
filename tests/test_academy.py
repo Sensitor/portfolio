@@ -708,6 +708,35 @@ def test_bitcoin_course_figures():
     forged = H.digest(honest[0].digest + "Bob paie Eve" + "0")
     check("the chain figure prints the real digests", all(h.digest[:10] in svg for h in honest) and forged[:10] in svg
           and forged != honest[1].digest)
+    check("bits: genesis 0x1d00ffff is difficulty 1", B.difficulty_from_bits(0x1D00FFFF) == 1.0
+          and B.target_from_bits(0x1D00FFFF) == B.MAX_TARGET)
+    net = catalog.dataset("reseau-bitcoin").rows
+    headers = [{"height": r["hauteur"], "timestamp": r["horodatage"], "bits": r["bits"]} for r in net]
+    headers.append({"height": net[-1]["hauteur_suivante"], "timestamp": net[-1]["horodatage_suivant"], "bits": 0})
+    rebuilt = B.epoch_rows(headers)
+    check("network: 482 complete periods, every one recomputed from its header",
+          len(net) == len(rebuilt) == 482 and all(
+              abs(a["difficulte"] / b["difficulte"] - 1) < 1e-5 and abs(a["jours"] - b["jours"]) < 0.006
+              and abs(a["puissance"] / b["puissance"] - 1) < 1e-5 and a["date"] == b["date"]
+              for a, b in zip(net, rebuilt)))
+    check("network: periods follow each other, 2 016 blocks apart",
+          all(n["hauteur_suivante"] - n["hauteur"] == 2016 and n["horodatage_suivant"] > n["horodatage"] for n in net)
+          and all(a["hauteur_suivante"] == b["hauteur"] for a, b in zip(net, net[1:])))
+    first = lambda level: next(r["date"][:7] for r in net if r["puissance"] >= level)
+    peak = max(net, key=lambda r: r["puissance"])
+    check("network: 1 EH/s in January 2016, 100 in January 2020, a high of about 1 116 on 16 October 2025",
+          first(1) == "2016-01" and first(100) == "2020-01" and peak["date"] == "2025-10-16" and round(peak["puissance"]) == 1116)
+    check("network: about 1 000 EH/s in early October 2026", net[-1]["date"] == "2026-10-03" and 950 < net[-1]["puissance"] < 1050)
+    import statistics
+    since2016 = [r["jours"] for r in net if r["date"] >= "2016"]
+    longest = max((r for r in net if r["date"] >= "2013"), key=lambda r: r["jours"])
+    by_date = {r["date"]: r for r in net}
+    check("network: median of 13,7 days since 2016; 19,4 days from 13 June 2021, the longest since 2013",
+          round(statistics.median(since2016), 1) == 13.7 and longest["date"] == "2021-06-13" and round(longest["jours"], 1) == 19.4)
+    check("network: about 179 EH/s from 1 May 2021, about 98 from 3 July",
+          round(by_date["2021-05-01"]["puissance"]) == 179 and round(by_date["2021-07-03"]["puissance"]) == 98)
+    check("lesson 5 quotes the network figures", all(t in text["preuve-de-travail"] for t in
+          ("1 116 EH/s", "13,7 jours", "19,4 jours", "179 EH/s", "98 EH/s", "482 périodes")))
     check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 

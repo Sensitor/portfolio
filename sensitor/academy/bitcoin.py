@@ -190,3 +190,51 @@ def estimated_date(from_height: int, from_date: _dt.date, target_height: int) ->
     """When a future block should be mined, at ten minutes per block from a known one."""
     minutes = (target_height - from_height) * TARGET_SPACING_MINUTES
     return from_date + _dt.timedelta(minutes=minutes)
+
+
+# =============================================================================
+# FROM BLOCK HEADERS
+# =============================================================================
+
+MAX_TARGET = 0xFFFF * 2 ** 208      # the target of difficulty 1, encoded as bits 0x1d00ffff
+
+
+def target_from_bits(bits: int) -> int:
+    """The target a block hash must stay under, decoded from the header's compact `bits` field."""
+    exponent, mantissa = bits >> 24, bits & 0xFFFFFF
+    return mantissa * 2 ** (8 * (exponent - 3))
+
+
+def difficulty_from_bits(bits: int) -> float:
+    """Difficulty as Bitcoin Core reports it: the difficulty-1 target divided by the block's target."""
+    return MAX_TARGET / target_from_bits(bits)
+
+
+def hashrate(difficulty: float, seconds_per_block: float) -> float:
+    """
+    The network's hashes per second implied by a difficulty and the observed
+    time between blocks: each block takes difficulty × 2^32 hashes on average.
+    """
+    if difficulty <= 0 or seconds_per_block <= 0:
+        raise ValueError("difficulty and block time must be positive")
+    return difficulty * 2 ** 32 / seconds_per_block
+
+
+def epoch_rows(headers: list[dict]) -> list[dict]:
+    """
+    One row per difficulty period, from the headers at the retarget heights
+    (and the tip): the period's difficulty from its bits, its length in days,
+    and the hashrate it implies, in exahashes per second.
+    """
+    rows = []
+    for this, nxt in zip(headers, headers[1:]):
+        blocks = nxt["height"] - this["height"]
+        seconds = nxt["timestamp"] - this["timestamp"]
+        if blocks < RETARGET_INTERVAL or seconds <= 0:
+            continue                            # the open period at the tip is not complete
+        diff = difficulty_from_bits(this["bits"])
+        rows.append({"hauteur": this["height"],
+                     "date": _dt.datetime.fromtimestamp(this["timestamp"], _dt.timezone.utc).date().isoformat(),
+                     "difficulte": diff, "jours": round(seconds / 86400, 2),
+                     "puissance": hashrate(diff, seconds / blocks) / 1e18})
+    return rows
