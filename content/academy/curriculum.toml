@@ -94,7 +94,8 @@ track = "investissement"
 number = 1
 title = "Stratégies d'investissement crypto"
 summary = "DCA, VCA, investissement progressif ou en une fois, rééquilibrage, allocation entre Bitcoin, altcoins et liquidités, drawdowns et scénarios défavorables, avec leurs simulateurs."
-status = "planned"
+status = "published"
+courses = ["investir-avec-methode"]
 topics = ["DCA et VCA", "Allocation et rééquilibrage", "Drawdowns et scénarios"]
 
 [[path]]

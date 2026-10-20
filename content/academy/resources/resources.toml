@@ -206,3 +206,15 @@ pdf = "fiche-analyse-crypto.pdf"
 access = "member"
 lessons = ["prix-et-capitalisation", "emission-et-deblocages", "revenus-et-incitations", "preter-emprunter", "perte-impermanente", "risques-defi", "grille-analyse"]
 
+[[resource]]
+id = "fiche-investir"
+title = "Investir dans la crypto avec méthode"
+description = "Conditions préalables, part de crypto et effet sur le risque, investissement en une fois, progressif ou vers une valeur cible, rééquilibrage, scénarios défavorables et fiscalité française : le parcours sur une page."
+kind = "fiche"
+category = "Investissement"
+level = "intermediaire"
+file = "fiche-investir.md"
+pdf = "fiche-investir.pdf"
+access = "member"
+lessons = ["avant-d-investir", "allocation-et-taille", "investissement-progressif", "valeur-cible", "reequilibrer", "scenarios-defavorables", "fiscalite-crypto", "recap-investir"]
+

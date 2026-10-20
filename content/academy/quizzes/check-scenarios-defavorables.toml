@@ -1,0 +1,73 @@
+id = "check-scenarios-defavorables"
+title = "Contrôle : les scénarios défavorables"
+course = "investir-avec-methode"
+lesson = "scenarios-defavorables"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ensemble"
+prompt = "Pourquoi appliquer les baisses en même temps ?"
+kind = "single"
+lesson = "scenarios-defavorables"
+
+[[question.option]]
+id = "correlation"
+text = "Parce qu'en crise, les corrélations montent et les actifs baissent ensemble."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "simple"
+text = "Pour simplifier le calcul."
+explanation = "C'est pour être réaliste en période de crise."
+
+[[question.option]]
+id = "rien"
+text = "Ce n'est pas utile."
+explanation = "Une baisse simultanée est le scénario à tester."
+
+[[question]]
+id = "calcul"
+prompt = "5 % crypto à −80 %, 55 % actions à −30 %, 40 % stables. Variation du patrimoine ?"
+kind = "single"
+lesson = "scenarios-defavorables"
+
+[[question.option]]
+id = "205"
+text = "−20,5 %"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "110"
+text = "−110 %"
+explanation = "On pondère chaque baisse par sa part."
+
+[[question.option]]
+id = "55"
+text = "−55 %"
+explanation = "Ce n'est pas le calcul."
+
+[[question]]
+id = "these"
+prompt = "Une baisse de prix suffit-elle à invalider une thèse de long terme ?"
+kind = "single"
+lesson = "scenarios-defavorables"
+
+[[question.option]]
+id = "non"
+text = "Non : il faut un fait nouveau, comme une faille ou un changement de règles."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Le prix seul ne dit pas si la thèse est fausse."
+
+[[question.option]]
+id = "moitie"
+text = "Oui, si la baisse dépasse 50 %."
+explanation = "La politique écrit d'avance ce qui invaliderait une position."

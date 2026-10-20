@@ -1,0 +1,73 @@
+id = "check-allocation-et-taille"
+title = "Contrôle : la part de crypto"
+course = "investir-avec-methode"
+lesson = "allocation-et-taille"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "vol"
+prompt = "Avec les hypothèses de la leçon, que devient la volatilité du patrimoine avec 5 % de crypto ?"
+kind = "single"
+lesson = "allocation-et-taille"
+
+[[question.option]]
+id = "105"
+text = "Environ 10,5 % au lieu de 10 %"
+correct = true
+explanation = "Oui : une petite part change peu le risque."
+
+[[question.option]]
+id = "60"
+text = "60 %"
+explanation = "C'est la volatilité de la crypto seule."
+
+[[question.option]]
+id = "35"
+text = "35 %"
+explanation = "C'est beaucoup trop pour une part de 5 %."
+
+[[question]]
+id = "baisse"
+prompt = "5 % de crypto, qui baisse de 75 %. Effet sur le patrimoine ?"
+kind = "single"
+lesson = "allocation-et-taille"
+
+[[question.option]]
+id = "375"
+text = "−3,75 %"
+correct = true
+explanation = "Oui : 5 % × 75 %."
+
+[[question.option]]
+id = "75"
+text = "−75 %"
+explanation = "Seule la part crypto baisse de 75 %."
+
+[[question.option]]
+id = "5"
+text = "−5 %"
+explanation = "La crypto ne perd pas tout."
+
+[[question]]
+id = "choisir"
+prompt = "Sur quoi fixer sa part de crypto ?"
+kind = "single"
+lesson = "allocation-et-taille"
+
+[[question.option]]
+id = "perte"
+text = "Sur ce qu'on supporterait de perdre sans vendre."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "gain"
+text = "Sur ce qu'on espère gagner."
+explanation = "C'est la baisse qui décide si l'on tiendra."
+
+[[question.option]]
+id = "amis"
+text = "Sur ce que font ses proches."
+explanation = "Leur situation n'est pas la vôtre."

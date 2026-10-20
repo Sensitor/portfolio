@@ -176,7 +176,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |
 | **D** ✔ | C1, cours « Utiliser la crypto en sécurité » : 8 leçons sourcées (jetons, stablecoins, portefeuilles, phrase de récupération, envoi, pools automatiques, arnaques), 4 exercices, fiche en accès libre. La chaîne de hash et la preuve de travail jouet sont dans le cours Bitcoin (C4) ; l'explorateur interactif n'est pas fait, remplacé par le schéma et l'exercice d'une transaction | terminé |
 | **E1** ✔ | C2, cours « Analyser un projet crypto » : capitalisation et valorisation diluée, déblocages, revenus et incitations, prêts et liquidations, perte impermanente, risques de la DeFi, grille en douze questions ; 7 leçons, 5 exercices, sur exemples construits | terminé |
-| **E2** | I1 : allocation, investissement progressif, VCA, rééquilibrage, fiscalité | contenu et simulateurs |
+| **E2** ✔ | I1, cours « Investir dans la crypto avec méthode » : conditions préalables, part et risque, investissement en une fois, progressif ou vers une valeur cible, rééquilibrage, scénarios défavorables, fiscalité française (article 150 VH bis, taux à vérifier chaque année) ; 8 leçons, 6 exercices | terminé |
 | **F** | Portefeuille et trading : référence Bitcoin, option 365 jours pour la crypto (avec tests et justification), liens Academy vers les outils, niveaux d'accès unifiés, rapprochement des chartes | modifications d'outils existants, une par une |
 | **G** | Tests avec des utilisateurs, retours, priorisation | validation |
 

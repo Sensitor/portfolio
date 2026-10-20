@@ -1,0 +1,40 @@
+id = "stress-patrimoine"
+title = "Un scénario de crise sur tout le patrimoine"
+context = """
+Un patrimoine de **200 000 €** : **5 %** en crypto, **55 %** en actions, **40 %** en fonds en euros et liquidités. Le scénario applique en même temps une baisse de **80 %** à la crypto, de **30 %** aux actions, et aucune variation au reste. *Scénario construit pour l'exercice.*
+"""
+conclusion = """
+Le patrimoine perd 20,5 %, soit 41 000 € : la crypto en coûte 8 000 et les actions 33 000. Il faudrait ensuite une hausse de 25,8 % pour revenir au départ. Avec 5 % de crypto, c'est la part en actions qui pèse le plus dans la baisse ; le test le montre, et c'est sur lui que se décide la conduite à tenir.
+"""
+
+[[step]]
+id = "variation"
+prompt = "De combien le patrimoine baisse-t-il, en % ? (Une décimale.)"
+unit = "%"
+answer = -20.5
+tolerance = 0.06
+solution = "5 % × (−80 %) + 55 % × (−30 %) + 40 % × 0 = **−20,5 %**."
+
+[[step]]
+id = "euros"
+prompt = "Et en € ?"
+unit = "€"
+answer = -41000
+tolerance = 0.5
+solution = "200 000 × −20,5 % = **−41 000 €**."
+
+[[step]]
+id = "crypto"
+prompt = "Combien la part crypto coûte-t-elle dans cette baisse, en € ?"
+unit = "€"
+answer = -8000
+tolerance = 0.5
+solution = "200 000 × 5 % × −80 % = **−8 000 €**."
+
+[[step]]
+id = "rattrapage"
+prompt = "Quelle hausse faut-il ensuite pour revenir à 200 000 €, en % ? (Une décimale.)"
+unit = "%"
+answer = 25.8
+tolerance = 0.06
+solution = "1 ÷ (1 − 0,205) − 1 = **25,8 %**."

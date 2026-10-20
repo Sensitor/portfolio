@@ -90,8 +90,8 @@ def test_real_catalog():
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
     planned = {p.id for p in catalog.paths if p.status == C.PLANNED}
-    check("only the founder's methods and what awaits licensed data are still announced",
-          planned == {"methode-sensitor", "strategies-crypto", "methode-fondateur"} and len(catalog.paths) == 16,
+    check("only the founder's two methods are still announced",
+          planned == {"methode-sensitor", "methode-fondateur"} and len(catalog.paths) == 16,
           str(sorted(planned)))
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
@@ -936,6 +936,54 @@ def test_analysis_figures():
                                                    and v in text["perte-impermanente"] for r, v in table.items()))
     check("impermanent loss: same loss up or down, none without a move",
           close(K.impermanent_loss(2), K.impermanent_loss(0.5)) and K.impermanent_loss(1) == 0)
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
+
+
+def test_invest_figures():
+    """« Investir dans la crypto avec méthode » : allocation, DCA, value averaging, rebalancing, tax."""
+    print("\nInvesting figures")
+    from sensitor.academy import invest as I
+    from sensitor.academy import savings as S
+    catalog = C.load_catalog()
+    course = catalog.course("investir-avec-methode")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+    al = ex("allocation-volatilite")
+    check("allocation: 10,5 % with 5 %, 15,7 % with 20 %, 3 750 and 15 000 € lost",
+          abs(S.portfolio_volatility(0.05, 0.6, 0.1, 0.2) * 100 - al["vol-5"]) < 0.06
+          and abs(S.portfolio_volatility(0.20, 0.6, 0.1, 0.2) * 100 - al["vol-20"]) < 0.06
+          and close(-I.portfolio_move([0.05, 0.95], [-0.75, 0]) * 100_000, al["baisse-5"])
+          and close(-I.portfolio_move([0.20, 0.80], [-0.75, 0]) * 100_000, al["baisse-20"]))
+    check("allocation: the lesson's table", all(t in text["allocation-et-taille"] for t in ("10,0 %", "10,5 %", "15,7 %"))
+          and round(S.portfolio_volatility(0, 0.6, 0.1, 0.2) * 100, 1) == 10.0)
+    dca = ex("dca-achats")
+    acc = I.fixed_amount(100, [40, 50, 25, 50])
+    check("DCA: 10,5 units, 38,10 € against a 41,25 € average, 525 € against 500 €",
+          close(acc.units, dca["unites"]) and abs(acc.average_cost - dca["revient"]) < 0.006
+          and close(sum([40, 50, 25, 50]) / 4, dca["moyenne"]) and close(acc.units * 50, dca["final-dca"])
+          and close(I.lump_sum(400, 40).units * 50, dca["final-une-fois"]))
+    check("DCA: the cost never exceeds the average price", all(
+        I.fixed_amount(10, p).average_cost <= sum(p) / len(p) + 1e-12 for p in ([1, 2, 3], [5, 5, 5], [9, 1, 4, 7])))
+    va = ex("va-versements")
+    check("value averaging: 100, 75, 200, -200", I.value_averaging(100, [40, 50, 25, 50]) == [va["m1"], va["m2"], va["m3"], va["m4"]])
+    rb = ex("reequilibrage")
+    w = I.weight_after_move(0.10, 1.0)
+    check("rebalancing: 110 000 €, 18,2 %, 9 000 € to sell", close(10_000 * 2 + 90_000, rb["total"])
+          and abs(w * 100 - rb["part"]) < 0.06 and close(I.rebalance_amount(110_000, w, 0.10), rb["vente"]))
+    st = ex("stress-patrimoine")
+    move = I.portfolio_move([0.05, 0.55, 0.40], [-0.8, -0.3, 0])
+    check("stress: -20,5 %, -41 000 €, -8 000 € from crypto, +25,8 % to recover",
+          close(move * 100, st["variation"]) and close(move * 200_000, st["euros"]) and close(200_000 * 0.05 * -0.8, st["crypto"])
+          and abs(R.recovery_needed(-move) * 100 - st["rattrapage"]) < 0.06)
+    check("weights must add up to 1", raises(lambda: I.portfolio_move([0.5, 0.4], [0, 0]), ValueError))
+    tx = ex("plus-value-150vh")
+    gain = I.gain_on_disposal(5000, 10_000, 25_000)
+    check("tax: 20 %, 2 000 € of cost, 3 000 € of gain, 942 € at 31,4 %, 8 000 € remaining",
+          5000 / 25_000 * 100 == tx["fraction"] and close(5000 - gain, tx["acquisition"]) and close(gain, tx["plus-value"])
+          and close(gain * 0.314, tx["impot"]) and close(I.remaining_acquisition_cost(10_000, 5000, 25_000), tx["reste"]))
+    check("tax: a sale above the portfolio's value is refused", raises(lambda: I.gain_on_disposal(30_000, 1, 25_000), ValueError))
+    check("tax: the lesson tells to check the year's rate on impots.gouv.fr",
+          "impots.gouv.fr" in text["fiscalite-crypto"] and "impots.gouv.fr" in catalog.exercise("plus-value-150vh").context)
     check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 
@@ -1906,6 +1954,7 @@ def main() -> int:
     test_process_figures()
     test_reserve_figures()
     test_analysis_figures()
+    test_invest_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

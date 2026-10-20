@@ -67,7 +67,8 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   bitcoin.py   Bitcoin's issuance from the protocol rules, difficulty retarget, the white paper's
                catch-up probability, fees, estimated block dates
   hashing.py   SHA-256 digests, a toy proof of work and a hash chain (the hash demonstration)
-  crypto.py    constant-product pools and price impact, Ethereum gas, BIP 39 entropy, stablecoin depegs
+  crypto.py    pools and price impact, gas, BIP 39 entropy, depegs, market cap and dilution, loans, impermanent loss
+  invest.py    progressive buying, value averaging, rebalancing, portfolio stress, the French 150 VH bis gain
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"

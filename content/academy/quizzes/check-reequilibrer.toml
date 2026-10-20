@@ -1,0 +1,73 @@
+id = "check-reequilibrer"
+title = "Contrôle : le rééquilibrage"
+course = "investir-avec-methode"
+lesson = "reequilibrer"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "part"
+prompt = "10 % de crypto qui double, le reste stable. Nouvelle part ?"
+kind = "single"
+lesson = "reequilibrer"
+
+[[question.option]]
+id = "182"
+text = "Environ 18,2 %"
+correct = true
+explanation = "Oui : 20 000 ÷ 110 000."
+
+[[question.option]]
+id = "20"
+text = "20 %"
+explanation = "Le patrimoine total a aussi augmenté."
+
+[[question.option]]
+id = "10"
+text = "10 %"
+explanation = "La part a dérivé."
+
+[[question]]
+id = "vendre"
+prompt = "Patrimoine de 110 000 €, part de 18,2 %, cible 10 %. Montant à vendre ?"
+kind = "single"
+lesson = "reequilibrer"
+
+[[question.option]]
+id = "9000"
+text = "Environ 9 000 €"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "20000"
+text = "20 000 €"
+explanation = "On ne vend que l'excédent."
+
+[[question.option]]
+id = "11000"
+text = "11 000 €"
+explanation = "C'est ce que la crypto doit valoir après le rééquilibrage."
+
+[[question]]
+id = "versements"
+prompt = "Quelle règle de rééquilibrage évite les ventes, et donc l'impôt ?"
+kind = "single"
+lesson = "reequilibrer"
+
+[[question.option]]
+id = "versements"
+text = "Orienter les nouveaux versements vers ce qui est en dessous de sa cible."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "calendrier"
+text = "Une vente annuelle à date fixe."
+explanation = "Elle implique des ventes."
+
+[[question.option]]
+id = "seuil"
+text = "Une vente dès que le seuil est franchi."
+explanation = "Elle implique aussi des ventes."

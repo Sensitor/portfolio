@@ -1,0 +1,39 @@
+id = "investir-avec-methode"
+path = "strategies-crypto"
+title = "Investir dans la crypto avec méthode"
+summary = "Huit leçons pour passer de la conviction à une méthode : ce qu'il faut régler avant d'investir, la part de la crypto dans un patrimoine et ce qu'elle pèse sur le risque, l'investissement progressif et ses limites, la méthode de la valeur cible, le rééquilibrage, les scénarios défavorables, et la fiscalité française des actifs numériques."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Fixer la part de la crypto dans un patrimoine à partir de son effet sur le risque d'ensemble.",
+  "Comparer investissement en une fois, investissement progressif et valeur cible, chiffres à l'appui.",
+  "Rééquilibrer une allocation et tester un patrimoine contre des scénarios défavorables.",
+  "Calculer une plus-value sur actifs numériques selon la règle française.",
+]
+prerequisites = ["Inflation et patrimoine", "Bitcoin, une réserve de valeur ?", "Utiliser la crypto en sécurité"]
+final_quiz = "investir-validation"
+
+[[module]]
+id = "base"
+title = "Les fondations"
+summary = "Ce qui se règle avant le premier euro, et la part que la crypto peut prendre dans un patrimoine."
+lessons = ["avant-d-investir", "allocation-et-taille"]
+
+[[module]]
+id = "methodes"
+title = "Les méthodes"
+summary = "Investir en une fois, progressivement, ou vers une valeur cible, puis rééquilibrer."
+lessons = ["investissement-progressif", "valeur-cible", "reequilibrer"]
+
+[[module]]
+id = "protection"
+title = "Se protéger"
+summary = "Les scénarios défavorables, et ce que l'État prélève sur les gains."
+lessons = ["scenarios-defavorables", "fiscalite-crypto"]
+
+[[module]]
+id = "synthese"
+title = "Synthèse"
+summary = "La politique d'investissement écrite, puis le quiz de validation."
+lessons = ["recap-investir"]

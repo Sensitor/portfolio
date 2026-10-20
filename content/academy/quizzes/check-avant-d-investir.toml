@@ -1,0 +1,73 @@
+id = "check-avant-d-investir"
+title = "Contrôle : avant d'investir"
+course = "investir-avec-methode"
+lesson = "avant-d-investir"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "precaution"
+prompt = "Où placer son épargne de précaution ?"
+kind = "single"
+lesson = "avant-d-investir"
+
+[[question.option]]
+id = "livret"
+text = "Sur un placement sans risque de perte nominale, comme un livret."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "crypto"
+text = "En crypto, pour qu'elle rapporte."
+explanation = "Elle pourrait manquer au moment d'une dépense imprévue."
+
+[[question.option]]
+id = "actions"
+text = "En actions."
+explanation = "Une baisse obligerait à vendre au mauvais moment."
+
+[[question]]
+id = "dette"
+prompt = "Faut-il investir en crypto avec un crédit à la consommation en cours ?"
+kind = "single"
+lesson = "avant-d-investir"
+
+[[question.option]]
+id = "rembourser"
+text = "Mieux vaut d'abord rembourser les dettes chères."
+correct = true
+explanation = "Oui : aucun placement ne rapporte sûrement plus."
+
+[[question.option]]
+id = "oui"
+text = "Oui, la crypto rapporte plus."
+explanation = "Rien ne le garantit, le coût du crédit est certain."
+
+[[question.option]]
+id = "emprunter"
+text = "Oui, et emprunter davantage."
+explanation = "C'est ajouter un levier au risque."
+
+[[question]]
+id = "premier"
+prompt = "Quelle décision pèse le plus sur le résultat ?"
+kind = "single"
+lesson = "avant-d-investir"
+
+[[question.option]]
+id = "part"
+text = "La part donnée à l'actif, et la capacité à la garder pendant une baisse."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "jeton"
+text = "Le choix du bon jeton."
+explanation = "Il compte moins que la part et la tenue."
+
+[[question.option]]
+id = "heure"
+text = "L'heure de l'achat."
+explanation = "Elle compte très peu sur un horizon long."

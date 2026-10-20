@@ -1,0 +1,73 @@
+id = "check-valeur-cible"
+title = "Contrôle : la valeur cible"
+course = "investir-avec-methode"
+lesson = "valeur-cible"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "versement"
+prompt = "Cible de 300 €, position qui vaut 100 €. Versement ?"
+kind = "single"
+lesson = "valeur-cible"
+
+[[question.option]]
+id = "200"
+text = "200 €"
+correct = true
+explanation = "Oui : 300 − 100."
+
+[[question.option]]
+id = "100"
+text = "100 €"
+explanation = "On verse ce qui manque pour atteindre la cible."
+
+[[question.option]]
+id = "300"
+text = "300 €"
+explanation = "La position vaut déjà 100 €."
+
+[[question]]
+id = "negatif"
+prompt = "Que signifie un versement négatif ?"
+kind = "single"
+lesson = "valeur-cible"
+
+[[question.option]]
+id = "vendre"
+text = "Qu'il faut vendre l'excédent au-dessus de la cible."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "erreur"
+text = "Une erreur de calcul."
+explanation = "C'est prévu par la méthode."
+
+[[question.option]]
+id = "pause"
+text = "Qu'il faut faire une pause."
+explanation = "Il faut vendre l'excédent."
+
+[[question]]
+id = "reserve"
+prompt = "Que demande la méthode de la valeur cible ?"
+kind = "single"
+lesson = "valeur-cible"
+
+[[question.option]]
+id = "reserve"
+text = "Une réserve de liquidités et un plafond de versement."
+correct = true
+explanation = "Oui : une forte baisse peut demander un gros versement."
+
+[[question.option]]
+id = "rien"
+text = "Rien de particulier."
+explanation = "Ses versements sont imprévisibles."
+
+[[question.option]]
+id = "credit"
+text = "Un crédit pour les gros versements."
+explanation = "Jamais d'emprunt pour investir dans un actif volatil."
