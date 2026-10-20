@@ -165,3 +165,20 @@ def unlock_rows(months: int = 48) -> list[dict]:
 def staking_rows(rate: float = 0.08, years: int = 10) -> list[dict]:
     """The share of the supply kept by someone who stakes and by someone who does not."""
     return [{"annee": y, "staking": 100.0, "sans_staking": round(100 / (1 + rate) ** y, 2)} for y in range(years + 1)]
+
+
+def seed_strength_rows(per_second: float = 1e12) -> list[dict]:
+    """Years to try every phrase, by number of words, at `per_second` tries a second."""
+    return [{"mots": f"{w} mots", "annees": years_to_try(entropy_bits(w), per_second)} for w in (12, 15, 18, 21, 24)]
+
+
+def gas_rows(eth_price: float = 3000.0) -> list[dict]:
+    """What a transfer costs in dollars as the gas price rises, for ether and for a token."""
+    return [{"gwei": g, "ether": round(gas_fee_eth(21_000, g) * eth_price, 2),
+             "jeton": round(gas_fee_eth(65_000, g) * eth_price, 2)} for g in (1, 5, 10, 20, 30, 50, 75, 100)]
+
+
+def impact_rows() -> list[dict]:
+    """The price impact of a deposit in a constant-product pool, by its share of the reserve."""
+    shares = (0.1, 0.5, 1, 2, 5, 10, 20, 30, 50)
+    return [{"part": s, "impact": round(price_impact(100.0, 100.0, s) * 100, 2)} for s in shares]

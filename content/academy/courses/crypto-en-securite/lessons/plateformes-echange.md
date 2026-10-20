@@ -50,6 +50,10 @@ La courbe d'un pool de 100 ETH et 300 000 USDC. Acheter avec 30 000 USDC déplac
 \text{Reçu} = \frac{y \times \text{montant déposé}}{x + \text{montant déposé}}
 :::
 
+::: chart impact-pool
+L'impact sur le prix d'un dépôt dans un pool, sans commission : il vaut la part du dépôt dans la réserve, 1 % pour 1 %, 10 % pour 10 %. Calcul exact.
+:::
+
 ## À vous
 
 ::: exercise pool-automatique

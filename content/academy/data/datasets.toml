@@ -328,3 +328,88 @@ license = "calcul Sensitor, aucune donnée tierce"
 retrieved = 2026-10-20
 unit = "%"
 columns = ["baisse", "hausse_necessaire"]
+
+[[dataset]]
+id = "indicateurs-exemple"
+title = "Prix réalisé, MVRV et NUPL sur un marché construit de 1 000 pièces"
+kind = "computed"
+generator = "price-indicators-example"
+source = "marché construit pour la leçon : 1 000 pièces dont le dernier prix d'échange est connu, 5 % des plus anciennes changeant de mains chaque mois au prix du mois ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = ""
+columns = ["mois", "prix", "prix_realise", "mvrv", "nupl"]
+notes = "Les séries réelles de ces indicateurs demandent un historique de prix sous licence commerciale, que Sensitor n'a pas encore : elles ne sont pas reproduites."
+
+[[dataset]]
+id = "force-phrase"
+title = "Le temps nécessaire pour essayer toutes les phrases de récupération, selon leur longueur"
+kind = "computed"
+generator = "seed-strength"
+source = "norme BIP 39 (11 bits par mot, somme de contrôle), attaquant hypothétique à mille milliards d'essais par seconde ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "ans"
+columns = ["mots", "annees"]
+
+[[dataset]]
+id = "frais-gaz"
+title = "Ce que coûte un envoi sur Ethereum selon le prix du gaz"
+kind = "computed"
+generator = "gas-costs"
+source = "21 000 unités de gaz pour un transfert d'ether, 65 000 pour un jeton, ether à 3 000 dollars, hypothèses de la leçon ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "$"
+columns = ["gwei", "ether", "jeton"]
+
+[[dataset]]
+id = "impact-pool"
+title = "L'impact sur le prix d'un achat dans un pool à produit constant, selon sa taille"
+kind = "computed"
+generator = "pool-impact"
+source = "formule du produit constant x × y = k, sans commission ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["part", "impact"]
+
+[[dataset]]
+id = "blocs-echantillon"
+title = "Un bloc par jour de la chaîne Bitcoin, depuis 2009"
+kind = "file"
+file = "blocs-echantillon.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = ""
+columns = ["jour", "hauteur", "transactions", "taille", "poids", "coinbase_sats", "coinbase_script"]
+
+[[dataset]]
+id = "activite-on-chain"
+title = "Transactions, frais, remplissage, taille et revenu des mineurs, en moyenne mensuelle, depuis 2009"
+kind = "file"
+file = "activite-on-chain.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = ""
+columns = ["mois", "echantillon", "transactions_par_jour", "frais_par_bloc", "part_frais", "remplissage", "taille_mo", "revenu_jour", "revenu_par_eh"]
+notes = "Estimations à partir d'un bloc par jour : une trentaine de blocs par mois. Le revenu par EH/s utilise la puissance déduite de la difficulté (jeu « reseau-bitcoin »)."
+
+[[dataset]]
+id = "pools-par-annee"
+title = "Part des blocs par pool de minage, chaque année depuis 2013, selon l'étiquette de la coinbase"
+kind = "file"
+file = "pools-par-annee.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor ; pools identifiés par l'étiquette inscrite dans le script de la coinbase"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = "%"
+columns = ["annee", "echantillon", "foundry_usa", "antpool", "btc_guild", "btc_com", "f2pool", "btc_top", "viabtc", "binance_pool", "btcc", "poolin", "autres", "non_identifie", "coefficient_nakamoto"]
+notes = "Environ 365 blocs par an : chaque part est une estimation, à quelques points près. Les blocs sans étiquette connue sont comptés comme non identifiés."

@@ -69,6 +69,7 @@ sensitor/academy/           the domain — no Streamlit, no FastAPI
   hashing.py   SHA-256 digests, a toy proof of work and a hash chain (the hash demonstration)
   crypto.py    pools and price impact, gas, BIP 39 entropy, depegs, market cap and dilution, loans, impermanent loss
   invest.py    progressive buying, value averaging, rebalancing, portfolio stress, the French 150 VH bis gain
+  onchain.py   metrics from sampled blocks: fees, fill, miner revenue, pools by coinbase tag; realized price, MVRV, NUPL on an example
   expectancy.py expectancy, Wilson interval, drawdown, exact risk of ruin (path 5)
   printable.py resource Markdown → print-ready HTML, and the PDF manifest
   progress.py  course progress and "what next"

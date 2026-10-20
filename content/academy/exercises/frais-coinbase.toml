@@ -1,0 +1,55 @@
+id = "frais-coinbase"
+title = "Les frais de deux blocs, lus dans leur coinbase"
+context = """
+Deux blocs réels de la chaîne Bitcoin, de part et d'autre du halving d'avril 2024 (relevés via l'API publique de mempool.space) :
+
+| Bloc | Coinbase | Récompense du protocole |
+|---|---|---|
+| 839 999 | 7,29455386 BTC | 6,25 BTC |
+| 840 000 | 40,75061499 BTC | 3,125 BTC |
+
+Le bloc 840 000 pèse **3 993 281** unités, pour un maximum de 4 000 000.
+"""
+conclusion = """
+Le dernier bloc avant le halving a payé environ 1,04 BTC de frais, 14,3 % du revenu du mineur. Le premier bloc après en a payé 37,63, 92,3 % du revenu : une demande exceptionnelle d'espace, due au lancement du protocole de jetons Runes à ce bloc précis. Un bloc isolé peut donc être très différent de la moyenne, d'où les moyennes mensuelles du cours.
+"""
+
+[[step]]
+id = "frais-avant"
+prompt = "Quels frais le bloc 839 999 a-t-il payés, en BTC ? (Deux décimales.)"
+unit = "BTC"
+answer = 1.04
+tolerance = 0.006
+solution = "7,29455386 − 6,25 = **1,04 BTC**."
+
+[[step]]
+id = "part-avant"
+prompt = "Quelle part du revenu du mineur représentent-ils, en % ? (Une décimale.)"
+unit = "%"
+answer = 14.3
+tolerance = 0.06
+solution = "1,04455386 ÷ 7,29455386 = **14,3 %**."
+
+[[step]]
+id = "frais-apres"
+prompt = "Quels frais le bloc 840 000 a-t-il payés, en BTC ? (Deux décimales.)"
+unit = "BTC"
+answer = 37.63
+tolerance = 0.006
+solution = "40,75061499 − 3,125 = **37,63 BTC**."
+
+[[step]]
+id = "part-apres"
+prompt = "Et quelle part du revenu, en % ? (Une décimale.)"
+unit = "%"
+answer = 92.3
+tolerance = 0.06
+solution = "37,62561499 ÷ 40,75061499 = **92,3 %**."
+
+[[step]]
+id = "remplissage"
+prompt = "Quel est le remplissage du bloc 840 000, en % du poids maximal ? (Une décimale.)"
+unit = "%"
+answer = 99.8
+tolerance = 0.06
+solution = "3 993 281 ÷ 4 000 000 = **99,8 %**."

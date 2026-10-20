@@ -1,0 +1,73 @@
+id = "check-activite-reseau"
+title = "Contrôle : l'activité du réseau"
+course = "metriques-on-chain"
+lesson = "activite-reseau"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "calcul"
+prompt = "Comment estime-t-on les transactions par jour à partir de l'échantillon ?"
+kind = "single"
+lesson = "activite-reseau"
+
+[[question.option]]
+id = "produit"
+text = "Transactions moyennes par bloc × blocs produits par jour."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "un"
+text = "Le nombre de transactions du bloc de midi."
+explanation = "Un seul bloc ne représente pas une journée."
+
+[[question.option]]
+id = "prix"
+text = "À partir du prix du bitcoin."
+explanation = "Aucun prix n'intervient."
+
+[[question]]
+id = "plein"
+prompt = "Que se passe-t-il quand le remplissage des blocs approche 100 % ?"
+kind = "single"
+lesson = "activite-reseau"
+
+[[question.option]]
+id = "frais"
+text = "La place devient rare et les frais montent."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "taille"
+text = "Les blocs s'agrandissent automatiquement."
+explanation = "Le poids maximal est fixé par les règles."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "La concurrence pour l'espace augmente."
+
+[[question]]
+id = "adoption"
+prompt = "Le nombre de transactions mesure-t-il le nombre d'utilisateurs ?"
+kind = "single"
+lesson = "activite-reseau"
+
+[[question.option]]
+id = "non"
+text = "Non : une transaction peut regrouper des centaines de paiements, ou déplacer des fonds vers soi-même."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, une transaction égale un utilisateur."
+explanation = "Rien ne relie les deux."
+
+[[question.option]]
+id = "double"
+text = "Oui, à deux transactions par utilisateur."
+explanation = "Aucune règle de ce type n'existe."

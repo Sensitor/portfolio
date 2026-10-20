@@ -218,3 +218,15 @@ pdf = "fiche-investir.pdf"
 access = "member"
 lessons = ["avant-d-investir", "allocation-et-taille", "investissement-progressif", "valeur-cible", "reequilibrer", "scenarios-defavorables", "fiscalite-crypto", "recap-investir"]
 
+[[resource]]
+id = "fiche-on-chain"
+title = "Lire les métriques on-chain de Bitcoin"
+description = "Les trois familles de métriques, les formules du cours, les repères de septembre 2026 et les dates de l'espace de bloc : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "intermediaire"
+file = "fiche-on-chain.md"
+pdf = "fiche-on-chain.pdf"
+access = "member"
+lessons = ["donnees-on-chain", "activite-reseau", "frais-budget-securite", "espace-de-bloc", "minage-et-pools", "indicateurs-de-prix", "recap-on-chain"]
+

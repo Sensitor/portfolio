@@ -30,6 +30,10 @@ Une phrase de récupération de la norme BIP 39 choisit ses mots dans une liste 
 
 À mille milliards d'essais par seconde, essayer toutes les phrases de douze mots prendrait environ 10¹⁹ ans, des centaines de millions de fois l'âge de l'univers. Le danger n'est donc jamais le hasard. Il est ailleurs : **la perte**, **le vol**, et **la ruse** de quelqu'un qui obtient la phrase de son propriétaire.
 
+::: chart force-phrase
+Le temps pour essayer toutes les phrases à mille milliards d'essais par seconde : environ 10¹⁹ ans pour 12 mots, plus de 10⁵⁷ ans pour 24. Échelle logarithmique. Calcul exact.
+:::
+
 ## À vous
 
 ::: exercise securite-phrase

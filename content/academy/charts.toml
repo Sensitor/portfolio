@@ -484,3 +484,253 @@ title = "Plus la baisse est profonde, plus la remontée doit être forte"
 [[chart.series]]
 column = "hausse_necessaire"
 label = "Hausse nécessaire"
+
+[[chart]]
+id = "prix-realise-exemple"
+dataset = "indicateurs-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Prix"
+title = "Le prix de marché et le prix réalisé, sur un marché construit"
+
+[[chart.series]]
+column = "prix"
+label = "Prix de marché"
+
+[[chart.series]]
+column = "prix_realise"
+label = "Prix réalisé"
+
+[[chart]]
+id = "mvrv-exemple"
+dataset = "indicateurs-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "MVRV"
+title = "Le MVRV : valeur de marché sur valeur réalisée"
+
+[[chart.series]]
+column = "mvrv"
+label = "MVRV"
+
+[[chart]]
+id = "nupl-exemple"
+dataset = "indicateurs-exemple"
+kind = "bar"
+x = "mois"
+x_label = "Mois"
+y_label = "NUPL"
+title = "Le NUPL : plus-values latentes nettes, en part de la valeur de marché"
+
+[[chart.series]]
+column = "nupl"
+label = "NUPL"
+
+[[chart]]
+id = "force-phrase"
+dataset = "force-phrase"
+kind = "bar"
+x = "mots"
+x_label = "Longueur de la phrase"
+y_label = "Années pour tout essayer"
+y_log = true
+title = "Deviner une phrase de récupération : des durées hors d'échelle humaine"
+
+[[chart.series]]
+column = "annees"
+label = "Années, à mille milliards d'essais par seconde"
+
+[[chart]]
+id = "frais-gaz"
+dataset = "frais-gaz"
+kind = "line"
+x = "gwei"
+x_label = "Prix du gaz, en gwei"
+y_label = "Coût de l'envoi, en dollars"
+title = "Le coût d'un envoi suit le prix du gaz, pas le montant envoyé"
+
+[[chart.series]]
+column = "ether"
+label = "Transfert d'ether (21 000 unités)"
+
+[[chart.series]]
+column = "jeton"
+label = "Transfert de jeton (65 000 unités)"
+
+[[chart]]
+id = "impact-pool"
+dataset = "impact-pool"
+kind = "line"
+x = "part"
+x_label = "Dépôt, en % de la réserve du pool"
+y_label = "Impact sur le prix, en %"
+title = "Plus l'ordre est gros par rapport au pool, plus il paie cher"
+
+[[chart.series]]
+column = "impact"
+label = "Impact sur le prix"
+
+[[chart]]
+id = "transactions-jour"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Transactions par jour"
+title = "Les transactions inscrites chaque jour sur la chaîne Bitcoin"
+
+[[chart.series]]
+column = "transactions_par_jour"
+label = "Transactions par jour, moyenne mensuelle"
+
+[[chart]]
+id = "remplissage-blocs"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Part du poids maximal utilisée, en %"
+title = "À quel point les blocs sont pleins"
+
+[[chart.series]]
+column = "remplissage"
+label = "Remplissage moyen des blocs"
+
+[[chart]]
+id = "frais-par-bloc"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Frais par bloc, en BTC"
+title = "Les frais payés aux mineurs, par bloc"
+
+[[chart.series]]
+column = "frais_par_bloc"
+label = "Frais moyens par bloc"
+
+[[chart]]
+id = "part-frais"
+dataset = "activite-on-chain"
+kind = "area"
+x = "mois"
+x_label = "Mois"
+y_label = "Part des frais dans le revenu des mineurs, en %"
+title = "Ce que les frais pèsent dans le revenu des mineurs"
+
+[[chart.series]]
+column = "part_frais"
+label = "Part des frais"
+
+[[chart]]
+id = "revenu-mineurs"
+dataset = "activite-on-chain"
+kind = "step"
+x = "mois"
+x_label = "Mois"
+y_label = "BTC par jour"
+title = "Le revenu des mineurs, récompense et frais, en bitcoins par jour"
+
+[[chart.series]]
+column = "revenu_jour"
+label = "Revenu des mineurs par jour"
+
+[[chart]]
+id = "taille-blocs"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taille moyenne, en Mo"
+title = "La taille moyenne des blocs : SegWit, Taproot, inscriptions"
+
+[[chart.series]]
+column = "taille_mo"
+label = "Taille moyenne des blocs"
+
+[[chart]]
+id = "revenu-par-eh"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "BTC par EH/s et par jour"
+y_log = true
+title = "Ce que rapporte une unité de puissance de calcul, en bitcoins"
+
+[[chart.series]]
+column = "revenu_par_eh"
+label = "Revenu par exahash par seconde et par jour"
+
+[[chart]]
+id = "pools-annee"
+dataset = "pools-par-annee"
+kind = "bar"
+x = "annee"
+x_label = "Année"
+y_label = "Part des blocs, en %"
+stacked = true
+title = "Qui produit les blocs : la part de chaque pool, année par année"
+
+[[chart.series]]
+column = "foundry_usa"
+label = "Foundry USA"
+
+[[chart.series]]
+column = "antpool"
+label = "AntPool"
+
+[[chart.series]]
+column = "btc_guild"
+label = "BTC Guild"
+
+[[chart.series]]
+column = "btc_com"
+label = "BTC.com"
+
+[[chart.series]]
+column = "f2pool"
+label = "F2Pool"
+
+[[chart.series]]
+column = "btc_top"
+label = "BTC.TOP"
+
+[[chart.series]]
+column = "viabtc"
+label = "ViaBTC"
+
+[[chart.series]]
+column = "binance_pool"
+label = "Binance Pool"
+
+[[chart.series]]
+column = "btcc"
+label = "BTCC"
+
+[[chart.series]]
+column = "poolin"
+label = "Poolin"
+
+[[chart.series]]
+column = "autres"
+label = "Autres pools identifiés"
+
+[[chart.series]]
+column = "non_identifie"
+label = "Non identifié"
+
+[[chart]]
+id = "nakamoto"
+dataset = "pools-par-annee"
+kind = "bar"
+x = "annee"
+x_label = "Année"
+y_label = "Nombre de pools"
+title = "Combien de pools faut-il pour dépasser la moitié des blocs ?"
+
+[[chart.series]]
+column = "coefficient_nakamoto"
+label = "Coefficient de Nakamoto du minage"

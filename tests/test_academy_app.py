@@ -269,7 +269,7 @@ def test_no_secret_asked(tok: str) -> None:
     catalog = C.load_catalog()
     words = ("phrase", "seed", "clé", "cle privée", "mnémonique", "mot de passe du portefeuille", "private")
     for course_id in ("bitcoin-fonctionnement", "bitcoin-reserve-de-valeur", "crypto-en-securite", "analyser-un-projet-crypto",
-                      "investir-avec-methode"):
+                      "investir-avec-methode", "metriques-on-chain"):
         for lesson in catalog.course(course_id).lessons:
             page = run({"page": "lesson", "course": course_id, "lesson": lesson.id}, tok)
             labels = [t.label.lower() for t in page.text_input] + [t.label.lower() for t in page.text_area]

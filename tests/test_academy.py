@@ -1021,10 +1021,111 @@ def test_visual_figures():
           and sum(sp.values()) == -41000)
     hn = {r["baisse"]: r["hausse_necessaire"] for r in rows("hausse-necessaire")}
     check("recovery: 25 % after -20 %, 100 % after -50 %, 400 % after -80 %", hn[20] == 25 and hn[50] == 100 and hn[80] == 400)
-    synthetic = {d for d in ("deblocages-exemple", "dilution-staking", "dca-exemple", "derive-allocation", "stress-poches")}
+    fp = {r["mots"]: r["annees"] for r in rows("force-phrase")}
+    check("seed strength: about 10^19 years for 12 words, more than 10^57 for 24",
+          f"{fp['12 mots']:.0e}" == "1e+19" and fp["24 mots"] > 1e57)
+    gz = {r["gwei"]: r for r in rows("frais-gaz")}
+    check("gas: 1,26 and 3,90 dollars at 20 gwei", gz[20]["ether"] == 1.26 and gz[20]["jeton"] == 3.9)
+    check("pool impact: equal to the deposit's share", all(close(r["impact"], r["part"], 1e-9) for r in rows("impact-pool")))
+    synthetic = {d for d in ("deblocages-exemple", "dilution-staking", "dca-exemple", "derive-allocation", "stress-poches",
+                             "frais-gaz", "indicateurs-exemple")}
     check("constructed examples are flagged as such", all(catalog.dataset(d).synthetic for d in synthetic))
     used = {b.target for c in catalog.available_courses() for l in c.lessons for b in l.blocks if b.kind == "chart"}
     check("every chart is used by a lesson", set(catalog.charts) <= used, str(set(catalog.charts) - used))
+
+
+def test_onchain_figures():
+    """« Lire les métriques on-chain » : every dataset rebuilt from the raw sample, every quoted figure checked."""
+    print("\nOn-chain figures")
+    from sensitor.academy import bitcoin as B
+    from sensitor.academy import onchain as O
+    catalog = C.load_catalog()
+    course = catalog.course("metriques-on-chain")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+    # Read as text: the dataset loader would turn an all-digit coinbase script into a number.
+    import csv
+    with open(C.CONTENT_ROOT / "data" / "blocs-echantillon.csv", encoding="utf-8") as handle:
+        raw = list(csv.DictReader(handle))
+    samples = [O.Sample(day=r["jour"], height=int(r["hauteur"]), tx_count=int(r["transactions"]), size=int(r["taille"]),
+                        weight=int(r["poids"]), reward=int(r["coinbase_sats"]), coinbase=r["coinbase_script"]) for r in raw]
+    check("sample: one block a day, 6 474 days from 9 January 2009 to 30 September 2026",
+          len(samples) == 6474 and samples[0].day == "2009-01-09" and samples[-1].day == "2026-09-30"
+          and len({s.day for s in samples}) == 6474)
+    check("sample: heights grow with the days, and no coinbase pays less than the subsidy",
+          all(a.height <= b.height for a, b in zip(samples, samples[1:]))
+          and all(s.reward >= B.block_subsidy(s.height) for s in samples))
+    check("sample: no block exceeds the weight limit", all(s.weight <= O.MAX_WEIGHT for s in samples))
+    periods = [{"date": r["date"], "jours": r["jours"], "puissance": r["puissance"]} for r in catalog.dataset("reseau-bitcoin").rows]
+    rebuilt = O.monthly_rows(samples, periods)
+    monthly = catalog.dataset("activite-on-chain").rows
+    same = lambda a, b: (a is None and b is None) or (a is not None and b is not None and abs(a - b) <= 1e-6 + abs(b) * 1e-6)
+    check("monthly activity: every month rebuilt from the sample", len(rebuilt) == len(monthly) == 213 and all(
+        r["mois"] == m["mois"] and all(same(r[k], m[k]) for k in r if k != "mois") for r, m in zip(rebuilt, monthly)))
+    pools = catalog.dataset("pools-par-annee").rows
+    ok = True
+    for row in pools:
+        sh = O.pool_shares(samples, str(row["annee"]))
+        ok &= abs(sh.get("Non identifié", 0) - row["non_identifie"]) < 0.06
+        ok &= (row["coefficient_nakamoto"] is None) == (O.nakamoto_coefficient(sh) is None)
+        ok &= row["coefficient_nakamoto"] is None or row["coefficient_nakamoto"] == O.nakamoto_coefficient(sh)
+        ok &= abs(sum(v for k, v in row.items() if k not in ("annee", "echantillon", "coefficient_nakamoto")) - 100) < 0.6
+    check("pools: every year rebuilt, shares adding up to 100 %", ok)
+    check("pools: no coefficient when the tagged pools do not reach half, as in 2014",
+          next(r for r in pools if r["annee"] == 2014)["coefficient_nakamoto"] is None)
+    check("pool tags: Foundry, AntPool and F2Pool's Chinese tag are recognised",
+          O.pool_of("Foundry USA Pool".encode().hex()) == "Foundry USA" and O.pool_of("Mined by AntPool".encode().hex()) == "AntPool"
+          and O.pool_of("七彩神仙鱼".encode().hex()) == "F2Pool" and O.pool_of("zz") == "Non identifié")
+    by = {r["mois"][:7]: r for r in monthly}
+    last = by["2026-09"]
+    fmt = lambda x, nd=0: f"{x:,.{nd}f}".replace(",", " ").replace(".", ",")
+    peak = max(monthly, key=lambda r: r["transactions_par_jour"])
+    check("activity: the figures quoted in lesson 2", all(t in text["activite-reseau"] for t in (
+        fmt(round(by["2012-06"]["transactions_par_jour"], -2)), fmt(round(peak["transactions_par_jour"], -3)),
+        fmt(round(last["transactions_par_jour"], -3)), fmt(last["remplissage"], 1))) and peak["mois"].startswith("2026-06"))
+    check("activity: blocks first above 90 % full in April 2016",
+          next(r for r in monthly if r["remplissage"] >= 90)["mois"].startswith("2016-04") and "avril 2016" in text["activite-reseau"])
+    fee_peak = max(monthly, key=lambda r: r["frais_par_bloc"])
+    outside = max((r for r in monthly if not r["mois"].startswith(("2017", "2018"))), key=lambda r: r["frais_par_bloc"])
+    share = max(monthly, key=lambda r: r["part_frais"])
+    check("fees: 3,89 BTC in December 2017, 1,99 in December 2023, a 22,2 % share in December 2023",
+          fee_peak["mois"].startswith("2017-12") and round(fee_peak["frais_par_bloc"], 2) == 3.89
+          and outside["mois"].startswith("2023-12") and round(outside["frais_par_bloc"], 2) == 1.99
+          and share["mois"].startswith("2023-12") and round(share["part_frais"], 1) == 22.2
+          and all(t in text["frais-budget-securite"] for t in ("3,89 BTC", "1,99 BTC", "22,2 %")))
+    size = max(monthly, key=lambda r: r["taille_mo"])
+    check("block space: above 1 MB from November 2017, 1,95 MB in February 2023",
+          next(r for r in monthly if r["taille_mo"] > 1)["mois"].startswith("2017-11") and size["mois"].startswith("2023-02")
+          and round(size["taille_mo"], 2) == 1.95 and "1,95 Mo" in text["espace-de-bloc"])
+    check("mining: about 1 153 BTC per EH/s a day in September 2016, 0,50 in September 2026",
+          round(by["2016-09"]["revenu_par_eh"]) == 1153 and round(last["revenu_par_eh"], 2) == 0.50
+          and "1 153 BTC" in text["minage-et-pools"])
+    p26 = next(r for r in pools if r["annee"] == 2026)
+    check("mining: Foundry USA about 30 % in 2026, three pools for half of the blocks",
+          round(p26["foundry_usa"]) == 30 and p26["coefficient_nakamoto"] == 3 and "3 pools" in text["minage-et-pools"])
+    ac = ex("activite-calcul")
+    check("exercise activity: transactions per day, weight used, free space",
+          abs(ac["par-jour"] - last["transactions_par_jour"]) <= 100 and abs(ac["poids"] - last["remplissage"] / 100 * 4e6) <= 600
+          and abs(ac["reste"] - (100 - last["remplissage"])) < 0.06)
+    pn = ex("pools-nakamoto")
+    ranked = sorted((v for k, v in p26.items() if k not in ("annee", "echantillon", "coefficient_nakamoto", "autres", "non_identifie")), reverse=True)
+    check("exercise pools: the two largest and the coefficient", abs(pn["deux"] - (ranked[0] + ranked[1])) < 0.06
+          and pn["coefficient"] == p26["coefficient_nakamoto"])
+    fc = ex("frais-coinbase")
+    check("exercise coinbase: blocks 839 999 and 840 000",
+          B.block_subsidy(839_999) == 625_000_000 and B.block_subsidy(840_000) == 312_500_000
+          and abs((729_455_386 - 625_000_000) / B.COIN - fc["frais-avant"]) < 0.006
+          and abs((4_075_061_499 - 312_500_000) / B.COIN - fc["frais-apres"]) < 0.006
+          and abs(37.62561499 / 40.75061499 * 100 - fc["part-apres"]) < 0.06 and abs(3_993_281 / 4e6 * 100 - fc["remplissage"]) < 0.06)
+    coins = list(O.EXAMPLE_COINS)
+    mv = ex("mvrv-calcul")
+    check("exercise MVRV: realized price 32,50, MVRV 1,38, NUPL 0,28",
+          close(O.realized_price(coins), mv["prix-realise"]) and abs(O.mvrv(45, coins) - mv["mvrv"]) < 0.006
+          and abs(O.nupl(45, coins) - mv["nupl"]) < 0.006)
+    ind = {r["mois"]: r for r in catalog.dataset("indicateurs-exemple").rows}
+    check("indicators example: MVRV 2,57 at month 6, 0,56 at month 11", ind[6]["mvrv"] == 2.57 and ind[11]["mvrv"] == 0.56
+          and "2,57" in text["indicateurs-de-prix"] and catalog.dataset("indicateurs-exemple").synthetic)
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 
 def test_bitcoin_issuance():
@@ -1996,6 +2097,7 @@ def main() -> int:
     test_analysis_figures()
     test_invest_figures()
     test_visual_figures()
+    test_onchain_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

@@ -23,6 +23,9 @@ PALETTE = (TOKENS["blue"], TOKENS["gold"], TOKENS["green"], TOKENS["red"], TOKEN
 # The Monnaie et crypto universe leads with its copper accent.
 PALETTES = {"trading": PALETTE,
             "monnaie": (TOKENS["copper-2"], TOKENS["blue"], TOKENS["green"], TOKENS["gold"], TOKENS["ink-3"])}
+# Charts with many series (pools, unlock pockets) continue with lighter tints of
+# the same hues, so that twelve series stay distinct without leaving the palette.
+EXTRA = ("#c98b5f", "#6f93b8", "#7aa38c", "#c2a56a", "#8a95a0", "#b9786f", "#d9c3a5")
 FONT = "DM Sans, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
 MONO = "DM Mono, SFMono-Regular, Consolas, monospace"
 
@@ -50,7 +53,8 @@ def figure(chart: Chart, dataset: Dataset, *, universe: str = "trading") -> go.F
     flags = [bool(r.get(chart.highlight)) for r in rows] if chart.highlight else [False] * len(rows)
     fig = go.Figure()
     for i, (column, label) in enumerate(chart.series):
-        color = palette[i % len(palette)]
+        colors = palette + EXTRA
+        color = colors[i % len(colors)]
         ys = [r[column] for r in rows]
         text = ["" if y is None else f"{_fr(y)} {dataset.unit}".strip() + (" · estimation" if f else "")
                 for y, f in zip(ys, flags)]

@@ -44,6 +44,10 @@ Sur Ethereum, une transaction consomme du **gaz**, une mesure du travail de calc
 \text{Frais} = \text{gaz consommé} \times \text{prix du gaz}
 :::
 
+::: chart frais-gaz
+Le coût d'un transfert selon le prix du gaz, ether à 3 000 dollars : 1,26 dollar à 20 gwei pour de l'ether, 3,90 dollars pour un jeton. Hypothèses de la leçon.
+:::
+
 ## À vous
 
 ::: exercise frais-ethereum

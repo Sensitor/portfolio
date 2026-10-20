@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import bitcoin, crypto, discipline, invest, money
+from . import bitcoin, crypto, discipline, invest, money, onchain
 
 FILE = "file"
 COMPUTED = "computed"
@@ -49,6 +49,10 @@ GENERATORS: dict[str, Callable[[], list[dict]]] = {
     "rebalancing-drift": invest.drift_rows,
     "stress-pockets": invest.stress_rows,
     "recovery-needed": invest.recovery_rows,
+    "price-indicators-example": onchain.indicator_rows,
+    "seed-strength": crypto.seed_strength_rows,
+    "gas-costs": crypto.gas_rows,
+    "pool-impact": crypto.impact_rows,
 }
 
 
