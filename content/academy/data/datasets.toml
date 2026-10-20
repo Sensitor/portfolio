@@ -223,3 +223,108 @@ retrieved = 2026-10-20
 unit = "%"
 columns = ["mois", "bitcoin", "zone_euro_m3", "etats_unis_m2", "stock_flux_bitcoin"]
 notes = "Le stock-to-flow de Bitcoin est l'offre existante divisée par l'émission de l'année écoulée : 100 divisé par le taux de croissance. Les derniers mois de M3 et de M2 ne sont pas encore publiés."
+
+[[dataset]]
+id = "perte-impermanente-courbe"
+title = "La perte impermanente selon la variation du prix relatif"
+kind = "computed"
+generator = "impermanent-loss"
+source = "formule de la perte impermanente d'un pool à produit constant (Adams, Zinsmeister et Robinson, 2020) ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["rapport", "perte"]
+
+[[dataset]]
+id = "liquidation-par-ratio"
+title = "La baisse de la garantie qui déclenche la liquidation, selon le ratio prêt-garantie"
+kind = "computed"
+generator = "liquidation-by-ltv"
+source = "facteur de santé d'un prêt surcollatéralisé, seuil de liquidation de 80 % ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["ratio", "baisse"]
+
+[[dataset]]
+id = "deblocages-exemple"
+title = "Un calendrier de déblocage de jetons, mois par mois"
+kind = "computed"
+generator = "token-unlocks"
+source = "jeton construit pour la leçon : 20 % au lancement, équipe 20 % (blocage 12 mois, puis 24 mois), investisseurs 15 % (6 mois, puis 18), communauté 45 % sur 48 mois"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "% de l'offre"
+columns = ["mois", "lancement", "equipe", "investisseurs", "communaute"]
+
+[[dataset]]
+id = "dilution-staking"
+title = "La part de l'offre conservée avec et sans staking, à 8 % d'émission par an"
+kind = "computed"
+generator = "staking-dilution"
+source = "émission de staking de 8 % par an, exemple de la leçon ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "%"
+columns = ["annee", "staking", "sans_staking"]
+
+[[dataset]]
+id = "volatilite-part-crypto"
+title = "La volatilité d'un patrimoine selon la part de crypto"
+kind = "computed"
+generator = "volatility-by-share"
+source = "volatilité de deux actifs (Markowitz, 1952), hypothèses de la leçon : 10 % pour le reste, 60 % pour la crypto, corrélation 0,2 ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["part", "volatilite"]
+notes = "Les hypothèses sont des exemples, pas des estimations de marché."
+
+[[dataset]]
+id = "dca-exemple"
+title = "Investir 100 € chaque mois sur une trajectoire de prix construite"
+kind = "computed"
+generator = "dca-example"
+source = "trajectoire de prix construite pour la leçon : baisse de 60 % en un an, puis remontée ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "€"
+columns = ["mois", "prix", "prix_de_revient", "en_une_fois"]
+
+[[dataset]]
+id = "derive-allocation"
+title = "La part de crypto, laissée libre ou rééquilibrée chaque trimestre"
+kind = "computed"
+generator = "rebalancing-drift"
+source = "même trajectoire de prix construite que la leçon sur l'investissement progressif, reste du patrimoine à +0,4 % par mois ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "%"
+columns = ["mois", "sans_reequilibrage", "reequilibre"]
+
+[[dataset]]
+id = "stress-poches"
+title = "Ce que coûte chaque poche dans le scénario de crise de la leçon"
+kind = "computed"
+generator = "stress-pockets"
+source = "scénario construit : crypto −80 %, actions −30 %, fonds en euros stables, patrimoine de 200 000 € ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "€"
+columns = ["poche", "contribution"]
+
+[[dataset]]
+id = "hausse-necessaire"
+title = "La hausse nécessaire pour effacer une baisse"
+kind = "computed"
+generator = "recovery-needed"
+source = "formule : 1 ÷ (1 − baisse) − 1 ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["baisse", "hausse_necessaire"]

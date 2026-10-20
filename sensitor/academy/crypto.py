@@ -122,3 +122,46 @@ def impermanent_loss(price_ratio: float) -> float:
     if price_ratio <= 0:
         raise ValueError("a price ratio is positive")
     return 2 * price_ratio ** 0.5 / (1 + price_ratio) - 1
+
+
+# =============================================================================
+# CHART ROWS (lesson examples)
+# =============================================================================
+
+def impermanent_loss_rows() -> list[dict]:
+    """The loss against holding, for relative price moves from ÷10 to ×10."""
+    ratios = [0.1, 0.15, 0.2, 0.25, 0.33, 0.5, 0.67, 0.8, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10]
+    return [{"rapport": r, "perte": round(impermanent_loss(r) * 100, 2)} for r in ratios]
+
+
+def liquidation_rows(threshold: float = 0.8) -> list[dict]:
+    """For each loan-to-value ratio, the fall of the collateral that triggers liquidation."""
+    return [{"ratio": ltv, "baisse": round((ltv / 100 / threshold - 1) * 100, 1)} for ltv in range(10, 80, 5)]
+
+
+# A constructed token for the unlock lesson: 10 billion tokens.
+UNLOCK_EXAMPLE = {
+    "lancement": (0.20, 0, 0),          # share, cliff in months, vesting months after the cliff
+    "equipe": (0.20, 12, 24),
+    "investisseurs": (0.15, 6, 18),
+    "communaute": (0.45, 0, 48),
+}
+
+
+def unlocked_share(share: float, cliff: int, vesting: int, month: int) -> float:
+    """The share of the supply released by `month`: nothing before the cliff, then linearly."""
+    if month < cliff:
+        return 0.0
+    if vesting == 0:
+        return share
+    return share * min(1.0, (month - cliff) / vesting)
+
+
+def unlock_rows(months: int = 48) -> list[dict]:
+    return [{"mois": m, **{k: round(unlocked_share(*v, m) * 100, 2) for k, v in UNLOCK_EXAMPLE.items()}}
+            for m in range(0, months + 1)]
+
+
+def staking_rows(rate: float = 0.08, years: int = 10) -> list[dict]:
+    """The share of the supply kept by someone who stakes and by someone who does not."""
+    return [{"annee": y, "staking": 100.0, "sans_staking": round(100 / (1 + rate) ** y, 2)} for y in range(years + 1)]

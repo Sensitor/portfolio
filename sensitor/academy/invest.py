@@ -95,3 +95,54 @@ def gain_on_disposal(sale_price: float, total_acquisition_cost: float, portfolio
 def remaining_acquisition_cost(total_acquisition_cost: float, sale_price: float, portfolio_value: float) -> float:
     """The acquisition cost that stays attached to the portfolio after the sale."""
     return total_acquisition_cost - total_acquisition_cost * sale_price / portfolio_value
+
+
+# =============================================================================
+# CHART ROWS (lesson examples)
+# =============================================================================
+
+def volatility_rows(rest_vol: float = 0.10, crypto_vol: float = 0.60, correlation: float = 0.2) -> list[dict]:
+    from .savings import portfolio_volatility
+    return [{"part": w, "volatilite": round(portfolio_volatility(w / 100, crypto_vol, rest_vol, correlation) * 100, 2)}
+            for w in range(0, 51, 5)]
+
+
+# A constructed price path for the progressive buying and rebalancing lessons:
+# a fall of 60 % over a year, then a recovery to three times the low.
+EXAMPLE_PATH = (100, 92, 85, 78, 70, 64, 58, 52, 48, 45, 42, 40, 41, 44, 48, 53, 58, 64, 71, 79, 87, 96, 108, 120)
+
+
+def dca_rows(amount: float = 100.0, prices=EXAMPLE_PATH) -> list[dict]:
+    rows, units = [], 0.0
+    for i, p in enumerate(prices, start=1):
+        units += amount / p
+        rows.append({"mois": i, "prix": p, "prix_de_revient": round(amount * i / units, 2),
+                     "en_une_fois": prices[0]})
+    return rows
+
+
+def drift_rows(target: float = 0.10, prices=EXAMPLE_PATH, rest_growth: float = 0.004) -> list[dict]:
+    """The crypto weight month by month, left alone or rebalanced each quarter to its target."""
+    crypto, rest = target * 100_000, (1 - target) * 100_000
+    c2, r2 = crypto, rest
+    rows = []
+    for i, (p0, p1) in enumerate(zip(prices, prices[1:]), start=1):
+        crypto *= p1 / p0; rest *= 1 + rest_growth
+        c2 *= p1 / p0; r2 *= 1 + rest_growth
+        if i % 3 == 0:
+            total = c2 + r2; c2, r2 = total * target, total * (1 - target)
+        rows.append({"mois": i, "sans_reequilibrage": round(crypto / (crypto + rest) * 100, 2),
+                     "reequilibre": round(c2 / (c2 + r2) * 100, 2)})
+    return rows
+
+
+def stress_rows() -> list[dict]:
+    """The crisis scenario of the lesson: each pocket's contribution to the fall, in euros."""
+    total = 200_000
+    return [{"poche": name, "contribution": round(total * w * m)} for name, w, m in
+            (("Crypto", 0.05, -0.8), ("Actions", 0.55, -0.3), ("Fonds en euros et liquidités", 0.40, 0.0))]
+
+
+def recovery_rows() -> list[dict]:
+    """The gain needed to make up for a fall, from 10 % to 90 %."""
+    return [{"baisse": d, "hausse_necessaire": round((1 / (1 - d / 100) - 1) * 100, 1)} for d in range(10, 91, 10)]

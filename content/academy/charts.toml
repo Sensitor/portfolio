@@ -338,3 +338,149 @@ title = "Le stock-to-flow de Bitcoin, calculé à partir du protocole"
 [[chart.series]]
 column = "stock_flux_bitcoin"
 label = "Stock ÷ émission des douze derniers mois"
+
+[[chart]]
+id = "perte-impermanente-courbe"
+dataset = "perte-impermanente-courbe"
+kind = "line"
+x = "rapport"
+x_label = "Multiplicateur du prix relatif (1 = aucune variation)"
+y_label = "Perte par rapport à la détention, en %"
+title = "La perte impermanente, du prix divisé par dix au prix multiplié par dix"
+
+[[chart.series]]
+column = "perte"
+label = "Perte impermanente"
+
+[[chart]]
+id = "liquidation-par-ratio"
+dataset = "liquidation-par-ratio"
+kind = "bar"
+x = "ratio"
+x_label = "Ratio prêt-garantie, en %"
+y_label = "Baisse qui déclenche la liquidation, en %"
+title = "Plus on emprunte, moins la garantie peut baisser"
+
+[[chart.series]]
+column = "baisse"
+label = "Baisse de la garantie avant liquidation"
+
+[[chart]]
+id = "deblocages-exemple"
+dataset = "deblocages-exemple"
+kind = "bar"
+stacked = true
+x = "mois"
+x_label = "Mois après le lancement"
+y_label = "Part de l'offre en circulation, en %"
+title = "Les jetons en circulation, poche par poche, sur quatre ans"
+
+[[chart.series]]
+column = "lancement"
+label = "Lancement"
+
+[[chart.series]]
+column = "equipe"
+label = "Équipe"
+
+[[chart.series]]
+column = "investisseurs"
+label = "Investisseurs"
+
+[[chart.series]]
+column = "communaute"
+label = "Communauté"
+
+[[chart]]
+id = "dilution-staking"
+dataset = "dilution-staking"
+kind = "line"
+x = "annee"
+x_label = "Années"
+y_label = "Part de l'offre conservée, en % de la part de départ"
+title = "Celui qui ne stake pas est dilué chaque année"
+
+[[chart.series]]
+column = "staking"
+label = "Avec staking"
+
+[[chart.series]]
+column = "sans_staking"
+label = "Sans staking"
+
+[[chart]]
+id = "volatilite-part-crypto"
+dataset = "volatilite-part-crypto"
+kind = "line"
+x = "part"
+x_label = "Part de crypto dans le patrimoine, en %"
+y_label = "Volatilité du patrimoine, en %"
+title = "Ce qu'une part de crypto fait à la volatilité d'un patrimoine"
+
+[[chart.series]]
+column = "volatilite"
+label = "Volatilité du patrimoine"
+
+[[chart]]
+id = "dca-exemple"
+dataset = "dca-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Euros"
+title = "Le prix de revient de l'investissement progressif, mois après mois"
+
+[[chart.series]]
+column = "prix"
+label = "Prix"
+
+[[chart.series]]
+column = "prix_de_revient"
+label = "Prix de revient, 100 € par mois"
+
+[[chart.series]]
+column = "en_une_fois"
+label = "Prix de revient, tout le premier mois"
+
+[[chart]]
+id = "derive-allocation"
+dataset = "derive-allocation"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Part de la crypto, en %"
+title = "Sans rééquilibrage, la part de crypto suit le prix"
+
+[[chart.series]]
+column = "sans_reequilibrage"
+label = "Sans rééquilibrage"
+
+[[chart.series]]
+column = "reequilibre"
+label = "Rééquilibrée chaque trimestre"
+
+[[chart]]
+id = "stress-poches"
+dataset = "stress-poches"
+kind = "bar"
+x = "poche"
+x_label = "Poche du patrimoine"
+y_label = "Contribution à la baisse, en €"
+title = "Où se loge la perte dans un scénario de crise"
+
+[[chart.series]]
+column = "contribution"
+label = "Contribution à la baisse"
+
+[[chart]]
+id = "hausse-necessaire"
+dataset = "hausse-necessaire"
+kind = "bar"
+x = "baisse"
+x_label = "Baisse, en %"
+y_label = "Hausse nécessaire pour revenir au départ, en %"
+title = "Plus la baisse est profonde, plus la remontée doit être forte"
+
+[[chart.series]]
+column = "hausse_necessaire"
+label = "Hausse nécessaire"

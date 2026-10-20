@@ -30,6 +30,10 @@ L'**investissement progressif**, souvent appelé DCA, consiste à investir la m�
 
 Le prix de revient obtenu est toujours inférieur ou égal à la moyenne des prix d'achat : c'est une propriété mathématique de la méthode, pas une prédiction.
 
+::: chart dca-exemple
+100 € chaque mois pendant deux ans sur une trajectoire de prix construite : une baisse de 60 % en un an, puis une remontée. Le prix de revient descend avec les achats dans la baisse et finit à 61,60 €, quand l'achat en une fois reste à 100 €. Sur une trajectoire qui ne fait que monter, l'ordre serait inverse. Exemple synthétique.
+:::
+
 ## À vous
 
 ::: exercise dca-achats

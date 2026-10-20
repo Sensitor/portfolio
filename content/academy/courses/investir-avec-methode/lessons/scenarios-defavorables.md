@@ -33,6 +33,14 @@ En temps de crise, les corrélations montent : des actifs qui semblaient indépe
 ::: exercise stress-patrimoine
 :::
 
+::: chart stress-poches
+Le scénario de l'exercice, poche par poche : sur 41 000 € de baisse, la crypto en coûte 8 000 et les actions 33 000. Exemple synthétique.
+:::
+
+::: chart hausse-necessaire
+La hausse nécessaire pour effacer une baisse : 25 % après −20 %, 100 % après −50 %, 400 % après −80 %. Calcul exact.
+:::
+
 ## La conduite à tenir, écrite à froid
 
 La théorie des perspectives l'a montré : une perte pèse plus lourd qu'un gain de même taille, et pousse à des décisions qu'on ne prendrait pas au calme. D'où l'intérêt d'écrire, avant, ce que l'on fera pendant.

@@ -28,6 +28,10 @@ Une allocation décidée à 10 % de crypto ne le reste pas. Si la crypto double 
 \text{Nouvelle part} = \frac{\text{part} \times (1 + \text{variation})}{\text{part} \times (1 + \text{variation}) + \text{reste}}
 :::
 
+::: chart derive-allocation
+La part de crypto d'un patrimoine qui vise 10 %, sur la trajectoire de prix construite de la leçon sur l'investissement progressif. Sans rééquilibrage, elle tombe à environ 4,1 % au plus bas, puis suit le prix ; rééquilibrée chaque trimestre, elle reste près de sa cible. Exemple synthétique.
+:::
+
 ## Revenir à la cible
 
 Rééquilibrer, c'est vendre l'actif qui a dépassé sa part et racheter celui qui est en dessous. On vend donc ce qui a monté et on rachète ce qui a baissé : une discipline à rebours de l'instinct.

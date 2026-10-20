@@ -40,6 +40,10 @@ où **r** est le rapport entre le nouveau prix relatif des deux actifs et l'anci
 | × 4 | −20,0 % |
 | × 0,5 | −5,7 % |
 
+::: chart perte-impermanente-courbe
+La perte d'une position de liquidité par rapport à la simple détention, selon la variation du prix relatif des deux actifs. Elle est nulle sans variation et croît dans les deux sens. Calcul exact, avant commissions.
+:::
+
 ## À vous
 
 ::: exercise perte-impermanente

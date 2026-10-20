@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import bitcoin, discipline, money
+from . import bitcoin, crypto, discipline, invest, money
 
 FILE = "file"
 COMPUTED = "computed"
@@ -40,6 +40,15 @@ GENERATORS: dict[str, Callable[[], list[dict]]] = {
     "loan-amortisation": money.example_amortisation_rows,
     "bitcoin-catch-up": bitcoin.catch_up_rows,
     "process-case-month": discipline.case_rows,
+    "impermanent-loss": crypto.impermanent_loss_rows,
+    "liquidation-by-ltv": crypto.liquidation_rows,
+    "token-unlocks": crypto.unlock_rows,
+    "staking-dilution": crypto.staking_rows,
+    "volatility-by-share": invest.volatility_rows,
+    "dca-example": invest.dca_rows,
+    "rebalancing-drift": invest.drift_rows,
+    "stress-pockets": invest.stress_rows,
+    "recovery-needed": invest.recovery_rows,
 }
 
 

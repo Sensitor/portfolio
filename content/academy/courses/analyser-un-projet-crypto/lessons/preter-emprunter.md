@@ -42,6 +42,10 @@ Au-dessus de 1, la position est saine. À 1, n'importe qui peut la **liquider** 
 \text{Prix de liquidation} = \frac{\text{dette}}{\text{unités de garantie} \times \text{seuil de liquidation}}
 :::
 
+::: chart liquidation-par-ratio
+Avec un seuil de liquidation de 80 % : à 25 % de ratio prêt-garantie, la garantie peut perdre près de 69 % avant liquidation ; à 75 %, à peine plus de 6 %. Calcul exact.
+:::
+
 ## À vous
 
 ::: exercise pret-liquidation

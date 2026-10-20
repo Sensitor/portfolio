@@ -34,6 +34,10 @@ Prenons un patrimoine dont le reste a une volatilité de 10 % par an, une part c
 
 Une petite part change peu le risque d'ensemble ; une grande part le domine. Entre 5 % et 20 %, la volatilité du patrimoine passe de 10,5 % à 15,7 %.
 
+::: chart volatilite-part-crypto
+La volatilité du patrimoine selon la part de crypto, avec les hypothèses de la leçon. La courbe s'accélère : chaque point de crypto en plus pèse davantage que le précédent.
+:::
+
 ## Ce que coûte une forte baisse
 
 Les baisses de 70 à 80 % ne sont pas rares dans l'histoire des cryptoactifs, et plus fréquentes encore pour les jetons autres que Bitcoin. Une baisse de 75 % de la part crypto coûte au patrimoine entier :

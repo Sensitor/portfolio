@@ -33,6 +33,10 @@ Le document d'un projet, son **livre blanc**, décrit la répartition des jetons
 
 Un **blocage** empêche de vendre pendant une période, souvent d'un an ; ensuite, un **déblocage progressif** libère les jetons mois après mois. Un déblocage important augmente d'un coup l'offre en circulation.
 
+::: chart deblocages-exemple
+Un jeton construit pour la leçon : 20 % de l'offre en circulation au lancement, 100 % au bout de quatre ans. À partir du treizième mois, la fin du blocage de l'équipe accélère l'arrivée de nouveaux jetons. Exemple synthétique.
+:::
+
 ## La dilution, chiffrée
 
 Si l'offre en circulation augmente sans que la demande suive, le prix doit baisser pour que la capitalisation reste la même.
@@ -42,6 +46,10 @@ Si l'offre en circulation augmente sans que la demande suive, le prix doit baiss
 :::
 
 Le **staking** produit le même effet, de façon plus discrète : les récompenses sont de nouveaux jetons. Celui qui ne participe pas voit sa part de l'offre diminuer au rythme de l'émission.
+
+::: chart dilution-staking
+À 8 % d'émission par an, celui qui ne stake pas conserve 46 % de sa part de départ au bout de dix ans. Calcul exact sur l'exemple de la leçon.
+:::
 
 ## À vous
 

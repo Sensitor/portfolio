@@ -987,6 +987,46 @@ def test_invest_figures():
     check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 
+def test_visual_figures():
+    """The computed charts of the Crypto and Investment courses: what each caption says, recomputed."""
+    print("\nComputed charts")
+    from sensitor.academy import crypto as K
+    from sensitor.academy import invest as I
+    catalog = C.load_catalog()
+    rows = lambda d: catalog.dataset(d).rows
+    il = {r["rapport"]: r["perte"] for r in rows("perte-impermanente-courbe")}
+    check("impermanent loss curve: zero at 1, -5,72 % at x2 and at /2", il[1] == 0 and il[2] == -5.72 and il[0.5] == -5.72)
+    liq = {r["ratio"]: r["baisse"] for r in rows("liquidation-par-ratio")}
+    check("liquidation: -68,8 % at 25 %, -6,2 % at 75 %", liq[25] == -68.8 and liq[75] == -6.2)
+    un = rows("deblocages-exemple")
+    total = lambda r: sum(v for k, v in r.items() if k != "mois")
+    check("unlocks: 20 % at launch, 100 % after four years", total(un[0]) == 20 and round(total(un[48]), 6) == 100)
+    steps = [total(b) - total(a) for a, b in zip(un, un[1:])]
+    check("unlocks: the pace rises from month 13, when the team's cliff ends", round(steps[12], 2) > round(steps[11], 2)
+          and un[12]["equipe"] == 0 and un[13]["equipe"] > 0)
+    st = rows("dilution-staking")
+    check("staking: 46 % kept after ten years at 8 %", round(st[-1]["sans_staking"]) == 46 and st[-1]["staking"] == 100)
+    vol = {r["part"]: r["volatilite"] for r in rows("volatilite-part-crypto")}
+    check("volatility curve: 10 %, 10,5 % and 15,7 % as in the table, accelerating",
+          vol[0] == 10 and round(vol[5], 1) == 10.5 and round(vol[20], 1) == 15.7
+          and all(b - a < c - b for a, b, c in zip(list(vol.values())[2:], list(vol.values())[3:], list(vol.values())[4:])))
+    dca = rows("dca-exemple")
+    check("DCA chart: a 60 % fall, a cost of 61,60 € against 100 €", min(r["prix"] for r in dca) == 40 and dca[0]["prix"] == 100
+          and dca[-1]["prix_de_revient"] == 61.6 and dca[-1]["en_une_fois"] == 100 and len(dca) == 24)
+    dr = rows("derive-allocation")
+    check("drift: about 4,1 % at the low without rebalancing, near 10 % when rebalanced",
+          round(min(r["sans_reequilibrage"] for r in dr), 1) == 4.1 and all(abs(r["reequilibre"] - 10) < 3.5 for r in dr))
+    sp = {r["poche"]: r["contribution"] for r in rows("stress-poches")}
+    check("stress: 8 000 and 33 000 € out of 41 000 €", sp["Crypto"] == -8000 and sp["Actions"] == -33000
+          and sum(sp.values()) == -41000)
+    hn = {r["baisse"]: r["hausse_necessaire"] for r in rows("hausse-necessaire")}
+    check("recovery: 25 % after -20 %, 100 % after -50 %, 400 % after -80 %", hn[20] == 25 and hn[50] == 100 and hn[80] == 400)
+    synthetic = {d for d in ("deblocages-exemple", "dilution-staking", "dca-exemple", "derive-allocation", "stress-poches")}
+    check("constructed examples are flagged as such", all(catalog.dataset(d).synthetic for d in synthetic))
+    used = {b.target for c in catalog.available_courses() for l in c.lessons for b in l.blocks if b.kind == "chart"}
+    check("every chart is used by a lesson", set(catalog.charts) <= used, str(set(catalog.charts) - used))
+
+
 def test_bitcoin_issuance():
     """The issuance schedule, from the protocol rules, in satoshis."""
     print("\nBitcoin issuance")
@@ -1955,6 +1995,7 @@ def main() -> int:
     test_reserve_figures()
     test_analysis_figures()
     test_invest_figures()
+    test_visual_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()
