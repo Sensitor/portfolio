@@ -1,0 +1,42 @@
+id = "stock-flux"
+title = "Le stock-to-flow de l'or et de Bitcoin"
+context = """
+**Or** : environ **212 582 tonnes** extraites à la fin de 2023, et environ **3 644 tonnes** produites cette année-là (World Gold Council).
+
+**Bitcoin** : **20 099 725 BTC** en circulation en octobre 2026. Depuis avril 2024, la récompense est de **3,125 BTC** par bloc, à raison de **144 blocs par jour** et **365 jours** par an.
+"""
+conclusion = """
+L'or affiche un stock-to-flow d'environ 58 ans : il faudrait 58 années de production pour doubler le stock. Bitcoin, avec 164 250 BTC créés par an, en affiche environ 122, le double de l'or depuis le halving de 2024, et le double encore après celui de 2028. Le ratio mesure une rareté ; il ne fixe aucun prix.
+"""
+
+[[step]]
+id = "or"
+prompt = "Quel est le stock-to-flow de l'or, en années ? (Arrondi à l'entier.)"
+unit = "ans"
+answer = 58
+tolerance = 0.5
+solution = "212 582 ÷ 3 644 = **58 ans**."
+
+[[step]]
+id = "flux"
+prompt = "Combien de bitcoins sont créés en un an ?"
+unit = "BTC"
+answer = 164250
+tolerance = 1
+solution = "3,125 × 144 × 365 = **164 250 BTC**."
+
+[[step]]
+id = "bitcoin"
+prompt = "Quel est le stock-to-flow de Bitcoin, en années ? (Arrondi à l'entier.)"
+unit = "ans"
+answer = 122
+tolerance = 0.5
+solution = "20 099 725 ÷ 164 250 = **122 ans**."
+
+[[step]]
+id = "apres"
+prompt = "Après le halving de 2028, la récompense passe à 1,5625 BTC, et le stock atteint 20 343 750 BTC. Quel stock-to-flow, en années ? (Arrondi à l'entier.)"
+unit = "ans"
+answer = 248
+tolerance = 1
+solution = "1,5625 × 144 × 365 = 82 125 BTC par an ; 20 343 750 ÷ 82 125 = **248 ans**."

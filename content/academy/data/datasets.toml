@@ -210,3 +210,16 @@ retrieved = 2026-10-19
 unit = "EH/s"
 columns = ["date", "hauteur", "horodatage", "bits", "horodatage_suivant", "hauteur_suivante", "difficulte", "jours", "puissance"]
 notes = "La puissance de calcul est une estimation : difficulté × 2³² ÷ temps moyen entre deux blocs de la période. Les horodatages des blocs sont fixés par les mineurs et peuvent s'écarter de quelques minutes ou heures de l'heure réelle."
+
+[[dataset]]
+id = "offre-monnaie-comparee"
+title = "Croissance sur un an de l'offre de bitcoins, de la masse monétaire M3 de la zone euro et de M2 aux États-Unis, depuis 2014"
+kind = "file"
+file = "offre-monnaie-comparee.csv"
+source = "Bitcoin : offre calculée par Sensitor à partir des règles d'émission et de la hauteur de bloc au début de chaque mois, interpolée entre les en-têtes de la chaîne (jeu « reseau-bitcoin ») ; zone euro : Banque centrale européenne, série BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A (M3, taux de croissance annuel) ; États-Unis : Board of Governors of the Federal Reserve System, série M2SL (M2, corrigé des variations saisonnières), via FRED, taux annuel calculé par Sensitor"
+url = "https://fred.stlouisfed.org/series/M2SL"
+license = "faits publics de la chaîne Bitcoin et calcul Sensitor ; statistiques BCE réutilisables avec mention de la source ; données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["mois", "bitcoin", "zone_euro_m3", "etats_unis_m2", "stock_flux_bitcoin"]
+notes = "Le stock-to-flow de Bitcoin est l'offre existante divisée par l'émission de l'année écoulée : 100 divisé par le taux de croissance. Les derniers mois de M3 et de M2 ne sont pas encore publiés."

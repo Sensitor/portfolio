@@ -1,0 +1,44 @@
+id = "dilution-offre"
+title = "Ce que la création monétaire fait à une part de l'offre"
+context = """
+Un épargnant détient **1 %** de l'offre totale d'une monnaie, et n'en achète pas davantage. On compare trois rythmes de création monétaire sur **10 ans** :
+
+- une monnaie dont l'offre croît de **5 % par an** ;
+- une monnaie dont l'offre croît de **0,82 % par an**, le rythme de Bitcoin en 2026, supposé constant ;
+- Bitcoin selon son protocole : **20 099 725 BTC** en octobre 2026, et environ **20 846 825 BTC** dix ans plus tard, au bloc 1 497 871, après les halvings de 2028, 2032 et 2036.
+"""
+conclusion = """
+À 5 % par an, la part de l'épargnant tombe de 1 % à 0,61 % en dix ans : il détient 39 % de moins de l'offre totale sans avoir rien vendu. À 0,82 %, elle tombe à 0,92 %. Avec Bitcoin, dont l'émission continue de baisser, l'offre ne croît que de 3,72 % en dix ans, et la part reste à 0,96 %. La dilution ne dit rien du prix : elle dit quelle part de la monnaie totale on conserve.
+"""
+
+[[step]]
+id = "cinq"
+prompt = "À 5 % par an, quelle part de l'offre détient-il après 10 ans, en % ? (Deux décimales.)"
+unit = "%"
+answer = 0.61
+tolerance = 0.006
+solution = "1 % ÷ 1,05¹⁰ = 1 % ÷ 1,629 = **0,61 %**."
+
+[[step]]
+id = "rythme"
+prompt = "À 0,82 % par an, quelle part après 10 ans, en % ? (Deux décimales.)"
+unit = "%"
+answer = 0.92
+tolerance = 0.006
+solution = "1 % ÷ 1,0082¹⁰ = 1 % ÷ 1,085 = **0,92 %**."
+
+[[step]]
+id = "bitcoin"
+prompt = "Selon le protocole, de combien l'offre de bitcoins croît-elle en 10 ans, en % ? (Deux décimales.)"
+unit = "%"
+answer = 3.72
+tolerance = 0.006
+solution = "20 846 825 ÷ 20 099 725 − 1 = **3,72 %**."
+
+[[step]]
+id = "part-bitcoin"
+prompt = "Quelle part de l'offre de bitcoins détiendrait-il alors, en % ? (Deux décimales.)"
+unit = "%"
+answer = 0.96
+tolerance = 0.006
+solution = "1 % ÷ 1,0372 = **0,96 %**."

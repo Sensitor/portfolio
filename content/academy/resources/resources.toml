@@ -182,3 +182,15 @@ pdf = "modele-plan-de-trading.pdf"
 access = "member"
 lessons = ["processus-ou-resultats", "plan-de-trading", "limites-de-risque", "preparer-seance", "executer-seance", "journal-mesures", "revue-amelioration", "cas-mois-de-trading", "recap-processus"]
 
+[[resource]]
+id = "fiche-reserve-de-valeur"
+title = "Bitcoin, une réserve de valeur ?"
+description = "Définitions, comparaison de Bitcoin, de l'or et de l'euro, création monétaire comparée, stock-to-flow, objections, et ce qui est établi ou débattu : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "intermediaire"
+file = "fiche-reserve-de-valeur.md"
+pdf = "fiche-reserve-de-valeur.pdf"
+access = "member"
+lessons = ["reserve-de-valeur", "proprietes-comparees", "creation-monetaire-comparee", "stock-to-flow", "objections-reserve", "recap-reserve-de-valeur"]
+

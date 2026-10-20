@@ -172,7 +172,7 @@ Chaque lot se termine par les tests, une vérification dans le navigateur, un co
 | **T8** ✔ | Trading, parcours 8 « Macroéconomie et actualité » : 9 leçons, données d'emploi, de taux et de courbe américaines (BLS et Réserve fédérale, via FRED), 5 exercices, fiche de révision | terminé |
 | **T10** ✔ | Trading, parcours 10 « Processus de trading discipliné » : 9 leçons, plan en sept parties, limites et réduction du risque, préparation, exécution, journal et coût des écarts, revue, un mois de trading analysé, modèle de plan à remplir | terminé |
 | **C4** ✔ | M2, cours « Bitcoin : origines et fonctionnement » : 8 leçons sourcées, émission calculée, probabilité de rattrapage du livre blanc recalculée, démonstration d'empreinte et de preuve de travail jouet, 4 exercices | terminé |
-| **C5** | M2, cours « Réserve de valeur et inflation » | dépend des données d'inflation |
+| **C5** ✔ | M2, cours « Bitcoin, une réserve de valeur ? », version sans prix sous licence : propriétés comparées, création monétaire de Bitcoin, de l'euro (M3) et du dollar (M2) sur données publiques, stock-to-flow calculé, objections ; 6 leçons, 2 exercices | terminé |
 | **C6** | M2, cours « Cycles et indicateurs » | dépend de la licence on-chain |
 | **D** ✔ | C1, cours « Utiliser la crypto en sécurité » : 8 leçons sourcées (jetons, stablecoins, portefeuilles, phrase de récupération, envoi, pools automatiques, arnaques), 4 exercices, fiche en accès libre. La chaîne de hash et la preuve de travail jouet sont dans le cours Bitcoin (C4) ; l'explorateur interactif n'est pas fait, remplacé par le schéma et l'exercice d'une transaction | terminé |
 | **E** | C2 et I1 : altcoins, DeFi, DCA et VCA, simulateurs | contenu et simulateurs |

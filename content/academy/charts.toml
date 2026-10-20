@@ -304,3 +304,37 @@ title = "Quatorze jours visés : la durée réelle de chaque période de difficu
 [[chart.series]]
 column = "jours"
 label = "Durée réelle de la période"
+
+[[chart]]
+id = "offre-comparee"
+dataset = "offre-monnaie-comparee"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Croissance sur un an, en %"
+title = "Combien de monnaie nouvelle chaque année : Bitcoin, euro et dollar"
+
+[[chart.series]]
+column = "bitcoin"
+label = "Offre de bitcoins"
+
+[[chart.series]]
+column = "zone_euro_m3"
+label = "Zone euro, masse monétaire M3"
+
+[[chart.series]]
+column = "etats_unis_m2"
+label = "États-Unis, masse monétaire M2"
+
+[[chart]]
+id = "stock-flux-bitcoin"
+dataset = "offre-monnaie-comparee"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Années d'émission que représente le stock"
+title = "Le stock-to-flow de Bitcoin, calculé à partir du protocole"
+
+[[chart.series]]
+column = "stock_flux_bitcoin"
+label = "Stock ÷ émission des douze derniers mois"

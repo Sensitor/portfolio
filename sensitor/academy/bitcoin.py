@@ -238,3 +238,23 @@ def epoch_rows(headers: list[dict]) -> list[dict]:
                      "difficulte": diff, "jours": round(seconds / 86400, 2),
                      "puissance": hashrate(diff, seconds / blocks) / 1e18})
     return rows
+
+
+def height_at(timestamp: float, points: list[tuple[int, float]]) -> float:
+    """
+    The block height reached at `timestamp`, interpolated linearly between
+    known (height, timestamp) points, such as the headers at retarget heights.
+    """
+    points = sorted(points)
+    if not points or timestamp < points[0][1] or timestamp > points[-1][1]:
+        raise ValueError("timestamp outside the known points")
+    for (h1, t1), (h2, t2) in zip(points, points[1:]):
+        if t1 <= timestamp <= t2:
+            return h1 + (h2 - h1) * (timestamp - t1) / (t2 - t1) if t2 > t1 else h1
+    return float(points[-1][0])
+
+
+def supply_growth(height_now: float, height_year_before: float) -> float:
+    """The growth of Bitcoin's supply over a period, as a fraction, from the heights at its two ends."""
+    before = supply_after(int(height_year_before))
+    return supply_after(int(height_now)) / before - 1

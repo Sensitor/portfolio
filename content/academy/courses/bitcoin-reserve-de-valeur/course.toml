@@ -1,0 +1,33 @@
+id = "bitcoin-reserve-de-valeur"
+path = "bitcoin"
+title = "Bitcoin, une réserve de valeur ?"
+summary = "Six leçons pour examiner la thèse qui fait de Bitcoin une manière de préserver un patrimoine : ce qu'est une réserve de valeur, les propriétés de Bitcoin face à l'or et à l'euro, la création monétaire comparée sur les données de la BCE et de la Réserve fédérale, le stock-to-flow calculé à partir du protocole, puis les objections, sans conclusion imposée."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Définir une réserve de valeur et les propriétés qu'on en attend.",
+  "Comparer Bitcoin, l'or et l'euro propriété par propriété, en séparant faits et débats.",
+  "Lire la création monétaire de Bitcoin, de l'euro et du dollar sur des données publiques.",
+  "Présenter les objections principales, et ce qu'elles impliquent pour la part d'un patrimoine.",
+]
+prerequisites = ["Bitcoin : origines et fonctionnement", "L'inflation"]
+final_quiz = "reserve-de-valeur-validation"
+
+[[module]]
+id = "these"
+title = "La thèse"
+summary = "Ce qu'on attend d'une réserve de valeur, et ce que Bitcoin propose pour y répondre."
+lessons = ["reserve-de-valeur", "proprietes-comparees"]
+
+[[module]]
+id = "donnees"
+title = "Les données"
+summary = "La création monétaire de Bitcoin, de l'euro et du dollar, et le rapport entre le stock et le flux."
+lessons = ["creation-monetaire-comparee", "stock-to-flow"]
+
+[[module]]
+id = "examen"
+title = "L'examen"
+summary = "Les objections, ce qu'elles impliquent pour un patrimoine, puis le quiz de validation."
+lessons = ["objections-reserve", "recap-reserve-de-valeur"]

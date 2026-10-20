@@ -1,0 +1,184 @@
+id = "reserve-de-valeur-validation"
+title = "Quiz de validation : Bitcoin, une réserve de valeur ?"
+course = "bitcoin-reserve-de-valeur"
+lesson = "recap-reserve-de-valeur"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Huit questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "placement"
+prompt = "Une réserve de valeur rapporte-t-elle un revenu ?"
+kind = "single"
+lesson = "reserve-de-valeur"
+
+[[question.option]]
+id = "non"
+text = "Non, on attend seulement qu'elle conserve un pouvoir d'achat."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, comme un placement."
+explanation = "C'est ce qui distingue un placement."
+
+[[question.option]]
+id = "toujours"
+text = "Oui, un intérêt garanti."
+explanation = "Aucune réserve de valeur ne garantit un intérêt."
+
+[[question]]
+id = "tableau"
+prompt = "Sur quelle propriété l'euro l'emporte-t-il ?"
+kind = "single"
+lesson = "proprietes-comparees"
+
+[[question.option]]
+id = "stabilite"
+text = "La stabilité du pouvoir d'achat à court terme et le paiement."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rarete"
+text = "La rareté."
+explanation = "Sa création dépend des banques et de la BCE."
+
+[[question.option]]
+id = "anciennete"
+text = "L'ancienneté."
+explanation = "L'or est bien plus ancien."
+
+[[question]]
+id = "saisie"
+prompt = "La difficulté de saisir des bitcoins gardés soi-même est-elle une qualité ?"
+kind = "single"
+lesson = "proprietes-comparees"
+
+[[question.option]]
+id = "debat"
+text = "C'est débattu : une protection contre l'arbitraire pour les uns, un risque de fraude pour les autres."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "qualite"
+text = "Oui, sans aucun inconvénient."
+explanation = "Elle a aussi des inconvénients."
+
+[[question.option]]
+id = "defaut"
+text = "Non, c'est seulement un défaut."
+explanation = "Elle a aussi des avantages."
+
+[[question]]
+id = "m3"
+prompt = "La masse monétaire M3 de la zone euro a-t-elle toujours augmenté ?"
+kind = "single"
+lesson = "creation-monetaire-comparee"
+
+[[question.option]]
+id = "non"
+text = "Non : elle a diminué de 1,3 % en août 2023."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, chaque mois depuis 1999."
+explanation = "Les données montrent une baisse en 2023."
+
+[[question.option]]
+id = "fixe"
+text = "Elle est fixe."
+explanation = "Elle varie avec le crédit."
+
+[[question]]
+id = "dilution"
+prompt = "Une offre croît de 5 % par an pendant 10 ans. Que devient une part de 1 % ?"
+kind = "single"
+lesson = "creation-monetaire-comparee"
+
+[[question.option]]
+id = "061"
+text = "Environ 0,61 %"
+correct = true
+explanation = "Oui : 1 % ÷ 1,05¹⁰."
+
+[[question.option]]
+id = "05"
+text = "0,5 %"
+explanation = "La croissance composée donne 0,61 %."
+
+[[question.option]]
+id = "1"
+text = "Toujours 1 %"
+explanation = "Sans achat, la part se dilue."
+
+[[question]]
+id = "s2f"
+prompt = "Stock-to-flow de Bitcoin en 2026, calculé à partir du protocole ?"
+kind = "single"
+lesson = "stock-to-flow"
+
+[[question.option]]
+id = "122"
+text = "Environ 122 ans"
+correct = true
+explanation = "Oui : 20 099 725 ÷ 164 250."
+
+[[question.option]]
+id = "58"
+text = "Environ 58 ans"
+explanation = "C'est celui de l'or."
+
+[[question.option]]
+id = "21"
+text = "21 ans"
+explanation = "Ce chiffre ne correspond à aucun calcul du cours."
+
+[[question]]
+id = "prevision"
+prompt = "Le stock-to-flow permet-il de prédire un prix à une date ?"
+kind = "single"
+lesson = "stock-to-flow"
+
+[[question.option]]
+id = "non"
+text = "Non : il mesure la rareté, pas la demande."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, c'est sa fonction."
+explanation = "Le modèle de prix est contesté."
+
+[[question.option]]
+id = "or"
+text = "Seulement pour l'or."
+explanation = "Ni pour l'or ni pour Bitcoin."
+
+[[question]]
+id = "crise"
+prompt = "En 2022, Bitcoin a-t-il protégé ses détenteurs de la baisse des actions ?"
+kind = "single"
+lesson = "objections-reserve"
+
+[[question.option]]
+id = "non"
+text = "Non : il a baissé avec elles, et le FMI notait une corrélation croissante."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, il a monté."
+explanation = "Il a baissé d'environ 62 %."
+
+[[question.option]]
+id = "neutre"
+text = "Il n'a pas bougé."
+explanation = "Il a fortement baissé."

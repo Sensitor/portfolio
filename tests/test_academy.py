@@ -856,6 +856,51 @@ def test_process_figures():
     check("the course is in the trading universe", catalog.universe_of(catalog.course("processus-de-trading")) == "trading")
 
 
+def test_reserve_figures():
+    """« Bitcoin, une réserve de valeur ? » : supply growth from the chain, M2 and M3, stock-to-flow."""
+    print("\nReserve of value figures")
+    import datetime as dt
+    from sensitor.academy import bitcoin as B
+    catalog = C.load_catalog()
+    course = catalog.course("bitcoin-reserve-de-valeur")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+    net = catalog.dataset("reseau-bitcoin").rows
+    points = [(r["hauteur"], r["horodatage"]) for r in net] + [(net[-1]["hauteur_suivante"], net[-1]["horodatage_suivant"])]
+    rows = catalog.dataset("offre-monnaie-comparee").rows
+    ts = lambda y, m: dt.datetime(y, m, 1, tzinfo=dt.timezone.utc).timestamp()
+    rebuilt = []
+    for r in rows:
+        y, m = int(r["mois"][:4]), int(r["mois"][5:7])
+        g = B.supply_growth(B.height_at(ts(y, m), points), B.height_at(ts(y - 1, m), points)) * 100
+        rebuilt.append(abs(g - r["bitcoin"]) < 0.006 and abs(r["stock_flux_bitcoin"] - 100 / r["bitcoin"]) < 0.06)
+    check("supply growth: every month rebuilt from the chain's headers and the protocol", all(rebuilt) and len(rows) == 153)
+    by = {r["mois"][:7]: r for r in rows}
+    m3 = {r["mois"][:7]: r["m3"] for r in catalog.dataset("m3-inflation-zone-euro").rows}
+    check("the euro column is the ECB M3 series", all(by[k]["zone_euro_m3"] == m3.get(k) for k in by if by[k]["zone_euro_m3"] is not None))
+    us = [(r["etats_unis_m2"], r["mois"][:7]) for r in rows if r["etats_unis_m2"] is not None]
+    eu = [(r["zone_euro_m3"], r["mois"][:7]) for r in rows if r["zone_euro_m3"] is not None]
+    check("M2: +26,8 % in February 2021, -4,6 % in April 2023", max(us) == (26.78, "2021-02") and min(us) == (-4.64, "2023-04"))
+    check("M3: +12,5 % in January 2021, -1,3 % in August 2023", max(eu) == (12.5, "2021-01") and min(eu) == (-1.3, "2023-08"))
+    check("Bitcoin: 0,82 % in September 2026, a stock-to-flow of 122", by["2026-09"]["bitcoin"] == 0.82
+          and round(by["2026-09"]["stock_flux_bitcoin"]) == 122)
+    check("lesson 3 quotes them", all(t in text["creation-monetaire-comparee"] for t in ("0,82 %", "26,8 %", "4,6 %", "12,5 %", "1,3 %")))
+
+    dl = ex("dilution-offre")
+    s0, s10 = B.supply_after(971_911) / B.COIN, B.supply_after(971_911 + int(10 * 365.25 * 144)) / B.COIN
+    check("dilution: 0,61 %, 0,92 %, +3,72 % of bitcoins, 0,96 %", abs(1 / 1.05 ** 10 - dl["cinq"]) < 0.006
+          and abs(1 / 1.0082 ** 10 - dl["rythme"]) < 0.006 and s10 == 20_846_825 and abs((s10 / s0 - 1) * 100 - dl["bitcoin"]) < 0.006
+          and abs(s0 / s10 - dl["part-bitcoin"]) < 0.006)
+    sf = ex("stock-flux")
+    check("stock-to-flow: gold 58, 164 250 BTC a year, Bitcoin 122, 248 after 2028",
+          round(212_582 / 3_644) == sf["or"] and 3.125 * 144 * 365 == sf["flux"] and round(20_099_725 / sf["flux"]) == sf["bitcoin"]
+          and B.supply_after(1_049_999) == 20_343_750 * B.COIN and round(20_343_750 / (1.5625 * 144 * 365)) == sf["apres"])
+    check("objections: -62 % from about 43 400 to 16 500 dollars", round((16_500 / 43_400 - 1) * 100) == -62
+          and "62 %" in text["objections-reserve"])
+    check("height interpolation: refuses a date outside the chain", raises(lambda: B.height_at(0, points), ValueError))
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
+
+
 def test_bitcoin_issuance():
     """The issuance schedule, from the protocol rules, in satoshis."""
     print("\nBitcoin issuance")
@@ -1821,6 +1866,7 @@ def main() -> int:
     test_bitcoin_course_figures()
     test_crypto_course_figures()
     test_process_figures()
+    test_reserve_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

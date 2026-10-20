@@ -1,0 +1,73 @@
+id = "check-stock-to-flow"
+title = "Contrôle : le stock-to-flow"
+course = "bitcoin-reserve-de-valeur"
+lesson = "stock-to-flow"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "or"
+prompt = "Stock d'or d'environ 212 582 t, production d'environ 3 644 t. Stock-to-flow ?"
+kind = "single"
+lesson = "stock-to-flow"
+
+[[question.option]]
+id = "58"
+text = "Environ 58 ans"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "3644"
+text = "3 644 ans"
+explanation = "C'est la production, pas le ratio."
+
+[[question.option]]
+id = "1"
+text = "1,7 an"
+explanation = "C'est l'inverse, en pourcentage : 1,7 % par an."
+
+[[question]]
+id = "halving"
+prompt = "Que fait un halving au stock-to-flow de Bitcoin ?"
+kind = "single"
+lesson = "stock-to-flow"
+
+[[question.option]]
+id = "double"
+text = "Il le double environ, puisque l'émission est divisée par deux."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "divise"
+text = "Il le divise par deux."
+explanation = "C'est l'émission qui est divisée par deux."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "Le flux change, donc le ratio aussi."
+
+[[question]]
+id = "modele"
+prompt = "Pourquoi le modèle de prix tiré du stock-to-flow est-il contesté ?"
+kind = "single"
+lesson = "stock-to-flow"
+
+[[question.option]]
+id = "demande"
+text = "Il ignore la demande et repose sur une corrélation entre deux tendances."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "calcul"
+text = "Parce que le ratio est mal calculé."
+explanation = "Le ratio se calcule exactement ; c'est le lien au prix qui est contesté."
+
+[[question.option]]
+id = "or"
+text = "Parce qu'il ne s'applique pas à l'or."
+explanation = "Ce n'est pas la critique principale."

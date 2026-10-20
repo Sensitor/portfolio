@@ -1,0 +1,73 @@
+id = "check-objections-reserve"
+title = "Contrôle : les objections"
+course = "bitcoin-reserve-de-valeur"
+lesson = "objections-reserve"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "2022"
+prompt = "Qu'a fait le prix de Bitcoin en 2022, l'année où l'inflation culminait ?"
+kind = "single"
+lesson = "objections-reserve"
+
+[[question.option]]
+id = "baisse"
+text = "Il a baissé d'environ 62 %."
+correct = true
+explanation = "Oui : d'environ 43 400 à 16 500 dollars."
+
+[[question.option]]
+id = "hausse"
+text = "Il a monté avec l'inflation."
+explanation = "Il a baissé."
+
+[[question.option]]
+id = "stable"
+text = "Il est resté stable."
+explanation = "Il a perdu plus de la moitié de sa valeur."
+
+[[question]]
+id = "horizon"
+prompt = "Que demande la volatilité de Bitcoin à celui qui le détient ?"
+kind = "single"
+lesson = "objections-reserve"
+
+[[question.option]]
+id = "horizon"
+text = "Un long horizon, une part mesurée, et une épargne de précaution à part."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "tout"
+text = "D'y placer toute son épargne de précaution."
+explanation = "C'est exactement ce qu'elle interdit."
+
+[[question.option]]
+id = "court"
+text = "Un horizon court, pour profiter des variations."
+explanation = "C'est de la spéculation, pas une réserve de valeur."
+
+[[question]]
+id = "garantie"
+prompt = "Peut-on présenter Bitcoin comme une protection garantie contre l'inflation ?"
+kind = "single"
+lesson = "objections-reserve"
+
+[[question.option]]
+id = "non"
+text = "Non : son offre est programmée, pas son prix."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, son offre est fixe."
+explanation = "L'offre fixe ne garantit pas le prix."
+
+[[question.option]]
+id = "parfois"
+text = "Oui, sur un an."
+explanation = "2022 a montré l'inverse."

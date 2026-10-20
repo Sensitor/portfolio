@@ -65,7 +65,7 @@ number = 2
 title = "Bitcoin en profondeur"
 summary = "Les origines et le fonctionnement de Bitcoin, sa politique monétaire, les arguments qui en font une réserve de valeur possible et leurs objections, son rapport à l'inflation, ses cycles et ses indicateurs."
 status = "published"
-courses = ["bitcoin-fonctionnement"]
+courses = ["bitcoin-fonctionnement", "bitcoin-reserve-de-valeur"]
 topics = ["Origines et fonctionnement", "Émission et halvings", "Réserve de valeur", "Cycles et indicateurs"]
 
 [[path]]
