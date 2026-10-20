@@ -28,7 +28,9 @@ FORMATS = (
     ("Leçons écrites et schémas originaux", "live"),
     ("Quiz corrigés, explication par réponse", "live"),
     ("Exercices chiffrés avec corrigé", "live"),
-    ("Calculateur de risque", "live"),
+    ("Graphiques interactifs sur données publiques, sourcées et datées", "live"),
+    ("Simulateurs : risque, ruine, épargne, empreinte et preuve de travail", "live"),
+    ("Fiches de révision et modèles à télécharger en PDF", "live"),
     ("Vidéos intégrées aux leçons", "soon"),
     ("Ebooks", "soon"),
 )

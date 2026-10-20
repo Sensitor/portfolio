@@ -59,7 +59,8 @@ SPACES: tuple[Space, ...] = (
           "et la monnaie, Bitcoin et la crypto, pour comprendre la valeur de l'argent et diversifier. "
           "Des parcours sourcés, des quiz corrigés et des exercices chiffrés.",
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
-          planned=("La suite des filières Monnaie et Bitcoin, Crypto et Investissement",
+          planned=("La méthode Sensitor et la méthode du fondateur, rédigées par le fondateur",
+                   "Les cycles et les indicateurs de Bitcoin, dès qu'une licence de prix sera obtenue",
                    "Vidéos intégrées aux leçons", "Ebooks")),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
