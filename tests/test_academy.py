@@ -89,12 +89,10 @@ def test_real_catalog():
           and catalog.universe_of(None) == "trading")
     check("a path is named by its track", catalog.path("structure-price-action").label == "Trading · Parcours 02"
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
-    check("Monnaie et Bitcoin opens paths 1 and 2, Crypto path 1; the rest is announced",
-          catalog.path("monnaie-inflation").is_available and catalog.path("bitcoin").is_available
-          and catalog.path("blockchain-securite").is_available
-          and all(p.status == C.PLANNED for p in catalog.paths
-                  if p.track == "investissement" or (p.track == "crypto" and p.number > 1))
-          and len(catalog.paths) == 16)
+    planned = {p.id for p in catalog.paths if p.status == C.PLANNED}
+    check("only the founder's methods and what awaits licensed data are still announced",
+          planned == {"methode-sensitor", "strategies-crypto", "methode-fondateur"} and len(catalog.paths) == 16,
+          str(sorted(planned)))
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
     check("planned paths carry no readable course",
@@ -898,6 +896,46 @@ def test_reserve_figures():
     check("objections: -62 % from about 43 400 to 16 500 dollars", round((16_500 / 43_400 - 1) * 100) == -62
           and "62 %" in text["objections-reserve"])
     check("height interpolation: refuses a date outside the chain", raises(lambda: B.height_at(0, points), ValueError))
+    check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
+
+
+def test_analysis_figures():
+    """« Analyser un projet crypto » : capitalisation, dilution, revenues, loans, impermanent loss."""
+    print("\nCrypto analysis figures")
+    from sensitor.academy import crypto as K
+    catalog = C.load_catalog()
+    course = catalog.course("analyser-un-projet-crypto")
+    text = {l.id: "\n".join(b.text for b in l.blocks) for l in course.lessons}
+    ex = lambda i: {s.id: s.answer for s in catalog.exercise(i).steps}
+    cf = ex("capitalisation-fdv")
+    check("cap: 1 bn, FDV 5 bn, 20 % circulating, 0,10 dollar diluted",
+          K.market_cap(0.5, 2e9) / 1e9 == cf["cap"] and K.fully_diluted(0.5, 1e10) / 1e9 == cf["fdv"]
+          and 2 / 10 * 100 == cf["part"] and close(K.price_after_dilution(0.5, 2e9, 1e10), cf["prix"]))
+    dj = ex("deblocage-jetons")
+    check("unlock: +25 %, -20 %, 92,6 % for a non-staker", 100 / 400 * 100 == dj["hausse"]
+          and close((K.price_after_dilution(1, 400e6, 500e6) - 1) * 100, dj["baisse"]) and abs(100 / 1.08 - dj["part"]) < 0.06)
+    check("dilution: refuses a shrinking supply", raises(lambda: K.price_after_dilution(1, 10, 5), ValueError))
+    rp = ex("revenus-protocole")
+    check("revenues: 12 M$, 50 times, -8 M$ net", close(30 * 0.4, rp["detenteurs"]) and close(600 / 12, rp["ratio"])
+          and close(12 - 20, rp["net"]))
+    pl = ex("pret-liquidation")
+    check("loan: 50 %, health 1,6, liquidation at 1 875 (-37,5 %), 937,50 with half the debt",
+          3000 / 6000 * 100 == pl["ratio"] and close(K.health_factor(6000, 0.8, 3000), pl["sante"])
+          and close(K.liquidation_price(2, 3000, 0.8), pl["liquidation"])
+          and close((K.liquidation_price(2, 3000, 0.8) / 3000 - 1) * 100, pl["baisse"])
+          and close(K.liquidation_price(2, 1500, 0.8), pl["moitie"]))
+    check("loan: the health factor is 1 at the liquidation price", close(K.health_factor(2 * 1875, 0.8, 3000), 1.0))
+    ip = ex("perte-impermanente")
+    lp = 10_000 * 2 ** 0.5
+    check("impermanent loss: 15 000 held, 14 142 pooled, -5,7 %, 858 dollars, -20 % at x4",
+          5000 * 2 + 5000 == ip["detention"] and round(lp) == ip["position"] and abs(K.impermanent_loss(2) * 100 - ip["perte"]) < 0.06
+          and round(15_000 - lp) == ip["frais"] and close(K.impermanent_loss(4) * 100, ip["quatre"])
+          and close(lp, 15_000 * (1 + K.impermanent_loss(2))))
+    table = {1.25: "−0,6 %", 1.5: "−2,0 %", 2: "−5,7 %", 4: "−20,0 %", 0.5: "−5,7 %"}
+    check("impermanent loss: the lesson's table", all(f"{K.impermanent_loss(r) * 100:.1f}".replace(".", ",").replace("-", "−") + " %" == v
+                                                   and v in text["perte-impermanente"] for r, v in table.items()))
+    check("impermanent loss: same loss up or down, none without a move",
+          close(K.impermanent_loss(2), K.impermanent_loss(0.5)) and K.impermanent_loss(1) == 0)
     check("the course is in the money universe", catalog.universe_of(course) == "monnaie")
 
 
@@ -1867,6 +1905,7 @@ def main() -> int:
     test_crypto_course_figures()
     test_process_figures()
     test_reserve_figures()
+    test_analysis_figures()
     test_bitcoin_issuance()
     test_datasets_and_charts()
     test_access_levels()

@@ -1,0 +1,32 @@
+id = "deblocage-jetons"
+title = "Un déblocage et une émission de staking"
+context = """
+**400 millions** de jetons circulent. Le mois prochain, **100 millions** de jetons des investisseurs seront débloqués. Par ailleurs, le staking émet chaque année de nouveaux jetons égaux à **8 %** de l'offre, distribués à ceux qui stakent. *Chiffres construits pour l'exercice.*
+"""
+conclusion = """
+Le déblocage augmente l'offre de 25 % : sans demande nouvelle, le prix devrait baisser de 20 % pour garder la même capitalisation. Le staking, lui, ne fait que conserver la part de ceux qui y participent ; un détenteur qui ne stake pas voit sa part fondre d'environ 7,4 % par an.
+"""
+
+[[step]]
+id = "hausse"
+prompt = "De combien l'offre en circulation augmente-t-elle avec le déblocage, en % ?"
+unit = "%"
+answer = 25
+tolerance = 0.01
+solution = "100 ÷ 400 = **25 %**."
+
+[[step]]
+id = "baisse"
+prompt = "De combien le prix doit-il baisser pour que la capitalisation reste la même, en % ?"
+unit = "%"
+answer = -20
+tolerance = 0.01
+solution = "400 ÷ 500 − 1 = **−20 %**."
+
+[[step]]
+id = "part"
+prompt = "Un détenteur qui ne stake pas : que devient sa part de l'offre après un an, en % de sa part initiale ? (Une décimale.)"
+unit = "%"
+answer = 92.6
+tolerance = 0.06
+solution = "1 ÷ 1,08 = **92,6 %** de sa part initiale, soit une dilution d'environ 7,4 %."

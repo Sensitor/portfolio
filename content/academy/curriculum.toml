@@ -84,7 +84,8 @@ track = "crypto"
 number = 2
 title = "Altcoins et analyse crypto"
 summary = "Proposition de valeur et tokenomics, dilution, revenus et gouvernance ; DeFi et ses risques ; données on-chain et données de marché, et ce que chacune permet de dire."
-status = "planned"
+status = "published"
+courses = ["analyser-un-projet-crypto"]
 topics = ["Tokenomics", "DeFi et risques", "On-chain et marché"]
 
 [[path]]

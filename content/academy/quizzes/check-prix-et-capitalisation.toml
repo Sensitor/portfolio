@@ -1,0 +1,73 @@
+id = "check-prix-et-capitalisation"
+title = "Contrôle : capitalisation et valorisation diluée"
+course = "analyser-un-projet-crypto"
+lesson = "prix-et-capitalisation"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "cher"
+prompt = "Un jeton à 0,01 dollar est-il forcément moins cher qu'un jeton à 100 dollars ?"
+kind = "single"
+lesson = "prix-et-capitalisation"
+
+[[question.option]]
+id = "non"
+text = "Non : il faut comparer les capitalisations, pas les prix."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, il a plus de marge."
+explanation = "Le prix unitaire dépend du nombre de jetons."
+
+[[question.option]]
+id = "toujours"
+text = "Oui, toujours."
+explanation = "Un prix bas peut cacher une capitalisation énorme."
+
+[[question]]
+id = "cap"
+prompt = "Prix 2 dollars, 50 millions de jetons en circulation. Capitalisation ?"
+kind = "single"
+lesson = "prix-et-capitalisation"
+
+[[question.option]]
+id = "100"
+text = "100 millions de dollars"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "25"
+text = "25 millions"
+explanation = "On multiplie, on ne divise pas."
+
+[[question.option]]
+id = "52"
+text = "52 millions"
+explanation = "On multiplie le prix par le nombre de jetons."
+
+[[question]]
+id = "fdv"
+prompt = "Que signale un grand écart entre capitalisation et valorisation diluée ?"
+kind = "single"
+lesson = "prix-et-capitalisation"
+
+[[question.option]]
+id = "dilution"
+text = "Une dilution à venir : beaucoup de jetons restent à distribuer."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rien"
+text = "Rien de particulier."
+explanation = "Il annonce des jetons supplémentaires."
+
+[[question.option]]
+id = "hausse"
+text = "Une hausse de prix certaine."
+explanation = "Rien ne la garantit."

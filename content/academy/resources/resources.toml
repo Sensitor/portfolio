@@ -194,3 +194,15 @@ pdf = "fiche-reserve-de-valeur.pdf"
 access = "member"
 lessons = ["reserve-de-valeur", "proprietes-comparees", "creation-monetaire-comparee", "stock-to-flow", "objections-reserve", "recap-reserve-de-valeur"]
 
+[[resource]]
+id = "fiche-analyse-crypto"
+title = "Analyser un projet crypto"
+description = "Capitalisation, valorisation diluée, déblocages, revenus nets, facteur de santé, perte impermanente, risques de la DeFi et grille d'analyse en douze questions : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "intermediaire"
+file = "fiche-analyse-crypto.md"
+pdf = "fiche-analyse-crypto.pdf"
+access = "member"
+lessons = ["prix-et-capitalisation", "emission-et-deblocages", "revenus-et-incitations", "preter-emprunter", "perte-impermanente", "risques-defi", "grille-analyse"]
+

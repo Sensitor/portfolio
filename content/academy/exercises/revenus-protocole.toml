@@ -1,0 +1,31 @@
+id = "revenus-protocole"
+title = "Revenu réel ou subvention ?"
+context = """
+Un protocole d'échange encaisse **30 millions de dollars** de frais par an. **40 %** reviennent aux détenteurs du jeton, le reste aux fournisseurs de liquidité. Pour attirer des utilisateurs, il distribue chaque année des jetons d'incitation d'une valeur de **20 millions de dollars**. Sa capitalisation est de **600 millions de dollars**. *Chiffres construits pour l'exercice.*
+"""
+conclusion = """
+Les détenteurs reçoivent 12 millions par an, soit une capitalisation de 50 fois ces revenus. Mais le protocole distribue 20 millions d'incitations, qui diluent ces mêmes détenteurs : leur revenu net est de −8 millions. L'activité est en partie achetée ; elle doit devenir rentable sans incitations pour que le jeton ait un revenu réel.
+"""
+
+[[step]]
+id = "detenteurs"
+prompt = "Combien les détenteurs reçoivent-ils par an, en millions de dollars ?"
+unit = "M$"
+answer = 12
+tolerance = 0.01
+solution = "30 × 40 % = **12 millions**."
+
+[[step]]
+id = "ratio"
+prompt = "Combien de fois ces revenus la capitalisation représente-t-elle ?"
+answer = 50
+tolerance = 0.01
+solution = "600 ÷ 12 = **50 fois**."
+
+[[step]]
+id = "net"
+prompt = "Quel est le revenu net des détenteurs, incitations déduites, en millions de dollars ?"
+unit = "M$"
+answer = -8
+tolerance = 0.01
+solution = "12 − 20 = **−8 millions** : l'activité coûte plus aux détenteurs qu'elle ne leur rapporte."

@@ -170,7 +170,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 9 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 1 sur 2"))
+              body.index("Trading · 9 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 2 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -268,7 +268,7 @@ def test_no_secret_asked(tok: str) -> None:
     from sensitor.academy import content as C
     catalog = C.load_catalog()
     words = ("phrase", "seed", "clé", "cle privée", "mnémonique", "mot de passe du portefeuille", "private")
-    for course_id in ("bitcoin-fonctionnement", "crypto-en-securite"):
+    for course_id in ("bitcoin-fonctionnement", "bitcoin-reserve-de-valeur", "crypto-en-securite", "analyser-un-projet-crypto"):
         for lesson in catalog.course(course_id).lessons:
             page = run({"page": "lesson", "course": course_id, "lesson": lesson.id}, tok)
             labels = [t.label.lower() for t in page.text_input] + [t.label.lower() for t in page.text_area]

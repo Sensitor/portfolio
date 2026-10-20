@@ -1,0 +1,73 @@
+id = "check-perte-impermanente"
+title = "Contrôle : la perte impermanente"
+course = "analyser-un-projet-crypto"
+lesson = "perte-impermanente"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "double"
+prompt = "Le prix relatif double. Perte impermanente ?"
+kind = "single"
+lesson = "perte-impermanente"
+
+[[question.option]]
+id = "57"
+text = "Environ −5,7 %"
+correct = true
+explanation = "Oui : 2√2 ÷ 3 − 1."
+
+[[question.option]]
+id = "50"
+text = "−50 %"
+explanation = "C'est beaucoup trop."
+
+[[question.option]]
+id = "0"
+text = "Aucune"
+explanation = "Le pool a vendu une partie de l'actif qui montait."
+
+[[question]]
+id = "sens"
+prompt = "Un prix divisé par deux donne-t-il une perte différente d'un prix qui double ?"
+kind = "single"
+lesson = "perte-impermanente"
+
+[[question.option]]
+id = "meme"
+text = "Non, la même : −5,7 %."
+correct = true
+explanation = "Oui : la perte ne dépend pas du sens."
+
+[[question.option]]
+id = "gain"
+text = "Non, c'est un gain."
+explanation = "C'est aussi une perte."
+
+[[question.option]]
+id = "double"
+text = "Oui, deux fois plus."
+explanation = "La formule donne la même valeur."
+
+[[question]]
+id = "frais"
+prompt = "Quand une position de liquidité a-t-elle mieux rapporté que la détention ?"
+kind = "single"
+lesson = "perte-impermanente"
+
+[[question.option]]
+id = "frais"
+text = "Quand les commissions perçues dépassent la perte impermanente."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "toujours"
+text = "Toujours, grâce aux commissions."
+explanation = "Pas si la perte impermanente les dépasse."
+
+[[question.option]]
+id = "jamais"
+text = "Jamais."
+explanation = "Elle peut, si les commissions sont assez élevées."

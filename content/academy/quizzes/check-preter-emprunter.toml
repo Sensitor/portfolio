@@ -1,0 +1,73 @@
+id = "check-preter-emprunter"
+title = "Contrôle : prêter et emprunter"
+course = "analyser-un-projet-crypto"
+lesson = "preter-emprunter"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "sante"
+prompt = "Garantie 6 000 $, seuil 80 %, dette 3 000 $. Facteur de santé ?"
+kind = "single"
+lesson = "preter-emprunter"
+
+[[question.option]]
+id = "16"
+text = "1,6"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "2"
+text = "2"
+explanation = "Il faut appliquer le seuil de 80 %."
+
+[[question.option]]
+id = "05"
+text = "0,5"
+explanation = "C'est le ratio prêt-garantie."
+
+[[question]]
+id = "liq"
+prompt = "Que se passe-t-il quand le facteur de santé atteint 1 ?"
+kind = "single"
+lesson = "preter-emprunter"
+
+[[question.option]]
+id = "liquidation"
+text = "La position peut être liquidée automatiquement."
+correct = true
+explanation = "Oui, sans délai."
+
+[[question.option]]
+id = "appel"
+text = "Le protocole envoie un appel de marge et attend."
+explanation = "Il n'y a pas d'appel de marge."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "C'est le seuil de liquidation."
+
+[[question]]
+id = "marge"
+prompt = "Comment éloigner son prix de liquidation ?"
+kind = "single"
+lesson = "preter-emprunter"
+
+[[question.option]]
+id = "moins"
+text = "Emprunter moins, ou ajouter de la garantie."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "plus"
+text = "Emprunter plus."
+explanation = "Cela le rapproche."
+
+[[question.option]]
+id = "racheter"
+text = "Racheter la garantie avec l'emprunt."
+explanation = "C'est un levier, qui le rapproche."

@@ -75,3 +75,50 @@ def years_to_try(bits: int, per_second: float) -> float:
     if per_second <= 0:
         raise ValueError("a positive rate is needed")
     return 2 ** bits / per_second / SECONDS_PER_YEAR
+
+
+# =============================================================================
+# ANALYSING A TOKEN
+# =============================================================================
+
+def market_cap(price: float, circulating: float) -> float:
+    return price * circulating
+
+
+def fully_diluted(price: float, max_supply: float) -> float:
+    """The value of every token that will ever exist, at today's price."""
+    return price * max_supply
+
+
+def price_after_dilution(price: float, supply_before: float, supply_after: float) -> float:
+    """The price at which the market capitalisation stays the same once new tokens circulate."""
+    if supply_before <= 0 or supply_after < supply_before:
+        raise ValueError("the supply cannot shrink in a dilution")
+    return price * supply_before / supply_after
+
+
+# =============================================================================
+# DEFI
+# =============================================================================
+
+def health_factor(collateral_value: float, liquidation_threshold: float, debt: float) -> float:
+    """Above 1 the loan is safe; at 1 it can be liquidated."""
+    if debt <= 0:
+        raise ValueError("no debt, no health factor")
+    return collateral_value * liquidation_threshold / debt
+
+
+def liquidation_price(collateral_units: float, debt: float, liquidation_threshold: float) -> float:
+    """The collateral price at which the health factor reaches 1."""
+    return debt / (collateral_units * liquidation_threshold)
+
+
+def impermanent_loss(price_ratio: float) -> float:
+    """
+    What a 50 / 50 constant-product position is worth against simply holding
+    the two assets, when one price moves by `price_ratio` against the other,
+    before fees. Always zero or negative.
+    """
+    if price_ratio <= 0:
+        raise ValueError("a price ratio is positive")
+    return 2 * price_ratio ** 0.5 / (1 + price_ratio) - 1

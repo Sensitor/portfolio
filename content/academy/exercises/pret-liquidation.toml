@@ -1,0 +1,47 @@
+id = "pret-liquidation"
+title = "Un prêt et son prix de liquidation"
+context = """
+Un utilisateur dépose **2 ETH** en garantie, à **3 000 dollars** l'unité, et emprunte **3 000 USDC**. Le seuil de liquidation de l'ether sur ce protocole est de **80 %**. *Chiffres construits pour l'exercice.*
+"""
+conclusion = """
+La position emprunte la moitié de sa garantie et affiche un facteur de santé de 1,6. Elle sera liquidée si l'ether tombe à 1 875 dollars, soit une baisse de 37,5 %. En empruntant seulement 1 500 USDC, le prix de liquidation descendrait à 937,50 dollars : la marge de sécurité se règle avec le montant emprunté.
+"""
+
+[[step]]
+id = "ratio"
+prompt = "Quel est le ratio prêt-garantie, en % ?"
+unit = "%"
+answer = 50
+tolerance = 0.01
+solution = "3 000 ÷ (2 × 3 000) = **50 %**."
+
+[[step]]
+id = "sante"
+prompt = "Quel est le facteur de santé ? (Une décimale.)"
+answer = 1.6
+tolerance = 0.001
+solution = "6 000 × 0,80 ÷ 3 000 = **1,6**."
+
+[[step]]
+id = "liquidation"
+prompt = "À quel prix de l'ether la position peut-elle être liquidée, en dollars ?"
+unit = "$"
+answer = 1875
+tolerance = 0.5
+solution = "3 000 ÷ (2 × 0,80) = **1 875 dollars**."
+
+[[step]]
+id = "baisse"
+prompt = "Quelle baisse de l'ether cela représente-t-il, en % ? (Une décimale.)"
+unit = "%"
+answer = -37.5
+tolerance = 0.06
+solution = "1 875 ÷ 3 000 − 1 = **−37,5 %**."
+
+[[step]]
+id = "moitie"
+prompt = "Et si l'utilisateur n'empruntait que 1 500 USDC, quel serait le prix de liquidation, en dollars ?"
+unit = "$"
+answer = 937.5
+tolerance = 0.5
+solution = "1 500 ÷ (2 × 0,80) = **937,50 dollars**."
