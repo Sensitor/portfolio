@@ -186,6 +186,14 @@ def crumbs(*parts: str, universe: str = "") -> None:
     html(f'<nav class="sx-crumbs" aria-label="Fil d\'Ariane">{items}{scope}</nav>')
 
 
+def carnet() -> None:
+    """
+    Opt the page into the « Carnet de bord » direction (prototype). The marker is
+    invisible; the stylesheet applies the direction's tokens to the page under it.
+    """
+    html('<span class="sx-da" hidden></span>')
+
+
 def page_header(kicker: str, title_html: str, lead: str = "", meta: list[str] | None = None,
                 *, display: bool = False) -> None:
     """`title_html` may contain one <em> for the accent word; everything else is escaped."""

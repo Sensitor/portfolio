@@ -49,7 +49,9 @@ TOKENS = {
 FONTS = ("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500"
          "&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700"
          "&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600"
-         "&family=Space+Grotesk:wght@400;500;600;700&display=swap")
+         "&family=Space+Grotesk:wght@400;500;600;700"
+         "&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500"
+         "&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap")
 
 ISO_GRID = ("repeating-linear-gradient(30deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
             "repeating-linear-gradient(150deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
@@ -958,9 +960,282 @@ JOURNAL_CSS = """
 """
 
 
+# =============================================================================
+# DIRECTION « CARNET DE BORD » (prototype, see docs/DIRECTION_ARTISTIQUE.md)
+# =============================================================================
+#
+# A page opts in with `components.carnet()`, which writes the `sx-da` marker;
+# everything below applies only under it, so the rest of the platform is
+# untouched until the direction is validated. Roles, not shades: each token
+# says what it is for, and nothing else uses it.
+#
+#   paper / sheet / margin     the page, the working surface, the annotation zone
+#   ink / ink-2 / graphite     text, secondary text, labels and axes (5.1:1 at worst)
+#   rule / rule-strong         hairlines
+#   plan                       the member's plan, selection, links
+#   up / down                  gain, loss and departure from the plan
+#   note                       the voice of annotation: Sensitor and the coach
+#   na                         not checkable; shapes only, never text
+#
+# Type: Newsreader for titles and, in italic, for annotations; Schibsted
+# Grotesk for the interface and every figure; DM Mono for times and identifiers
+# only. Schibsted has tabular figures (DM Sans has none), used in table columns
+# only: its tabular comma is as wide as a digit.
+
+CARNET_TOKENS = {
+    "paper": "#F3F0E8", "sheet": "#FFFDF8", "margin": "#EEE9DD",
+    "ink": "#0F1B26", "ink-2": "#33414D", "graphite": "#59636B",
+    "rule": "#D8D2C3", "rule-strong": "#B7B0A0",
+    "plan": "#1F4A72", "plan-soft": "#E1E9F1",
+    "up": "#22604A", "up-soft": "#DDEBE2", "down": "#9A3A2C", "down-soft": "#F3E0DA",
+    "note": "#855615", "note-soft": "#F2E7D2", "na": "#A2A8AC",
+}
+CARNET_FONTS = {
+    "title": "'Newsreader', Georgia, serif",
+    "text": "'Schibsted Grotesk', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
+    "code": "'DM Mono', 'SFMono-Regular', Consolas, monospace",
+}
+
+CARNET_CSS = """
+.stApp:has(.sx-da) { __CTOKENS__ }
+__DA__ { font-family: var(--c-text); color: var(--c-ink); font-variant-numeric: normal; }
+/* Tabular figures in table columns only: Schibsted's tabular set widens the comma,
+   which opens a gap in French decimals anywhere alignment does not need it. */
+__DA__ [data-testid="stMarkdownContainer"] td:not(:first-child) { font-variant-numeric: tabular-nums; }
+__DA__ [data-testid="stMarkdownContainer"] :is(td, th) { border-left: 0 !important; border-right: 0 !important; }
+__DA__ .sx-facts dd { font-variant-numeric: normal; }
+__DA__ .sx-calendar text { font-family: var(--c-text); font-size: 8.5px; fill: var(--c-graphite); }
+__DA__ .sx-j-legend { font: 500 12px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-j-legend em { font: italic 400 13.5px var(--c-title); color: var(--c-graphite); }
+__DA__ [data-testid="stMarkdownContainer"] :is(p, li, td, th, dd, dt),
+__DA__ [data-testid="stWidgetLabel"] p, __DA__ button p, __DA__ input, __DA__ textarea,
+__DA__ [data-baseweb="select"] * { font-family: var(--c-text); }
+
+/* Titles: one direct sentence per page; the accent word keeps its italic, in the plan's blue. */
+__DA__ .sx-title { font: 600 clamp(2.1rem, 3.6vw, 2.9rem)/1.05 var(--c-title); letter-spacing: -.02em; }
+__DA__ .sx-title em { font-weight: 500; color: var(--c-plan); }
+__DA__ .sx-lead { font: 400 17px/1.6 var(--c-text); color: var(--c-ink-2); }
+/* The rubric is the only spaced capital of the system. */
+__DA__ .sx-kicker { font: 600 11.5px var(--c-text); letter-spacing: .08em; color: var(--c-graphite); }
+__DA__ .sx-crumbs { font: 500 12.5px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-crumbs b { font-weight: 600; }
+
+/* Sections: a question and its answer, stacked; a hairline, no lead-in bar. */
+__DA__ .sx-section { display: block; border-top: 1px solid var(--c-rule-strong); padding-top: 1.1rem; margin: 3rem 0 1.1rem; }
+__DA__ .sx-section::before { display: none; }
+__DA__ .sx-section .num { font: 600 12px var(--c-text); letter-spacing: 0; color: var(--c-note); display: inline; margin: 0 .6rem 0 0; }
+__DA__ .sx-section > div { display: flex; align-items: baseline; }
+__DA__ .sx-section h2 { font: 600 1.6rem/1.2 var(--c-title); letter-spacing: -.012em; }
+__DA__ .sx-section p { font: 400 15px/1.6 var(--c-text); color: var(--c-graphite); margin-top: .35rem; max-width: 720px; }
+__DA__ .sx-note { font: italic 400 15px/1.55 var(--c-title); color: var(--c-ink-2); border-left: 2px solid var(--c-note); }
+__DA__ .sx-footer { font-family: var(--c-text); letter-spacing: .04em; }
+
+/* Tabs: sentence case, the plan's blue underline. */
+__DA__ [class*="st-key-jnav"] .stButton > button p { font: 500 14px var(--c-text) !important; letter-spacing: 0; text-transform: none; color: var(--c-graphite) !important; }
+__DA__ [class*="st-key-jnav"] .stButton > button[data-testid="stBaseButton-primary"] { border-bottom-color: var(--c-plan) !important; }
+__DA__ [class*="st-key-jnav"] .stButton > button[data-testid="stBaseButton-primary"] p { color: var(--c-ink) !important; font-weight: 600 !important; }
+/* Period: a quiet choice of words, not three tiles. */
+__DA__ [data-testid="stRadio"] [role="radiogroup"] label { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: .2rem .9rem .2rem 0 !important; }
+__DA__ [data-testid="stRadio"] [role="radiogroup"] label p { font: 500 14px var(--c-text); color: var(--c-graphite); }
+__DA__ [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) p { color: var(--c-ink); font-weight: 600; text-decoration: underline 2px var(--c-plan); text-underline-offset: 6px; }
+
+/* Tables: a ledger. Rules only, figures right-aligned and tabular. */
+__DA__ [data-testid="stMarkdownContainer"] table { background: transparent; border: 0; border-top: 2px solid var(--c-ink); }
+__DA__ [data-testid="stMarkdownContainer"] th { font: 600 12px var(--c-text); letter-spacing: .02em; text-transform: none; color: var(--c-graphite);
+  background: transparent; border-bottom: 1px solid var(--c-rule-strong); padding: 9px 12px 9px 0; }
+__DA__ [data-testid="stMarkdownContainer"] td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--c-rule); font-size: 14.5px; }
+__DA__ table.sx-j-table td small { font: italic 400 13px var(--c-title); letter-spacing: 0; text-transform: none; color: var(--c-note); }
+__DA__ .sx-j-r { font-family: var(--c-text) !important; font-weight: 600; }
+__DA__ .sx-j-r.up, __DA__ .up { color: var(--c-up); } __DA__ .sx-j-r.down, __DA__ .down { color: var(--c-down); }
+__DA__ .sx-pill { font: 600 11px var(--c-text); letter-spacing: .02em; text-transform: none; border-radius: 2px; }
+__DA__ .sx-pill.soon { color: var(--c-note); background: var(--c-note-soft); border-color: transparent; }
+__DA__ .sx-pill.live { color: var(--c-up); background: var(--c-up-soft); border-color: transparent; }
+__DA__ .sx-pill.done { color: #fff; background: var(--c-plan); border-color: var(--c-plan); }
+__DA__ .sx-facts dt, __DA__ .sx-j-facts dt { font: 500 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
+
+/* The label for synthetic data: a slip of paper, with the hook. */
+__DA__ .sx-j-banner { background: var(--c-margin); border: 0; border-left: 3px solid var(--c-note); border-radius: 0; font: 400 14px var(--c-text); }
+__DA__ .sx-j-banner b { font: 600 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-note); }
+
+/* ── The record (le relevé): one mark per trade ─────────────────────────── */
+__DA__ .sx-c-record { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; border-top: 2px solid var(--c-ink); background: var(--c-sheet); }
+__DA__ .sx-c-record .body { padding: 1.5rem 1.8rem 1.4rem 0; }
+__DA__ .sx-c-record .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+__DA__ .sx-c-record h3 { font: 600 1.75rem/1.2 var(--c-title); letter-spacing: -.012em; color: var(--c-ink); margin: .35rem 0 1rem; }
+__DA__ .sx-c-record h3 em { font-style: italic; font-weight: 500; color: var(--c-plan); }
+__DA__ .sx-c-count { display: flex; gap: 1.6rem; align-items: flex-end; }
+__DA__ .sx-c-count .big { font: 600 3rem/1 var(--c-text); letter-spacing: -.03em; color: var(--c-ink); white-space: nowrap; }
+__DA__ .sx-c-count .big small { font-size: 1.3rem; color: var(--c-graphite); font-weight: 500; letter-spacing: 0; }
+__DA__ .sx-c-count .lab { font: 500 13px var(--c-text); color: var(--c-graphite); margin-top: .3rem; }
+__DA__ .sx-c-count svg { flex: 1; min-width: 0; height: 52px; }
+__DA__ .sx-c-key { display: flex; gap: 1.1rem; flex-wrap: wrap; font: 500 12.5px var(--c-text); color: var(--c-graphite); margin-top: .5rem; }
+__DA__ .sx-c-key i { display: inline-block; width: 4px; height: 12px; margin-right: .4rem; vertical-align: -1px; }
+
+/* ── The margin: where Sensitor says what a figure means ───────────────── */
+__DA__ .sx-c-margin { background: var(--c-margin); border-left: 1px solid var(--c-rule-strong); padding: 1.3rem 1.3rem 1rem; }
+__DA__ .sx-c-margin .rub { color: var(--c-note); }
+__DA__ .sx-c-notes { list-style: none; margin: .7rem 0 0; padding: 0; }
+__DA__ .sx-c-notes li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); margin: 0 0 .9rem !important; padding: 0;
+  font: italic 400 15px/1.5 var(--c-title) !important; color: var(--c-ink-2) !important; }
+__DA__ .sx-c-notes li b { font: 600 13px/1.6 var(--c-text); font-style: normal; color: var(--c-note); }
+
+/* ── Figures with their sentence ───────────────────────────────────────── */
+__DA__ .sx-c-figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--c-rule-strong); }
+__DA__ .sx-c-figures > div { padding: 1rem 1.2rem .9rem 0; border-bottom: 1px solid var(--c-rule); }
+__DA__ .sx-c-figures > div:not(:nth-child(3n+1)) { padding-left: 1.2rem; border-left: 1px solid var(--c-rule); }
+__DA__ .sx-c-figures .l { font: 500 13px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-c-figures .v { font: 600 1.9rem/1.15 var(--c-text); letter-spacing: -.025em; color: var(--c-ink); margin-top: .2rem; white-space: nowrap; }
+__DA__ .sx-c-figures .v.up { color: var(--c-up); } __DA__ .sx-c-figures .v.down { color: var(--c-down); }
+__DA__ .sx-c-figures .s { font: italic 400 14.5px/1.45 var(--c-title); color: var(--c-ink-2); margin-top: .3rem; }
+
+/* ── The ledger of rules ───────────────────────────────────────────────── */
+__DA__ .sx-c-ledger { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--c-ink); }
+__DA__ .sx-c-ledger li { display: grid; grid-template-columns: minmax(0, 1fr) 9.5rem 5.2rem 6.4rem; gap: 1rem; align-items: center;
+  padding: .72rem 0; border-bottom: 1px solid var(--c-rule); margin: 0 !important; font-size: 15px; }
+__DA__ .sx-c-ledger li.clean { color: var(--c-graphite); }
+__DA__ .sx-c-ledger .marks { display: flex; gap: 3px; flex-wrap: wrap; }
+__DA__ .sx-c-ledger .marks i { width: 3px; height: 14px; background: var(--c-down); display: block; }
+__DA__ .sx-c-ledger .marks em { font: italic 400 13.5px var(--c-title); color: var(--c-graphite); }
+__DA__ .sx-c-ledger .n { font: 500 13px var(--c-text); color: var(--c-graphite); text-align: right; }
+__DA__ .sx-c-ledger .cost { font: 600 14.5px var(--c-text); text-align: right; }
+__DA__ .sx-c-ledger .cost.ok { font: italic 400 14px var(--c-title); color: var(--c-up); }
+__DA__ .sx-c-ledger .cost.down { color: var(--c-down); } __DA__ .sx-c-ledger .cost.up { color: var(--c-up); }
+
+/* A note in the margin that asks for action: the hook, the ochre, a lesson. */
+__DA__ .sx-c-todo { background: var(--c-margin); border-left: 3px solid var(--c-note); padding: 1.1rem 1.2rem 1rem; }
+__DA__ .sx-c-todo .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-note); display: flex; gap: .45rem; align-items: center; }
+__DA__ .sx-c-todo h4 { font: 600 1.25rem/1.25 var(--c-title); color: var(--c-ink); margin: .45rem 0 .35rem; }
+__DA__ .sx-c-todo p { font: italic 400 15px/1.5 var(--c-title); color: var(--c-ink-2); margin: 0; }
+
+/* ── Rows: a trade, a request ──────────────────────────────────────────── */
+__DA__ .sx-c-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr) auto 5.6rem 1.2rem; gap: 0 1.3rem; align-items: center;
+  padding: .8rem .2rem; border-top: 1px solid var(--c-rule); transition: background .15s; }
+__DA__ [class*="st-key-tap_"]:last-child .sx-c-row { border-bottom: 1px solid var(--c-rule); }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-row { background: var(--c-sheet); }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-row .go { color: var(--c-plan); transform: translateX(3px); }
+__DA__ .sx-c-row .sym { font: 600 15.5px var(--c-text); color: var(--c-ink); }
+__DA__ .sx-c-row .sym span { font: 500 12.5px var(--c-text); color: var(--c-plan); margin-left: .45rem; }
+__DA__ .sx-c-row .when { font: 400 12px var(--c-code); color: var(--c-graphite); margin-top: .15rem; }
+__DA__ .sx-c-row .q { font: italic 400 15px/1.4 var(--c-title); color: var(--c-ink-2); }
+__DA__ .sx-c-row .wait { font: 500 12.5px var(--c-text); color: var(--c-note); margin-top: .15rem; font-style: normal; display: block; }
+__DA__ .sx-c-row .r { font: 600 15px var(--c-text); text-align: right; white-space: nowrap; }
+__DA__ .sx-c-row .go { color: var(--c-rule-strong); transition: transform .15s, color .15s; }
+__DA__ .sx-c-row .go svg { width: 16px; height: 16px; }
+
+/* The print of a trade: the plan's rules, always in the same order. */
+.stApp .sx-c-print { display: inline-flex; gap: 3px; vertical-align: middle; }
+.stApp .sx-c-print i { width: 10px; height: 10px; display: block; }
+.stApp .sx-c-print i.ok { background: var(--c-ink); }
+.stApp .sx-c-print i.fail { background: var(--c-down); height: 14px; margin-top: -2px; }
+.stApp .sx-c-print i.na { border: 1px solid var(--c-na); }
+.stApp .sx-c-print.big i { width: 16px; height: 16px; } .stApp .sx-c-print.big i.fail { height: 22px; margin-top: -3px; }
+
+/* A lesson to read, from the journal: a reference, not a chapter. */
+__DA__ .sx-c-ref { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) auto; gap: .8rem; align-items: center; padding: .75rem 0; border-top: 1px solid var(--c-rule); }
+__DA__ [class*="st-key-tap_"]:last-child .sx-c-ref { border-bottom: 1px solid var(--c-rule); }
+__DA__ .sx-c-ref .t { font: 600 1.08rem var(--c-title); color: var(--c-ink); }
+__DA__ .sx-c-ref .s { font: 500 12.5px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-c-ref .go { color: var(--c-rule-strong); } __DA__ .sx-c-ref .go svg { width: 16px; height: 16px; }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-ref .t { color: var(--c-plan); }
+
+/* ── The checks of one trade, as a list with its print ─────────────────── */
+__DA__ .sx-j-checks li { grid-template-columns: 1.4rem minmax(0, 15rem) minmax(0, 1fr); }
+__DA__ .sx-j-checks .mark { width: 14px; height: 14px; border-radius: 0; top: 3px; }
+__DA__ .sx-j-checks .mark svg { display: none; }
+__DA__ .sx-j-checks li.ok .mark { background: var(--c-ink); } __DA__ .sx-j-checks li.ko .mark { background: var(--c-down); height: 18px; top: 1px; }
+__DA__ .sx-j-checks li.na .mark { background: transparent; border: 1px solid var(--c-na); }
+__DA__ .sx-j-checks b { font: 600 15px var(--c-text); } __DA__ .sx-j-checks li.ko b { color: var(--c-down); }
+__DA__ .sx-j-checks .why { font: italic 400 15px/1.45 var(--c-title); color: var(--c-ink-2); }
+
+/* ── The corrected copy: the coach's review ────────────────────────────── */
+__DA__ .sx-c-copy { display: grid; grid-template-columns: minmax(0, 1fr) 21rem; border-top: 2px solid var(--c-ink); background: var(--c-sheet); }
+__DA__ .sx-c-copy .body { padding: 1.3rem 1.6rem 1.2rem 0; }
+__DA__ p.sx-c-quote { font: italic 400 1.35rem/1.45 var(--c-title); color: var(--c-ink); margin: .3rem 0 0; }
+__DA__ .sx-c-quote::before { content: "« "; color: var(--c-note); } __DA__ .sx-c-quote::after { content: " »"; color: var(--c-note); }
+__DA__ .sx-c-who { font: 500 13px var(--c-text); color: var(--c-graphite); margin-top: .5rem; }
+__DA__ .sx-c-marks { list-style: none; margin: 0; padding: 0; }
+__DA__ .sx-c-marks li { display: grid; grid-template-columns: minmax(0, 11rem) auto minmax(0, 1fr); gap: 1rem; align-items: center; padding: .55rem 0;
+  border-bottom: 1px solid var(--c-rule); margin: 0 !important; }
+__DA__ .sx-c-marks .name { font: 500 14.5px var(--c-text); }
+__DA__ .sx-c-marks .v { font: italic 400 14.5px var(--c-title); color: var(--c-ink-2); }
+__DA__ .sx-c-points { counter-reset: none; list-style: none; margin: 0; padding: 0; }
+__DA__ .sx-c-points li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: .2rem; padding: .9rem 0; border-bottom: 1px solid var(--c-rule); margin: 0 !important; }
+__DA__ .sx-c-points li > b { font: 600 15px var(--c-text); color: var(--c-note); }
+__DA__ .sx-c-points h5 { font: 600 13px var(--c-text); letter-spacing: .02em; color: var(--c-graphite); margin: 0 0 .2rem; }
+__DA__ .sx-c-points li.good h5 { color: var(--c-up); } __DA__ .sx-c-points li.work h5 { color: var(--c-down); }
+__DA__ .sx-c-points p { font: italic 400 16.5px/1.55 var(--c-title) !important; color: var(--c-ink) !important; margin: 0; }
+__DA__ .sx-c-visa { display: inline-flex; gap: .8rem; align-items: center; border: 1.5px solid var(--c-ink); padding: .7rem 1rem .65rem .8rem; margin-top: 1.2rem; }
+__DA__ .sx-c-visa b { display: block; font: 600 14px var(--c-text); color: var(--c-ink); }
+__DA__ .sx-c-visa span { font: italic 400 13.5px var(--c-title); color: var(--c-ink-2); }
+__DA__ .sx-c-status { font: 600 13px var(--c-text); color: var(--c-note); display: inline-flex; gap: .4rem; align-items: center; }
+__DA__ .sx-c-status.done { color: var(--c-up); }
+
+__DA__ .sx-c-row .meta2 { font: 500 13.5px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-c-row .meta2 em { font: italic 400 14.5px var(--c-title); color: var(--c-down); }
+
+/* The verdict: the one strong block of a page. No grid on it: the grid lives on the binding. */
+__DA__ [class*="st-key-navy_"] { background-image: none; border-radius: 0; }
+__DA__ .sx-c-verdict .k { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--on-navy-accent); }
+__DA__ .sx-c-verdict .r { font: 600 3rem/1.05 var(--c-text); letter-spacing: -.03em; color: #f6f3ec; margin-top: .3rem; }
+__DA__ .sx-c-verdict .r.up { color: #9fd3b4; } __DA__ .sx-c-verdict .r.down { color: #e7b2a8; }
+__DA__ .sx-c-verdict p { font: italic 400 16px var(--c-title); color: var(--on-navy-muted) !important; margin: .3rem 0 0; }
+__DA__ .sx-c-verdict .pr { display: flex; gap: .8rem; align-items: center; margin-top: 1rem; padding-top: .9rem; border-top: 1px solid #2b3f52; }
+__DA__ .sx-c-verdict .pr span:last-child { font: 500 13px var(--c-text); color: var(--on-navy-muted); }
+__DA__ .sx-c-verdict .sx-c-print i.ok { background: #f6f3ec; } __DA__ .sx-c-verdict .sx-c-print i.fail { background: #e7b2a8; }
+__DA__ .sx-c-verdict .sx-c-print i.na { border-color: #6e7d8a; }
+__DA__ svg text { font-variant-numeric: proportional-nums; }
+
+__DA__ .sx-c-summary { font: 400 17px/1.55 var(--c-text); color: var(--c-ink-2); margin: 1.2rem 0 0; border-top: 2px solid var(--c-ink); padding-top: .9rem; }
+__DA__ .sx-c-summary b { color: var(--c-ink); font-weight: 600; }
+__DA__ .sx-c-summary span { color: var(--c-graphite); font-size: 15px; }
+__DA__ .sx-c-done { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--c-rule-strong); }
+__DA__ .sx-c-done li { display: grid; grid-template-columns: 10rem 7rem minmax(0, 1fr); padding: .55rem 0; border-bottom: 1px solid var(--c-rule);
+  margin: 0 !important; font: 500 14px var(--c-text); color: var(--c-ink-2); }
+__DA__ .sx-c-done li span:last-child { font: italic 400 14.5px var(--c-title); color: var(--c-graphite); }
+__DA__ p.sx-c-none { font: italic 400 15px/1.5 var(--c-title); color: var(--c-ink-2); margin-top: .6rem; }
+__DA__ .sx-c-copy .sx-c-notes li { font-size: 14px !important; margin-bottom: .55rem !important; }
+__DA__ .sx-c-broken { margin-top: 1.1rem; padding-top: .8rem; border-top: 1px solid var(--c-rule); }
+__DA__ .sx-c-broken .rub { display: flex; gap: .7rem; align-items: center; }
+__DA__ .sx-c-broken ul { list-style: none; margin: .5rem 0 0; padding: 0; }
+__DA__ .sx-c-broken li { font: 400 14.5px/1.45 var(--c-text) !important; color: var(--c-ink-2); margin: 0 0 .35rem !important; padding-left: 1rem; position: relative; }
+__DA__ .sx-c-broken li::before { content: ""; position: absolute; left: 0; top: .3rem; width: 4px; height: 12px; background: var(--c-down); }
+__DA__ .sx-c-broken li b { color: var(--c-down); font-weight: 600; }
+__DA__ .sx-j-facts dd { font-family: var(--c-text); font-variant-numeric: normal; }
+__DA__ .sx-c-copy .rub, __DA__ .sx-c-margin .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+__DA__ .sx-c-margin .rub { color: var(--c-note); }
+
+/* Panels and the one strong block keep their roles: a sheet, and a verdict. */
+__DA__ [class*="st-key-panel_"] { background: var(--c-sheet); border: 0; border-top: 2px solid var(--c-ink); border-radius: 0; }
+__DA__ [class*="st-key-chart_"] { background: var(--c-sheet); border: 0; border-top: 2px solid var(--c-ink); border-radius: 0; }
+__DA__ .sx-chart-foot b { font: 600 12.5px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-note); }
+__DA__ .sx-chart-foot span { font: italic 400 15px/1.5 var(--c-title); color: var(--c-ink-2); }
+
+@media (max-width: 1000px) {
+  __DA__ .sx-c-record, __DA__ .sx-c-copy { grid-template-columns: 1fr; }
+  __DA__ .sx-c-record .body, __DA__ .sx-c-copy .body { padding-right: 0; }
+  __DA__ .sx-c-margin { border-left: 0; border-top: 1px solid var(--c-rule-strong); }
+  __DA__ .sx-c-count { flex-direction: column; align-items: stretch; gap: .6rem; }
+  __DA__ .sx-c-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  __DA__ .sx-c-figures > div { padding-left: 0 !important; border-left: 0 !important; padding-right: .8rem; }
+  __DA__ .sx-c-ledger li { grid-template-columns: minmax(0, 1fr) auto; }
+  __DA__ .sx-c-ledger .marks { grid-column: 1 / -1; grid-row: 2; }
+  __DA__ .sx-c-ledger .n { display: none; }
+  __DA__ .sx-c-row { grid-template-columns: minmax(0, 1fr) auto; gap: .35rem 1rem; }
+  __DA__ .sx-c-row .q { grid-column: 1 / -1; grid-row: 2; }
+  __DA__ .sx-c-row .go { display: none; }
+  __DA__ .sx-j-checks li { grid-template-columns: 1.4rem minmax(0, 1fr); }
+  __DA__ .sx-c-marks li { grid-template-columns: minmax(0, 1fr) auto; }
+  __DA__ .sx-c-marks .v { grid-column: 1 / -1; }
+}
+"""
+
+
 def stylesheet() -> str:
     tokens = "".join(f"--{k}:{v};" for k, v in TOKENS.items())
-    return ((CSS + JOURNAL_CSS).replace("__FONTS__", FONTS).replace("__TOKENS__", tokens)
+    carnet = ("".join(f"--c-{k}:{v};" for k, v in CARNET_TOKENS.items())
+              + "".join(f"--c-{k}:{v};" for k, v in CARNET_FONTS.items()))
+    da = CARNET_CSS.replace("__CTOKENS__", carnet).replace("__DA__", '.stApp:has(.sx-da) [data-testid="stMain"]')
+    return ((CSS + JOURNAL_CSS + da).replace("__FONTS__", FONTS).replace("__TOKENS__", tokens)
             .replace("__ISO__", ISO_GRID))
 
 

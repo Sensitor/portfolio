@@ -47,3 +47,18 @@ def monogram_svg(size: int = 40, *, color: str = "currentColor") -> str:
     """The S alone, one colour — for watermarks and small inline uses."""
     svg = _source(MONOGRAM).replace("currentColor", color)
     return re.sub(r"<svg\b", f'<svg width="{size}" height="{size * 88 // 80}"', svg, count=1)
+
+
+def hook_path() -> str:
+    """
+    The upper hook of the S, as path data: the half of the monogram that the
+    « Carnet de bord » direction uses as its mark for levels, notes and the
+    coach's visa. Taken from the monogram file, so it can never drift from it.
+    """
+    return re.findall(r'd="([^"]+)"', _source(MONOGRAM))[0]
+
+
+def hook_svg(size: int = 14, *, color: str = "currentColor") -> str:
+    """The hook alone, one colour, about as wide as it is tall."""
+    return (f'<svg width="{size}" height="{size * 60 // 70}" viewBox="28 22 72 61" aria-hidden="true">'
+            f'<path d="{hook_path()}" fill="{color}"/></svg>')

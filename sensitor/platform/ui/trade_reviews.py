@@ -15,18 +15,20 @@ reminder that no recommendation on a future trade belongs in it.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import streamlit as st
 
 from ...trading import coaching as C
 from ...trading import review as R
 from ...trading.models import Trade
 from ...trading.setups import mistake_label, setup_label
-from .. import spaces
+from .. import brand, spaces
 from . import runtime as rt
 from . import trade_visuals as V
-from .components import (crumbs, date_fr, esc, footer, hexmark, html, icon, note, notice,
+from .components import (carnet, crumbs, date_fr, esc, footer, html, icon, note, notice,
                          page_header, pill, section, tap)
-from .trading_journal import flash, nav, show_flash
+from .trading_journal import flash, lesson_ref, nav, show_flash
 
 
 def _quota(email: str) -> tuple[int, int]:
@@ -92,8 +94,9 @@ STATUS = {"pending": ("En attente", "soon"), "answered": ("Répondue", "live")}
 
 def reviews_page(catalog, email, route) -> None:
     space = spaces.space("journal")
+    carnet()
     crumbs("Sensitor", space.label, "Revues")
-    page_header(f"Espace {space.numeral} · Journal de trading", "Le regard d'un <em>coach</em>.",
+    page_header("Journal de trading · revues", "Le regard d'un <em>coach</em>.",
                 "Envoyez un trade et votre question : un coach Sensitor le relit avec sa revue automatique et "
                 "vous répond, avec les leçons à travailler.")
     store = rt.get_store()
@@ -131,17 +134,19 @@ def reviews_page(catalog, email, route) -> None:
         rt.link("Choisir un trade", "journal_trades", key="reviews_pick", kind="primary")
     for r in requests:
         trade = r["trade"] or {}
-        label, kind = STATUS[r["status"]]
+        label = "En attente" if r["status"] == "pending" else "Répondue"
         if r["status"] == "answered" and not r.get("seen_at"):
-            label, kind = "Nouvelle réponse", "done"
-        mark = hexmark(f"{r['id'] % 100:02d}")
+            label = "Nouvelle réponse"
+        auto = R.TradeReview.from_dict(r.get("auto_review") or {})
+        status = (f'<span class="sx-c-status{" done" if r["status"] == "answered" else ""}">'
+                  f'{brand.hook_svg(11)}{esc(label)}</span>')
         tap(f"review_{r['id']}",
-            f'<div class="sx-j-trade">{mark}<div>'
-            f'<div class="sym">{esc(trade.get("symbol", ""))}<span>{"ACHAT" if trade.get("direction") == "long" else "VENTE"}</span></div>'
-            f'<div class="meta">Demandée le {esc(date_fr(r["created_at"]))} · {esc(_excerpt(r["question"]))}</div></div>'
-            f'<div class="tags">{pill(label, kind)}</div>'
-            f'<div class="sx-j-r {V.tone(trade.get("r_multiple"))}">{esc(V.r_text(trade.get("r_multiple")))}</div>'
-            f'<span class="arrow">{icon("arrow")}</span></div>',
+            f'<div class="sx-c-row"><div><div class="sym">{esc(trade.get("symbol", ""))}<span>{_side(trade)}</span></div>'
+            f'<div class="when">demandée le {esc(date_fr(r["created_at"]))}</div></div>'
+            f'<div class="q">{esc(_excerpt(r["question"]))}{status}</div>'
+            f'<div>{V.rule_print(auto.checks) if auto.checks else ""}</div>'
+            f'<div class="r {V.tone(trade.get("r_multiple"))}">{esc(V.r_text(trade.get("r_multiple")))}</div>'
+            f'<span class="go">{icon("arrow")}</span></div>',
             f"Demande sur {trade.get('symbol', '')}, {label.lower()}", "journal_reviews", review=str(r["id"]))
     section(2, "Comment ça marche", "")
     _how_it_works()
@@ -164,21 +169,25 @@ def _how_it_works() -> None:
          '</ul>')
 
 
+def _side(trade: dict) -> str:
+    return "achat" if trade.get("direction") == "long" else "vente"
+
+
 def _trade_block(request: dict, *, key: str) -> None:
     trade = request["trade"] or {}
     auto = R.TradeReview.from_dict(request.get("auto_review") or {})
-    left, right = st.columns([1, 1.25], gap="large")
+    left, right = st.columns([1.1, 1], gap="large")
     with left:
         with st.container(key=f"panel_ladder_{key}"):
-            html(V.price_ladder(trade))
+            html(V.levels(trade, uid=f"lv{key}"))
     with right:
-        center = f"{auto.passed}/{len(auto.evaluated)}" if auto.evaluated else ""
         r = trade.get("r_multiple")
+        kept = (f"{auto.passed} règle{'s' if auto.passed > 1 else ''} sur {len(auto.evaluated)} tenues"
+                if auto.evaluated else "aucune règle vérifiable")
         with st.container(key=f"navy_result_{key}"):
-            html(f'<div class="sx-j-big">{V.score_ring(auto.score, size=96, on_navy=True, center=center)}<div>'
-                 f'<div class="k">{esc(trade.get("symbol", ""))} · {"achat" if trade.get("direction") == "long" else "vente"}</div>'
-                 f'<div class="r {V.tone(r)}">{esc(V.r_text(r))}</div>'
-                 f'<p>{esc(_session_line(trade))}</p></div></div>')
+            html(f'<div class="sx-c-verdict"><div class="k">{esc(trade.get("symbol", ""))} · {_side(trade)}</div>'
+                 f'<div class="r {V.tone(r)}">{esc(V.r_text(r))}</div><p>{esc(_session_line(trade))}</p>'
+                 f'<div class="pr">{V.rule_print(auto.checks, big=True)}<span>{esc(kept)}</span></div></div>')
         notes = trade.get("notes")
         setups = ", ".join(setup_label(s, "fr") for s in trade.get("setups") or []) or "sans setup"
         mistakes = ", ".join(mistake_label(m, "fr").lower() for m in trade.get("mistakes") or []) or "aucun"
@@ -194,6 +203,32 @@ def _trade_block(request: dict, *, key: str) -> None:
         with st.expander(f"Revue automatique : {auto.passed} règle{'s' if auto.passed > 1 else ''} respectée"
                          f"{'s' if auto.passed > 1 else ''} sur {len(auto.evaluated)} vérifiables"):
             html(V.checks_list(auto.checks))
+
+
+def _broken(request: dict) -> str:
+    """The rules the automatic review found broken, in words, for the top of a review."""
+    auto = R.TradeReview.from_dict(request.get("auto_review") or {})
+    if not auto.checks:
+        return ""
+    failed = auto.failed
+    items = ("".join(f"<li><b>{esc(c.label)}</b> : {esc(c.detail)}</li>" for c in failed) if failed
+             else "<li>Aucune règle enfreinte : la question porte sur la lecture ou la gestion.</li>")
+    return (f'<div class="sx-c-broken"><div class="rub">Ce que la revue automatique a relevé {V.rule_print(auto.checks)}</div>'
+            f'<ul>{items}</ul></div>')
+
+
+def _waiting(stamp: str) -> str:
+    """How long a request has been waiting, in words."""
+    try:
+        since = datetime.fromisoformat(stamp)
+    except (TypeError, ValueError):
+        return ""
+    minutes = max(0, int((datetime.now(timezone.utc) - since).total_seconds() // 60))
+    if minutes < 60:
+        return f"en attente depuis {minutes} min"
+    if minutes < 48 * 60:
+        return f"en attente depuis {minutes // 60} h"
+    return f"en attente depuis {minutes // 1440} jours"
 
 
 def _symbol(code: str) -> str:
@@ -213,12 +248,19 @@ def _paragraphs(text: str) -> str:
 def _review_detail(catalog, request: dict, email: str) -> None:
     store = rt.get_store()
     rt.link("Toutes mes demandes", "journal_reviews", key="review_back")
-    label, kind = STATUS[request["status"]]
-    html(f'<div style="margin-top:.6rem">{pill(label, kind)}</div>')
-    html(f'<div class="sx-j-quote"><span class="k">Votre question · {esc(date_fr(request["created_at"]))}</span>'
-         f'{_paragraphs(request["question"])}</div>')
+    trade = request["trade"] or {}
+    answered = request["status"] == "answered"
+    status = (f"Répondue le {date_fr(request.get('answered_at') or '')}" if answered else "En attente d'un coach")
+    sent = V.notes([f"Le trade {trade.get('symbol', '')} et vos notes, figés au moment de la demande.",
+                    "Sa revue automatique et votre plan.",
+                    "Rien d'autre de votre journal ; le coach voit un pseudonyme."])
+    html(f'<div class="sx-c-copy"><div class="body"><div class="rub">Votre question · {esc(date_fr(request["created_at"]))}</div>'
+         f'<p class="sx-c-quote">{_paragraphs(request["question"])}</p>'
+         f'<div class="sx-c-who"><span class="sx-c-status{" done" if answered else ""}">{brand.hook_svg(11)}{esc(status)}</span></div>'
+         f'{_broken(request)}</div>'
+         f'<div class="sx-c-margin"><div class="rub">Ce qui a été envoyé</div>{sent}</div></div>')
     _trade_block(request, key=f"m{request['id']}")
-    if request["status"] == "pending":
+    if not answered:
         notice("En attente d'un coach", "Vous pouvez retirer votre demande tant qu'elle n'a pas reçu de réponse ; "
                "elle ne sera alors plus comptée dans votre quota.", "clock")
         if st.button("Retirer ma demande", key="review_withdraw", type="tertiary"):
@@ -233,18 +275,25 @@ def _review_detail(catalog, request: dict, email: str) -> None:
 
 def _feedback(catalog, feedback: dict, *, key: str, answered_at: str = "") -> None:
     with st.container(key=f"panel_feedback_{key}"):
-        html(f'<div class="sx-j-fbhead">{icon("people")}<div><b>Coach Sensitor</b>'
-             f'<span>Revue pédagogique{" · " + esc(date_fr(answered_at)) if answered_at else ""}</span></div></div>')
-        if feedback.get("scores"):
-            html(V.score_bars(feedback["scores"], C.AXES, C.SCORE_LABELS))
-        cols = []
-        for field, title, tone in (("strengths", "Ce qui est solide", "good"), ("improve", "À travailler", "work")):
+        scores = feedback.get("scores") or {}
+        if scores:
+            rows = []
+            for axis, name in C.AXES:
+                value = scores.get(axis)
+                words = f"{value} sur 5, {C.SCORE_LABELS[value].lower()}" if value else "non noté"
+                rows.append(f'<li><span class="name">{esc(name)}</span>{V.graduation(value)}'
+                            f'<span class="v">{esc(words)}</span></li>')
+            html(f'<ul class="sx-c-marks">{"".join(rows)}</ul>')
+        points = []
+        for field, title, tone in (("strengths", "Ce qui est solide", "good"), ("improve", "À travailler", "work"),
+                                   ("comment", "Commentaire", "")):
             if feedback.get(field):
-                cols.append(f'<div class="{tone}"><h5>{title}</h5><p>{_paragraphs(feedback[field])}</p></div>')
-        if cols:
-            html(f'<div class="sx-j-fbcols n{len(cols)}">{"".join(cols)}</div>')
-        if feedback.get("comment"):
-            html(f'<div class="sx-j-text"><h5>Commentaire</h5><p>{_paragraphs(feedback["comment"])}</p></div>')
+                points.append((title, tone, feedback[field]))
+        if points:
+            html('<ol class="sx-c-points">' + "".join(
+                f'<li class="{tone}"><b>{V.circled(i)}</b><div><h5>{esc(title)}</h5><p>{_paragraphs(text)}</p></div></li>'
+                for i, (title, tone, text) in enumerate(points)) + "</ol>")
+        html(V.visa(date_fr(answered_at) if answered_at else "revue pédagogique"))
     lessons = feedback.get("lessons") or []
     if lessons:
         html('<div class="sx-kicker" style="margin-top:1.4rem">Les leçons recommandées</div>')
@@ -252,18 +301,17 @@ def _feedback(catalog, feedback: dict, *, key: str, answered_at: str = "") -> No
             page, fields = spaces.parse_target(target)
             lesson = catalog.find_lesson(fields.get("lesson", "")) if fields else None
             title = lesson.title if lesson else target
-            tap(f"fb_lesson_{key}_{i}",
-                f'<div class="sx-lesson flush">{hexmark(f"{i + 1:02d}")}<div><div class="title">{esc(title)}</div>'
-                f'</div><div class="side"></div><span class="arrow">{icon("arrow")}</span></div>',
-                f"Leçon : {title}", page, **fields)
+            lesson_ref(f"fb_lesson_{key}_{i}", target, title, "Recommandée par le coach")
 
 
 # ── The coach's queue ────────────────────────────────────────────────────────
 
 def coach_page(catalog, email, route) -> None:
+    carnet()
     crumbs("Sensitor", "Coaching", "File de revue")
-    page_header("Coaching · réservé à l'équipe", "La file de <em>revue</em>.",
-                "Les trades que les membres ont choisi d'envoyer, du plus ancien au plus récent.")
+    page_header("Coaching · réservé à l'équipe", "Les trades qui attendent <em>un regard</em>.",
+                "Ce que les membres ont choisi d'envoyer, du plus ancien au plus récent. Un trade, son plan, "
+                "une question : rien d'autre de leur journal.")
     store = rt.get_store()
     if not email or store is None or not store.is_coach(email):
         notice("Accès réservé", "Cette page est réservée aux coachs de Sensitor.", "lock")
@@ -277,36 +325,39 @@ def coach_page(catalog, email, route) -> None:
         footer()
         return
     answered = store.coach_queue(email, "answered", limit=30)
-    html('<div class="sx-stats">'
-         f'<div><div class="l">À traiter</div><div class="v">{len(pending)}</div><div class="d">demandes en attente</div></div>'
-         f'<div><div class="l">Plus ancienne</div><div class="v" style="font-size:1.4rem">'
-         f'{esc(date_fr(pending[0]["created_at"])) if pending else "aucune"}</div><div class="d">date de la demande</div></div>'
-         f'<div><div class="l">Répondues</div><div class="v">{len(answered)}</div><div class="d">les trente dernières</div></div></div>')
-    section(1, "À traiter", "Ouvrez une demande pour y répondre.")
+    if pending:
+        oldest = _waiting(pending[0]["created_at"]).replace("en attente depuis", "depuis")
+        summary = (f"<b>{len(pending)} demande{'s' if len(pending) > 1 else ''}</b> "
+                   f"attend{'ent' if len(pending) > 1 else ''} une réponse ; la plus ancienne {esc(oldest)}.")
+    else:
+        summary = "<b>Aucune demande</b> n'attend de réponse."
+    html(f'<p class="sx-c-summary">{summary} <span>{len(answered)} réponse{"s" if len(answered) > 1 else ""} '
+         f'parmi les trente dernières.</span></p>')
+    section(1, "À traiter", "Ouvrez une demande pour la corriger. L'empreinte montre déjà les règles qui ont cédé.")
     if not pending:
-        note("Aucune demande en attente.")
+        note("La file est vide. Les nouvelles demandes apparaîtront ici, la plus ancienne en premier.")
     for r in pending:
         _queue_row(r, key="p")
     if answered:
         section(2, "Dernières réponses", "Pour garder une cohérence d'un membre à l'autre.")
-        for r in answered[:10]:
-            trade = r["trade"] or {}
-            html(f'<p class="sx-note"><b>{esc(C.pseudonym(r["user_email"]))}</b> · {esc(trade.get("symbol", ""))} · '
-                 f'répondue le {esc(date_fr(r["answered_at"] or ""))}</p>')
+        rows = "".join(f'<li><span>{esc(C.pseudonym(r["user_email"]))}</span><span>{esc((r["trade"] or {}).get("symbol", ""))}</span>'
+                       f'<span>répondue le {esc(date_fr(r["answered_at"] or ""))}</span></li>' for r in answered[:10])
+        html(f'<ul class="sx-c-done">{rows}</ul>')
     footer()
 
 
 def _queue_row(r: dict, *, key: str) -> None:
     trade = r["trade"] or {}
-    mark = hexmark(f"{r['id'] % 100:02d}")
+    auto = R.TradeReview.from_dict(r.get("auto_review") or {})
+    who = C.pseudonym(r["user_email"])
     tap(f"coach_{key}_{r['id']}",
-        f'<div class="sx-j-trade">{mark}<div>'
-        f'<div class="sym">{esc(trade.get("symbol", ""))}<span>{esc(C.pseudonym(r["user_email"]).upper())}</span></div>'
-        f'<div class="meta">Demandée le {esc(date_fr(r["created_at"]))} · {esc(_excerpt(r["question"]))}</div></div>'
-        f'<div class="tags">{pill("En attente", "soon")}</div>'
-        f'<div class="sx-j-r {V.tone(trade.get("r_multiple"))}">{esc(V.r_text(trade.get("r_multiple")))}</div>'
-        f'<span class="arrow">{icon("arrow")}</span></div>',
-        f"Demande de {C.pseudonym(r['user_email'])} sur {trade.get('symbol', '')}", "coach", review=str(r["id"]))
+        f'<div class="sx-c-row"><div><div class="sym">{esc(trade.get("symbol", ""))}<span>{_side(trade)}</span></div>'
+        f'<div class="when">{esc(who)}</div></div>'
+        f'<div class="q">{esc(_excerpt(r["question"]))}<span class="wait">{esc(_waiting(r["created_at"]))}</span></div>'
+        f'<div>{V.rule_print(auto.checks) if auto.checks else ""}</div>'
+        f'<div class="r {V.tone(trade.get("r_multiple"))}">{esc(V.r_text(trade.get("r_multiple")))}</div>'
+        f'<span class="go">{icon("arrow")}</span></div>',
+        f"Demande de {who} sur {trade.get('symbol', '')}", "coach", review=str(r["id"]))
 
 
 def _lesson_choices(catalog) -> dict[str, str]:
@@ -324,18 +375,16 @@ def _lesson_choices(catalog) -> dict[str, str]:
 def _answer(catalog, request: dict, email: str) -> None:
     store = rt.get_store()
     rt.link("Retour à la file", "coach", key="coach_back")
-    html(f'<div class="sx-kicker" style="margin-top:.8rem">{esc(C.pseudonym(request["user_email"]))} · '
-         f'demandée le {esc(date_fr(request["created_at"]))}</div>')
-    html(f'<div class="sx-j-quote"><span class="k">La question du membre</span>{_paragraphs(request["question"])}</div>')
+    plan = R.TradingPlan.from_dict(request["plan"]) if request.get("plan") else None
+    margin = (V.notes(R.plan_sentences(plan)) if plan else
+              '<p class="sx-c-none">Le membre n\'a pas encore écrit de plan : la revue automatique a utilisé le plan de départ.</p>')
+    html(f'<div class="sx-c-copy"><div class="body"><div class="rub">{esc(C.pseudonym(request["user_email"]))} · '
+         f'{esc(_waiting(request["created_at"]))}</div><p class="sx-c-quote">{_paragraphs(request["question"])}</p>'
+         f'<div class="sx-c-who">Demandée le {esc(date_fr(request["created_at"]))}</div>{_broken(request)}</div>'
+         f'<div class="sx-c-margin"><div class="rub">Le plan du membre</div>{margin}</div></div>')
     _trade_block(request, key=f"c{request['id']}")
-    if request.get("plan"):
-        plan = R.TradingPlan.from_dict(request["plan"])
-        with st.container(key=f"navy_coach_plan_{request['id']}"):
-            items = "".join(f"<li>{esc(s)}</li>" for s in R.plan_sentences(plan))
-            html(f'<div class="sx-kicker on-navy">Le plan du membre</div><ol class="sx-j-plan">{items}</ol>')
-    else:
-        note("Le membre n'a pas encore écrit de plan : la revue automatique a utilisé le plan de départ.")
-    section(1, "Votre réponse", "Sur ce trade clôturé uniquement.")
+    section(1, "Votre correction", "Sur ce trade clôturé uniquement. Le membre la lira dans cet ordre : vos notes, ce qui "
+            "est solide, ce qui est à travailler, puis les leçons.")
     notice("Retour pédagogique", "Commentez la lecture, l'exécution, la gestion et le respect du plan. Aucune "
            "recommandation d'achat ou de vente, aucun avis sur un trade à venir.", "info")
     choices = _lesson_choices(catalog)

@@ -312,7 +312,23 @@ def test_visuals() -> None:
     check("the calendar labels each day", "20 octobre : +2,00 R, 1 trade" in cal)
     check("a day without trades says so", "aucun trade" in cal)
     check("R reads in French", V.r_text(-1.5) == "−1,50 R" and V.r_text(None) == "n.d.")
-    dashes = [s for s in (ring, ladder, cal) if "\u2014" in s or "\u2013" in s]
+    rec = V.record([("in", "Trade 1"), ("out", "Trade 2"), ("na", "Trade 3")])
+    check("the record draws one mark per trade, each labelled", rec.count("<rect") == 3 and "Trade 2" in rec)
+    check("a departure is taller than a trade inside the plan, so it reads without colour",
+          'height="34"' in rec and 'height="22"' in rec)
+    review = R.review_trade(trade("p1", risk=250), PLAN, [])
+    print_ = V.rule_print(review.checks)
+    check("the print has the plan's nine rules, in a fixed order", print_.count("<i ") == 9
+          and print_.index("risque maximum") < print_.index("écarts notés"))
+    check("and says in words which one broke", "enfreinte : le risque maximum par trade" in print_)
+    levels = V.levels(trade("v3").to_dict())
+    check("the levels are named in French and in R", all(w in levels for w in ("Stop", "Entrée", "Objectif", "+2,0", "−1,0")))
+    check("the risk and target zones are hatched at 30°", levels.count("rotate(-30)") == 2)
+    check("the exit is annotated", "sortie à l'objectif" in levels.replace("&#x27;", "'"))
+    check("a mark out of five on a graduated rule", V.graduation(3).count("<line") == 7 and V.graduation(None).count("<line") == 6)
+    check("the coach's visa", "Revu par un coach Sensitor" in V.visa("21 octobre 2026"))
+    check("margin notes are numbered", V.notes(["a", "b"]).count("<li>") == 2 and "②" in V.notes(["a", "b"]))
+    dashes = [s for s in (ring, ladder, cal, rec, print_, levels) if "\u2014" in s or "\u2013" in s]
     check("no long dash in any drawing", not dashes)
 
 

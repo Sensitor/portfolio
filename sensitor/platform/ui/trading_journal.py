@@ -31,7 +31,8 @@ from ...trading.setups import EMOTIONS, MISTAKES, SETUPS, mistake_label, setup_l
 from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
-from .components import (crumbs, date_fr, esc, footer, hexmark, html, icon, note, notice,
+from .. import brand
+from .components import (carnet, crumbs, date_fr, esc, footer, hexmark, html, icon, note, notice,
                          page_header, pill, section, tap)
 from .theme import TOKENS as T
 
@@ -91,8 +92,9 @@ def _in_period(trades: list[Trade], period: str) -> list[Trade]:
 
 def _header(subtitle: str, title_html: str, lead: str = "") -> None:
     space = spaces.space("journal")
+    carnet()
     crumbs("Sensitor", space.label, *( (subtitle,) if subtitle else ()))
-    page_header(f"Espace {space.numeral} · Journal de trading", title_html, lead)
+    page_header("Journal de trading", title_html, lead)
 
 
 def nav(page: str, email: str | None) -> None:
@@ -125,13 +127,13 @@ def _demo_banner(book: Book, email: str | None, *, key: str) -> None:
     if not book.demo:
         return
     if email:
-        html(f'<div class="sx-j-banner">{icon("info")}<div><b>Exemple synthétique</b>Un journal construit '
+        html(f'<div class="sx-j-banner">{brand.hook_svg(16)}<div><b>Exemple synthétique</b> Un journal construit '
              'pour montrer la méthode, avec son plan. Vos propres trades ne sont pas affichés.</div></div>')
         if st.button("Revenir à mon journal", key=f"demo_off_{key}", type="secondary"):
             st.session_state[DEMO_KEY] = False
             st.rerun()
     else:
-        html(f'<div class="sx-j-banner">{icon("info")}<div><b>Exemple synthétique</b>Ce journal est '
+        html(f'<div class="sx-j-banner">{brand.hook_svg(16)}<div><b>Exemple synthétique</b> Ce journal est '
              'construit pour la démonstration : un trader fictif, son plan et neuf semaines de trades. '
              'Créez un compte pour tenir le vôtre.</div></div>')
 
@@ -179,18 +181,16 @@ def _currency(code: str) -> str:
 
 
 def trade_row(trade: Trade, review: R.TradeReview | None, *, key: str) -> None:
-    score = review.score if review else None
-    center = f"{review.passed}/{len(review.evaluated)}" if review and review.evaluated else ""
-    tags = "".join(pill(setup_label(s, "fr")) for s in trade.setups[:2])
-    if review and review.failed:
-        tags += pill(f"{len(review.failed)} écart{'s' if len(review.failed) > 1 else ''}", "soon")
     r = trade.r_multiple
+    print_ = V.rule_print(review.checks) if review else ""
+    departures = (f'<em>{len(review.failed)} écart{"s" if len(review.failed) > 1 else ""}</em>'
+                  if review and review.failed else "")
     tap(f"trade_{key}_{trade.id}",
-        f'<div class="sx-j-trade">{V.score_ring(score, size=46, center=center)}<div>'
-        f'<div class="sym">{esc(trade.symbol)}<span>{_side(trade).upper()}</span></div>'
-        f'<div class="meta">{esc(_when(trade.opened_at))} · {esc(V.SESSION_SHORT.get(trade.session.value, ""))}</div></div>'
-        f'<div class="tags">{tags}</div><div class="sx-j-r {V.tone(r)}">{esc(V.r_text(r))}</div>'
-        f'<span class="arrow">{icon("arrow")}</span></div>',
+        f'<div class="sx-c-row"><div><div class="sym">{esc(trade.symbol)}<span>{_side(trade).lower()}</span></div>'
+        f'<div class="when">{esc(_when(trade.opened_at))} · {esc(V.SESSION_SHORT.get(trade.session.value, ""))}</div></div>'
+        f'<div class="meta2">{esc(_setups_text(trade))}{" · " + departures if departures else ""}</div>'
+        f'<div>{print_}</div><div class="r {V.tone(r)}">{esc(V.r_text(r))}</div>'
+        f'<span class="go">{icon("arrow")}</span></div>',
         f"{trade.symbol}, {_side(trade).lower()} du {_when(trade.opened_at)}, {V.r_text(r)}",
         "journal_trade", trade=trade.id)
 
@@ -222,21 +222,21 @@ def dashboard(catalog, email, route) -> None:
     rep = R.report(trades, reviews)
     metrics = compute_metrics(trades)
 
-    _hero(book, rep, metrics, trades)
+    _record(book, rep, metrics, trades, reviews, period)
     if not book.plan_written and not book.demo:
         notice("Plan par défaut", "Vos trades sont revus avec un plan de départ (1 % de risque, rapport "
                "de 1,5, trois trades par jour). Écrivez le vôtre dans « Mon plan » : la revue suivra vos règles.",
                "info")
 
-    section(1, "Votre plan face au marché", "Deux courbes : vos trades tels qu'ils ont été pris, et les "
-            "mêmes trades si chaque écart au plan avait été évité.")
+    section(1, "Ce que vos écarts vous ont coûté", "Vos trades tels qu'ils ont été pris, et les mêmes trades si "
+            "chaque écart au plan avait été évité. La zone entre les deux, c'est le prix des écarts.")
     _curves(trades, reviews)
 
-    section(2, "Où partent vos R", "Chaque règle de votre plan, combien de fois elle a été enfreinte, et "
-            "ce que les trades concernés ont rapporté ou coûté.")
+    section(2, "Où partent vos R", "Chaque règle de votre plan : une marque par écart, et ce que les trades "
+            "concernés ont rapporté ou coûté.")
     _rules(rep, key="dash")
 
-    section(3, "Votre régularité", "Un carré par jour : vert pour un jour gagnant en R, rouge pour un jour "
+    section(3, "Vos jours, un par un", "Un carré par jour : vert pour un jour gagnant en R, brique pour un jour "
             "perdant. Les semaines se lisent de gauche à droite.")
     _regularity(trades)
 
@@ -244,7 +244,8 @@ def dashboard(catalog, email, route) -> None:
             "trades derrière chaque chiffre.")
     _breakdowns(trades)
 
-    section(5, "Derniers trades", "Le score indique la part des règles vérifiables qui ont été respectées.")
+    section(5, "Vos derniers trades", "À droite de chaque trade, son empreinte : les neuf règles du plan, "
+            "toujours dans le même ordre. Une case brique, une règle enfreinte.")
     recent = sorted(trades, key=lambda t: t.closed_at, reverse=True)[:6]
     for t in recent:
         trade_row(t, book.reviews.get(t.id), key="dash")
@@ -270,41 +271,107 @@ def _empty_state(email: str | None) -> None:
          "automatiquement : c'est le même compte et le même journal.")
 
 
-def _hero(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade]) -> None:
-    compliance = rep.compliance
-    ring = V.score_ring(compliance, size=150, caption="DU PLAN", on_navy=True)
+def _streaks(trades: list[Trade], reviews: dict) -> tuple[int, int]:
+    """Trades in a row inside the plan: the run still going, and the longest one."""
+    current = best = 0
+    for t in sorted(trades, key=lambda t: (t.closed_at, t.id)):
+        followed = reviews.get(t.id) and reviews[t.id].followed
+        if followed:
+            current += 1
+            best = max(best, current)
+        elif followed is False:
+            current = 0
+    return current, best
+
+
+def _share(value: float) -> str:
+    return f"{round(abs(value) * 100)} %"
+
+
+def _figure_notes(m: dict, rep: R.PlanReport) -> dict[str, str]:
+    """One sentence per figure, saying what it means for this member."""
+    e, total, pf, win = m.get("expectancy_r"), m.get("total_r"), m.get("profit_factor"), m.get("win_rate")
+    payoff, dd = m.get("payoff_ratio"), m.get("max_drawdown_r")
+    out = {}
+    out["e"] = ("Sans stop, pas d'espérance en R." if e is None else
+                f"En moyenne, un trade vous rend {_share(e)} de ce que vous risquez." if e > 0 else
+                f"En moyenne, un trade vous coûte {_share(e)} de ce que vous risquez.")
+    out["total"] = ("" if total is None else
+                    f"Soit {V.fr(abs(total), 1)} fois votre risque par trade, {'gagné' if total >= 0 else 'perdu'} sur la période.")
+    if win is None:
+        out["win"] = "Aucun trade gagnant ou perdant."
+    elif payoff:
+        out["win"] = (f"Avec vos gains moyens, {round(100 / (1 + payoff))} % suffisent pour ne pas perdre d'argent.")
+    else:
+        out["win"] = f"{_plural(m.get('n_wins', 0), 'gagnant')} pour {_plural(m.get('n_losses', 0), 'perdant')}."
+    out["pf"] = ("Pas encore de perte pour le calculer." if pf is None else
+                 f"Pour 1 perdu, {V.fr(pf)} gagné, en argent.")
+    out["dd"] = ("" if not dd else
+                 f"Le pire recul, du sommet au creux : l'équivalent de {V.fr(abs(dd), 1)} pertes de 1 R d'affilée.")
+    out["dep"] = (f"Ce qu'ont {'coûté' if rep.departed_r < 0 else 'rapporté'} les "
+                  f"{_plural(rep.n_departed_r, 'trade')} hors plan.")
+    return out
+
+
+def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews: dict, period: str) -> None:
+    ordered = sorted(trades, key=lambda t: (t.closed_at, t.id))
+    marks = []
+    for i, t in enumerate(ordered, start=1):
+        rv = reviews.get(t.id)
+        state = "na" if not rv or rv.followed is None else ("in" if rv.followed else "out")
+        what = {"in": "plan suivi", "out": f"{len(rv.failed) if rv else 0} écart(s)", "na": "rien de vérifiable"}[state]
+        marks.append((state, f"Trade {i} · {t.symbol} · {V.r_text(t.r_multiple)} · {what}"))
     if rep.n_checked:
         headline = (f"Plan respecté sur <em>{_count_of(rep.n_followed, rep.n_checked)}</em>."
                     if rep.n_followed else f"Plan respecté sur <em>aucun des {rep.n_checked} trades</em>.")
-        lead = (f"Les trades conformes ont rapporté {V.r_text(rep.followed_r)} ; ceux qui s'en sont "
-                f"écartés, {V.r_text(rep.departed_r)}.")
     else:
-        headline, lead = "Aucune règle vérifiable.", "Renseignez le stop et le setup de vos trades."
-    n_r = m.get("n_with_r", 0)
+        headline = "Aucune règle vérifiable : renseignez le stop et le setup de vos trades."
+    current, best = _streaks(trades, reviews)
+    rows = R.plan_curves(trades, reviews)
+    reading = []
+    if rows and rep.n_departed_r and rep.departed_r < 0:
+        reading.append(f"Sans les {_plural(rep.n_departed_r, 'écart')}, la courbe finirait à "
+                       f"{V.r_text(rows[-1]['plan'])} au lieu de {V.r_text(rows[-1]['realise'])}.")
+    top = rep.priority
+    if top is not None:
+        reading.append(f"L'écart qui pèse le plus : {top.label.lower()}, {top.breaches} fois"
+                       f"{', pour ' + V.r_text(top.cost_r) if top.cost_r else ''}.")
+    if best and current:
+        reading.append(f"Série en cours : {_plural(current, 'trade')} d'affilée dans le plan. "
+                       f"Votre meilleure : {best}.")
+    elif best:
+        reading.append(f"Le dernier trade a rompu la série ; votre meilleure : {best} trades d'affilée dans le plan.")
+    n = m["n"]
+    reading.append(f"Sur {n} trades, ces chiffres donnent un ordre de grandeur" +
+                   (", pas encore une certitude." if n < 100 else " ; comparez-les d'un mois à l'autre."))
+    when = {"30": "les 30 derniers jours", "90": "les 90 derniers jours"}.get(period, "toute la période")
+    f = _figure_notes(m, rep)
 
-    def kpi(label: str, value: str, detail: str, tone_: str = "") -> str:
-        return (f'<div><div class="v {tone_}">{value}</div><div class="l">{esc(label)}</div>'
-                f'<div class="d">{esc(detail)}</div></div>')
+    def figure(label: str, value: str, sentence: str, tone_: str = "") -> str:
+        return (f'<div><div class="l">{esc(label)}</div><div class="v {tone_}">{value}</div>'
+                f'<div class="s">{esc(sentence)}</div></div>')
 
-    pf = m.get("profit_factor")
-    win = m.get("win_rate")
-    kpis = "".join((
-        kpi("Espérance par trade", esc(V.r_text(m.get("expectancy_r"))), f"sur {_plural(n_r, 'trade')} avec un stop",
-            V.tone(m.get("expectancy_r"))),
-        kpi("Résultat total", esc(V.r_text(m.get("total_r"))), f"{_plural(m['n'], 'trade')} clôturé{'s' if m['n'] > 1 else ''}",
-            V.tone(m.get("total_r"))),
-        kpi("Taux de réussite", "n.d." if win is None else f"{round(win * 100)}<small> %</small>",
-            f"{_plural(m.get('n_wins', 0), 'gagnant')}, {_plural(m.get('n_losses', 0), 'perdant')}"),
-        kpi("Profit factor", "n.d." if pf is None else esc(V.fr(pf)), "gains bruts sur pertes brutes, en argent"),
-        kpi("Drawdown maximum", esc(V.r_text(m.get("max_drawdown_r"))), "le pire recul de la courbe en R",
-            "down" if (m.get("max_drawdown_r") or 0) < 0 else ""),
-        kpi("Coût des écarts" if rep.departed_r < 0 else "Résultat hors plan", esc(V.r_text(rep.departed_r)),
-            f"{_plural(rep.n_departed_r, 'trade')} hors plan", V.tone(rep.departed_r)),
+    pf, win = m.get("profit_factor"), m.get("win_rate")
+    figures = "".join((
+        figure("Espérance par trade", esc(V.r_text(m.get("expectancy_r"))), f["e"], V.tone(m.get("expectancy_r"))),
+        figure("Résultat total", esc(V.r_text(m.get("total_r"))), f["total"], V.tone(m.get("total_r"))),
+        figure("Taux de réussite", "n.d." if win is None else f"{round(win * 100)} %", f["win"]),
+        figure("Profit factor", "n.d." if pf is None else esc(V.fr(pf)), f["pf"]),
+        figure("Drawdown maximum", esc(V.r_text(m.get("max_drawdown_r"))), f["dd"],
+               "down" if (m.get("max_drawdown_r") or 0) < 0 else ""),
+        figure("Coût des écarts" if rep.departed_r < 0 else "Résultat hors plan", esc(V.r_text(rep.departed_r)),
+               f["dep"], V.tone(rep.departed_r)),
     ))
-    with st.container(key="navy_jr_hero"):
-        html(f'<div class="sx-j-hero">{ring}<div class="lead"><div class="k">'
-             f'{"Exemple synthétique · " if book.demo else ""}Respect du plan</div><h3>{headline}</h3>'
-             f'<p>{esc(lead)}</p></div></div><div class="sx-j-kpis">{kpis}</div>')
+    key = ('<div class="sx-c-key"><span><i style="background:var(--c-ink)"></i>plan suivi</span>'
+           '<span><i style="background:var(--c-down);height:16px"></i>écart au plan</span>'
+           '<span><i style="border:1px solid var(--c-na);height:8px"></i>rien de vérifiable</span>'
+           '<span>une marque par trade, du plus ancien au plus récent</span></div>')
+    html(f'<div class="sx-c-record"><div class="body"><div class="rub">Le relevé · {esc(when)}'
+         f'{" · exemple synthétique" if book.demo else ""}</div><h3>{headline}</h3>'
+         f'<div class="sx-c-count"><div><div class="big">{rep.n_followed}<small> / {rep.n_checked}</small></div>'
+         f'<div class="lab">trades dans le plan</div></div>{V.record(marks)}</div>{key}</div>'
+         f'<div class="sx-c-margin"><div class="rub">Lecture</div>{V.notes(reading)}</div></div>'
+         f'<div class="sx-c-figures">{figures}</div>')
 
 
 def _curves(trades: list[Trade], reviews: dict) -> None:
@@ -312,51 +379,81 @@ def _curves(trades: list[Trade], reviews: dict) -> None:
     if len(rows) < 2:
         note("La courbe apparaîtra à partir de deux trades avec un stop.")
         return
+    K = V.K
     xs = [r["n"] for r in rows]
+    real, plan = [r["realise"] for r in rows], [r["plan"] for r in rows]
+    low, high = min(real + plan + [0]), max(real + plan + [0])
+    rug = low - (high - low) * 0.09
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=xs, y=[r["plan"] for r in rows], name="Si le plan avait été suivi",
-                             line=dict(color=T["blue-2"], width=2.2, dash="dot"),
-                             hovertemplate="Trade %{x} · plan seul : %{y:+.2f} R<extra></extra>"))
-    fig.add_trace(go.Scatter(x=xs, y=[r["realise"] for r in rows], name="Réalisé",
-                             line=dict(color=T["ink"], width=2.6), fill="tozeroy",
-                             fillcolor="rgba(15,27,38,0.05)",
+    fig.add_trace(go.Scatter(x=xs, y=real, name="Réalisé", line=dict(color=K["ink"], width=2.4),
                              hovertemplate="Trade %{x} · réalisé : %{y:+.2f} R<extra></extra>"))
+    # Filled to the curve above: the area between the two is what the departures cost.
+    fig.add_trace(go.Scatter(x=xs, y=plan, name="Plan seul", line=dict(color=K["plan"], width=1.5),
+                             fill="tonexty", fillcolor="rgba(154,58,44,0.10)",
+                             hovertemplate="Trade %{x} · plan seul : %{y:+.2f} R<extra></extra>"))
     off = [r for r in rows if r["ecart"]]
     if off:
-        fig.add_trace(go.Scatter(x=[r["n"] for r in off], y=[r["realise"] for r in off], mode="markers",
-                                 name="Trade hors plan", marker=dict(color=T["red"], size=9,
-                                                                     line=dict(color=T["white"], width=1.5)),
-                                 hovertemplate="Trade %{x} hors plan<extra></extra>"))
+        fig.add_trace(go.Scatter(x=[r["n"] for r in off], y=[rug] * len(off), mode="markers", name="Écart",
+                                 marker=dict(symbol="line-ns", size=11, line=dict(color=K["down"], width=2.2)),
+                                 hovertemplate="Trade %{x} : hors plan<extra></extra>"))
+    font = "Schibsted Grotesk, DM Sans, sans-serif"
+    last = rows[-1]
+    gap = last["plan"] - last["realise"]
+    near = abs(gap) < (high - low) * 0.08
+    for value, label, color, shift in ((last["plan"], "Plan seul", K["plan"], -9 if near and gap >= 0 else 0),
+                                       (last["realise"], "Réalisé", K["ink"], 9 if near and gap >= 0 else 0)):
+        fig.add_annotation(x=xs[-1], y=value, text=f"<b>{label}</b> {V.r_text(value)}", showarrow=False,
+                           xanchor="left", xshift=8, yshift=shift, font=dict(family=font, size=12.5, color=color))
+    if off and abs(gap) > 0.01:
+        k = max(1, int(len(xs) * 0.78)) - 1
+        mid = (rows[k]["plan"] + rows[k]["realise"]) / 2
+        fig.add_annotation(x=xs[k], y=mid, text=f"écart final : {V.fr(abs(gap))} R",
+                           showarrow=True, arrowhead=0, arrowwidth=1, arrowcolor=K["note"], ax=-52, ay=-30,
+                           xanchor="right", font=dict(family="Newsreader, Georgia, serif", size=14, color=K["note"]))
     chart_style(fig, x_label="Trades, dans l'ordre de clôture", y_label="Résultat cumulé, en R",
-                numeric_x=True, height=380)
+                numeric_x=True, height=380, legend=False)
+    fig.update_layout(font=dict(family=font, color=K["ink-2"]), margin=dict(l=10, r=128, t=24, b=10),
+                      xaxis=dict(showgrid=False, tickfont=dict(family=font, size=11.5, color=K["graphite"]),
+                                 linecolor=K["rule-strong"], title_font=dict(family=font, size=12.5, color=K["graphite"])),
+                      yaxis=dict(gridcolor=K["rule"], zerolinecolor=K["rule-strong"],
+                                 tickfont=dict(family=font, size=11.5, color=K["graphite"]),
+                                 title_font=dict(family=font, size=12.5, color=K["graphite"])),
+                      hoverlabel=dict(font=dict(family=font)))
     with st.container(key="chart_jr_curves"):
         st.plotly_chart(fig, key="plot_jr_curves", theme=None, config={"displayModeBar": False, "responsive": True})
-        gap = rows[-1]["plan"] - rows[-1]["realise"]
         missing = len([t for t in trades if t.r_multiple is None])
         extra = f" {missing} trade{'s' if missing > 1 else ''} sans stop, donc sans R, n'y figure{'nt' if missing > 1 else ''} pas." if missing else ""
-        html(f'<div class="sx-chart-foot"><b>Lecture</b><span>Écart final entre les deux courbes : '
-             f'{esc(V.r_text(gap))}. La courbe du plan compte à zéro chaque trade qui a enfreint une règle : '
-             f'elle montre ce que la discipline seule aurait changé, pas un résultat garanti.{esc(extra)}</span></div>')
+        html(f'<div class="sx-chart-foot"><b>Lecture</b><span>Les traits brique, sous la courbe, marquent les trades hors '
+             f'plan. La courbe du plan compte ces trades à zéro : elle montre ce que la discipline seule aurait '
+             f'changé, pas un résultat garanti.{esc(extra)}</span></div>')
 
 
 def _rules(rep: R.PlanReport, *, key: str) -> None:
     if not rep.tallies:
         note("Aucune règle vérifiable sur cette période.")
         return
-    left, right = st.columns([1.7, 1], gap="large")
+    left, right = st.columns([1.75, 1], gap="large")
     with left:
-        html(V.rule_bars(rep.tallies))
+        rows = []
+        for t in rep.tallies:
+            marks = ("".join("<i></i>" for _ in range(min(t.breaches, 24)))
+                     + (f"<em>+{t.breaches - 24}</em>" if t.breaches > 24 else "")) if t.breaches else ""
+            cost = (f'<span class="cost {V.tone(t.cost_r)}">{esc(V.r_text(t.cost_r))}</span>' if t.breaches
+                    else '<span class="cost ok">tenue</span>')
+            rows.append(f'<li class="{"" if t.breaches else "clean"}"><span>{esc(t.label)}</span>'
+                        f'<span class="marks">{marks}</span><span class="n">{t.breaches} sur {t.checked}</span>{cost}</li>')
+        html(f'<ul class="sx-c-ledger">{"".join(rows)}</ul>')
     with right:
         top = rep.priority
         if top is None:
-            html('<div class="sx-j-priority"><div class="k">Priorité</div><h4>Aucun écart sur la période.</h4>'
-                 '<p>Chaque règle vérifiable a été respectée. Le plan lui-même se juge à la revue mensuelle, '
+            html(f'<div class="sx-c-todo"><div class="rub">{brand.hook_svg(13)}Rien à corriger</div>'
+                 '<h4>Chaque règle a tenu sur la période.</h4><p>Le plan lui-même se juge à la revue mensuelle, '
                  'sur un échantillon suffisant.</p></div>')
             return
         page, fields = spaces.parse_target(top.lesson)
-        html(f'<div class="sx-j-priority"><div class="k">Priorité de la période</div><h4>{esc(top.label)}</h4>'
-             f'<p><b>{top.breaches} écart{"s" if top.breaches > 1 else ""}</b> sur {top.checked} trades, pour '
-             f'<b>{esc(V.r_text(top.cost_r))}</b>. La leçon qui traite cet écart :</p></div>')
+        html(f'<div class="sx-c-todo"><div class="rub">{brand.hook_svg(13)}À travailler en premier</div>'
+             f'<h4>{esc(top.label)}</h4><p>{_plural(top.breaches, "écart")} sur {top.checked} trades, pour '
+             f'{esc(V.r_text(top.cost_r))}. La leçon qui traite cet écart :</p></div>')
         rt.link(f"Lire : {top.lesson_title}", page, key=f"priority_{key}", kind="primary", width="stretch",
                 **fields)
 
@@ -477,16 +574,18 @@ def trade_page(catalog, email, route) -> None:
     nav("journal_trade", email)
     _demo_banner(book, email, key="trade")
 
-    left, right = st.columns([1, 1.25], gap="large")
+    left, right = st.columns([1.1, 1], gap="large")
     with left:
         with st.container(key="panel_jr_ladder"):
-            html(V.price_ladder(trade.to_dict()))
+            html(V.levels(trade.to_dict(), uid=f"lv{trade.id}"))
     with right:
         r = trade.r_multiple
+        kept = f"{review.passed} règle{'s' if review.passed > 1 else ''} sur {len(review.evaluated)}" if review and review.evaluated else ""
         with st.container(key="navy_jr_result"):
-            html(f'<div class="sx-j-big">{V.score_ring(review.score if review else None, size=96, on_navy=True, center=(f"{review.passed}/{len(review.evaluated)}" if review and review.evaluated else ""))}'
-                 f'<div><div class="k">Résultat</div><div class="r {V.tone(r)}">{esc(V.r_text(r))}</div>'
-                 f'<p>{esc(_result_line(trade, review))}</p></div></div>')
+            html(f'<div class="sx-c-verdict"><div class="k">Résultat</div><div class="r {V.tone(r)}">{esc(V.r_text(r))}</div>'
+                 f'<p>{esc(_result_line(trade, review))}</p>'
+                 + (f'<div class="pr">{V.rule_print(review.checks, big=True)}<span>{esc(kept)} tenues</span></div>' if kept else "")
+                 + '</div>')
         html(_facts(trade))
 
     section(1, "La revue automatique", "Votre plan, règle par règle, appliqué à ce trade. Une règle non "
@@ -551,17 +650,21 @@ def _duration(minutes: float | None) -> str:
     return f"{hours} h {rest:02d}" if rest else f"{hours} h"
 
 
+def lesson_ref(key: str, target: str, title: str, why: str) -> None:
+    """A lesson to read, as a reference with the hook: the journal points to the Academy, it is not a chapter."""
+    page, fields = spaces.parse_target(target)
+    tap(key, f'<div class="sx-c-ref">{brand.hook_svg(15, color=V.K["note"])}<div><div class="t">{esc(title)}</div>'
+             f'<div class="s">{esc(why)}</div></div><span class="go">{icon("arrow")}</span></div>',
+        f"Leçon : {title}", page, **fields)
+
+
 def _lessons_for(review: R.TradeReview, *, key: str) -> None:
-    lessons = list(dict.fromkeys((c.lesson, c.lesson_title) for c in review.failed if c.lesson))
+    lessons = list(dict.fromkeys((c.lesson, c.lesson_title, c.label) for c in review.failed if c.lesson))
     if not lessons:
         return
     html('<div class="sx-kicker" style="margin-top:1.4rem">Pour progresser</div>')
-    for i, (target, title) in enumerate(lessons):
-        page, fields = spaces.parse_target(target)
-        tap(f"lesson_{key}_{i}",
-            f'<div class="sx-lesson flush">{hexmark(f"{i + 1:02d}")}<div><div class="title">{esc(title)}</div>'
-            f'<div class="summary">La leçon de l\'Academy qui traite cet écart.</div></div><div class="side"></div>'
-            f'<span class="arrow">{icon("arrow")}</span></div>', f"Leçon : {title}", page, **fields)
+    for i, (target, title, rule) in enumerate(lessons):
+        lesson_ref(f"lesson_{key}_{i}", target, title, f"Academy · pour la règle « {rule.lower()} »")
 
 
 def _neighbours(book: Book, trade: Trade) -> None:

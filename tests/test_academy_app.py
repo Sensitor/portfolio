@@ -344,6 +344,16 @@ def test_journal_space(alice_tok: str) -> None:
           and "Sortie à l'objectif." not in text(other))
 
 
+def test_direction_prototype(tok: str) -> None:
+    print("\nThe « Carnet de bord » prototype stays on its pages")
+    marked = [r for r in ({"page": "journal"}, {"page": "journal_trade", "trade": "demo-005"},
+                          {"page": "journal_reviews"}, {"page": "coach"}) if 'class="sx-da"' in text(run(r, tok))]
+    check("the journal, a trade, the reviews and the coach queue carry the direction", len(marked) == 4, str(marked))
+    others = [r["page"] for r in ({"page": "home"}, {"page": "academy"}, {"page": "lesson", "course": "premiers-pas",
+              "lesson": "fonctionnement-marche"}, {"page": "psychology"}, {"page": "lab"}) if 'class="sx-da"' in text(run(r, tok))]
+    check("the rest of the platform is unchanged until it is validated", not others, str(others))
+
+
 def test_no_secret_asked(tok: str) -> None:
     print("\nNo key or seed phrase is ever asked for")
     from sensitor.academy import content as C
@@ -502,6 +512,7 @@ def main() -> int:
     test_hash_demo(alice)
     test_no_secret_asked(alice)
     test_journal_space(alice)
+    test_direction_prototype(alice)
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)
