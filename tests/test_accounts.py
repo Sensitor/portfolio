@@ -184,7 +184,7 @@ def test_upgrade() -> None:
     check("the journal table is there after the upgrade",
           store.add_journal_entry("old@example.com", kind="free", body="Première note.") > 0)
     check("the database is at the current version",
-          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 9)
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 10)
 
     print("\nUpgrading a version-8 database (journal without routines)")
     path = os.path.join(WORK, "v8.db")
@@ -212,7 +212,34 @@ def test_upgrade() -> None:
     check("the old note survives, with no routine", len(old) == 1 and old[0]["checks"] is None)
     store.add_journal_entry("old@example.com", kind="pre", body="Nouvelle note.", checks=["etat"])
     check("a new note stores its routine", store.journal_entries("old@example.com")[0]["checks"] == ["etat"])
-    check("the database is at version 9", store._read("PRAGMA user_version")[0][0] == 9)
+    check("the database is at the current version", store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION)
+
+    print("\nUpgrading a version-9 database (no roles, no journal review)")
+    path = os.path.join(WORK, "v9.db")
+    conn = sqlite3.connect(path)
+    conn.executescript("""
+        CREATE TABLE users (email TEXT PRIMARY KEY, tier TEXT NOT NULL DEFAULT 'free',
+            display_name TEXT, password_hash TEXT, last_login_at TEXT,
+            failed_logins INTEGER NOT NULL DEFAULT 0, locked_until TEXT, email_verified_at TEXT,
+            created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        INSERT INTO users (email, created_at, updated_at) VALUES ('old@example.com', 'x', 'x');
+        INSERT INTO users (email, created_at, updated_at) VALUES ('team@example.com', 'x', 'x');
+        PRAGMA user_version = 9;
+    """)
+    conn.commit()
+    conn.close()
+    store = Store(path)
+    check("every existing account starts as a member, not a coach",
+          store.get_user("old@example.com")["role"] == "" and not store.is_coach("team@example.com"))
+    store.set_role("team@example.com", "coach")
+    check("a coach can be named after the upgrade", store.is_coach("team@example.com"))
+    store.save_trading_plan("old@example.com", {"risk_pct": 1.0})
+    request = store.create_review_request("old@example.com", trade_id="t", trade={"id": "t"},
+                                          auto_review={"checks": []}, plan=None, question="Question ?")
+    check("the plan and review tables are there",
+          store.get_trading_plan("old@example.com") == {"risk_pct": 1.0}
+          and [r["id"] for r in store.coach_queue("team@example.com")] == [request])
+    check("the database is at version 10", store._read("PRAGMA user_version")[0][0] == 10)
 
 
 def main() -> int:

@@ -103,6 +103,10 @@ def session_for(moment: datetime | None) -> Session:
     The overlap wins when both London and New York are open, because "London/NY"
     is the distinction traders actually reason about — reporting such a trade as
     plain London would hide the busiest window of the day.
+
+    London also wins over Asia in the hour both windows share (07:00 to 08:00
+    UTC): in summer that hour is London's open, 9 a.m. on a Paris screen, and a
+    trader taking the open is trading London, not the end of Tokyo.
     """
     if moment is None:
         return Session.OFF_HOURS
@@ -110,7 +114,8 @@ def session_for(moment: datetime | None) -> Session:
 
     if OVERLAP_WINDOW[0] <= hour < OVERLAP_WINDOW[1]:
         return Session.OVERLAP
-    for session, (start, end) in SESSION_WINDOWS.items():
+    for session in (Session.LONDON, Session.NEW_YORK, Session.ASIA):
+        start, end = SESSION_WINDOWS[session]
         if start <= hour < end:
             return session
     return Session.OFF_HOURS

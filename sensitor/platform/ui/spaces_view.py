@@ -80,18 +80,6 @@ def tools(catalog, email, route) -> None:
               "overview", "Ouvrir l'analyse de portefeuille")
 
 
-def journal(catalog, email, route) -> None:
-    _separate("journal", "Le journal du trader, dans l'application d'analyse",
-              "Le journal de trading existe et fonctionne, dans la même application que le "
-              "portefeuille. Il rejoindra cet espace membre dans une étape ultérieure.",
-              ("Saisie des trades ou synchronisation MetaTrader 5, avec setups, émotions et discipline.",
-               "Performance en R, espérance, profit factor, drawdown et séries.",
-               "Analyse par setup, actif, session, jour et unité de temps.",
-               "Risque, discipline et psychologie, puis revue hebdomadaire exportable.",
-               "Les mêmes comptes : l'adresse et le mot de passe utilisés ici fonctionnent aussi là-bas."),
-              "trading_overview", "Ouvrir le journal de trading")
-
-
 def space_cards(*, key: str, exclude: tuple[str, ...] = ()) -> None:
     """The map of spaces, three per row, each one a link."""
     shown = [s for s in spaces.SPACES if s.id not in exclude]

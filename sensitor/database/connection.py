@@ -175,7 +175,8 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "workspace": [("manual_prices", "TEXT")],
     "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
               ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
-              ("locked_until", "TEXT"), ("email_verified_at", "TEXT")],
+              ("locked_until", "TEXT"), ("email_verified_at", "TEXT"),
+              ("role", "TEXT NOT NULL DEFAULT ''")],
     "journal_entries": [("checks", "TEXT")],
 }
 
@@ -227,6 +228,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # Version 9 adds `journal_entries.checks`, the routine items ticked on a
     # note. A nullable column, applied above; existing notes keep NULL, which
     # reads as « no routine offered » and keeps them out of the routine counts.
+    #
+    # Version 10 adds `trading_plans` and `trade_reviews`, the journal's plan and
+    # the requests for a coach's review, and `users.role`. New tables and a
+    # column with a default, applied above; no existing row is touched.
     #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.

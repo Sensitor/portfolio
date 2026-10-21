@@ -22,11 +22,11 @@ place, and each one is reused as it was:
 | Existing piece | Role in the platform |
 |---|---|
 | `sensitor/core/auth.py` + `Store` sessions | the single account system, shared with the portfolio app |
-| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6, the reflection journal since v8, its routine since v9 |
+| `sensitor/database` (SQLite / PostgreSQL) | the single database; Academy tables since schema v6, the reflection journal since v8, its routine since v9, the trading plan, coach review requests and `users.role` since v10 |
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
-| `portfolio_optimizer_saas.py` | kept as it is; linked as the « Portefeuille et risque » and « Journal de trading » spaces |
+| `portfolio_optimizer_saas.py` | kept as it is; linked as the « Portefeuille et risque » space, and for MetaTrader 5 synchronisation from the journal |
 
 What moved:
 
@@ -68,7 +68,7 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
 | IV | Progression | Apprendre | live | `progress` |
 | V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
-| VI | Journal de trading | Trader | separate | `journal` (opens the analytics app on `?page=trading_overview`) |
+| VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
 | VII | Salle des marchés | Trader | preparing | `market` |
 | VIII | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
 | IX | Communauté | Échanger | preparing | `community` |
@@ -100,6 +100,39 @@ written before v9 stay out of the routine counts).
   it, labels the person or suggests a diagnosis.
 * The space links to path 6, « Décider sous incertitude », and to its « Routine de séance »
   checklist. Nothing in it is announced as planned any more.
+
+**Journal de trading** is live, in this app and on the same `trades` table as
+the analytics app, so trades synchronised from MetaTrader 5 there appear here.
+
+* **The plan and the automatic review** (`trading/review.py`). A member writes
+  their rules once (stop, maximum risk, minimum reward-to-risk, sessions,
+  setups, trades per day, daily loss limit in R, pause after losses; table
+  `trading_plans`). Every closed trade is checked rule by rule: respected,
+  broken, or not checkable (never counted as a pass). Mistakes the member
+  recorded on a trade count as departures; nothing is inferred from prices.
+  Each broken rule points to the Academy lesson that teaches it. The dashboard
+  shows the compliance rate, the R of trades inside and outside the plan, the
+  curve as traded against the curve with departures set to zero, the cost per
+  rule with a priority lesson, a calendar of R per day, and results by setup
+  and session with their sample size.
+* **Entry and import** (`trading/entry.py`). A trade is entered with the risk
+  in money; the size is `risk / |entry − stop|`, so R is exact for any
+  instrument. Times are Paris time, stored in UTC. A CSV template imports
+  many trades (« ; » or « , », decimal comma), reports each bad row by line,
+  and re-importing a file updates rather than duplicates.
+* **Coach review** (`trading/coaching.py`, `platform/ui/trade_reviews.py`,
+  table `trade_reviews`). A member sends one closed trade with a question: a
+  frozen copy of that trade and its notes, its automatic review and the plan.
+  Nothing else of the journal leaves the account; the coach sees a pseudonym.
+  Quota per calendar month: 1 for a member, 8 for premium (no billing; the tier
+  is set by hand). A coach is an account with `users.role = 'coach'`, set with
+  `python -m sensitor.core.admin set-role someone@example.com coach`; the
+  queue and the answer go through store methods that check the role inside
+  their own query, and the page `coach` checks it again. The answer has four
+  marks, what is solid, what to work on, a comment and up to four lessons. It
+  is about a closed trade only; the form says no recommendation belongs in it.
+* **Demonstration.** A visitor, or a member who asks, sees a constructed
+  journal (`trading/demo.py`), labelled « Exemple synthétique » on every page.
 
 **The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
 set, and says the link is not configured otherwise.
@@ -209,6 +242,8 @@ operator can still hand out a reset link:
 ```bash
 python -m sensitor.core.admin reset-link someone@example.com    # valid 1 hour, once
 python -m sensitor.core.admin verify-link someone@example.com   # valid 48 hours, once
+python -m sensitor.core.admin set-role someone@example.com coach   # or member
+python -m sensitor.core.admin set-tier someone@example.com premium # or free; no billing
 ```
 
 ---

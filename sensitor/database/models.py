@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 TABLES: dict[str, str] = {
     "users": """
@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS users (
     -- When the address was proven to belong to the account holder, by a link
     -- sent to it. NULL until then; nothing is gated on it yet, it is shown.
     email_verified_at TEXT,
+
+    -- '' for a member, 'coach' for the staff who answer trade review requests.
+    -- Set by hand (`python -m sensitor.core.admin set-role`), like the tier.
+    role          TEXT NOT NULL DEFAULT '',
 
     last_login_at TEXT,
     -- Throttling state. Kept on the user rather than in memory so a restart
@@ -302,6 +306,40 @@ CREATE TABLE IF NOT EXISTS journal_entries (
     checks      TEXT,
     created_at  TEXT NOT NULL
 )""",
+
+    # ── Journal review ───────────────────────────────────────────────────────
+    # A member's written trading plan, as the JSON of `trading.review.TradingPlan`.
+    # One per member; the automatic review reads it, nothing else does.
+    "trading_plans": """
+CREATE TABLE IF NOT EXISTS trading_plans (
+    user_email  TEXT PRIMARY KEY REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    plan        TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+)""",
+
+    # A trade a member chose to submit to a coach. The only member data a coach
+    # ever reads, and only what the member sent: a frozen copy of that one trade,
+    # its automatic review and the plan at the time, and the member's question.
+    # The rest of the journal stays private. The copy is frozen so a later edit
+    # of the trade cannot change what the coach answered about.
+    "trade_reviews": """
+CREATE TABLE IF NOT EXISTS trade_reviews (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    trade_id     TEXT NOT NULL,
+    trade        TEXT NOT NULL,          -- JSON, Trade.to_dict() without the broker payload
+    auto_review  TEXT NOT NULL,          -- JSON, TradeReview.to_dict()
+    plan         TEXT,                   -- JSON, TradingPlan.to_dict(), or NULL
+    question     TEXT NOT NULL DEFAULT '',
+    status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'answered')),
+    coach_email  TEXT,
+    feedback     TEXT,                   -- JSON, see trading.coaching.clean_feedback
+    created_at   TEXT NOT NULL,
+    answered_at  TEXT,
+    seen_at      TEXT
+)""",
 }
 
 INDEXES = """
@@ -317,6 +355,8 @@ CREATE INDEX IF NOT EXISTS idx_tokens_user ON account_tokens(user_email, purpose
 CREATE INDEX IF NOT EXISTS idx_progress_user ON lesson_progress(user_email, course_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reviews_user ON trade_reviews(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_at);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

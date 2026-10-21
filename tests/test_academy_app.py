@@ -82,6 +82,13 @@ ROUTES = [
     {"page": "community"},
     {"page": "tools"},
     {"page": "journal"},
+    {"page": "journal_trades"},
+    {"page": "journal_trade", "trade": "demo-005"},
+    {"page": "journal_trade", "trade": "inexistant"},
+    {"page": "journal_add"},
+    {"page": "journal_plan"},
+    {"page": "journal_reviews"},
+    {"page": "coach"},
     {"page": "reset"},
     {"page": "reset", "token": "invalide"},
     {"page": "verify", "token": "invalide"},
@@ -263,6 +270,80 @@ def test_hash_demo(tok: str) -> None:
                                                    for t in page.text_input))
 
 
+def test_journal_space(alice_tok: str) -> None:
+    print("\nThe trading journal and its review")
+    from datetime import datetime, timezone
+    from sensitor.trading.models import Direction, Trade
+
+    visitor = run({"page": "journal"})
+    body = text(visitor)
+    check("visitor: the demonstration journal, labelled as such",
+          "Exemple synthétique" in body and "Plan respecté sur" in body, error(visitor))
+    check("visitor: the plan-versus-traded chart is drawn", len(visitor.get("plotly_chart")) == 1)
+    demo_trade = run({"page": "journal_trade", "trade": "demo-005"})
+    check("visitor: a demonstration trade shows its automatic review",
+          "La revue automatique" in text(demo_trade) and "Demander la revue" not in text(demo_trade))
+    check("visitor: entering trades asks to sign in",
+          "Connectez-vous pour saisir vos trades" in text(run({"page": "journal_add"})))
+
+    carol = token("carol@example.com")
+    empty = run({"page": "journal"}, carol)
+    check("member without trades: three ways to start", "Trois façons de commencer" in text(empty))
+    check("member without trades: no demonstration figures are passed off as theirs",
+          "Plan respecté sur" not in text(empty))
+
+    opened = datetime(2026, 10, 20, 8, 0, tzinfo=timezone.utc)
+    trade = Trade(id="m-carol1", symbol="EURUSD", direction=Direction.LONG, entry_price=1.1, size=100_000,
+                  opened_at=opened, exit_price=1.102, closed_at=opened.replace(hour=9), stop_loss=1.099,
+                  take_profit=1.102, gross_pnl=200.0, setups=["fvg"], source="manual")
+    store().save_trades("carol@example.com", [trade])
+    dash = run({"page": "journal"}, carol)
+    body = text(dash)
+    check("member with a trade: the dashboard is theirs, not the example",
+          "Exemple synthétique" not in body and "Plan respecté sur" in body, error(dash))
+    check("member without a written plan: the default plan is stated", "Plan par défaut" in body)
+    page = run({"page": "journal_trade", "trade": "m-carol1"}, carol)
+    body = text(page)
+    check("member: the trade page shows +2 R and the review", "+2,00\u00a0R" in body and "La revue automatique" in body,
+          error(page))
+    check("member: a review can be requested", any(b.label == "Envoyer la demande" for b in page.button)
+          or "Envoyer la demande" in str(page))
+    snooper = run({"page": "journal_trade", "trade": "m-carol1"}, alice_tok)
+    check("another member cannot open that trade", "introuvable" in text(snooper) and "EURUSD" not in text(snooper))
+
+    store().create_review_request("carol@example.com", trade_id="m-carol1", trade={"id": "m-carol1", "symbol": "EURUSD",
+                                  "direction": "long", "entry_price": 1.1, "stop_loss": 1.099, "take_profit": 1.102,
+                                  "exit_price": 1.102, "r_multiple": 2.0}, auto_review={"trade_id": "m-carol1", "checks": []},
+                                  plan=None, question="Ma sortie était-elle bien gérée ?")
+    refused = run({"page": "coach"}, alice_tok)
+    check("a member who is not a coach sees no queue",
+          "Accès réservé" in text(refused) and "Ma sortie" not in text(refused))
+    coach_tok = token("coach@example.com")
+    store().set_role("coach@example.com", "coach")
+    queue = run({"page": "coach"}, coach_tok)
+    body = text(queue)
+    check("the coach sees the request under a pseudonym",
+          "EURUSD" in body and "Membre " in body and "carol@example.com" not in body, error(queue))
+    check("the coach has a link in the sidebar", any(b.label.startswith("File de revue") for b in queue.button))
+    request_id = store().review_requests("carol@example.com")[0]["id"]
+    answer = run({"page": "coach", "review": str(request_id)}, coach_tok)
+    check("the coach's form reminds that no trade is recommended",
+          "Aucune recommandation d&#x27;achat ou de vente" in text(answer), error(answer))
+    store().answer_review("coach@example.com", request_id, {"strengths": "Sortie à l'objectif.", "improve": "Noter l'état.",
+                                                           "comment": "", "scores": {"execution": 4},
+                                                           "lessons": ["lesson:processus-de-trading/journal-mesures"]})
+    tabs = run({"page": "journal"}, carol)
+    check("the member is told a reply arrived", any("1 nouvelle" in b.label for b in tabs.button))
+    read = run({"page": "journal_reviews", "review": str(request_id)}, carol)
+    body = text(read)
+    check("the member reads the coach's review and its lesson",
+          "Sortie à l&#x27;objectif." in body and "Le journal et ce qu&#x27;il mesure" in body, error(read))
+    check("reading it clears the notice", not any("nouvelle" in b.label for b in read.button))
+    other = run({"page": "journal_reviews", "review": str(request_id)}, alice_tok)
+    check("another member cannot read it", "Sortie à l&#x27;objectif." not in text(other)
+          and "Sortie à l'objectif." not in text(other))
+
+
 def test_no_secret_asked(tok: str) -> None:
     print("\nNo key or seed phrase is ever asked for")
     from sensitor.academy import content as C
@@ -420,6 +501,7 @@ def main() -> int:
     test_universes()
     test_hash_demo(alice)
     test_no_secret_asked(alice)
+    test_journal_space(alice)
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)
@@ -434,13 +516,13 @@ def main() -> int:
         check(f"{page}: offers no input of any kind",
               not app.text_input and not app.radio and not app.checkbox and not app.text_area)
     journal = run({"page": "journal"})
-    check("journal: describes the trading journal, no link without an address",
-          "Le journal du trader" in text(journal) and "Lien non configuré" in text(journal))
+    check("journal: open in the platform itself, no longer a link away",
+          "Chaque trade" in text(journal) and "Lien non configuré" not in text(journal))
     os.environ["SENSITOR_TOOLS_URL"] = "https://outils.example"
     try:
-        linked = run({"page": "journal"})
-        check("journal: opens the trading side of the analytics app",
-              any(b.url == "https://outils.example/?page=trading_overview" for b in linked.get("link_button")))
+        linked = run({"page": "journal_add"}, token("linked@example.com"))
+        check("journal: MetaTrader 5 synchronisation opens the analytics app's journal",
+              any(b.url == "https://outils.example/?page=trading_journal" for b in linked.get("link_button")))
         linked = run({"page": "tools"})
         check("tools: opens the portfolio side of the analytics app",
               any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))

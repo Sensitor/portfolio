@@ -15,7 +15,7 @@ from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from .. import brand, spaces
-from . import account, home, psychology, spaces_view, theme
+from . import account, home, psychology, spaces_view, theme, trade_reviews, trading_journal
 from . import runtime as rt
 from .components import esc, html
 
@@ -36,7 +36,13 @@ RENDERERS = {
     "market": spaces_view.preparing,
     "community": spaces_view.preparing,
     "tools": spaces_view.tools,
-    "journal": spaces_view.journal,
+    "journal": trading_journal.dashboard,
+    "journal_trades": trading_journal.trades_page,
+    "journal_trade": trading_journal.trade_page,
+    "journal_add": trading_journal.add_page,
+    "journal_plan": trading_journal.plan_page,
+    "journal_reviews": trade_reviews.reviews_page,
+    "coach": trade_reviews.coach_page,
 }
 
 
@@ -59,6 +65,12 @@ def _sidebar(page: str, email: str | None, catalog) -> None:
                 active = current is not None and current.id == space.id
                 rt.link(space.label, space.entry, key=f"{prefix}_{space.id}",
                         kind="primary" if active else "secondary", width="stretch")
+        store = rt.get_store() if email else None
+        if store is not None and store.is_coach(email):
+            pending = len(store.coach_queue(email, "pending"))
+            html('<div class="sx-side-label">COACHING</div>')
+            rt.link(f"File de revue · {pending}" if pending else "File de revue", "coach", key="nav_coach",
+                    kind="primary" if page == "coach" else "secondary", width="stretch")
         html('<div class="sx-side-label">COMPTE</div>')
         rt.link("Mon compte" if email else "Se connecter", "account", key="nav_account",
                 kind="primary" if page == "account" else "secondary", width="stretch")

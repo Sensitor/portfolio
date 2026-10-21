@@ -79,11 +79,18 @@ SPACES: tuple[Space, ...] = (
           "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
           entry="lab", pages=("lab",), numeral="V",
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
-    Space("journal", "Journal de trading", "trader", SEPARATE,
-          "Le journal du trader : import MetaTrader 5, performance en R, analyse par setup et par "
-          "session, discipline et rapports.",
-          entry="journal", pages=("journal",), numeral="VI",
-          planned=("Intégration au même espace membre",)),
+    Space("journal", "Journal de trading", "trader", LIVE,
+          "Chaque trade jugé sur votre propre plan : revue automatique règle par règle, coût des "
+          "écarts en R, calendrier de régularité, et revue d'un trade par un coach.",
+          entry="journal",
+          pages=("journal", "journal_trades", "journal_trade", "journal_add", "journal_plan",
+                 "journal_reviews"),
+          numeral="VI",
+          planned=("Synchronisation MetaTrader 5 dans cet espace (aujourd'hui dans l'application "
+                   "d'analyse, sur le même compte)",
+                   "Captures de graphique jointes à un trade"),
+          related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
+                   ("Le modèle de plan de trading", "resource:modele-plan-de-trading"))),
     Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
           entry="market", pages=("market",), numeral="VII",
@@ -104,7 +111,7 @@ SPACES: tuple[Space, ...] = (
                    "Retours d'expérience authentiques, sans résultats mis en scène")),
 )
 
-PLATFORM_PAGES = ("home", "account", "reset", "verify")
+PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach")
 LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
 
 
