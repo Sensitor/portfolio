@@ -23,11 +23,11 @@ from ...trading import coaching as C
 from ...trading import review as R
 from ...trading.models import Trade
 from ...trading.setups import mistake_label, setup_label
-from .. import brand, spaces
+from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
 from .components import (carnet, crumbs, date_fr, esc, footer, html, icon, note, notice,
-                         page_header, pill, section, tap)
+                         page_header, section, tap)
 from .trading_journal import flash, lesson_ref, nav, show_flash
 
 
@@ -120,13 +120,18 @@ def reviews_page(catalog, email, route) -> None:
         footer()
         return
     used, quota = _quota(email)
-    html('<div class="sx-stats">'
-         f'<div><div class="l">Ce mois-ci</div><div class="v">{used}<small> / {quota}</small></div>'
-         '<div class="d">revues demandées</div></div>'
-         f'<div><div class="l">En attente</div><div class="v">{sum(r["status"] == "pending" for r in requests)}</div>'
-         '<div class="d">chez les coachs</div></div>'
-         f'<div><div class="l">Répondues</div><div class="v">{sum(r["status"] == "answered" for r in requests)}</div>'
-         '<div class="d">depuis le début</div></div></div>')
+    waiting = sum(r["status"] == "pending" for r in requests)
+    done = sum(r["status"] == "answered" for r in requests)
+    left = max(0, quota - used)
+    if not used:
+        head = f"<b>{quota} revue{'s' if quota > 1 else ''}</b> ce mois-ci, pas encore utilisée{'s' if quota > 1 else ''}."
+    elif left:
+        head = f"<b>{used} revue{'s' if used > 1 else ''} sur {quota}</b> utilisée{'s' if used > 1 else ''} ce mois-ci ; il vous en reste {left}."
+    else:
+        head = f"<b>Vos {quota} revue{'s' if quota > 1 else ''} du mois</b> {'sont utilisées' if quota > 1 else 'est utilisée'} ; le compteur repart le 1er."
+    tail = ", ".join(x for x in (f"{waiting} en attente" if waiting else "",
+                                 f"{done} répondue{'s' if done > 1 else ''} depuis le début" if done else "") if x)
+    html(f'<p class="sx-c-summary">{head}{f" <span>{tail[:1].upper() + tail[1:]}.</span>" if tail else ""}</p>')
     section(1, "Vos demandes", "De la plus récente à la plus ancienne.")
     if not requests:
         note("Aucune demande pour l'instant. Ouvrez un trade dans l'onglet Trades, puis « Demander la revue "
@@ -138,8 +143,7 @@ def reviews_page(catalog, email, route) -> None:
         if r["status"] == "answered" and not r.get("seen_at"):
             label = "Nouvelle réponse"
         auto = R.TradeReview.from_dict(r.get("auto_review") or {})
-        status = (f'<span class="sx-c-status{" done" if r["status"] == "answered" else ""}">'
-                  f'{brand.hook_svg(11)}{esc(label)}</span>')
+        status = f'<span class="sx-c-status{" done" if r["status"] == "answered" else ""}">{esc(label)}</span>'
         tap(f"review_{r['id']}",
             f'<div class="sx-c-row"><div><div class="sym">{esc(trade.get("symbol", ""))}<span>{_side(trade)}</span></div>'
             f'<div class="when">demandée le {esc(date_fr(r["created_at"]))}</div></div>'
@@ -211,10 +215,19 @@ def _broken(request: dict) -> str:
     if not auto.checks:
         return ""
     failed = auto.failed
-    items = ("".join(f"<li><b>{esc(c.label)}</b> : {esc(c.detail)}</li>" for c in failed) if failed
+    def detail(c) -> str:
+        # The recorded mistakes already say where they come from; the rule's name says the rest.
+        text = c.detail.removeprefix("Écart noté sur ce trade : ")
+        return text[:1].upper() + text[1:]
+    items = ("".join(f"<li><b>{esc(c.label)}</b> : {esc(detail(c))}</li>" for c in failed) if failed
              else "<li>Aucune règle enfreinte : la question porte sur la lecture ou la gestion.</li>")
     return (f'<div class="sx-c-broken"><div class="rub">Ce que la revue automatique a relevé {V.rule_print(auto.checks)}</div>'
             f'<ul>{items}</ul></div>')
+
+
+def _long(text: str) -> str:
+    """A question past a few lines is set smaller, so it reads as a quote and not as a wall."""
+    return " long" if len(text or "") > 280 else ""
 
 
 def _waiting(stamp: str) -> str:
@@ -251,12 +264,12 @@ def _review_detail(catalog, request: dict, email: str) -> None:
     trade = request["trade"] or {}
     answered = request["status"] == "answered"
     status = (f"Répondue le {date_fr(request.get('answered_at') or '')}" if answered else "En attente d'un coach")
-    sent = V.notes([f"Le trade {trade.get('symbol', '')} et vos notes, figés au moment de la demande.",
+    sent = V.facts([f"Le trade {trade.get('symbol', '')} et vos notes, figés au moment de la demande.",
                     "Sa revue automatique et votre plan.",
                     "Rien d'autre de votre journal ; le coach voit un pseudonyme."])
     html(f'<div class="sx-c-copy"><div class="body"><div class="rub">Votre question · {esc(date_fr(request["created_at"]))}</div>'
-         f'<p class="sx-c-quote">{_paragraphs(request["question"])}</p>'
-         f'<div class="sx-c-who"><span class="sx-c-status{" done" if answered else ""}">{brand.hook_svg(11)}{esc(status)}</span></div>'
+         f'<p class="sx-c-quote{_long(request["question"])}">{_paragraphs(request["question"])}</p>'
+         f'<div class="sx-c-who"><span class="sx-c-status{" done" if answered else ""}">{esc(status)}</span></div>'
          f'{_broken(request)}</div>'
          f'<div class="sx-c-margin"><div class="rub">Ce qui a été envoyé</div>{sent}</div></div>')
     _trade_block(request, key=f"m{request['id']}")
@@ -376,10 +389,10 @@ def _answer(catalog, request: dict, email: str) -> None:
     store = rt.get_store()
     rt.link("Retour à la file", "coach", key="coach_back")
     plan = R.TradingPlan.from_dict(request["plan"]) if request.get("plan") else None
-    margin = (V.notes(R.plan_sentences(plan)) if plan else
+    margin = (V.facts(R.plan_sentences(plan)) if plan else
               '<p class="sx-c-none">Le membre n\'a pas encore écrit de plan : la revue automatique a utilisé le plan de départ.</p>')
     html(f'<div class="sx-c-copy"><div class="body"><div class="rub">{esc(C.pseudonym(request["user_email"]))} · '
-         f'{esc(_waiting(request["created_at"]))}</div><p class="sx-c-quote">{_paragraphs(request["question"])}</p>'
+         f'{esc(_waiting(request["created_at"]))}</div><p class="sx-c-quote{_long(request["question"])}">{_paragraphs(request["question"])}</p>'
          f'<div class="sx-c-who">Demandée le {esc(date_fr(request["created_at"]))}</div>{_broken(request)}</div>'
          f'<div class="sx-c-margin"><div class="rub">Le plan du membre</div>{margin}</div></div>')
     _trade_block(request, key=f"c{request['id']}")

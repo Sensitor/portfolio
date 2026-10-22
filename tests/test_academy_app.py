@@ -344,6 +344,61 @@ def test_journal_space(alice_tok: str) -> None:
           and "Sortie à l'objectif." not in text(other))
 
 
+def test_journal_edge_cases() -> None:
+    print("\nThe journal and coaching with little data, long texts and empty states")
+    from datetime import datetime
+    from sensitor.trading import coaching as C
+    from sensitor.trading import review as R
+    from sensitor.trading.entry import build_trade
+
+    day = datetime(2026, 10, 19, 9, 30)
+    solo = token("solo@example.com")
+    store().save_trades("solo@example.com", [build_trade(symbol="EURUSD", direction="achat", opened_at=day,
+        closed_at=day.replace(hour=10, minute=30), entry=1.085, exit=1.088, stop=1.0835, target=1.088, risk=50, setups=["fvg"])])
+    body = text(run({"page": "journal", "jr_period_dash": "all"}, solo))
+    check("one trade: no plural slip, no figure passed off as stable",
+          "1 trades" not in body and "Avec 1 trade, ces chiffres ne mesurent encore rien de stable" in body, body[-300:])
+    check("one trade: no departure is said as such", "Aucun trade hors plan sur la période." in body)
+
+    bare = token("bare@example.com")
+    store().save_trades("bare@example.com", [build_trade(symbol="BTCUSD", direction="vente", opened_at=day.replace(day=19 - i),
+        closed_at=day.replace(day=19 - i, hour=11), entry=67000, exit=66500, result=100.0 - 60 * i) for i in range(3)])
+    body = text(run({"page": "journal"}, bare))
+    check("no stop at all: the margin says it is the first rule to hold",
+          "Aucun de ces trades n&#x27;a de stop" in body or "Aucun de ces trades n'a de stop" in body)
+    check("no stop at all: the cost of departures is unknown, not zero",
+          "leur coût en R est inconnu" in body and "0,00\u00a0R" not in body.split("Coût des écarts")[-1][:120])
+
+    longer = token("longer@example.com")
+    trade = build_trade(symbol="US30.cash-ECN-MINI", direction="achat", opened_at=day, closed_at=day.replace(hour=11),
+                        entry=42150.5, exit=42010.0, stop=42080.0, target=42400.0, risk=250, notes="Contexte. " * 190,
+                        mistakes=["moved_stop", "fomo"])
+    store().save_trades("longer@example.com", [trade])
+    review = R.review_trade(trade, R.DEFAULT_PLAN, [trade])
+    question = ("Pourquoi ai-je déplacé mon stop alors que la structure avait changé ? " * 30)[:C.MAX_QUESTION]
+    request = store().create_review_request("longer@example.com", trade_id=trade.id, trade=C.snapshot(trade),
+                                            auto_review=review.to_dict(), plan=None, question=question)
+    page = run({"page": "journal_reviews", "review": str(request)}, longer)
+    body = text(page)
+    check("a long question renders, set smaller", not page.exception and "sx-c-quote long" in body, error(page))
+    check("a pending request says it waits and can be withdrawn",
+          "En attente d" in body and any(b.label == "Retirer ma demande" for b in page.button))
+    check("the broken rules are written out once, without repeating where they come from",
+          "Stop déplacé, entrée fomo" in body and "Écart noté sur ce trade : stop" not in body.split("Ce que la revue automatique a relevé")[-1][:400])
+    trade_page = run({"page": "journal_trade", "trade": trade.id}, longer)
+    check("a long symbol and long notes render on the trade page", not trade_page.exception and "US30.CASH-ECN-MINI" in text(trade_page),
+          error(trade_page))
+
+    empty = token("blank@example.com")
+    body = text(run({"page": "journal_reviews"}, empty))
+    check("no request yet: the month's review is offered, no zero counts", "pas encore utilisée" in body and "0 en attente" not in body)
+    store().set_role("blank@example.com", "coach")
+    for r in store().coach_queue("blank@example.com"):
+        store().answer_review("blank@example.com", r["id"], {"comment": "Revue.", "strengths": "", "improve": "", "scores": {}, "lessons": []})
+    body = text(run({"page": "coach"}, empty))
+    check("an empty queue says so plainly", "Aucune demande" in body and "La file est vide" in body)
+
+
 def test_direction_prototype(tok: str) -> None:
     print("\nThe « Carnet de bord » prototype stays on its pages")
     marked = [r for r in ({"page": "journal"}, {"page": "journal_trade", "trade": "demo-005"},
@@ -513,6 +568,7 @@ def main() -> int:
     test_no_secret_asked(alice)
     test_journal_space(alice)
     test_direction_prototype(alice)
+    test_journal_edge_cases()
 
     print("\nThe platform")
     legacy = run({"page": "home"}, entry=LEGACY_APP)

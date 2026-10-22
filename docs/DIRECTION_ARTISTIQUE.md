@@ -257,12 +257,119 @@ phrases de lecture sont dérivées des chiffres déjà calculés ; seule la sér
 Comparaisons : `docs/assets/prototype-journal-avant-apres.png`,
 `prototype-coach-avant-apres.png`, `prototype-revue-avant-apres.png`.
 
-## 7. Si la direction est validée
+## 7. Décision du 22 octobre 2026
 
-1. Passer les tokens du Carnet de bord à la racine et retirer le marqueur.
-2. Academy : la marge devient l'encadré pédagogique, les figures sont
-   numérotées ; Newsreader pour le texte long des leçons.
-3. Investissement : l'application d'analyse abandonne son thème sombre « fintech »
-   pour la feuille, l'encre et la grammaire des données (relevés, règles
-   graduées, annotations).
-4. Réduire le monospace aux heures et identifiants dans toute la plateforme.
+**Direction retenue : B, le Carnet de bord**, pour toute la plateforme. Les
+principes du Bulletin s'appliquent à l'Academy et aux contenus éditoriaux.
+
+## 8. Charte d'usage des signatures
+
+Chaque signature a une fonction. Si la fonction est absente, la signature l'est aussi.
+
+| Signature | Sert à | Jamais |
+|---|---|---|
+| Le relevé | montrer des trades un par un, dans l'ordre | pour une valeur unique, ou plus d'un par écran |
+| L'empreinte | dire quelles règles un trade a tenues, ordre fixe | hors d'un trade ou d'une demande de revue |
+| La marge « Lecture » | interpréter des chiffres : ce qu'ils veulent dire, leur portée | pour répéter un chiffre, ou sur une page sans données |
+| Le crochet du S | marquer un niveau de prix, une valeur sur une graduation, un renvoi à une leçon, une note qui appelle une action, l'étiquette d'une donnée synthétique | dans un statut, un titre, un bouton, un fond |
+| La hachure à 30° | une zone de risque ou d'objectif | toute autre surface |
+| Le visa | une revue finalisée par un coach | une revue automatique, une demande en attente |
+| L'italique Newsreader | la voix qui interprète : marge, phrases sous les chiffres, annotations, paroles du coach et question du membre | un fait (un détail de règle, une date, un plan) |
+| Le monospace | heures, dates d'un trade, identifiants, pseudonymes | une phrase, un libellé, un chiffre de synthèse |
+| Le bloc marine | un verdict par page au plus | une section courante, une liste |
+| Le quadrillage isométrique | la barre latérale (la reliure) | les pages |
+
+Les écrans de travail (journal, coaching, saisie, plan) n'ont pas de numéros de
+chapitre : une section y est une question. Les numéros « § » restent à
+l'Academy, où l'on lit.
+
+## 9. Finalisation du journal et du coaching
+
+Vérifié le 22 octobre 2026, en largeur bureau (1 440 px) et téléphone (390 px),
+sans débordement horizontal ni erreur sur 28 captures :
+
+| Cas | Ce qui a été corrigé |
+|---|---|
+| Journal vide | page blanche avec une consigne : un trade, dix, trente, et ce que chacun permet de lire |
+| Un seul trade | « Avec 1 trade, ces chiffres ne mesurent encore rien de stable » ; plus de « 1 trades », de série « 1, meilleure : 1 », ni d'étiquettes superposées sur le relevé |
+| Aucun stop | la marge le dit en premier ; « Coût des écarts : n.d., leur coût en R est inconnu » au lieu de « 0,00 R » ; le résultat en argent est donné quand le R manque |
+| Peu d'écarts ou aucun | « aucun », « Aucun trade hors plan sur la période », « Rien à corriger » sans crochet |
+| Textes longs | question longue composée plus petit, notes et symboles longs sans débordement, règles enfreintes écrites sans répétition |
+| Revues | quota dit en une phrase selon le cas, plus de « 0 en attente, 0 répondue » |
+| File vide | « Aucune demande n'attend de réponse », « La file est vide » |
+| Téléphone | dans les listes, ce qui est tradé et le résultat sur la première ligne, puis la question, puis l'empreinte |
+
+Ces cas sont couverts par `test_journal_edge_cases` (tests/test_academy_app.py).
+
+Aperçus : `docs/assets/ecrans-valides-bureau.png`, `ecrans-valides-mobile.png`,
+`ecrans-valides-cas-limites.png`.
+
+## 10. Plan de généralisation
+
+Chaque étape : un point de restauration, les tokens d'abord, puis les pages,
+puis les captures bureau et téléphone, les contrastes et la suite de tests ;
+une validation avant l'étape suivante. Aucune route, aucun calcul, aucune donnée
+ne change.
+
+### Étape 1 · Socle commun (préalable, sans effet visible hors journal)
+
+- Passer `CARNET_TOKENS` et `CARNET_FONTS` à la racine du thème, à côté des
+  anciens tokens, sans encore les appliquer ailleurs.
+- Remplacer, dans les composants partagés (`page_header`, `section`, `notice`,
+  `pill`, `crumbs`), les valeurs codées en dur par les rôles du Carnet, derrière
+  le marqueur : un seul endroit à basculer ensuite.
+- Fin du monospace pour les libellés dans ces composants.
+
+### Étape 2 · Academy et Bibliothèque, traitement « Bulletin »
+
+L'Academy est le seul espace qui se lit. Elle prend le Carnet pour les
+couleurs, les polices et la grammaire des données, et le Bulletin pour la
+mise en page.
+
+- **Leçons** : Newsreader pour le texte long (le seul espace où le corps est en
+  serif), chapeau, figures et graphiques numérotés « Fig. 2 » avec leur
+  source en note, tableaux en registre.
+- **Encadrés** : la marge devient l'encadré pédagogique (définition, méthode,
+  erreur fréquente), avec les mêmes rôles : ocre pour l'annotation, faits
+  droits, interprétation en italique. Les encadrés « Opinion » et « Débat »
+  gardent leur distinction.
+- **Parcours et cours** : les numéros de chapitre en serif restent (c'est un
+  repère de lecture ici) ; les hexagones des leçons restent comme état de
+  progression, sans numéro décoratif.
+- **Progression** : le relevé s'applique aux leçons et aux quiz (une marque
+  par leçon), pour valoriser le travail fait plutôt qu'un pourcentage.
+- **Bibliothèque** : fiches en registre, couvertures sans quadrillage.
+- **Univers Monnaie et crypto** : le cuivre reste son accent ; Space Grotesk
+  pour ses titres est réévalué face à Newsreader (proposition à valider sur
+  captures).
+- Points d'attention : les 138 leçons et leurs graphiques sont rendus par des
+  composants communs ; la vérification se fait sur un échantillon par parcours
+  et sur la page de chaque type de bloc.
+
+### Étape 3 · Investissement et analyseur de portefeuille
+
+C'est l'écart le plus grand : l'application d'analyse a un thème sombre
+« fintech » (`sensitor/ui/themes.py`, 17 pages).
+
+- Passer au fond ivoire et à l'encre, avec les rôles du Carnet ; supprimer les
+  halos et le bleu électrique. La palette de séries validée pour le daltonisme
+  est recalculée et revalidée sur le fond clair.
+- Grammaire des données : performance avec étiquettes en bout de ligne,
+  drawdown hachuré à 30° comme zone de risque, allocation en registre, la
+  marge « Lecture » sur les écrans de synthèse (risque, corrélations,
+  stress tests).
+- L'espace reste dense : tableaux en registre, chiffres tabulaires dans les
+  colonnes, pas de marge sur les écrans de saisie.
+- Points d'attention : l'application a ses propres tests de rendu
+  (`test_sensitor_pages`, `test_trading_pages`) ; la refonte se fait page par
+  page, en commençant par la vue d'ensemble.
+
+### Étape 4 · Composants communs et autres espaces
+
+- Accueil, compte, Psychologie et discipline, Trading Lab, espaces en
+  préparation : application des composants du socle, retrait des cartes
+  marine répétées et du quadrillage hors de la barre latérale.
+- Barre latérale : libellés en grotesque, quadrillage conservé (la reliure).
+- Psychologie : le journal de réflexion prend la marge et l'italique pour la
+  voix du membre ; pas de relevé (rien n'y est mesuré au trade).
+- Retrait du marqueur `sx-da` une fois toutes les pages passées.

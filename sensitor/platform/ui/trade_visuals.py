@@ -313,8 +313,9 @@ def record(marks: list[tuple[str, str]], *, max_width: int = 640) -> str:
     width = n * step
     parts.append(f'<line x1="0" x2="{width:.1f}" y1="38.5" y2="38.5" stroke="{K["rule-strong"]}"/>')
     parts.append(f'<text x="0" y="50" font-family="Schibsted Grotesk, sans-serif" font-size="10" fill="{K["graphite"]}">1</text>')
-    parts.append(f'<text x="{width:.1f}" y="50" text-anchor="end" font-family="Schibsted Grotesk, sans-serif" font-size="10" '
-                 f'fill="{K["graphite"]}">{n}</text>')
+    if n > 1:
+        parts.append(f'<text x="{width:.1f}" y="50" text-anchor="end" font-family="Schibsted Grotesk, sans-serif" font-size="10" '
+                     f'fill="{K["graphite"]}">{n}</text>')
     return (f'<svg class="sx-c-releve" viewBox="0 0 {width:.1f} 52" width="{width:.1f}" height="52" '
             f'style="max-width:100%" aria-hidden="true">' + "".join(parts) + "</svg>")
 
@@ -439,6 +440,11 @@ def notes(items: list[str]) -> str:
     """Numbered margin notes, in italic: what the figures mean."""
     return '<ol class="sx-c-notes">' + "".join(f"<li><b>{circled(i)}</b><span>{esc(t)}</span></li>"
                                                for i, t in enumerate(items)) + "</ol>"
+
+
+def facts(items: list[str]) -> str:
+    """A plain list of facts (a plan, what was sent): upright, because nothing here is interpreted."""
+    return '<ul class="sx-c-facts">' + "".join(f"<li>{esc(t)}</li>" for t in items) + "</ul>"
 
 
 def visa(when: str) -> str:

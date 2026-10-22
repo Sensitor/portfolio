@@ -32,9 +32,8 @@ from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
 from .. import brand
-from .components import (carnet, crumbs, date_fr, esc, footer, hexmark, html, icon, note, notice,
-                         page_header, pill, section, tap)
-from .theme import TOKENS as T
+from .components import (carnet, crumbs, date_fr, esc, footer, html, icon, note, notice,
+                         page_header, section, tap)
 
 DEMO_KEY = "jr_demo"
 PERIODS = {"30": ("30 jours", 30), "90": ("90 jours", 90), "all": ("Tout", None)}
@@ -254,10 +253,12 @@ def dashboard(catalog, email, route) -> None:
 
 
 def _empty_state(email: str | None) -> None:
-    html('<div class="sx-j-empty"><div class="sx-kicker">Votre journal est vide</div>'
-         '<h3>Trois façons de commencer.</h3><p>Saisissez un trade en trente secondes, importez un '
-         'fichier de vos trades, ou explorez d\'abord un journal d\'exemple pour voir ce que la revue '
-         'vous apprendra.</p></div>')
+    html('<div class="sx-c-blank"><div class="rub">Votre journal est vide</div><h3>Trois façons de commencer.</h3>'
+         '<p>Saisissez un trade en trente secondes, importez un fichier de vos trades, ou explorez d\'abord un '
+         'journal d\'exemple pour voir ce que la revue vous apprendra.</p>'
+         '<ol><li><b>Un trade suffit</b> pour voir sa revue règle par règle.</li>'
+         '<li><b>Dix trades</b> donnent un premier relevé.</li>'
+         '<li><b>Trente trades</b> et plus : la marge commence à dire quelque chose de fiable.</li></ol></div>')
     a, b, c = st.columns(3)
     with a:
         rt.link("Saisir un trade", "journal_add", key="empty_add", kind="primary", width="stretch")
@@ -288,29 +289,49 @@ def _share(value: float) -> str:
     return f"{round(abs(value) * 100)} %"
 
 
-def _figure_notes(m: dict, rep: R.PlanReport) -> dict[str, str]:
-    """One sentence per figure, saying what it means for this member."""
+def _figure_notes(m: dict, rep: R.PlanReport, currency: str = "") -> dict[str, str]:
+    """One sentence per figure, saying what it means for this member, including when it cannot be computed."""
     e, total, pf, win = m.get("expectancy_r"), m.get("total_r"), m.get("profit_factor"), m.get("win_rate")
     payoff, dd = m.get("payoff_ratio"), m.get("max_drawdown_r")
+    net = m.get("net_pnl")
+    money = f"{V.signed(net)} {currency}".strip() if net is not None else ""
     out = {}
-    out["e"] = ("Sans stop, pas d'espérance en R." if e is None else
+    out["e"] = ("Sans stop, le risque est inconnu : pas d'espérance en R." if e is None else
                 f"En moyenne, un trade vous rend {_share(e)} de ce que vous risquez." if e > 0 else
                 f"En moyenne, un trade vous coûte {_share(e)} de ce que vous risquez.")
-    out["total"] = ("" if total is None else
+    out["total"] = (f"Sans stop, pas de résultat en R. En argent : {money}." if total is None else
                     f"Soit {V.fr(abs(total), 1)} fois votre risque par trade, {'gagné' if total >= 0 else 'perdu'} sur la période.")
     if win is None:
         out["win"] = "Aucun trade gagnant ou perdant."
     elif payoff:
-        out["win"] = (f"Avec vos gains moyens, {round(100 / (1 + payoff))} % suffisent pour ne pas perdre d'argent.")
+        out["win"] = f"Avec vos gains moyens, {round(100 / (1 + payoff))} % suffisent pour ne pas perdre d'argent."
     else:
         out["win"] = f"{_plural(m.get('n_wins', 0), 'gagnant')} pour {_plural(m.get('n_losses', 0), 'perdant')}."
     out["pf"] = ("Pas encore de perte pour le calculer." if pf is None else
                  f"Pour 1 perdu, {V.fr(pf)} gagné, en argent.")
-    out["dd"] = ("" if not dd else
+    out["dd"] = ("Sans stop, pas de drawdown en R." if dd is None else
+                 "Aucun recul : la courbe n'a fait que monter." if not dd else
                  f"Le pire recul, du sommet au creux : l'équivalent de {V.fr(abs(dd), 1)} pertes de 1 R d'affilée.")
-    out["dep"] = (f"Ce qu'ont {'coûté' if rep.departed_r < 0 else 'rapporté'} les "
-                  f"{_plural(rep.n_departed_r, 'trade')} hors plan.")
+    departures = rep.n_checked - rep.n_followed
+    if not departures:
+        out["dep"] = "Aucun trade hors plan sur la période."
+    elif not rep.n_departed_r:
+        out["dep"] = (f"{'Les' if departures > 1 else 'Le'} {_plural(departures, 'trade')} hors plan "
+                      f"{'n’ont' if departures > 1 else 'n’a'} pas de stop : leur coût en R est inconnu.")
+    else:
+        unknown = departures - rep.n_departed_r
+        out["dep"] = (f"Ce qu'ont {'coûté' if rep.departed_r < 0 else 'rapporté'} les {_plural(rep.n_departed_r, 'trade')} "
+                      f"hors plan" + (f", sans compter {unknown} sans stop." if unknown else "."))
     return out
+
+
+def _sample_note(n: int) -> str:
+    if n < 10:
+        return (f"Avec {_plural(n, 'trade')}, ces chiffres ne mesurent encore rien de stable : "
+                "regardez plutôt la revue de chaque trade.")
+    if n < 100:
+        return f"Sur {n} trades, ces chiffres donnent un ordre de grandeur, pas encore une certitude."
+    return f"Sur {n} trades, l'échantillon permet de comparer un mois à l'autre."
 
 
 def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews: dict, period: str) -> None:
@@ -336,16 +357,23 @@ def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews
     if top is not None:
         reading.append(f"L'écart qui pèse le plus : {top.label.lower()}, {top.breaches} fois"
                        f"{', pour ' + V.r_text(top.cost_r) if top.cost_r else ''}.")
-    if best and current:
+    if best and current == best:
+        reading.append(f"Série en cours : {_plural(current, 'trade')} d'affilée dans le plan, "
+                       "votre meilleure à ce jour.")
+    elif best and current:
         reading.append(f"Série en cours : {_plural(current, 'trade')} d'affilée dans le plan. "
                        f"Votre meilleure : {best}.")
     elif best:
         reading.append(f"Le dernier trade a rompu la série ; votre meilleure : {best} trades d'affilée dans le plan.")
-    n = m["n"]
-    reading.append(f"Sur {n} trades, ces chiffres donnent un ordre de grandeur" +
-                   (", pas encore une certitude." if n < 100 else " ; comparez-les d'un mois à l'autre."))
+    if m["n"] and not m.get("n_with_r"):
+        reading.insert(0, "Aucun de ces trades n'a de stop : ni le risque ni le résultat en R ne peuvent être "
+                          "mesurés. C'est la première règle à tenir.")
+    elif m.get("n_with_r", 0) < m["n"]:
+        reading.append(f"{_plural(m['n'] - m['n_with_r'], 'trade')} sans stop "
+                       f"{'sont' if m['n'] - m['n_with_r'] > 1 else 'est'} hors des chiffres en R.")
+    reading.append(_sample_note(m["n"]))
     when = {"30": "les 30 derniers jours", "90": "les 90 derniers jours"}.get(period, "toute la période")
-    f = _figure_notes(m, rep)
+    f = _figure_notes(m, rep, _currency(trades[0].account_currency) if trades else "")
 
     def figure(label: str, value: str, sentence: str, tone_: str = "") -> str:
         return (f'<div><div class="l">{esc(label)}</div><div class="v {tone_}">{value}</div>'
@@ -359,8 +387,9 @@ def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews
         figure("Profit factor", "n.d." if pf is None else esc(V.fr(pf)), f["pf"]),
         figure("Drawdown maximum", esc(V.r_text(m.get("max_drawdown_r"))), f["dd"],
                "down" if (m.get("max_drawdown_r") or 0) < 0 else ""),
-        figure("Coût des écarts" if rep.departed_r < 0 else "Résultat hors plan", esc(V.r_text(rep.departed_r)),
-               f["dep"], V.tone(rep.departed_r)),
+        figure("Coût des écarts",
+               esc(V.r_text(rep.departed_r)) if rep.n_departed_r else ("aucun" if rep.n_checked == rep.n_followed else "n.d."),
+               f["dep"], V.tone(rep.departed_r) if rep.n_departed_r else ""),
     ))
     key = ('<div class="sx-c-key"><span><i style="background:var(--c-ink)"></i>plan suivi</span>'
            '<span><i style="background:var(--c-down);height:16px"></i>écart au plan</span>'
@@ -446,7 +475,7 @@ def _rules(rep: R.PlanReport, *, key: str) -> None:
     with right:
         top = rep.priority
         if top is None:
-            html(f'<div class="sx-c-todo"><div class="rub">{brand.hook_svg(13)}Rien à corriger</div>'
+            html(f'<div class="sx-c-todo calm"><div class="rub">Rien à corriger</div>'
                  '<h4>Chaque règle a tenu sur la période.</h4><p>Le plan lui-même se juge à la revue mensuelle, '
                  'sur un échantillon suffisant.</p></div>')
             return

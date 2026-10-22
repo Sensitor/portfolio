@@ -868,6 +868,7 @@ JOURNAL_CSS = """
 .stApp .sx-j-legend em { font-style: normal; color: var(--faint); margin-left: .8rem; }
 .stApp .sx-calendar, .stApp .sx-ladder { display: block; }
 .stApp .sx-calendar { max-width: 560px; }
+.stApp:has(.sx-da) .sx-calendar { max-width: 400px; }
 .stApp table.sx-j-table th:first-child, .stApp table.sx-j-table td:first-child { width: 44%; }
 .stApp table.sx-j-table td:not(:first-child), .stApp table.sx-j-table th:not(:first-child) { white-space: nowrap; text-align: right; }
 .stApp table.sx-j-table td small { display: block; font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-top: .15rem; }
@@ -1067,7 +1068,7 @@ __DA__ .sx-c-count { display: flex; gap: 1.6rem; align-items: flex-end; }
 __DA__ .sx-c-count .big { font: 600 3rem/1 var(--c-text); letter-spacing: -.03em; color: var(--c-ink); white-space: nowrap; }
 __DA__ .sx-c-count .big small { font-size: 1.3rem; color: var(--c-graphite); font-weight: 500; letter-spacing: 0; }
 __DA__ .sx-c-count .lab { font: 500 13px var(--c-text); color: var(--c-graphite); margin-top: .3rem; }
-__DA__ .sx-c-count svg { flex: 1; min-width: 0; height: 52px; }
+__DA__ .sx-c-count svg { flex: 0 1 auto; min-width: 0; height: 52px; }
 __DA__ .sx-c-key { display: flex; gap: 1.1rem; flex-wrap: wrap; font: 500 12.5px var(--c-text); color: var(--c-graphite); margin-top: .5rem; }
 __DA__ .sx-c-key i { display: inline-block; width: 4px; height: 12px; margin-right: .4rem; vertical-align: -1px; }
 
@@ -1204,6 +1205,38 @@ __DA__ .sx-j-facts dd { font-family: var(--c-text); font-variant-numeric: normal
 __DA__ .sx-c-copy .rub, __DA__ .sx-c-margin .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
 __DA__ .sx-c-margin .rub { color: var(--c-note); }
 
+/* Working pages carry no chapter numbers: a section is a question, not a chapter. */
+__DA__ .sx-section .num { display: none; }
+/* Italic serif is the voice of interpretation only; facts stay upright. */
+__DA__ .sx-j-checks .why { font: 400 14.5px/1.45 var(--c-text); color: var(--c-ink-2); }
+__DA__ .sx-c-ledger .cost.ok { font: 500 13px var(--c-text); color: var(--c-up); }
+__DA__ .sx-c-done li span:last-child { font: 400 13.5px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-c-facts { list-style: none; margin: .6rem 0 0; padding: 0; }
+__DA__ .sx-c-facts li { font: 400 14px/1.45 var(--c-text) !important; color: var(--c-ink-2) !important; margin: 0 !important;
+  padding: .45rem 0; border-bottom: 1px solid var(--c-rule); }
+__DA__ .sx-c-facts li:last-child { border-bottom: 0; }
+__DA__ p.sx-c-quote.long { font-size: 1.06rem; line-height: 1.6; max-width: 46rem; }
+__DA__ .sx-j-text h5 { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+__DA__ .sx-j-text p { font: 400 15px/1.65 var(--c-text); color: var(--c-ink-2); max-width: 46rem; }
+__DA__ .sx-c-todo.calm { border-left-color: var(--c-up); } __DA__ .sx-c-todo.calm .rub { color: var(--c-up); }
+__DA__ .sx-c-blank { border-top: 2px solid var(--c-ink); background: var(--c-sheet); padding: 1.6rem 1.8rem 1.3rem; }
+__DA__ .sx-c-blank .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+__DA__ .sx-c-blank h3 { font: 600 1.7rem/1.2 var(--c-title); color: var(--c-ink); margin: .4rem 0 .5rem; }
+__DA__ .sx-c-blank p { font: 400 15.5px/1.6 var(--c-text); color: var(--c-ink-2); max-width: 640px; margin: 0; }
+__DA__ .sx-c-blank ol { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
+__DA__ .sx-c-blank li { border-top: 1px solid var(--c-rule-strong); padding-top: .6rem; font: 400 14px/1.5 var(--c-text); color: var(--c-graphite); margin: 0 !important; }
+__DA__ .sx-c-blank li b { display: block; font-weight: 600; color: var(--c-ink); }
+@media (max-width: 1000px) { __DA__ .sx-c-blank ol { grid-template-columns: 1fr; } __DA__ .sx-c-blank { padding: 1.3rem 1.1rem 1.1rem; } }
+
+__DA__ .sx-plan .n { font: 600 12px var(--c-text); letter-spacing: 0; color: var(--c-note); }
+__DA__ .sx-plan .x { font: 400 15px/1.55 var(--c-text); }
+
+/* A notice is a note in the margin: upright, with the ochre rule, no dashed box. */
+__DA__ .sx-notice { background: var(--c-margin); border: 0; border-left: 3px solid var(--c-note); border-radius: 0; }
+__DA__ .sx-notice svg { color: var(--c-note); }
+__DA__ .sx-notice b { font: 600 14px var(--c-text); color: var(--c-ink); }
+__DA__ .sx-notice p { font: 400 14.5px/1.55 var(--c-text); color: var(--c-ink-2); }
+
 /* Panels and the one strong block keep their roles: a sheet, and a verdict. */
 __DA__ [class*="st-key-panel_"] { background: var(--c-sheet); border: 0; border-top: 2px solid var(--c-ink); border-radius: 0; }
 __DA__ [class*="st-key-chart_"] { background: var(--c-sheet); border: 0; border-top: 2px solid var(--c-ink); border-radius: 0; }
@@ -1220,9 +1253,15 @@ __DA__ .sx-chart-foot span { font: italic 400 15px/1.5 var(--c-title); color: va
   __DA__ .sx-c-ledger li { grid-template-columns: minmax(0, 1fr) auto; }
   __DA__ .sx-c-ledger .marks { grid-column: 1 / -1; grid-row: 2; }
   __DA__ .sx-c-ledger .n { display: none; }
-  __DA__ .sx-c-row { grid-template-columns: minmax(0, 1fr) auto; gap: .35rem 1rem; }
-  __DA__ .sx-c-row .q { grid-column: 1 / -1; grid-row: 2; }
+  /* A row on a phone: what and how much on the first line, the words, then the print. */
+  __DA__ .sx-c-row { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem 1rem; }
+  __DA__ .sx-c-row > div:first-child { grid-column: 1; grid-row: 1; }
+  __DA__ .sx-c-row .r { grid-column: 2; grid-row: 1; align-self: start; }
+  __DA__ .sx-c-row .q, __DA__ .sx-c-row .meta2 { grid-column: 1 / -1; grid-row: 2; }
+  __DA__ .sx-c-row > div:nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
   __DA__ .sx-c-row .go { display: none; }
+  __DA__ .sx-c-done li { grid-template-columns: minmax(0, 1fr) auto; }
+  __DA__ .sx-c-done li span:last-child { grid-column: 1 / -1; }
   __DA__ .sx-j-checks li { grid-template-columns: 1.4rem minmax(0, 1fr); }
   __DA__ .sx-c-marks li { grid-template-columns: minmax(0, 1fr) auto; }
   __DA__ .sx-c-marks .v { grid-column: 1 / -1; }
