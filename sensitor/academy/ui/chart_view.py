@@ -26,8 +26,10 @@ PALETTES = {"trading": PALETTE,
 # Charts with many series (pools, unlock pockets) continue with lighter tints of
 # the same hues, so that twelve series stay distinct without leaving the palette.
 EXTRA = ("#c98b5f", "#6f93b8", "#7aa38c", "#c2a56a", "#8a95a0", "#b9786f", "#d9c3a5")
-FONT = "DM Sans, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
-MONO = "DM Mono, SFMono-Regular, Consolas, monospace"
+# The charts are drawn on « Carnet de bord » pages (lessons, the journal): the
+# direction's grotesque for every label and tick, DM Sans as the fallback.
+FONT = "Schibsted Grotesk, DM Sans, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
+MONO = FONT
 
 
 _SUPERSCRIPT = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")

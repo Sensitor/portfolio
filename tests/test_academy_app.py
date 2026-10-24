@@ -400,13 +400,24 @@ def test_journal_edge_cases() -> None:
 
 
 def test_direction_prototype(tok: str) -> None:
-    print("\nThe « Carnet de bord » prototype stays on its pages")
-    marked = [r for r in ({"page": "journal"}, {"page": "journal_trade", "trade": "demo-005"},
-                          {"page": "journal_reviews"}, {"page": "coach"}) if 'class="sx-da"' in text(run(r, tok))]
-    check("the journal, a trade, the reviews and the coach queue carry the direction", len(marked) == 4, str(marked))
-    others = [r["page"] for r in ({"page": "home"}, {"page": "academy"}, {"page": "lesson", "course": "premiers-pas",
-              "lesson": "fonctionnement-marche"}, {"page": "psychology"}, {"page": "lab"}) if 'class="sx-da"' in text(run(r, tok))]
-    check("the rest of the platform is unchanged until it is validated", not others, str(others))
+    print("\nThe « Carnet de bord » direction stays on its pages, with its edition")
+    import re
+
+    def marker(route):
+        found = re.search(r'class="sx-da( [a-z]+)?" hidden', text(run(route, tok)))
+        return None if not found else (found.group(1) or "").strip()
+
+    working = {r["page"]: marker(r) for r in ({"page": "journal"}, {"page": "journal_trade", "trade": "demo-005"},
+                                               {"page": "journal_reviews"}, {"page": "coach"})}
+    check("the journal, a trade, the reviews and the coach queue: working edition", set(working.values()) == {""},
+          str(working))
+    reading = {r["page"]: marker(r) for r in ({"page": "academy"}, {"page": "course", "course": "premiers-pas"},
+               {"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"},
+               {"page": "library"}, {"page": "resource", "resource": "checklist-avant-trade"}, {"page": "progress"})}
+    check("the Academy, the library and the progress: Bulletin edition", set(reading.values()) == {"bulletin"}, str(reading))
+    others = {r["page"]: marker(r) for r in ({"page": "home"}, {"page": "psychology"}, {"page": "lab"},
+                                              {"page": "market"}, {"page": "tools"})}
+    check("the rest of the platform is unchanged until its step", set(others.values()) == {None}, str(others))
 
 
 def test_no_secret_asked(tok: str) -> None:

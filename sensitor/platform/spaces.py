@@ -44,6 +44,7 @@ class Space:
     related: tuple[tuple[str, str], ...] = ()   # (label, page) of real features related to it
     numeral: str = ""
     carnet: bool = False                        # drawn in the « Carnet de bord » direction
+    edition: str = ""                           # "" (working pages) or "bulletin" (pages that are read)
 
     @property
     def status_label(self) -> str:
@@ -62,10 +63,12 @@ SPACES: tuple[Space, ...] = (
           entry="academy", pages=("academy", "course", "lesson", "quiz"), numeral="I",
           planned=("La méthode Sensitor et la méthode du fondateur, rédigées par le fondateur",
                    "Les cycles et les indicateurs de Bitcoin, dès qu'une licence de prix sera obtenue",
-                   "Vidéos intégrées aux leçons", "Ebooks")),
+                   "Vidéos intégrées aux leçons", "Ebooks"),
+          carnet=True, edition="bulletin"),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
-          entry="library", pages=("library", "resource"), numeral="II"),
+          entry="library", pages=("library", "resource"), numeral="II",
+          carnet=True, edition="bulletin"),
     Space("psychology", "Psychologie et discipline", "apprendre", LIVE,
           "Un journal de réflexion privé avec sa routine de séance, et le parcours 6 sur les biais "
           "et les routines.",
@@ -75,7 +78,8 @@ SPACES: tuple[Space, ...] = (
                    ("La checklist avant chaque trade", "resource:checklist-avant-trade"))),
     Space("progress", "Progression", "apprendre", LIVE,
           "Leçons terminées, historique des quiz et notions à revoir.",
-          entry="progress", pages=("progress",), numeral="IV"),
+          entry="progress", pages=("progress",), numeral="IV",
+          carnet=True, edition="bulletin"),
     Space("lab", "Trading Lab", "trader", LIVE,
           "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
           entry="lab", pages=("lab",), numeral="V",
@@ -144,6 +148,12 @@ def uses_carnet(page: str) -> bool:
     """
     space_ = space_of(page)
     return page in CARNET_PAGES or bool(space_ and space_.carnet)
+
+
+def edition_of(page: str) -> str:
+    """The « Carnet de bord » edition of a page: "bulletin" where one reads, "" where one works."""
+    space_ = space_of(page)
+    return space_.edition if space_ and space_.carnet else ""
 
 
 def by_group() -> list[tuple[str, list[Space]]]:

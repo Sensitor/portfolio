@@ -1040,9 +1040,10 @@ __DA__ {
   --r-notice-border: 0; --r-notice-edge: 3px solid var(--c-note); --r-notice-radius: 0; --r-notice-bg: var(--c-margin);
   --r-footer-track: .04em;
 }
-/* Tabular figures in table columns only: Schibsted's tabular set widens the comma,
-   which opens a gap in French decimals anywhere alignment does not need it. */
-__DA__ [data-testid="stMarkdownContainer"] td:not(:first-child) { font-variant-numeric: tabular-nums; }
+/* No tabular figures: Schibsted's tabular set widens the comma, which opens a gap
+   in French decimals (« 12 ,5 »). Columns align on the right instead. */
+__DA__ :is([data-testid="stMarkdownContainer"] td, .sx-figures .v, .sx-stats .v, .sx-result .big,
+  .sx-figures-navy .v, .sx-j-facts dd, input) { font-variant-numeric: normal; }
 __DA__ [data-testid="stMarkdownContainer"] :is(td, th) { border-left: 0 !important; border-right: 0 !important; }
 __DA__ .sx-facts dd { font-variant-numeric: normal; }
 __DA__ .sx-calendar text { font-family: var(--c-text); font-size: 8.5px; fill: var(--c-graphite); }
@@ -1291,12 +1292,138 @@ __DA__ .sx-chart-foot span { font: italic 400 15px/1.5 var(--c-title); color: va
 """
 
 
+# =============================================================================
+# CARNET DE BORD · BULLETIN EDITION (Academy, Library, Progress)
+# =============================================================================
+#
+# The pages where one reads. The direction's roles apply as on the working
+# pages, with the Bulletin's editorial rules on top: numbered sections and
+# figures, the lesson body in Newsreader (the only place where running text is
+# set in a serif), the callouts as the lesson's margin, one strong block per page.
+#
+# The Academy components name the fonts directly (var(--serif), var(--sans),
+# var(--mono)); under this edition those three point at the direction's faces,
+# so a label written in « mono » becomes a grotesque label, and only code and
+# hashes keep a monospace.
+#
+# Monnaie et crypto keeps Space Grotesk for its titles and copper for its accent
+# (MONNAIE_TITLES = "grotesk"); "newsreader" gives it the Trading titles. Its
+# running text is in Newsreader either way.
+
+MONNAIE_TITLES = "grotesk"
+MONNAIE_GROTESK = """
+.stApp:has(.sx-da.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --serif: var(--grotesk); --r-title: var(--grotesk); }
+"""
+
+BULLETIN_CSS = """
+__BU__ { --serif: var(--c-title); --sans: var(--c-text); --mono: var(--c-text);
+  --r-num-display: inline; --r-num-track: 0; --r-marker: var(--c-note); }
+__BU__ code, __BU__ code.sx-hash, __BU__ .sx-hash { font-family: var(--c-code) !important; }
+.stApp:has(.sx-da.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --r-accent: var(--copper-2); }
+
+/* Labels that were spaced monospace capitals become rubrics: one case, one tracking. */
+__BU__ :is(.sx-callout-title, .sx-chapter .k, .sx-outline-head, .sx-qhead .k, .sx-feedback .status,
+  .sx-figures .l, .sx-figures-navy .l, .sx-cover .ck, .sx-ucard .topics span, .sx-index .n, .sx-objectives .n) {
+  letter-spacing: .06em; }
+__BU__ .sx-meta { letter-spacing: 0; font-size: 13px; }
+__BU__ .sx-meta > span + span::before { width: 3px; height: 3px; border-radius: 50%; transform: none; }
+
+/* The lesson: a sheet with its rule, the body in Newsreader. */
+__BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) { background: var(--c-sheet); border: 0; border-top: 2px solid var(--c-ink); border-radius: 0; }
+__BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) [data-testid="stMarkdownContainer"] :is(p, li) {
+  font-family: var(--c-title); font-size: 18.5px; line-height: 1.62; color: var(--c-ink); }
+__BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) [data-testid="stMarkdownContainer"] strong { font-weight: 600; }
+__BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) [data-testid="stMarkdownContainer"] h2:not([class])::before {
+  font: 600 12px var(--c-text); letter-spacing: 0; color: var(--c-note); }
+__BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) [data-testid="stMarkdownContainer"] h2:not([class]) { border-top-color: var(--c-rule-strong); }
+
+/* Figures: numbered, the caption in italic, the source as a note under it. */
+__BU__ .sx-diagram { background: transparent; border: 0; border-top: 1px solid var(--c-rule-strong); border-radius: 0; padding: 1rem 0 .4rem; }
+__BU__ :is(.sx-chart-foot > b, .sx-diagram figcaption b) { font: 600 12.5px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-note); }
+__BU__ :is(.sx-chart-foot > span, .sx-diagram figcaption span) { font: italic 400 15.5px/1.5 var(--c-title) !important; color: var(--c-ink-2); }
+__BU__ .sx-chart-credit { font-family: var(--c-text) !important; color: var(--c-graphite) !important; }
+__BU__ .sx-chart-title { font: 600 1.08rem/1.35 var(--c-text); color: var(--c-ink); }
+
+/* Callouts: the lesson's margin. A rule and a rubric say the role; facts upright,
+   the founder's opinion in italic; the recap is the page's one strong block. */
+__BU__ [class*="st-key-callout_"] { background: var(--c-margin); border-left: 3px solid var(--c-graphite); border-radius: 0; }
+__BU__ [class*="st-key-callout_"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 16.5px; line-height: 1.6; }
+__BU__ .sx-callout-title { font: 600 11.5px var(--c-text); letter-spacing: .06em; color: var(--c-graphite); }
+__BU__ [class*="st-key-callout_definition"] { border-left-color: var(--c-ink); }
+__BU__ [class*="st-key-callout_definition"] .sx-callout-title { color: var(--c-ink); }
+__BU__ [class*="st-key-callout_method"] { border-left-color: var(--c-plan); }
+__BU__ [class*="st-key-callout_method"] .sx-callout-title { color: var(--c-plan); }
+__BU__ :is([class*="st-key-callout_note"], [class*="st-key-callout_warning"], [class*="st-key-callout_example"]) { border-left-color: var(--c-note); }
+__BU__ :is([class*="st-key-callout_note"], [class*="st-key-callout_warning"], [class*="st-key-callout_example"]) .sx-callout-title { color: var(--c-note); }
+__BU__ [class*="st-key-callout_mistake"] { background: var(--c-down-soft); border-left-color: var(--c-down); }
+__BU__ [class*="st-key-callout_mistake"] .sx-callout-title { color: var(--c-down); }
+__BU__ [class*="st-key-callout_opinion"] { background: var(--c-sheet); border: 1px solid var(--c-note); border-left: 3px solid var(--c-note); }
+__BU__ [class*="st-key-callout_opinion"] .sx-callout-title { color: var(--c-note); }
+__BU__ [class*="st-key-callout_opinion"] [data-testid="stMarkdownContainer"] :is(p, li) { font-style: italic; }
+__BU__ [class*="st-key-callout_debate"] { border-left: 4px double var(--c-graphite); }
+__BU__ [class*="st-key-callout_recap"] { background-color: var(--c-ink); border-left: 0; }
+__BU__ [class*="st-key-callout_recap"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 16px; }
+
+/* The one grid left is the binding: no grid on covers, start cards or emphasised figures. */
+__BU__ :is(.sx-cover, .sx-start, .sx-figures > div.emph, [class*="st-key-callout_recap"], .sx-result) { background-image: none; }
+__BU__ .sx-cover { box-shadow: 4px 4px 0 var(--c-rule-strong); border-radius: 0; }
+
+/* Exercises: a sheet in the sheet. */
+__BU__ [class*="st-key-panel_ex_"] { background: var(--c-paper); border: 0; border-top: 2px solid var(--c-ink); }
+__BU__ [class*="st-key-panel_ex_"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 17px; }
+
+__BU__ .sx-section .num { margin: 0 .6rem 0 0; }
+
+/* The list of paths: a register with rules, not a stack of framed cards. */
+__BU__ .sx-feature { background: transparent; border: 0; border-top: 1px solid var(--c-rule-strong); border-radius: 0;
+  grid-template-columns: 7rem minmax(0, 1fr) auto; padding: 1.4rem .4rem 1.3rem 0; }
+__BU__ [class*="st-key-tap_"]:last-child .sx-feature { border-bottom: 1px solid var(--c-rule-strong); }
+__BU__ [class*="st-key-tap_"]:hover .sx-feature { background: var(--c-sheet); box-shadow: none; border-color: var(--c-rule-strong); }
+__BU__ .sx-feature .numeral { font-size: 3.8rem; }
+__BU__ .sx-feature .t { font-size: 1.55rem; }
+__BU__ .sx-feature .go { width: 40px; height: 40px; border-color: var(--c-rule-strong); }
+__BU__ .sx-feature .go svg { width: 17px; height: 17px; }
+
+/* The end of a lesson is an action, not a second verdict: a sheet with its rule. */
+__BU__ [class*="st-key-navy_done_"] { background-color: var(--c-paper); border-top: 2px solid var(--c-ink); }
+__BU__ [class*="st-key-navy_done_"] .sx-kicker { color: var(--c-graphite); }
+__BU__ [class*="st-key-navy_done_"] .sx-h3 { color: var(--c-ink); }
+__BU__ [class*="st-key-navy_done_"] p { color: var(--c-ink-2) !important; }
+__BU__ [class*="st-key-navy_done_"] .stButton > button[data-testid="stBaseButton-primary"] {
+  background: var(--c-ink) !important; border-color: var(--c-ink) !important; color: var(--c-paper) !important; }
+__BU__ [class*="st-key-navy_done_"] button[data-testid="stBaseButton-tertiary"] { color: var(--c-plan) !important; }
+__BU__ .sx-cover .ct { font-size: .8rem; overflow-wrap: anywhere; }
+__BU__ .sx-cover.big .ct { font-size: 1.3rem; }
+
+/* Progress: one mark per lesson. */
+__BU__ .sx-c-course { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1.2rem; align-items: end;
+  padding: 1rem 0 .6rem; border-top: 1px solid var(--c-rule-strong); margin-top: 1.4rem; }
+__BU__ .sx-c-course .t { font: 600 1.2rem/1.3 var(--c-title); color: var(--c-ink); }
+__BU__ .sx-c-course .n { font: 600 15px var(--c-text); color: var(--c-ink); white-space: nowrap; }
+__BU__ .sx-c-course .n small { font-weight: 500; color: var(--c-graphite); }
+__BU__ .sx-c-course svg { grid-column: 1 / -1; }
+
+/* A wide table or formula scrolls inside its own frame, never the page. */
+__BU__ [data-testid="stMarkdownContainer"]:has(> table) { overflow-x: auto; }
+__BU__ .katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: .2rem; }
+
+@media (max-width: 1000px) {
+  __BU__ :is([class*="st-key-doc_"], [class*="st-key-sheet_"]) [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 17.5px; }
+  __BU__ [data-testid="stMarkdownContainer"] table { min-width: 100%; width: max-content; max-width: none; }
+  __BU__ [data-testid="stMarkdownContainer"] td { min-width: 6.5rem; }
+}
+"""
+
+
 def stylesheet() -> str:
     tokens = "".join(f"--{k}:{v};" for k, v in TOKENS.items())
     carnet = ("".join(f"--c-{k}:{v};" for k, v in CARNET_TOKENS.items())
               + "".join(f"--c-{k}:{v};" for k, v in CARNET_FONTS.items()))
     da = CARNET_CSS.replace("__CTOKENS__", carnet).replace("__DA__", '.stApp:has(.sx-da) [data-testid="stMain"]')
-    return ((CSS + JOURNAL_CSS + da).replace("__FONTS__", FONTS).replace("__TOKENS__", tokens)
+    bu = BULLETIN_CSS.replace("__BU__", '.stApp:has(.sx-da.bulletin) [data-testid="stMain"]')
+    if MONNAIE_TITLES == "grotesk":
+        bu += MONNAIE_GROTESK
+    return ((CSS + JOURNAL_CSS + da + bu).replace("__FONTS__", FONTS).replace("__TOKENS__", tokens)
             .replace("__ISO__", ISO_GRID))
 
 

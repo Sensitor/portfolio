@@ -104,7 +104,7 @@ def main() -> None:
     email = rt.current_user()
     _sidebar(page, email, catalog)
     if spaces.uses_carnet(page):
-        carnet()
+        carnet(spaces.edition_of(page))
     RENDERERS.get(page, home.render)(catalog, email, route)
     _scroll_to_top()
     rt.flush_cookie()

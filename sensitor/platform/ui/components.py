@@ -186,13 +186,13 @@ def crumbs(*parts: str, universe: str = "") -> None:
     html(f'<nav class="sx-crumbs" aria-label="Fil d\'Ariane">{items}{scope}</nav>')
 
 
-def carnet() -> None:
+def carnet(edition: str = "") -> None:
     """
     Draw the page in the « Carnet de bord » direction. The shell calls it for the
     pages `spaces.uses_carnet` names; the marker is invisible and the stylesheet
     sets the direction's roles on the page under it.
     """
-    html('<span class="sx-da" hidden></span>')
+    html(f'<span class="sx-da{" " + esc(edition) if edition else ""}" hidden></span>')
 
 
 def page_header(kicker: str, title_html: str, lead: str = "", meta: list[str] | None = None,

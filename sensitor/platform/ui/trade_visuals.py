@@ -299,6 +299,7 @@ def record(marks: list[tuple[str, str]], *, max_width: int = 640) -> str:
     One mark per trade, in closing order: `marks` is a list of (state, label),
     state in « in » (plan followed), « out » (a rule broken), « na » (nothing
     checkable). A departure is taller and in brick, so it reads without colour.
+    The Academy uses the same record for lessons: « in » done, « todo » not yet.
     """
     n = len(marks)
     if not n:
@@ -308,6 +309,11 @@ def record(marks: list[tuple[str, str]], *, max_width: int = 640) -> str:
     parts = []
     for i, (state, label) in enumerate(marks):
         x = i * step + (step - bar) / 2
+        if state == "todo":
+            # Not done yet: an outline, at full height, so the record reads as « so far, out of all ».
+            parts.append(f'<rect x="{x + .5:.2f}" y="16.5" width="{max(bar - 1, .8):.2f}" height="21" fill="none" '
+                         f'stroke="{K["na"]}" stroke-width="1"><title>{esc(label)}</title></rect>')
+            continue
         y, h, color = {"in": (16, 22, K["ink"]), "out": (4, 34, K["down"]), "na": (26, 12, K["na"])}[state]
         parts.append(f'<rect x="{x:.2f}" y="{y}" width="{bar:.2f}" height="{h}" fill="{color}"><title>{esc(label)}</title></rect>')
     width = n * step

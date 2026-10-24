@@ -36,7 +36,7 @@ def render(exercise: Exercise, *, scope: str) -> None:
                 _solution(step, st.session_state.get(f"{key}::{run}::{step.id}"),
                           checked=state["checked"], key=f"{scope}_{exercise.id}_{run}_{step.id}")
 
-        cols = st.columns([1, 1, 2])
+        cols = st.columns(2)
         if not state["checked"]:
             with cols[0]:
                 if st.button("Vérifier mes réponses", key=f"{key}::check::{run}", type="primary"):

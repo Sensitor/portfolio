@@ -15,6 +15,7 @@ import streamlit as st
 
 from ...platform import spaces
 from ...platform.ui import runtime as rt
+from ...platform.ui import trade_visuals as V
 from ...platform.ui.components import (crumbs, date_fr, duration, esc, footer, hexmark, html,
                                        icon, note, notice, numeral, page_header, pill,
                                        progress_bar, section, tap, universe_tag)
@@ -528,22 +529,21 @@ def progress_page(catalog: Catalog, email: str | None, route: dict) -> None:
     total = sum(len(c.lessons) for c in courses)
     done = sum(member.progress(c).done for c in courses)
     finals = [c.final_quiz_id for c in courses if c.final_quiz_id]
-    html('<div class="sx-stats" style="margin-top:2rem">'
-         f'<div><div class="l">Leçons terminées</div><div class="v">{done}<small> / {total}</small></div>'
-         f'<div class="d">dans les parcours ouverts</div></div>'
-         f'<div><div class="l">Quiz de validation</div><div class="v">'
-         f'{sum(1 for q in finals if q in member.passed)}<small> / {len(finals)}</small></div>'
-         f'<div class="d">réussi</div></div>'
-         f'<div><div class="l">Tentatives de quiz</div><div class="v">{len(member.attempts)}</div>'
-         f'<div class="d">contrôles et évaluations</div></div></div>')
+    passed = sum(1 for q in finals if q in member.passed)
+    tries = len(member.attempts)
+    html(f'<p class="sx-c-summary"><b>{done} leçon{"s" if done > 1 else ""} terminée{"s" if done > 1 else ""}</b> sur '
+         f'{total} dans les parcours ouverts ; {passed} quiz de validation réussi{"s" if passed > 1 else ""} sur '
+         f'{len(finals)}. <span>{tries} tentative{"s" if tries > 1 else ""} de quiz au total.</span></p>')
 
-    section(1, "Par parcours")
+    section(1, "Par parcours", "Une marque par leçon, dans l'ordre du cours : pleine quand la leçon est terminée.")
     for course in courses:
         progress = member.progress(course)
         universe = catalog.universe_of(course)
-        html(f'<div class="uni-{universe}"><div class="sx-kicker muted" style="margin:.4rem 0 .6rem">'
-             f'{universe_tag(universe, UNIVERSES[universe])}{esc(course.title)} · {progress.done} / '
-             f'{progress.total}</div>{progress_bar(progress.fraction)}</div>')
+        marks = [("in" if lesson_state(lesson, member, progress) == "done" else "todo",
+                  f"Leçon {lesson.number} : {lesson.title}") for lesson in course.lessons]
+        html(f'<div class="sx-c-course uni-{universe}"><div class="t">{universe_tag(universe, UNIVERSES[universe])} '
+             f'{esc(course.title)}</div><div class="n">{progress.done}<small> / {progress.total}</small></div>'
+             f'{V.record(marks, max_width=360)}</div>')
         for lesson in course.lessons:
             state = lesson_state(lesson, member, progress)
             when = date_fr(member.completed_at.get((course.id, lesson.id), ""))

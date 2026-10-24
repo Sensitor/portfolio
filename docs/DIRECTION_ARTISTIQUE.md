@@ -338,7 +338,46 @@ le registre (tests/test_platform.py).
   le marqueur : un seul endroit à basculer ensuite.
 - Fin du monospace pour les libellés dans ces composants.
 
-### Étape 2 · Academy et Bibliothèque, traitement « Bulletin »
+### Étape 2 · Academy et Bibliothèque, traitement « Bulletin » (faite le 24 octobre 2026)
+
+**Fait.** L'Academy, la Bibliothèque et la Progression passent en Carnet de
+bord, **édition Bulletin** (`edition="bulletin"` dans `spaces.py`, bloc
+`BULLETIN_CSS` dans `theme.py`) :
+
+- **Polices** : sous l'édition, `--serif`, `--sans` et `--mono` pointent vers
+  Newsreader et Schibsted Grotesk ; seuls le code et les empreintes de hachage
+  restent en monospace. Les libellés en capitales espacées deviennent des
+  rubriques à espacement unique.
+- **Leçons et fiches** : feuille avec son filet, texte courant en Newsreader
+  (18,5 px), sections numérotées en ocre, intertitres en Newsreader.
+- **Figures** : « Figure 1 » en ocre, légende en italique, source en note
+  sous la légende ; graduations des graphiques en Schibsted Grotesk.
+- **Encadrés** : la marge de la leçon. Définition à l'encre, méthode en bleu
+  du plan, exemple, note et avertissement en ocre, erreur fréquente en brique,
+  débat en double filet graphite, opinion du fondateur en italique dans un cadre
+  ocre ; le récapitulatif est le seul bloc marine, sans quadrillage. La fin de
+  leçon devient une feuille avec son filet.
+- **Exercices** : boutons sur deux colonnes (ils étaient tronqués).
+- **Parcours** : la liste devient un registre à filets au lieu de cartes
+  encadrées ; les chiffres romains des chapitres restent, en Newsreader.
+- **Progression** : une phrase de synthèse et, pour chaque cours, le
+  **relevé** des leçons (une marque pleine par leçon terminée, un contour pour
+  les autres).
+- **Bibliothèque** : couvertures sans quadrillage, titre de couverture sans
+  coupure au milieu d'un mot.
+- **Monnaie et crypto** garde Space Grotesk pour ses titres et le cuivre pour
+  son accent, avec le texte courant en Newsreader (`MONNAIE_TITLES`,
+  comparaison : `docs/assets/monnaie-titres-grotesk-ou-newsreader.png`).
+- **Chiffres** : plus de chiffres tabulaires sous la direction (la virgule
+  tabulaire ouvrait un blanc : « 12 ,5 BTC »).
+- **Téléphone** : un tableau ou une formule large défile dans son cadre.
+  Balayage des 138 leçons à 390 px : aucun débordement, aucune erreur. Le
+  premier balayage en avait trouvé six (formules et tableaux larges), et la leçon
+  « Émission et halvings » débordait déjà avant l'étape ; toutes sont corrigées.
+
+Vérifié : captures avant et après (`docs/assets/academy-*-avant-apres.png`,
+`bibliotheque-avant-apres.png`), pages hors périmètre identiques au pixel
+près, suite de tests complète.
 
 L'Academy est le seul espace qui se lit. Elle prend le Carnet pour les
 couleurs, les polices et la grammaire des données, et le Bulletin pour la
