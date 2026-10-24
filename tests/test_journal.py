@@ -332,9 +332,25 @@ def test_visuals() -> None:
     check("no long dash in any drawing", not dashes)
 
 
+def test_theme_roles() -> None:
+    print("\nThe shared components and the direction")
+    import re
+    from sensitor.platform.ui import theme
+    css = theme.stylesheet()
+    check("the direction's tokens are declared at the root", re.search(r":root \{ --c-paper:#F3F0E8;", css) is not None)
+    check("shared components read roles, with the current look as their default",
+          all(r in css for r in ("var(--r-label, var(--mono))", "var(--r-title, var(--serif))",
+                                 "var(--r-rubric-color, var(--blue-2))", "var(--r-section-display, grid)")))
+    scope = '.stApp:has(.sx-da) [data-testid="stMain"] {'
+    block = css[css.index(scope):css.index("}", css.index(scope))]
+    check("the direction switches a page by setting those roles under its marker",
+          all(f"--r-{r}:" in block for r in ("title", "label", "label-case", "rubric-color", "section-display", "voice")))
+    check("no long dash in the stylesheet", "\u2014" not in css and "\u2013" not in css)
+
+
 def main() -> int:
     for test in (test_plan, test_rules, test_daily_rules, test_report, test_entry, test_import,
-                 test_coaching, test_demo, test_visuals):
+                 test_coaching, test_demo, test_visuals, test_theme_roles):
         test()
     failures = [c for c in CHECKS if not c[1]]
     print(f"\n{len(CHECKS)} checks, {len(failures)} failures")

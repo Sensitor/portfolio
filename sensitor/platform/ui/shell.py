@@ -17,7 +17,7 @@ from ...academy.ui import library as library_pages
 from .. import brand, spaces
 from . import account, home, psychology, spaces_view, theme, trade_reviews, trading_journal
 from . import runtime as rt
-from .components import esc, html
+from .components import carnet, esc, html
 
 RENDERERS = {
     "home": home.render,
@@ -103,6 +103,8 @@ def main() -> None:
 
     email = rt.current_user()
     _sidebar(page, email, catalog)
+    if spaces.uses_carnet(page):
+        carnet()
     RENDERERS.get(page, home.render)(catalog, email, route)
     _scroll_to_top()
     rt.flush_cookie()

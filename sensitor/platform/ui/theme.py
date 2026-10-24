@@ -104,8 +104,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   background: var(--white); border: 1px solid var(--line);
 }
 .stApp [data-testid="stMarkdownContainer"] th {
-  font: 500 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
-  text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--ink); background: var(--paper);
+  font: 500 10.5px var(--r-label, var(--mono)); letter-spacing: var(--r-th-track, .1em); text-transform: var(--r-label-case, uppercase);
+  color: var(--r-label-color, var(--muted)); text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--ink); background: var(--paper);
 }
 .stApp [data-testid="stMarkdownContainer"] td {
   padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--text);
@@ -249,7 +249,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 :root { color-scheme: light; }
 [data-baseweb="popover"] li, [data-baseweb="popover"] ul { background: var(--white) !important; color: var(--ink) !important; }
 
-/* Choices — Streamlit 1.64: label[data-testid=stRadioOption], stCheckbox > label */
+/* Choices, Streamlit 1.64: label[data-testid=stRadioOption], stCheckbox > label */
 .stApp [data-testid="stRadio"], .stApp [data-testid="stRadio"] > div,
 .stApp [data-testid="stRadio"] [role="radiogroup"], .stApp [data-testid="stCheckbox"] { width: 100%; }
 .stApp [data-testid="stRadio"] [role="radiogroup"] { gap: .5rem; }
@@ -367,21 +367,25 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [data-testid="stHorizontalBlock"]:has([class*="st-key-outline"]) { align-items: stretch; }
 
 /* ═══ Composition primitives ═══════════════════════════════════════════════ */
-.stApp .sx-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; font: 400 12px var(--mono);
-  letter-spacing: .06em; color: var(--muted); padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); margin-bottom: .6rem; }
+.stApp .sx-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem;
+  font: var(--r-crumbs-weight, 400) var(--r-crumbs-size, 12px) var(--r-label, var(--mono));
+  letter-spacing: var(--r-crumbs-track, .06em); color: var(--r-label-color, var(--muted)); padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); margin-bottom: .6rem; }
 .stApp .sx-crumbs b { color: var(--ink); font-weight: 500; }
 .stApp .sx-crumbs i { font-style: normal; color: var(--line-strong); }
-.stApp .sx-kicker { font: 500 11.5px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--blue-2); }
+.stApp .sx-kicker { font: var(--r-rubric-weight, 500) 11.5px var(--r-label, var(--mono)); letter-spacing: var(--r-rubric-track, .18em);
+  text-transform: uppercase; color: var(--r-rubric-color, var(--blue-2)); }
 .stApp .sx-kicker.muted { color: var(--muted); }
 .stApp .sx-kicker.on-navy { color: var(--on-navy-accent); }
-.stApp .sx-display { font: 600 clamp(2.6rem, 5.2vw, 4.4rem)/1.02 var(--serif); letter-spacing: -.032em; color: var(--ink);
+.stApp .sx-display { font: 600 clamp(2.6rem, 5.2vw, 4.4rem)/1.02 var(--r-title, var(--serif)); letter-spacing: -.032em; color: var(--ink);
   margin: .9rem 0 1.1rem; padding: 0 !important; }
-.stApp .sx-display em, .stApp .sx-title em { font-style: italic; font-weight: 500; color: var(--blue-2); }
+.stApp .sx-display em, .stApp .sx-title em { font-style: italic; font-weight: 500; color: var(--r-accent, var(--blue-2)); }
 .stApp .sx-display.on-navy { color: #f6f3ec; }
 .stApp .sx-display.on-navy em { color: var(--on-navy-accent); }
-.stApp .sx-title { font: 600 clamp(2.2rem, 4vw, 3.3rem)/1.06 var(--serif); letter-spacing: -.028em; color: var(--ink);
+.stApp .sx-title { font: 600 var(--r-title-size, clamp(2.2rem, 4vw, 3.3rem))/var(--r-title-line, 1.06) var(--r-title, var(--serif));
+  letter-spacing: var(--r-title-track, -.028em); color: var(--ink);
   margin: .7rem 0 .9rem; padding: 0 !important; }
-.stApp .sx-lead { font-size: 18.5px; line-height: 1.68; color: var(--muted); max-width: 660px; margin: 0; }
+.stApp .sx-lead { font-size: var(--r-lead-size, 18.5px); line-height: var(--r-lead-line, 1.68); color: var(--r-lead-color, var(--muted));
+  max-width: 660px; margin: 0; }
 .stApp .sx-lead.on-navy { color: var(--on-navy-muted); }
 .stApp .sx-body { font-size: 15.5px; line-height: 1.72; color: var(--muted); margin: 0; }
 .stApp .sx-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 0; margin-top: 1.4rem;
@@ -393,12 +397,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-meta svg { width: 14px; height: 14px; color: var(--faint); }
 
 /* Section header: § number, strong rule with a blue lead-in, title and intro side by side */
-.stApp .sx-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem 3rem;
-  align-items: end; border-top: 1px solid var(--ink); padding-top: 1.4rem; margin: 3.6rem 0 1.4rem; position: relative; }
-.stApp .sx-section::before { content: ""; position: absolute; top: -2px; left: 0; width: 56px; height: 3px; background: var(--blue-2); }
-.stApp .sx-section .num { font: 500 12px var(--mono); letter-spacing: .16em; color: var(--blue-2); display: block; margin-bottom: .6rem; }
-.stApp .sx-section h2 { font: 600 2.15rem/1.12 var(--serif); letter-spacing: -.02em; color: var(--ink); margin: 0; padding: 0 !important; }
-.stApp .sx-section p { font-size: 15.5px; line-height: 1.7; color: var(--muted); margin: 0; max-width: 520px; }
+.stApp .sx-section { display: var(--r-section-display, grid); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem 3rem;
+  align-items: end; border-top: 1px solid var(--r-section-rule, var(--ink)); padding-top: var(--r-section-pad, 1.4rem);
+  margin: var(--r-section-margin, 3.6rem 0 1.4rem); position: relative; }
+.stApp .sx-section::before { content: ""; position: absolute; top: -2px; left: 0; width: var(--r-section-lead, 56px); height: 3px; background: var(--blue-2); }
+.stApp .sx-section .num { font: 500 12px var(--r-label, var(--mono)); letter-spacing: var(--r-num-track, .16em); color: var(--r-marker, var(--blue-2));
+  display: var(--r-num-display, block); margin-bottom: .6rem; }
+.stApp .sx-section h2 { font: 600 var(--r-h2-size, 2.15rem)/var(--r-h2-line, 1.12) var(--r-title, var(--serif)); letter-spacing: var(--r-h2-track, -.02em);
+  color: var(--ink); margin: 0; padding: 0 !important; }
+.stApp .sx-section p { font-size: var(--r-section-text-size, 15.5px); line-height: var(--r-section-text-line, 1.7); color: var(--r-section-text, var(--muted));
+  margin: var(--r-section-text-margin, 0); max-width: var(--r-section-text-width, 520px); }
 .stApp .sx-section.compact { margin-top: 2.4rem; }
 
 /* Chapter header */
@@ -440,13 +448,14 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp [class*="st-key-tap_"]:hover .sx-hex:not(.is-done):not(.is-current) .h { stroke: var(--blue-2); }
 
 /* Pills */
-.stApp .sx-pill { display: inline-flex; align-items: center; gap: .35rem; font: 500 10.5px var(--mono); letter-spacing: .1em;
-  text-transform: uppercase; padding: 4px 8px 4px 7px; border-radius: 2px; border: 1px solid var(--line-strong); color: var(--muted); white-space: nowrap; }
+.stApp .sx-pill { display: inline-flex; align-items: center; gap: .35rem;
+  font: var(--r-pill-weight, 500) var(--r-pill-size, 10.5px) var(--r-label, var(--mono)); letter-spacing: var(--r-pill-track, .1em);
+  text-transform: var(--r-label-case, uppercase); padding: 4px 8px 4px 7px; border-radius: 2px; border: 1px solid var(--line-strong); color: var(--muted); white-space: nowrap; }
 .stApp .sx-pill svg { width: 12px; height: 12px; }
 .stApp .sx-pill.free { color: var(--green); border-color: #a9c3b1; }
 .stApp .sx-pill.member { color: var(--blue); border-color: #b4c6d7; }
 .stApp .sx-pill.done { color: #fff; background: var(--blue-2); border-color: var(--blue-2); }
-.stApp .sx-pill.soon { color: var(--gold); border-color: #d6c39c; background: var(--gold-soft); }
+.stApp .sx-pill.soon { color: var(--r-annotation, var(--gold)); border-color: var(--r-annotation-line, #d6c39c); background: var(--r-annotation-soft, var(--gold-soft)); }
 .stApp .sx-pill.live { color: var(--green); border-color: #a9c3b1; background: var(--green-soft); }
 .stApp .sx-pill.sep { color: var(--muted); }
 .stApp .sx-pill.on-navy { color: var(--on-navy-accent); border-color: #3d5468; }
@@ -476,7 +485,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 /* Facts */
 .stApp .sx-facts { display: grid; gap: 0; border-top: 1px solid var(--ink); }
 .stApp .sx-facts > div { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--line); }
-.stApp .sx-facts dt { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.stApp .sx-facts dt { font: 500 var(--r-dt-size, 11px) var(--r-label, var(--mono)); letter-spacing: var(--r-dt-track, .12em);
+  text-transform: var(--r-label-case, uppercase); color: var(--r-label-color, var(--muted)); }
 .stApp .sx-facts dd { margin: 0; font-size: 14.5px; color: var(--ink); text-align: right; }
 
 /* Path and space cards */
@@ -638,11 +648,14 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
 /* Notices */
 .stApp .sx-notice { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: start;
-  border: 1px dashed var(--line-strong); border-radius: 3px; padding: 1.1rem 1.3rem; background: transparent; }
-.stApp .sx-notice svg { width: 20px; height: 20px; color: var(--gold); margin-top: .1rem; }
+  border: var(--r-notice-border, 1px dashed var(--line-strong)); border-left: var(--r-notice-edge, 1px dashed var(--line-strong));
+  border-radius: var(--r-notice-radius, 3px); padding: 1.1rem 1.3rem; background: var(--r-notice-bg, transparent); }
+.stApp .sx-notice svg { width: 20px; height: 20px; color: var(--r-annotation, var(--gold)); margin-top: .1rem; }
 .stApp .sx-notice b { display: block; color: var(--ink); font-size: 14.5px; margin-bottom: .2rem; }
 .stApp .sx-notice p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
-.stApp .sx-note { font-size: 13.5px; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--line-strong); padding-left: .9rem; margin: 0; }
+.stApp .sx-note { font-family: var(--r-voice, inherit); font-style: var(--r-voice-style, normal); font-size: var(--r-note-size, 13.5px);
+  color: var(--r-note-color, var(--muted)); line-height: var(--r-note-line, 1.6); border-left: 2px solid var(--r-note-rule, var(--line-strong));
+  padding-left: .9rem; margin: 0; }
 /* Reflection journal */
 .stApp .sx-entry-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .stApp .sx-entry-q { margin: .9rem 0 .2rem; font: italic 500 1.05rem/1.45 var(--serif); color: var(--ink); }
@@ -678,7 +691,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-side-foot { font-size: 11.5px; color: #7f93a6; line-height: 1.55; padding: .9rem .75rem 0; }
 
 .stApp .sx-footer { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1rem 2rem; align-items: center;
-  border-top: 1px solid var(--ink); margin-top: 4.5rem; padding-top: 1.2rem; font: 400 11px var(--mono); color: var(--muted); letter-spacing: .05em; }
+  border-top: 1px solid var(--ink); margin-top: 4.5rem; padding-top: 1.2rem; font: 400 11px var(--r-label, var(--mono)); color: var(--muted);
+  letter-spacing: var(--r-footer-track, .05em); }
 .stApp .sx-footer .m { display: flex; align-items: center; gap: .7rem; color: var(--ink); letter-spacing: .2em; font-weight: 500; }
 .stApp .sx-footer .c { text-align: center; }
 
@@ -772,7 +786,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 @media (max-width: 1000px) {
   [data-testid="stMainBlockContainer"] { padding: 3.4rem 1.15rem 4rem; }
   .stApp [class*="st-key-doc_"] { padding: 1.5rem 1.15rem 1.2rem; }
-  .stApp .sx-section { grid-template-columns: 1fr; margin-top: 2.8rem; }
+  .stApp .sx-section { grid-template-columns: 1fr; margin-top: var(--r-section-margin-top-sm, 2.8rem); }
   .stApp .sx-chapter { grid-template-columns: 3.4rem minmax(0, 1fr); gap: 0 1rem; }
   .stApp .sx-chapter .numeral { font-size: 3rem; text-align: left; }
   .stApp .sx-chapter h3 { font-size: 1.6rem; }
@@ -998,8 +1012,34 @@ CARNET_FONTS = {
 }
 
 CARNET_CSS = """
-.stApp:has(.sx-da) { __CTOKENS__ }
-__DA__ { font-family: var(--c-text); color: var(--c-ink); font-variant-numeric: normal; }
+/* The direction's tokens are declared everywhere; only pages under the marker use them. */
+:root { __CTOKENS__ }
+
+/* The roles of the shared components (crumbs, rubric, titles, lead, sections, notes,
+   notices, pills, facts, tables, footer), as the direction sets them. The base rules
+   read these roles with the current look as their default: a page switches by
+   carrying the marker, and nothing else has to change. */
+__DA__ {
+  font-family: var(--c-text); color: var(--c-ink); font-variant-numeric: normal;
+  --r-title: var(--c-title); --r-label: var(--c-text); --r-label-case: none; --r-label-color: var(--c-graphite);
+  --r-title-size: clamp(2.1rem, 3.6vw, 2.9rem); --r-title-line: 1.05; --r-title-track: -.02em; --r-accent: var(--c-plan);
+  --r-lead-size: 17px; --r-lead-line: 1.6; --r-lead-color: var(--c-ink-2);
+  --r-rubric-weight: 600; --r-rubric-track: .08em; --r-rubric-color: var(--c-graphite);
+  --r-crumbs-weight: 500; --r-crumbs-size: 12.5px; --r-crumbs-track: .06em;
+  --r-section-display: block; --r-section-rule: var(--c-rule-strong); --r-section-pad: 1.1rem;
+  --r-section-margin: 3rem 0 1.1rem; --r-section-margin-top-sm: 3rem; --r-section-lead: 0;
+  --r-num-display: none; --r-num-track: 0; --r-marker: var(--c-note);
+  --r-h2-size: 1.6rem; --r-h2-line: 1.2; --r-h2-track: -.012em;
+  --r-section-text: var(--c-graphite); --r-section-text-size: 15px; --r-section-text-line: 1.6;
+  --r-section-text-margin: .35rem 0 0; --r-section-text-width: 720px;
+  --r-pill-weight: 600; --r-pill-size: 11px; --r-pill-track: .02em;
+  --r-annotation: var(--c-note); --r-annotation-soft: var(--c-note-soft); --r-annotation-line: transparent;
+  --r-dt-size: 13px; --r-dt-track: 0; --r-th-track: .02em;
+  --r-voice: var(--c-title); --r-voice-style: italic; --r-note-size: 15px; --r-note-line: 1.55;
+  --r-note-color: var(--c-ink-2); --r-note-rule: var(--c-note);
+  --r-notice-border: 0; --r-notice-edge: 3px solid var(--c-note); --r-notice-radius: 0; --r-notice-bg: var(--c-margin);
+  --r-footer-track: .04em;
+}
 /* Tabular figures in table columns only: Schibsted's tabular set widens the comma,
    which opens a gap in French decimals anywhere alignment does not need it. */
 __DA__ [data-testid="stMarkdownContainer"] td:not(:first-child) { font-variant-numeric: tabular-nums; }
@@ -1011,25 +1051,13 @@ __DA__ .sx-j-legend em { font: italic 400 13.5px var(--c-title); color: var(--c-
 __DA__ [data-testid="stMarkdownContainer"] :is(p, li, td, th, dd, dt),
 __DA__ [data-testid="stWidgetLabel"] p, __DA__ button p, __DA__ input, __DA__ textarea,
 __DA__ [data-baseweb="select"] * { font-family: var(--c-text); }
-
-/* Titles: one direct sentence per page; the accent word keeps its italic, in the plan's blue. */
-__DA__ .sx-title { font: 600 clamp(2.1rem, 3.6vw, 2.9rem)/1.05 var(--c-title); letter-spacing: -.02em; }
-__DA__ .sx-title em { font-weight: 500; color: var(--c-plan); }
-__DA__ .sx-lead { font: 400 17px/1.6 var(--c-text); color: var(--c-ink-2); }
-/* The rubric is the only spaced capital of the system. */
-__DA__ .sx-kicker { font: 600 11.5px var(--c-text); letter-spacing: .08em; color: var(--c-graphite); }
-__DA__ .sx-crumbs { font: 500 12.5px var(--c-text); color: var(--c-graphite); }
 __DA__ .sx-crumbs b { font-weight: 600; }
-
-/* Sections: a question and its answer, stacked; a hairline, no lead-in bar. */
-__DA__ .sx-section { display: block; border-top: 1px solid var(--c-rule-strong); padding-top: 1.1rem; margin: 3rem 0 1.1rem; }
-__DA__ .sx-section::before { display: none; }
-__DA__ .sx-section .num { font: 600 12px var(--c-text); letter-spacing: 0; color: var(--c-note); display: inline; margin: 0 .6rem 0 0; }
+/* The lead and the notes are paragraphs: the general paragraph rule outranks a class,
+   so their size is read from the roles at paragraph level. */
+__DA__ p.sx-lead { font-size: var(--r-lead-size); line-height: var(--r-lead-line); }
+__DA__ p.sx-note { font-size: var(--r-note-size); line-height: var(--r-note-line); }
+__DA__ .sx-section h2 { font-family: var(--r-title); font-size: var(--r-h2-size); line-height: var(--r-h2-line); letter-spacing: var(--r-h2-track); }
 __DA__ .sx-section > div { display: flex; align-items: baseline; }
-__DA__ .sx-section h2 { font: 600 1.6rem/1.2 var(--c-title); letter-spacing: -.012em; }
-__DA__ .sx-section p { font: 400 15px/1.6 var(--c-text); color: var(--c-graphite); margin-top: .35rem; max-width: 720px; }
-__DA__ .sx-note { font: italic 400 15px/1.55 var(--c-title); color: var(--c-ink-2); border-left: 2px solid var(--c-note); }
-__DA__ .sx-footer { font-family: var(--c-text); letter-spacing: .04em; }
 
 /* Tabs: sentence case, the plan's blue underline. */
 __DA__ [class*="st-key-jnav"] .stButton > button p { font: 500 14px var(--c-text) !important; letter-spacing: 0; text-transform: none; color: var(--c-graphite) !important; }
@@ -1042,17 +1070,15 @@ __DA__ [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) p { 
 
 /* Tables: a ledger. Rules only, figures right-aligned and tabular. */
 __DA__ [data-testid="stMarkdownContainer"] table { background: transparent; border: 0; border-top: 2px solid var(--c-ink); }
-__DA__ [data-testid="stMarkdownContainer"] th { font: 600 12px var(--c-text); letter-spacing: .02em; text-transform: none; color: var(--c-graphite);
-  background: transparent; border-bottom: 1px solid var(--c-rule-strong); padding: 9px 12px 9px 0; }
+__DA__ [data-testid="stMarkdownContainer"] th { font-weight: 600; font-size: 12px; background: transparent;
+  border-bottom: 1px solid var(--c-rule-strong); padding: 9px 12px 9px 0; }
 __DA__ [data-testid="stMarkdownContainer"] td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--c-rule); font-size: 14.5px; }
 __DA__ table.sx-j-table td small { font: italic 400 13px var(--c-title); letter-spacing: 0; text-transform: none; color: var(--c-note); }
 __DA__ .sx-j-r { font-family: var(--c-text) !important; font-weight: 600; }
 __DA__ .sx-j-r.up, __DA__ .up { color: var(--c-up); } __DA__ .sx-j-r.down, __DA__ .down { color: var(--c-down); }
-__DA__ .sx-pill { font: 600 11px var(--c-text); letter-spacing: .02em; text-transform: none; border-radius: 2px; }
-__DA__ .sx-pill.soon { color: var(--c-note); background: var(--c-note-soft); border-color: transparent; }
 __DA__ .sx-pill.live { color: var(--c-up); background: var(--c-up-soft); border-color: transparent; }
 __DA__ .sx-pill.done { color: #fff; background: var(--c-plan); border-color: var(--c-plan); }
-__DA__ .sx-facts dt, __DA__ .sx-j-facts dt { font: 500 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
+__DA__ .sx-j-facts dt { font: 500 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
 
 /* The label for synthetic data: a slip of paper, with the hook. */
 __DA__ .sx-j-banner { background: var(--c-margin); border: 0; border-left: 3px solid var(--c-note); border-radius: 0; font: 400 14px var(--c-text); }
@@ -1205,8 +1231,6 @@ __DA__ .sx-j-facts dd { font-family: var(--c-text); font-variant-numeric: normal
 __DA__ .sx-c-copy .rub, __DA__ .sx-c-margin .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
 __DA__ .sx-c-margin .rub { color: var(--c-note); }
 
-/* Working pages carry no chapter numbers: a section is a question, not a chapter. */
-__DA__ .sx-section .num { display: none; }
 /* Italic serif is the voice of interpretation only; facts stay upright. */
 __DA__ .sx-j-checks .why { font: 400 14.5px/1.45 var(--c-text); color: var(--c-ink-2); }
 __DA__ .sx-c-ledger .cost.ok { font: 500 13px var(--c-text); color: var(--c-up); }
@@ -1232,8 +1256,6 @@ __DA__ .sx-plan .n { font: 600 12px var(--c-text); letter-spacing: 0; color: var
 __DA__ .sx-plan .x { font: 400 15px/1.55 var(--c-text); }
 
 /* A notice is a note in the margin: upright, with the ochre rule, no dashed box. */
-__DA__ .sx-notice { background: var(--c-margin); border: 0; border-left: 3px solid var(--c-note); border-radius: 0; }
-__DA__ .sx-notice svg { color: var(--c-note); }
 __DA__ .sx-notice b { font: 600 14px var(--c-text); color: var(--c-ink); }
 __DA__ .sx-notice p { font: 400 14.5px/1.55 var(--c-text); color: var(--c-ink-2); }
 

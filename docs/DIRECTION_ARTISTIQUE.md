@@ -311,7 +311,25 @@ puis les captures bureau et téléphone, les contrastes et la suite de tests ;
 une validation avant l'étape suivante. Aucune route, aucun calcul, aucune donnée
 ne change.
 
-### Étape 1 · Socle commun (préalable, sans effet visible hors journal)
+### Étape 1 · Socle commun (faite le 24 octobre 2026)
+
+**Fait.** Les composants partagés (fil d'Ariane, rubrique, titres, chapeau,
+sections, notes, encadrés, étiquettes, listes de faits, tableaux, pied de page)
+lisent des **rôles** (`--r-title`, `--r-label`, `--r-rubric-color`,
+`--r-section-display`, `--r-voice`...) dont la valeur par défaut est l'apparence
+actuelle. Le Carnet de bord ne réécrit plus ces composants : il redéfinit les
+rôles sous son marqueur. Les tokens `--c-*` sont déclarés à la racine.
+
+**Basculer un espace** se fait à un seul endroit : `carnet=True` sur l'espace
+dans `sensitor/platform/spaces.py` (ou le nom de la page dans `CARNET_PAGES`).
+Le shell pose le marqueur ; aucune page n'a à l'appeler.
+
+**Vérifié au pixel** : 38 captures pleine page (19 pages, bureau et téléphone),
+avant et après. Les 30 captures hors journal sont identiques au pixel près.
+Sur les 8 du journal et du coaching, seules diffèrent deux rubriques sur fond
+marine, qui reprennent leur couleur claire au lieu du graphite peu contrasté
+de la version précédente. Tests : `test_theme_roles` (tests/test_journal.py) et
+le registre (tests/test_platform.py).
 
 - Passer `CARNET_TOKENS` et `CARNET_FONTS` à la racine du thème, à côté des
   anciens tokens, sans encore les appliquer ailleurs.

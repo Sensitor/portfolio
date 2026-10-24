@@ -32,7 +32,7 @@ from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
 from .. import brand
-from .components import (carnet, crumbs, date_fr, esc, footer, html, icon, note, notice,
+from .components import (crumbs, date_fr, esc, footer, html, icon, note, notice,
                          page_header, section, tap)
 
 DEMO_KEY = "jr_demo"
@@ -91,7 +91,6 @@ def _in_period(trades: list[Trade], period: str) -> list[Trade]:
 
 def _header(subtitle: str, title_html: str, lead: str = "") -> None:
     space = spaces.space("journal")
-    carnet()
     crumbs("Sensitor", space.label, *( (subtitle,) if subtitle else ()))
     page_header("Journal de trading", title_html, lead)
 

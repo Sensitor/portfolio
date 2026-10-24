@@ -188,8 +188,9 @@ def crumbs(*parts: str, universe: str = "") -> None:
 
 def carnet() -> None:
     """
-    Opt the page into the « Carnet de bord » direction (prototype). The marker is
-    invisible; the stylesheet applies the direction's tokens to the page under it.
+    Draw the page in the « Carnet de bord » direction. The shell calls it for the
+    pages `spaces.uses_carnet` names; the marker is invisible and the stylesheet
+    sets the direction's roles on the page under it.
     """
     html('<span class="sx-da" hidden></span>')
 

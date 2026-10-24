@@ -43,6 +43,7 @@ class Space:
     planned: tuple[str, ...] = ()               # what is announced, for preparing spaces
     related: tuple[tuple[str, str], ...] = ()   # (label, page) of real features related to it
     numeral: str = ""
+    carnet: bool = False                        # drawn in the « Carnet de bord » direction
 
     @property
     def status_label(self) -> str:
@@ -90,7 +91,8 @@ SPACES: tuple[Space, ...] = (
                    "d'analyse, sur le même compte)",
                    "Captures de graphique jointes à un trade"),
           related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
-                   ("Le modèle de plan de trading", "resource:modele-plan-de-trading"))),
+                   ("Le modèle de plan de trading", "resource:modele-plan-de-trading")),
+          carnet=True),
     Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
           entry="market", pages=("market",), numeral="VII",
@@ -112,6 +114,8 @@ SPACES: tuple[Space, ...] = (
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach")
+# Platform pages outside any space that are drawn in the « Carnet de bord » direction.
+CARNET_PAGES = ("coach",)
 LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
 
 
@@ -130,6 +134,16 @@ def space(space_id: str) -> Space | None:
 
 def space_of(page: str) -> Space | None:
     return next((s for s in SPACES if page in s.pages), None)
+
+
+def uses_carnet(page: str) -> bool:
+    """
+    Whether a page is drawn in the « Carnet de bord » direction. The one place
+    that decides it: a space switches by setting `carnet=True`, a platform page
+    by joining CARNET_PAGES. See docs/DIRECTION_ARTISTIQUE.md.
+    """
+    space_ = space_of(page)
+    return page in CARNET_PAGES or bool(space_ and space_.carnet)
 
 
 def by_group() -> list[tuple[str, list[Space]]]:

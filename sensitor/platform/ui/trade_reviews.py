@@ -26,7 +26,7 @@ from ...trading.setups import mistake_label, setup_label
 from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
-from .components import (carnet, crumbs, date_fr, esc, footer, html, icon, note, notice,
+from .components import (crumbs, date_fr, esc, footer, html, icon, note, notice,
                          page_header, section, tap)
 from .trading_journal import flash, lesson_ref, nav, show_flash
 
@@ -94,7 +94,6 @@ STATUS = {"pending": ("En attente", "soon"), "answered": ("Répondue", "live")}
 
 def reviews_page(catalog, email, route) -> None:
     space = spaces.space("journal")
-    carnet()
     crumbs("Sensitor", space.label, "Revues")
     page_header("Journal de trading · revues", "Le regard d'un <em>coach</em>.",
                 "Envoyez un trade et votre question : un coach Sensitor le relit avec sa revue automatique et "
@@ -320,7 +319,6 @@ def _feedback(catalog, feedback: dict, *, key: str, answered_at: str = "") -> No
 # ── The coach's queue ────────────────────────────────────────────────────────
 
 def coach_page(catalog, email, route) -> None:
-    carnet()
     crumbs("Sensitor", "Coaching", "File de revue")
     page_header("Coaching · réservé à l'équipe", "Les trades qui attendent <em>un regard</em>.",
                 "Ce que les membres ont choisi d'envoyer, du plus ancien au plus récent. Un trade, son plan, "
