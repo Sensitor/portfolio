@@ -67,7 +67,7 @@ def render_trading_analytics(ctx=None) -> None:
 # =============================================================================
 
 def _dna_block(tctx, lang) -> None:
-    section(tr("trading_dna", lang).upper(), tr("trading_dna_sub", lang))
+    section(tr("trading_dna", lang), tr("trading_dna_sub", lang))
 
     currency = tctx.currency
     symbols = tctx.breakdown("symbol")
@@ -170,7 +170,7 @@ def _best_card(label, rows, currency, lang) -> None:
 # =============================================================================
 
 def _slicer_block(tctx, lang) -> None:
-    section(tr("performance_by", lang).upper())
+    section(tr("performance_by", lang))
 
     dim_labels = [tr(f"d_{d}", lang) for d in DIMENSIONS]
     metric_labels = [tr(_metric_key(m), lang) for m in METRICS]
@@ -241,7 +241,7 @@ def _comparison_block(tctx, lang) -> None:
     if not concentration:
         return
 
-    section(tr("where_the_result_comes_from", lang).upper())
+    section(tr("where_the_result_comes_from", lang))
 
     profit_share = concentration.get("profit_share")
     busiest_share = concentration.get("busiest_share")

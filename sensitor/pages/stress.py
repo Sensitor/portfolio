@@ -48,7 +48,7 @@ def render_stress(ctx) -> None:
 # =============================================================================
 
 def _historical_block(ctx, lang: str) -> None:
-    section(tr("historical_scenarios", lang).upper(), tr("historical_sub", lang))
+    section(tr("historical_scenarios", lang), tr("historical_sub", lang))
 
     bench_ticker = benchmark_selector(ctx, "stress_bench")
     bench_name = benchmark_label(bench_ticker, lang)
@@ -162,7 +162,7 @@ def _scenario_card(result: dict, lang: str) -> None:
 # =============================================================================
 
 def _custom_block(ctx, lang: str) -> None:
-    section(tr("custom_stress", lang).upper(), tr("custom_stress_sub", lang))
+    section(tr("custom_stress", lang), tr("custom_stress_sub", lang))
 
     driver_returns = _load_drivers(ctx)
     if driver_returns is None or driver_returns.empty:

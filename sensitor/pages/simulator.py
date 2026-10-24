@@ -80,7 +80,7 @@ def _simulated_weights(current: dict) -> dict:
 
 
 def _what_if_block(ctx, lang, current, simulated, before, after) -> None:
-    section(tr("what_if", lang).upper(), tr("what_if_sub", lang))
+    section(tr("what_if", lang), tr("what_if_sub", lang))
 
     head, reset_col = st.columns([4, 1])
     with reset_col:
@@ -190,7 +190,7 @@ def _impact_cards(lang, before, after, currency, value) -> None:
 # =============================================================================
 
 def _comparison_block(ctx, lang, before, after, bundle_kwargs) -> None:
-    section(tr("comparison", lang).upper(), tr("comparison_sub", lang))
+    section(tr("comparison", lang), tr("comparison_sub", lang))
 
     bundles = {tr("current", lang): before}
 
@@ -250,7 +250,7 @@ def _comparison_block(ctx, lang, before, after, bundle_kwargs) -> None:
 # =============================================================================
 
 def _monte_carlo_block(ctx, lang, bundle) -> None:
-    section(tr("monte_carlo", lang).upper(), tr("monte_carlo_sub", lang))
+    section(tr("monte_carlo", lang), tr("monte_carlo_sub", lang))
 
     if not bundle:
         note(tr("short_history_body", lang))

@@ -68,7 +68,7 @@ def render_performance(ctx) -> None:
                     caption=f"{stats['n_days']} {tr('days', lang)}")
 
     # ── Cumulative performance ───────────────────────────────────────────────
-    section(tr("cumulative_performance", lang).upper(),
+    section(tr("cumulative_performance", lang),
             f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} — {ctx.period}")
 
     series_map = {tr("portfolio", lang): values}
@@ -80,7 +80,7 @@ def render_performance(ctx) -> None:
     )
 
     # ── Benchmark analysis ───────────────────────────────────────────────────
-    section(tr("benchmark_analysis", lang).upper(), bench_name)
+    section(tr("benchmark_analysis", lang), bench_name)
     if bench_aligned is None:
         note(tr("benchmark_unavailable", lang))
     else:
@@ -141,7 +141,7 @@ def render_performance(ctx) -> None:
         data_table(["", tr("portfolio", lang), bench_name, "Δ"], rows, align="lrrr")
 
     # ── Attribution ──────────────────────────────────────────────────────────
-    section(tr("attribution", lang).upper(), tr("attribution_sub", lang))
+    section(tr("attribution", lang), tr("attribution_sub", lang))
     attribution = ctx.attribution
     if attribution is not None and not attribution.empty:
         st.plotly_chart(
@@ -164,7 +164,7 @@ def render_performance(ctx) -> None:
         note(define("attribution", lang))
 
     # ── Rolling metrics ──────────────────────────────────────────────────────
-    section(tr("rolling_metrics", lang).upper(), "63-day window")
+    section(tr("rolling_metrics", lang), "63-day window")
     rolling = A.rolling_stats(ctx.portfolio_returns, window=63)
     if rolling.empty:
         note(tr("short_history_body", lang))
@@ -187,7 +187,7 @@ def render_performance(ctx) -> None:
     # ── Monthly returns ──────────────────────────────────────────────────────
     monthly = A.monthly_returns(ctx.portfolio_returns)
     if not monthly.empty:
-        section(tr("monthly_returns", lang).upper())
+        section(tr("monthly_returns", lang))
         months = _MONTHS.get(lang, _MONTHS["en"])
         headers = [""] + [months[m - 1] for m in monthly.columns] + ["Σ"]
         rows = []

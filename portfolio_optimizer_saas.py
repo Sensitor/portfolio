@@ -107,528 +107,15 @@ st.set_page_config(
 )
 
 # =============================================================================
-# CSS — Dark pro theme, Inter font, high contrast
+# CSS: the « Carnet de bord » direction, from sensitor/ui/themes.py
 # =============================================================================
+#
+# The first-generation pages keep their own classes (score, KPI, asset, model,
+# recommendation cards); `inject_legacy` styles them with the same tokens. The
+# widgets, the sidebar and the page are styled once, by `inject_theme`.
 
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+sensitor_design.inject_legacy()
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, sans-serif !important;
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(18px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes slideRight {
-        from { opacity: 0; transform: translateX(-14px); }
-        to   { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes shimmer {
-        0%   { background-position: -400px 0; }
-        100% { background-position: 400px 0; }
-    }
-    @keyframes glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(144,133,233,0.3); }
-        50%       { box-shadow: 0 0 40px rgba(144,133,233,0.6); }
-    }
-
-    /* ── App background ── */
-    .stApp {
-        background: linear-gradient(160deg, #0d1526 0%, #111827 50%, #0f172a 100%) !important;
-        min-height: 100vh;
-    }
-
-    /* ── Main content area ── */
-    .main .block-container {
-        background: transparent !important;
-        border-radius: 0 !important;
-        padding: 2rem 2.5rem !important;
-        max-width: 1300px !important;
-        animation: fadeUp 0.45s ease-out;
-    }
-
-    /* ── ALL TEXT in main area ── */
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
-        color: #f8fafc !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.02em !important;
-    }
-    .main p, .main li, .main span, .main div, .main label {
-        color: #e2e8f0 !important;
-    }
-    .main .stMarkdown, .main .stText {
-        color: #e2e8f0 !important;
-    }
-
-    /* ── Sidebar ── */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1526 0%, #111827 100%) !important;
-        border-right: 1px solid rgba(57,135,229,0.12) !important;
-    }
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] label {
-        color: #e2e8f0 !important;
-    }
-    [data-testid="stSidebar"] .stButton > button {
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: #94a3b8 !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
-        transition: all 0.2s ease !important;
-        text-align: left !important;
-    }
-    [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(144,133,233,0.2) !important;
-        border-color: rgba(144,133,233,0.5) !important;
-        color: #e2e8f0 !important;
-        transform: translateX(3px) !important;
-    }
-    [data-testid="stSidebar"] .stButton > [data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #9085E9, #9085E9) !important;
-        border-color: transparent !important;
-        color: white !important;
-        box-shadow: 0 2px 12px rgba(144,133,233,0.4) !important;
-    }
-    [data-testid="stSidebar"] .stSelectbox > div > div {
-        background: rgba(255,255,255,0.07) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: #e2e8f0 !important;
-    }
-
-    /* ── Main buttons ── */
-    .stButton > button {
-        background: linear-gradient(135deg, #9085E9 0%, #7c3aed 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 11px 26px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        letter-spacing: 0.01em !important;
-        box-shadow: 0 4px 16px rgba(144,133,233,0.35) !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(144,133,233,0.5) !important;
-    }
-    .stButton > button[kind="secondary"] {
-        background: rgba(255,255,255,0.06) !important;
-        color: #94a3b8 !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        box-shadow: none !important;
-    }
-    .stButton > button[kind="secondary"]:hover {
-        background: rgba(255,255,255,0.1) !important;
-        color: #e2e8f0 !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* ── Score / stat cards ── */
-    .score-card {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%);
-        border: 1px solid rgba(139,92,246,0.3);
-        border-radius: 20px;
-        padding: 32px 36px;
-        margin: 16px 0;
-        box-shadow: 0 8px 40px rgba(144,133,233,0.3);
-        animation: fadeUp 0.5s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-    .score-card::before {
-        content: '';
-        position: absolute;
-        top: -30%; right: -10%;
-        width: 250px; height: 250px;
-        background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .score-card::after {
-        content: '';
-        position: absolute;
-        bottom: -20%; left: -5%;
-        width: 180px; height: 180px;
-        background: radial-gradient(circle, rgba(144,133,233,0.10) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .score-num {
-        font-size: 5rem;
-        font-weight: 900;
-        color: white;
-        line-height: 1;
-        letter-spacing: -0.04em;
-        text-shadow: 0 2px 20px rgba(255,255,255,0.2);
-    }
-    .score-label {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.55);
-        margin-bottom: 8px;
-    }
-    .score-badge {
-        display: inline-block;
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(4px);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 20px;
-        padding: 5px 16px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: white;
-        margin-top: 10px;
-    }
-    .bar-bg {
-        background: rgba(255,255,255,0.12);
-        border-radius: 6px;
-        height: 6px;
-        overflow: hidden;
-        margin-top: 5px;
-    }
-    .bar-fill {
-        height: 100%;
-        border-radius: 6px;
-        background: rgba(255,255,255,0.75);
-        transition: width 0.7s ease-out;
-    }
-
-    /* ── Dark metric cards ── */
-    .metric-card {
-        background: #1e293b;
-        border: 1px solid rgba(57,135,229,0.12);
-        border-radius: 16px;
-        padding: 22px 26px;
-        transition: all 0.25s ease;
-    }
-    .metric-card:hover {
-        border-color: rgba(57,135,229,0.35);
-        box-shadow: 0 4px 24px rgba(57,135,229,0.10);
-        transform: translateY(-2px);
-    }
-    .metric-label {
-        font-size: 0.72rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 8px;
-    }
-    .metric-value {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #f1f5f9;
-        line-height: 1;
-        letter-spacing: -0.02em;
-    }
-
-    /* ── Recommendation cards ── */
-    .rec-card {
-        background: #1e293b;
-        border-left: 4px solid #9085E9;
-        padding: 18px 22px;
-        margin: 10px 0;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.06);
-        border-left: 4px solid #9085E9;
-        animation: slideRight 0.4s ease-out;
-        transition: all 0.2s ease;
-    }
-    .rec-card:hover {
-        background: #1a2540;
-        transform: translateX(4px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .rec-card h4 { color: #f1f5f9 !important; margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 600; }
-    .rec-card p  { color: #94a3b8 !important; margin: 4px 0; line-height: 1.6; font-size: 0.87rem; }
-    .rec-card.critical { border-left-color: #ef4444 !important; }
-    .rec-card.warning  { border-left-color: #f59e0b !important; }
-    .rec-card.success  { border-left-color: #10b981 !important; }
-    .rec-card.info     { border-left-color: #9085E9 !important; }
-
-    /* ── Asset cards ── */
-    .asset-card {
-        background: #1e293b;
-        border: 1px solid rgba(144,133,233,0.12);
-        border-radius: 14px;
-        padding: 20px 24px;
-        margin: 6px 0;
-        transition: all 0.25s ease;
-    }
-    .asset-card:hover {
-        border-color: rgba(144,133,233,0.4);
-        background: #1a2540;
-        box-shadow: 0 4px 24px rgba(144,133,233,0.15);
-    }
-    .asset-card p, .asset-card span, .asset-card div {
-        color: #94a3b8 !important;
-    }
-
-    /* ── Badges ── */
-    .asset-class-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-    }
-    .risk-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
-    /* ── Progress bar (dark) ── */
-    .progress-bar-bg {
-        background: rgba(255,255,255,0.08);
-        border-radius: 6px;
-        height: 7px;
-        overflow: hidden;
-        margin-top: 4px;
-    }
-    .progress-bar-fill {
-        height: 100%;
-        border-radius: 6px;
-        transition: width 0.6s ease-out;
-    }
-
-    /* ── Model portfolio cards ── */
-    .model-card {
-        background: #1e293b;
-        border: 1px solid rgba(144,133,233,0.15);
-        border-radius: 16px;
-        padding: 24px 28px;
-        margin: 10px 0;
-        transition: all 0.25s ease;
-    }
-    .model-card:hover {
-        border-color: rgba(144,133,233,0.4);
-        background: #1a2540;
-        box-shadow: 0 8px 32px rgba(144,133,233,0.18);
-        transform: translateY(-3px);
-    }
-
-    /* ── Upgrade card ── */
-    .upgrade-card {
-        background: linear-gradient(135deg, rgba(144,133,233,0.15), rgba(124,58,237,0.15));
-        border: 1px solid rgba(144,133,233,0.35);
-        border-radius: 16px;
-        padding: 28px 32px;
-        text-align: center;
-        margin: 16px 0;
-    }
-    .upgrade-card h3 { color: #9AA8BF !important; margin: 0 0 8px 0; }
-    .upgrade-card p  { color: #9085E9 !important; font-size: 0.9rem; }
-
-    /* ── Paywall block ── */
-    .paywall-block {
-        background: rgba(144,133,233,0.08);
-        border: 1px dashed rgba(144,133,233,0.3);
-        border-radius: 14px;
-        padding: 32px;
-        text-align: center;
-        margin: 16px 0;
-    }
-
-    /* ── Native Streamlit metric override ── */
-    [data-testid="stMetricValue"] {
-        font-size: 2rem !important;
-        color: #f1f5f9 !important;
-        font-weight: 800 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 0.72rem !important;
-        color: #64748b !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.07em !important;
-    }
-
-    /* ── Progress bars ── */
-    .stProgress > div > div {
-        background: linear-gradient(90deg, #3987E5 0%, #9085E9 100%) !important;
-    }
-
-    /* ── Tabs ── */
-    .stTabs [data-baseweb="tab-list"] {
-        background: rgba(255,255,255,0.04) !important;
-        border-radius: 12px !important;
-        padding: 4px !important;
-        gap: 4px !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        color: #64748b !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        font-size: 0.84rem !important;
-        transition: all 0.2s !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0ea5e9, #9085E9) !important;
-        color: white !important;
-        box-shadow: 0 2px 12px rgba(14,165,233,0.4) !important;
-    }
-
-    /* ── Expanders ── */
-    .streamlit-expanderHeader {
-        background: #161b22 !important;
-        border: 1px solid rgba(57,135,229,0.12) !important;
-        border-radius: 10px !important;
-        color: #cbd5e1 !important;
-    }
-    .streamlit-expanderHeader:hover {
-        background: #1c2333 !important;
-        border-color: rgba(57,135,229,0.3) !important;
-    }
-    details[open] .streamlit-expanderHeader {
-        border-bottom-left-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-    }
-
-    /* ── KPI fintech cards ── */
-    .kpi-card {
-        background: linear-gradient(145deg, #1e293b, #263348);
-        border: 1px solid rgba(57,135,229,0.12);
-        border-radius: 18px;
-        padding: 22px 24px 18px;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    .kpi-card:hover {
-        border-color: rgba(57,135,229,0.35);
-        box-shadow: 0 8px 32px rgba(57,135,229,0.10);
-        transform: translateY(-3px);
-    }
-    .kpi-card::before {
-        content: '';
-        position: absolute;
-        top: -20px; right: -20px;
-        width: 90px; height: 90px;
-        background: radial-gradient(circle, rgba(57,135,229,0.07) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .kpi-icon  { font-size: 1.3rem; margin-bottom: 10px; }
-    .kpi-label {
-        font-size: 0.67rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: #475569; margin-bottom: 6px;
-    }
-    .kpi-value {
-        font-size: 2.2rem; font-weight: 900; line-height: 1;
-        letter-spacing: -0.03em; margin-bottom: 6px;
-    }
-    .kpi-sub   { font-size: 0.75rem; color: #475569; line-height: 1.4; }
-    .kpi-positive { color: #16B979; }
-    .kpi-negative { color: #E2504F; }
-    .kpi-neutral  { color: #3987E5; }
-    .kpi-warning  { color: #E8A317; }
-
-    /* ── Section headers ── */
-    .section-header {
-        display: flex; align-items: center; gap: 12px;
-        margin: 32px 0 18px; padding-bottom: 12px;
-        border-bottom: 1px solid rgba(57,135,229,0.1);
-    }
-    .section-icon {
-        width: 34px; height: 34px;
-        background: linear-gradient(135deg, rgba(57,135,229,0.12), rgba(144,133,233,0.12));
-        border: 1px solid rgba(57,135,229,0.18);
-        border-radius: 9px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1rem;
-    }
-    .section-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
-    .section-sub   { font-size: 0.76rem; color: #475569; margin-top: 2px; }
-
-    /* ── Tooltip hint boxes ── */
-    .tooltip-hint {
-        background: rgba(57,135,229,0.05);
-        border: 1px solid rgba(57,135,229,0.12);
-        border-radius: 10px; padding: 10px 14px;
-        font-size: 0.80rem; color: #64748b; line-height: 1.55;
-    }
-    .tooltip-hint strong { color: #3987E5; }
-
-    /* ── Fintech gradient divider ── */
-    .ft-divider {
-        height: 1px;
-        background: linear-gradient(90deg, transparent 0%, rgba(57,135,229,0.25) 40%,
-                    rgba(144,133,233,0.25) 60%, transparent 100%);
-        margin: 28px 0; border: none;
-    }
-
-    /* ── Inputs ── */
-    .stTextInput > div > div > input {
-        background: #131c30 !important;
-        border: 1px solid rgba(144,133,233,0.2) !important;
-        border-radius: 10px !important;
-        color: #f1f5f9 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-    .stTextInput > div > div > input:focus {
-        border-color: #9085E9 !important;
-        box-shadow: 0 0 0 3px rgba(144,133,233,0.15) !important;
-    }
-    .stSelectbox > div > div {
-        background: #131c30 !important;
-        border: 1px solid rgba(144,133,233,0.2) !important;
-        border-radius: 10px !important;
-        color: #f1f5f9 !important;
-    }
-
-    /* ── Sliders ── */
-    .stSlider > div > div > div {
-        color: #f1f5f9 !important;
-    }
-    .stSlider label { color: #94a3b8 !important; font-size:0.82rem !important; }
-
-    /* ── Success / warning / error ── */
-    .stAlert {
-        border-radius: 12px !important;
-        border: none !important;
-    }
-    div[data-testid="stNotification"] { border-radius: 12px !important; }
-
-    /* ── Divider ── */
-    hr {
-        border: none !important;
-        border-top: 1px solid rgba(255,255,255,0.06) !important;
-        margin: 24px 0 !important;
-    }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #060818; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #9085E9; }
-
-    #MainMenu { visibility: hidden; }
-    footer     { visibility: hidden; }
-    header     { visibility: hidden; }
-</style>
-""", unsafe_allow_html=True)
-
-# Sensitor design system — injected after the legacy stylesheet so its tokens win
-# on the new pages while the existing pages keep their current appearance.
 sensitor_design.inject_theme()
 
 # =============================================================================
@@ -808,13 +295,13 @@ def render_kpi_cards(metrics, lang="en"):
 def render_health_gauge(score, lang="en"):
     """Plotly gauge chart for portfolio health score (0–100)."""
     if score >= 80:
-        bar_color = "#16B979"
+        bar_color = "#22604A"
     elif score >= 60:
-        bar_color = "#3987E5"
+        bar_color = "#1F4A72"
     elif score >= 40:
-        bar_color = "#E8A317"
+        bar_color = "#855615"
     else:
-        bar_color = "#E2504F"
+        bar_color = "#9A3A2C"
 
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -828,17 +315,17 @@ def render_health_gauge(score, lang="en"):
                 range=[0, 100],
                 tickwidth=1,
                 tickvals=[0, 20, 40, 60, 80, 100],
-                tickcolor='rgba(255,255,255,0.12)',
-                tickfont=dict(color='#475569', size=10),
+                tickcolor='rgba(15,27,38,0.12)',
+                tickfont=dict(color='#59636B', size=10),
             ),
             bar=dict(color=bar_color, thickness=0.22),
-            bgcolor='rgba(0,0,0,0)',
+            bgcolor='rgba(15,27,38,0)',
             borderwidth=0,
             steps=[
-                dict(range=[0,  40], color='rgba(255,77,77,0.10)'),
-                dict(range=[40, 60], color='rgba(255,176,32,0.10)'),
-                dict(range=[60, 80], color='rgba(57,135,229,0.10)'),
-                dict(range=[80,100], color='rgba(0,255,156,0.10)'),
+                dict(range=[0,  40], color='rgba(154,58,44,0.10)'),
+                dict(range=[40, 60], color='rgba(133,86,21,0.10)'),
+                dict(range=[60, 80], color='rgba(31,74,114,0.10)'),
+                dict(range=[80,100], color='rgba(34,96,74,0.10)'),
             ],
             threshold=dict(
                 line=dict(color=bar_color, width=3),
@@ -850,7 +337,7 @@ def render_health_gauge(score, lang="en"):
     fig.update_layout(
         height=240,
         margin=dict(l=20, r=20, t=20, b=10),
-        paper_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(15,27,38,0)',
         font=dict(family='Inter, sans-serif'),
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -872,7 +359,7 @@ def render_metric_tooltips(lang="en"):
             tips = [
                 ("📈 Ratio de Sharpe", "Mesure le rendement par unité de risque. > 1 = bon, > 2 = excellent. < 0 = le portefeuille perd de l'argent après ajustement du risque."),
                 ("〰️ Volatilité",      "Écart-type annualisé des rendements quotidiens. < 10% = très stable, 10–20% = modéré, > 25% = risque élevé."),
-                ("📉 Max Drawdown",    "La plus grande baisse entre un sommet et un creux. Plus c'est proche de 0, mieux c'est. Ex : −30% = perte temporaire de 30% de la valeur."),
+                ("📉 Max Drawdown",    "La plus grande baisse entre un sommet et un creux. Plus c'est proche de 0, mieux c'est. Ex: −30% = perte temporaire de 30% de la valeur."),
                 ("🔀 Diversification", "Répartir les actifs par secteur, zone géographique et classe d'actifs pour réduire la concentration. Plus les actifs sont décorrélés, mieux c'est."),
                 ("🔗 Corrélation",     "Valeur entre −1 et +1. Proche de +1 = actifs évoluent ensemble (moins de diversification). Proche de −1 = actifs opposés (bonne couverture)."),
             ]
@@ -947,20 +434,19 @@ def render_robustness_score(robustness, lang="en"):
     interp_display = interpretation if lang == 'en' else interp_fr.get(interpretation, interpretation)
 
     score_color_map = {
-        "#10b981": "normal", "#9085E9": "normal", "#f59e0b": "inverse", "#ef4444": "inverse"
+        "#22604A": "normal", "#1F4A72": "normal", "#855615": "inverse", "#9A3A2C": "inverse"
     }
 
-    st.markdown(f"""<div style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);
-border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:28px 32px;margin:12px 0;
-box-shadow:0 8px 40px rgba(144,133,233,0.25);position:relative;overflow:hidden;">
+    st.markdown(f"""<div style="background:#0F1B26;border-top:2px solid #855615;border-radius:3px;padding:28px 32px;margin:12px 0;
+position:relative;overflow:hidden;">
 <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-color:rgba(255,255,255,0.5);margin-bottom:6px;">{label}</div>
-<div style="font-size:4.5rem;font-weight:900;color:white;line-height:1;letter-spacing:-0.04em;">
+color:rgba(255,253,248,0.62);margin-bottom:6px;">{label}</div>
+<div style="font-family:'Newsreader',Georgia,serif;font-size:4.5rem;font-weight:500;color:#FFFDF8;line-height:1;letter-spacing:-0.02em;">
 {total}<span style="font-size:1.8rem;font-weight:400;opacity:0.4;">/100</span></div>
-<div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.12);
-border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 16px;
+<div style="display:inline-block;margin-top:10px;background:rgba(255,253,248,0.08);
+border:1px solid rgba(255,253,248,0.25);border-radius:2px;padding:4px 16px;
 font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-color:white;">{interp_display}</div></div>""", unsafe_allow_html=True)
+color:#FFFDF8;">{interp_display}</div></div>""", unsafe_allow_html=True)
 
     # ── Breakdown using native Streamlit (no HTML needed)
     breakdown_label = "Score Breakdown" if lang == 'en' else "Détail du Score"
@@ -983,9 +469,9 @@ color:white;">{interp_display}</div></div>""", unsafe_allow_html=True)
         target_col = col_a if i % 2 == 0 else col_b
         with target_col:
             st.markdown(
-                f"<div style='font-size:0.78rem;color:#94a3b8;margin-bottom:2px;"
-                f"margin-top:10px;'>{icon} <strong style='color:#e2e8f0;'>{name}</strong>"
-                f" <span style='float:right;color:#64748b;'>{score}/{max_score}</span></div>",
+                f"<div style='font-size:0.78rem;color:#33414D;margin-bottom:2px;"
+                f"margin-top:10px;'>{icon} <strong style='color:#0F1B26;'>{name}</strong>"
+                f" <span style='float:right;color:#59636B;'>{score}/{max_score}</span></div>",
                 unsafe_allow_html=True
             )
             st.progress(pct)
@@ -1005,12 +491,12 @@ def render_improvement_suggestions(suggestions, lang="en"):
     
     for sug in suggestions:
         badge_colors = {
-            'CRITICAL': '#ef4444',
-            'HIGH': '#f59e0b',
-            'MEDIUM': '#9085E9',
-            'INFO': '#10b981'
+            'CRITICAL': '#9A3A2C',
+            'HIGH': '#855615',
+            'MEDIUM': '#1F4A72',
+            'INFO': '#22604A'
         }
-        badge_color = badge_colors.get(sug['priority'], '#64748b')
+        badge_color = badge_colors.get(sug['priority'], '#59636B')
         
         issue_label = "Issue" if lang == "en" else "Problème"
         sol_label = "Solution" if lang == "en" else "Solution"
@@ -1025,7 +511,7 @@ def render_improvement_suggestions(suggestions, lang="en"):
             </div>
             <p><strong>{issue_label}:</strong> {sug['issue']}</p>
             <p><strong>{sol_label}:</strong> {sug['solution']}</p>
-            {f"<p style='color:#9085E9;font-weight:600;margin-top:10px;font-size:0.85rem;'>{impact_label}: {sug['impact']}</p>" if sug.get("impact") else ""}
+            {f"<p style='color:#1F4A72;font-weight:600;margin-top:10px;font-size:0.85rem;'>{impact_label}: {sug['impact']}</p>" if sug.get("impact") else ""}
         </div>
         """, unsafe_allow_html=True)
 
@@ -1055,25 +541,25 @@ def render_asset_card(ticker, lang="en", show_weight=None):
     typical_use = info.get(f"typical_use_{lang}", info.get("typical_use", "N/A"))
 
     risk_colors = {
-        "Low": "#10b981", "Low-Medium": "#22d3ee", "Medium": "#9085E9",
-        "Medium-High": "#f59e0b", "High": "#f97316", "Very High": "#ef4444",
-        "Unknown": "#94a3b8",
+        "Low": "#22604A", "Low-Medium": "#2F6A9E", "Medium": "#1F4A72",
+        "Medium-High": "#855615", "High": "#9C5A1E", "Very High": "#9A3A2C",
+        "Unknown": "#33414D",
     }
     class_colors = {
-        "Stock": "#dbeafe", "ETF": "#d1fae5", "Crypto": "#fef3c7",
-        "Commodity": "#fde8d8", "Bond": "#ede9fe", "Unknown": "#f1f5f9",
+        "Stock": "#E1E9F1", "ETF": "#DDEBE2", "Crypto": "#F2E7D2",
+        "Commodity": "#F3E0DA", "Bond": "#EEE9DD", "Unknown": "#EEE9DD",
     }
     class_text_colors = {
-        "Stock": "#1d4ed8", "ETF": "#065f46", "Crypto": "#92400e",
-        "Commodity": "#c2410c", "Bond": "#5b21b6", "Unknown": "#64748b",
+        "Stock": "#1F4A72", "ETF": "#22604A", "Crypto": "#855615",
+        "Commodity": "#9A3A2C", "Bond": "#33414D", "Unknown": "#59636B",
     }
 
     risk = info.get("risk_level", "Unknown")
     asset_class = info.get("asset_class", "Unknown")
     liq = info.get("liquidity", 70)
-    risk_color = risk_colors.get(risk, "#94a3b8")
-    cls_bg = class_colors.get(asset_class, "#f1f5f9")
-    cls_txt = class_text_colors.get(asset_class, "#64748b")
+    risk_color = risk_colors.get(risk, "#33414D")
+    cls_bg = class_colors.get(asset_class, "#0F1B26")
+    cls_txt = class_text_colors.get(asset_class, "#59636B")
 
     # Display labels (translated)
     risk_labels_fr = {
@@ -1090,7 +576,7 @@ def render_asset_card(ticker, lang="en", show_weight=None):
 
     weight_html = ""
     if show_weight is not None:
-        weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#9085E9;margin-left:8px;'>{show_weight*100:.1f}%</span>"
+        weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#1F4A72;margin-left:8px;'>{show_weight*100:.1f}%</span>"
 
     with st.expander(f"{ticker}  —  {info['name']}"):
         role_label = "Portfolio role" if lang == 'en' else "Rôle dans le portefeuille"
@@ -1107,25 +593,25 @@ def render_asset_card(ticker, lang="en", show_weight=None):
             <span class="risk-badge" style="background:{risk_color}22;color:{risk_color};">{risk_display}</span>
             {weight_html}
           </div>
-          <p style="color:#94a3b8;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{description}</p>
+          <p style="color:#33414D;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">{description}</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:0.83rem;">
-            <div><span style="color:#4b5563;font-weight:500;">{sector_label}</span><br/>
-                 <span style="color:#e2e8f0;font-weight:600;">{info['sector']}</span></div>
-            <div><span style="color:#4b5563;font-weight:500;">{geo_label}</span><br/>
-                 <span style="color:#e2e8f0;font-weight:600;">{info['geography']}</span></div>
-            <div><span style="color:#4b5563;font-weight:500;">{div_label}</span><br/>
-                 <span style="color:#e2e8f0;font-weight:600;">{info.get('dividend_yield', 'N/A')}</span></div>
-            <div><span style="color:#4b5563;font-weight:500;">{cap_label}</span><br/>
-                 <span style="color:#e2e8f0;font-weight:600;">{info.get('market_cap', 'N/A')}</span></div>
+            <div><span style="color:#59636B;font-weight:500;">{sector_label}</span><br/>
+                 <span style="color:#0F1B26;font-weight:600;">{info['sector']}</span></div>
+            <div><span style="color:#59636B;font-weight:500;">{geo_label}</span><br/>
+                 <span style="color:#0F1B26;font-weight:600;">{info['geography']}</span></div>
+            <div><span style="color:#59636B;font-weight:500;">{div_label}</span><br/>
+                 <span style="color:#0F1B26;font-weight:600;">{info.get('dividend_yield', 'N/A')}</span></div>
+            <div><span style="color:#59636B;font-weight:500;">{cap_label}</span><br/>
+                 <span style="color:#0F1B26;font-weight:600;">{info.get('market_cap', 'N/A')}</span></div>
           </div>
-          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(144,133,233,0.12);">
-            <div style="font-size:0.75rem;color:#4b5563;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">{liq_label}</div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(31,74,114,0.12);">
+            <div style="font-size:0.75rem;color:#59636B;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">{liq_label}</div>
             <div class="progress-bar-bg" style="margin-bottom:10px;">
-              <div class="progress-bar-fill" style="width:{liq}%;background:#9085E9;"></div>
+              <div class="progress-bar-fill" style="width:{liq}%;background:#1F4A72;"></div>
             </div>
-            <div style="font-size:0.82rem;color:#64748b;line-height:1.6;">
-              <span style="color:#94a3b8;font-weight:600;">{role_label}:</span> {utility}<br/>
-              <span style="color:#94a3b8;font-weight:600;">{use_label}:</span> {typical_use}
+            <div style="font-size:0.82rem;color:#59636B;line-height:1.6;">
+              <span style="color:#33414D;font-weight:600;">{role_label}:</span> {utility}<br/>
+              <span style="color:#33414D;font-weight:600;">{use_label}:</span> {typical_use}
             </div>
           </div>
         </div>
@@ -1143,21 +629,21 @@ def render_enhanced_charts(analyzer, lang="en"):
 
     CHART_LAYOUT = dict(
         height=440,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
+        paper_bgcolor='rgba(15,27,38,0)',
+        plot_bgcolor='rgba(15,27,38,0)',
+        font=dict(family='Inter, sans-serif', size=12, color='#33414D'),
         margin=dict(l=10, r=10, t=48, b=10),
         hovermode='x unified',
-        hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(57,135,229,0.3)',
-                        font=dict(color='#f1f5f9', size=12)),
+        hoverlabel=dict(bgcolor='#FFFDF8', bordercolor='rgba(31,74,114,0.3)',
+                        font=dict(color='#0F1B26', size=12)),
     )
     AXIS_STYLE = dict(
         showgrid=True,
-        gridcolor='rgba(255,255,255,0.04)',
+        gridcolor='rgba(15,27,38,0.04)',
         gridwidth=1,
-        linecolor='rgba(255,255,255,0.06)',
-        tickfont=dict(size=11, color='#475569'),
-        zerolinecolor='rgba(255,255,255,0.05)',
+        linecolor='rgba(15,27,38,0.06)',
+        tickfont=dict(size=11, color='#59636B'),
+        zerolinecolor='rgba(15,27,38,0.05)',
     )
 
     with tabs[0]:
@@ -1167,15 +653,15 @@ def render_enhanced_charts(analyzer, lang="en"):
             y=analyzer.portfolio_values.values,
             mode='lines',
             name='Portfolio' if lang == 'en' else 'Portefeuille',
-            line=dict(color='#3987E5', width=2.5),
+            line=dict(color='#1F4A72', width=2.5),
             fill='tozeroy',
-            fillcolor='rgba(57,135,229,0.06)',
+            fillcolor='rgba(31,74,114,0.06)',
             hovertemplate='<b>%{x|%b %d, %Y}</b><br>$%{y:,.0f}<extra></extra>',
         ))
         fig.update_layout(
             title=dict(
                 text="Portfolio Performance" if lang == 'en' else "Performance du Portefeuille",
-                font=dict(size=14, color='#e2e8f0', family='Inter'),
+                font=dict(size=14, color='#0F1B26', family='Inter'),
             ),
             yaxis=dict(tickprefix="$", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
@@ -1192,15 +678,15 @@ def render_enhanced_charts(analyzer, lang="en"):
             y=drawdown.values * 100,
             mode='lines',
             name='Drawdown',
-            line=dict(color='#E2504F', width=2),
+            line=dict(color='#9A3A2C', width=2),
             fill='tozeroy',
-            fillcolor='rgba(255,77,77,0.08)',
+            fillcolor='rgba(154,58,44,0.08)',
             hovertemplate='<b>%{x|%b %d, %Y}</b><br>%{y:.1f}%<extra></extra>',
         ))
         fig.update_layout(
             title=dict(
                 text="Portfolio Drawdown" if lang == 'en' else "Drawdown du Portefeuille",
-                font=dict(size=14, color='#e2e8f0', family='Inter'),
+                font=dict(size=14, color='#0F1B26', family='Inter'),
             ),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
@@ -1209,27 +695,27 @@ def render_enhanced_charts(analyzer, lang="en"):
         st.plotly_chart(fig, use_container_width=True)
 
     with tabs[2]:
-        palette = ['#3987E5','#9085E9','#16B979','#E8A317','#E2504F',
-                   '#9085E9','#34d399','#fbbf24','#9AA8BF','#6ee7b7']
+        palette = ['#1F4A72','#1F4A72','#22604A','#855615','#9A3A2C',
+                   '#1F4A72','#22604A','#855615','#33414D','#22604A']
         alloc_title = "Portfolio Allocation" if lang == 'en' else "Allocation du Portefeuille"
         fig = go.Figure(data=[go.Pie(
             labels=list(analyzer.weights.keys()),
             values=[v * 100 for v in analyzer.weights.values()],
             hole=0.50,
-            marker=dict(colors=palette, line=dict(color='#0e1117', width=2)),
+            marker=dict(colors=palette, line=dict(color='#FFFDF8', width=2)),
             textinfo='label+percent',
             textfont=dict(size=12, color='white'),
             hovertemplate='<b>%{label}</b><br>%{value:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text=alloc_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
+            title=dict(text=alloc_title, font=dict(size=14, color='#0F1B26', family='Inter')),
             showlegend=True,
-            legend=dict(orientation='v', x=1.02, y=0.5, font=dict(color='#94a3b8', size=11)),
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='Inter, sans-serif', color='#94a3b8'),
+            legend=dict(orientation='v', x=1.02, y=0.5, font=dict(color='#33414D', size=11)),
+            paper_bgcolor='rgba(15,27,38,0)',
+            font=dict(family='Inter, sans-serif', color='#33414D'),
             height=440, margin=dict(l=10, r=10, t=48, b=10),
-            hoverlabel=dict(bgcolor='#1c2333', bordercolor='rgba(57,135,229,0.3)',
-                            font=dict(color='#f1f5f9', size=12)),
+            hoverlabel=dict(bgcolor='#FFFDF8', bordercolor='rgba(31,74,114,0.3)',
+                            font=dict(color='#0F1B26', size=12)),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1241,20 +727,20 @@ def render_enhanced_charts(analyzer, lang="en"):
 
         sorted_geo = dict(sorted(geo_alloc.items(), key=lambda x: x[1], reverse=True))
         geo_title = "Geographic Allocation" if lang == 'en' else "Allocation Géographique"
-        bar_colors = ['#3987E5' if i == 0 else '#9085E9' if i == 1 else '#9085E9'
+        bar_colors = ['#1F4A72' if i == 0 else '#1F4A72' if i == 1 else '#1F4A72'
                       for i in range(len(sorted_geo))]
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_geo.keys()),
             y=[v*100 for v in sorted_geo.values()],
             marker=dict(color=bar_colors, opacity=0.9,
-                        line=dict(color='rgba(57,135,229,0.3)', width=1)),
+                        line=dict(color='rgba(31,74,114,0.3)', width=1)),
             text=[f"{v*100:.1f}%" for v in sorted_geo.values()],
             textposition='outside',
-            textfont=dict(color='#94a3b8', size=11),
+            textfont=dict(color='#33414D', size=11),
             hovertemplate='<b>%{x}</b><br>%{y:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text=geo_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
+            title=dict(text=geo_title, font=dict(size=14, color='#0F1B26', family='Inter')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1269,23 +755,23 @@ def render_enhanced_charts(analyzer, lang="en"):
 
         sorted_sec = dict(sorted(sector_alloc.items(), key=lambda x: x[1], reverse=True))
         sec_title = "Sector Allocation" if lang == 'en' else "Allocation Sectorielle"
-        sec_colors = ['#16B979', '#3987E5', '#9085E9', '#E8A317', '#E2504F',
-                      '#9085E9', '#34d399', '#fbbf24', '#9AA8BF', '#6ee7b7']
+        sec_colors = ['#22604A', '#1F4A72', '#1F4A72', '#855615', '#9A3A2C',
+                      '#1F4A72', '#22604A', '#855615', '#33414D', '#22604A']
         fig = go.Figure(data=[go.Bar(
             x=list(sorted_sec.keys()),
             y=[v*100 for v in sorted_sec.values()],
             marker=dict(
                 color=sec_colors[:len(sorted_sec)],
                 opacity=0.9,
-                line=dict(color='rgba(255,255,255,0.1)', width=1),
+                line=dict(color='rgba(15,27,38,0.1)', width=1),
             ),
             text=[f"{v*100:.1f}%" for v in sorted_sec.values()],
             textposition='outside',
-            textfont=dict(color='#94a3b8', size=11),
+            textfont=dict(color='#33414D', size=11),
             hovertemplate='<b>%{x}</b><br>%{y:.1f}%<extra></extra>',
         )])
         fig.update_layout(
-            title=dict(text=sec_title, font=dict(size=14, color='#e2e8f0', family='Inter')),
+            title=dict(text=sec_title, font=dict(size=14, color='#0F1B26', family='Inter')),
             yaxis=dict(ticksuffix="%", **AXIS_STYLE),
             xaxis=AXIS_STYLE,
             **CHART_LAYOUT
@@ -1310,16 +796,15 @@ def render_upgrade_prompt(lang="en"):
         ("Unlimited analyses", "Analyses illimitées"),
     ]
     features_html = "".join(
-        f"<div style='font-size:0.85rem;color:#5b21b6;margin:4px 0;'>&#10003; {f[0] if lang=='en' else f[1]}</div>"
+        f"<div style='font-size:0.85rem;color:#1F4A72;margin:4px 0;'>&#10003; {f[0] if lang=='en' else f[1]}</div>"
         for f in features
     )
     btn_html = (
         f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:14px;'
-        f'padding:10px 28px;background:linear-gradient(135deg,#9085E9,#9085E9);color:white;'
-        f'border-radius:9px;font-weight:600;font-size:0.9rem;text-decoration:none;'
-        f'box-shadow:0 2px 8px rgba(144,133,233,0.3);">{title} — ${price}/mo</a>'
+        f'padding:10px 28px;background:#1F4A72;color:#FFFDF8;'
+        f'border-radius:3px;font-weight:600;font-size:0.9rem;text-decoration:none;">{title} · ${price}/mo</a>'
     ) if link else (
-        f'<div style="margin-top:14px;font-size:0.82rem;color:#7c3aed;">Contact us to upgrade</div>'
+        f'<div style="margin-top:14px;font-size:0.82rem;color:#1F4A72;">Contact us to upgrade</div>'
     )
 
     st.markdown(f"""
@@ -1340,11 +825,10 @@ def render_paywall(feature_name, lang="en"):
         f"**{feature_name}** est disponible sur le plan Pro."
     )
     st.markdown(f"""
-    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;
+    <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-left:3px solid #855615;border-radius:3px;
                 padding:20px 24px;text-align:center;margin:12px 0;">
-      <div style="font-size:1.3rem;margin-bottom:8px;">&#128274;</div>
-      <div style="font-weight:600;color:#4338ca;margin-bottom:4px;">{feature_name}</div>
-      <div style="font-size:0.87rem;color:#5b21b6;">
+            <div style="font-weight:600;color:#0F1B26;margin-bottom:4px;">{feature_name}</div>
+      <div style="font-size:0.87rem;color:#1F4A72;">
         {'Available on Pro plan' if lang == 'en' else 'Disponible sur le plan Pro'}
       </div>
     </div>
@@ -1372,30 +856,30 @@ def render_stress_test_results(stress_results, lang="en"):
         resil_pct  = resilience * 100
 
         if resil_pct >= 80:
-            resil_color = "#16B979"
+            resil_color = "#22604A"
             badge = "🟢"
         elif resil_pct >= 50:
-            resil_color = "#E8A317"
+            resil_color = "#855615"
             badge = "🟡"
         else:
-            resil_color = "#E2504F"
+            resil_color = "#9A3A2C"
             badge = "🔴"
 
         with col:
             st.markdown(
-                f"<div style='background:#1e293b;border:1px solid rgba(57,135,229,0.15);"
-                f"border-radius:14px;padding:18px 20px;height:100%;'>"
+                f"<div style='background:#FFFDF8;border:1px solid rgba(31,74,114,0.15);"
+                f"border-radius:3px;padding:18px 20px;height:100%;'>"
                 f"<div style='font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
-                f"text-transform:uppercase;color:#475569;margin-bottom:6px;'>{scenario}</div>"
-                f"<div style='font-size:0.78rem;color:#64748b;margin-bottom:14px;'>"
+                f"text-transform:uppercase;color:#59636B;margin-bottom:6px;'>{scenario}</div>"
+                f"<div style='font-size:0.78rem;color:#59636B;margin-bottom:14px;'>"
                 f"{result['description']}</div>"
-                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{loss_lbl}</div>"
-                f"<div style='font-size:1.6rem;font-weight:800;color:#E2504F;line-height:1;"
+                f"<div style='font-size:0.7rem;color:#59636B;margin-bottom:2px;'>{loss_lbl}</div>"
+                f"<div style='font-size:1.6rem;font-weight:800;color:#9A3A2C;line-height:1;"
                 f"margin-bottom:10px;'>{port_loss:+.1f}%</div>"
-                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:2px;'>{mkt_lbl}</div>"
-                f"<div style='font-size:1rem;font-weight:600;color:#64748b;"
+                f"<div style='font-size:0.7rem;color:#59636B;margin-bottom:2px;'>{mkt_lbl}</div>"
+                f"<div style='font-size:1rem;font-weight:600;color:#59636B;"
                 f"margin-bottom:12px;'>{mkt_loss:.0f}%</div>"
-                f"<div style='font-size:0.7rem;color:#475569;margin-bottom:4px;'>"
+                f"<div style='font-size:0.7rem;color:#59636B;margin-bottom:4px;'>"
                 f"{badge} {resil_lbl} {resil_pct:.0f}%</div>"
                 f"</div>",
                 unsafe_allow_html=True,
@@ -1470,7 +954,7 @@ def _manual_price_editor(tickers, lang) -> None:
                 f"No price was found for: {', '.join(sorted(unpriced))}. Enter one "
                 f"below, or the holding is left out of the total."
                 if lang == "en" else
-                f"Aucun cours trouvé pour : {', '.join(sorted(unpriced))}. Saisissez-en "
+                f"Aucun cours trouvé pour: {', '.join(sorted(unpriced))}. Saisissez-en "
                 f"un ci-dessous, sinon la ligne est exclue du total."
             )
 
@@ -1591,9 +1075,9 @@ def _sidebar(lang):
     """Render sidebar navigation and user info."""
     with st.sidebar:
         st.markdown(
-            "<div style='font-size:1.1rem;font-weight:700;color:#e2e8f0;letter-spacing:-0.01em;"
-            "padding:0 0 4px 0;'>Portfolio Health Pro</div>"
-            "<div style='font-size:0.72rem;color:#64748b;letter-spacing:0.05em;text-transform:uppercase;"
+            "<div style='font-family:Newsreader,Georgia,serif;font-size:1.3rem;font-weight:500;color:#FFFDF8;"
+            "letter-spacing:-0.01em;padding:0 0 4px 0;'>Portfolio Health Pro</div>"
+            "<div style='font-size:0.72rem;color:rgba(255,253,248,0.6);letter-spacing:0.05em;text-transform:uppercase;"
             "margin-bottom:20px;'>Professional Analytics</div>",
             unsafe_allow_html=True
         )
@@ -1611,7 +1095,7 @@ def _sidebar(lang):
                 st.session_state.language = "fr"
                 st.rerun()
 
-        st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:16px 0;'>",
+        st.markdown("<hr style='border-color:rgba(15,27,38,0.08);margin:16px 0;'>",
                     unsafe_allow_html=True)
 
         # Risk profile — translated labels
@@ -1625,7 +1109,7 @@ def _sidebar(lang):
         )
         st.session_state.user_profile = profile_options[profile_labels.index(selected_label)]
 
-        st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
+        st.markdown("<hr style='border-color:rgba(15,27,38,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
 
         # Analysis mode selector
@@ -1679,7 +1163,7 @@ def _sidebar(lang):
                 f"Converti depuis {others} au taux du jour."
             )
 
-        st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:14px 0;'>",
+        st.markdown("<hr style='border-color:rgba(15,27,38,0.06);margin:14px 0;'>",
                     unsafe_allow_html=True)
 
         # ── Navigation ───────────────────────────────────────────────────────
@@ -1731,7 +1215,7 @@ def _sidebar(lang):
         def _nav_group(title, entries):
             st.markdown(
                 f"<div style='font-size:0.63rem;font-weight:700;letter-spacing:0.15em;"
-                f"text-transform:uppercase;color:#465065;margin:6px 0 6px 4px;'>{title}</div>",
+                f"text-transform:uppercase;color:rgba(255,253,248,0.55);margin:6px 0 6px 4px;'>{title}</div>",
                 unsafe_allow_html=True,
             )
             for key, label in entries:
@@ -1748,18 +1232,17 @@ def _sidebar(lang):
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
         _nav_group("Build" if lang == "en" else "Construire", tools)
 
-        st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:16px 0;'>",
+        st.markdown("<hr style='border-color:rgba(15,27,38,0.08);margin:16px 0;'>",
                     unsafe_allow_html=True)
 
         # Tier badge
         tier = st.session_state.user_tier
-        tier_color = "#10b981" if tier == 'pro' else "#f59e0b"
         tier_label = TIER_LIMITS[tier]['label']
         email_display = st.session_state.user_email or ("Demo mode" if lang == 'en' else "Mode démo")
         st.markdown(
-            f"<div style='font-size:0.78rem;color:#64748b;margin-bottom:4px;'>{email_display}</div>"
-            f"<div style='display:inline-block;background:{tier_color}22;color:{tier_color};"
-            f"padding:2px 12px;border-radius:12px;font-size:0.72rem;font-weight:600;"
+            f"<div style='font-size:0.78rem;color:rgba(255,253,248,0.6);margin-bottom:4px;'>{email_display}</div>"
+            f"<div style='display:inline-block;border:1px solid rgba(255,253,248,0.35);color:#FFFDF8;"
+            f"padding:2px 12px;border-radius:3px;font-size:0.72rem;font-weight:600;"
             f"letter-spacing:0.06em;text-transform:uppercase;'>{tier_label}</div>",
             unsafe_allow_html=True
         )
@@ -1922,7 +1405,7 @@ def _storage_location(lang):
                 "URL in `SENSITOR_DB_URL` — see docs/DEPLOY.md."
                 if lang == "en" else
                 "**Ces données seront perdues.** Vous tournez sur un hébergeur sans "
-                "disque persistant : ce fichier SQLite est supprimé à chaque "
+                "disque persistant: ce fichier SQLite est supprimé à chaque "
                 "redémarrage, redéploiement et mise en veille. Créez une base "
                 "PostgreSQL gratuite et mettez son URL dans `SENSITOR_DB_URL` — "
                 "voir docs/DEPLOY.md."
@@ -1937,7 +1420,7 @@ def _storage_location(lang):
                     "path depends on the directory the app was started from. "
                     "Launching from somewhere else opens a different, empty database."
                     if lang == "en" else
-                    "Ni SENSITOR_DB_URL ni SENSITOR_DB_PATH n'est défini : ce chemin "
+                    "Ni SENSITOR_DB_URL ni SENSITOR_DB_PATH n'est défini: ce chemin "
                     "dépend du dossier depuis lequel l'app a été lancée. Un lancement "
                     "depuis un autre dossier ouvre une autre base, vide."
                 )
@@ -2139,13 +1622,13 @@ def main():
         col_free, col_pro = st.columns(2)
         with col_free:
             st.markdown("""
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:#0f172a;margin-bottom:4px;">Free</div>
-              <div style="font-size:1.5rem;font-weight:800;color:#0f172a;">$0<span style="font-size:0.9rem;color:#64748b;font-weight:400;">/mo</span></div>
-              <hr style="border-color:#e2e8f0;margin:12px 0;">
-              <div style="font-size:0.85rem;color:#475569;">Up to 5 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:#475569;margin-top:4px;">Basic metrics &amp; charts</div>
-              <div style="font-size:0.85rem;color:#475569;margin-top:4px;">Asset Library</div>
+            <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-top:2px solid #0F1B26;border-radius:3px;padding:20px 22px;">
+              <div style="font-weight:700;font-size:1rem;color:#0F1B26;margin-bottom:4px;">Free</div>
+              <div style="font-size:1.5rem;font-weight:800;color:#0F1B26;">$0<span style="font-size:0.9rem;color:#59636B;font-weight:400;">/mo</span></div>
+              <hr style="border-color:#D8D2C3;margin:12px 0;">
+              <div style="font-size:0.85rem;color:#59636B;">Up to 5 assets per portfolio</div>
+              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Basic metrics &amp; charts</div>
+              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Asset Library</div>
             </div>""", unsafe_allow_html=True)
 
         with col_pro:
@@ -2153,23 +1636,23 @@ def main():
             link = STRIPE_CONFIG['payment_link']
             btn = (
                 f'<a href="{link}" target="_blank" style="display:block;margin-top:14px;'
-                f'padding:10px 0;background:linear-gradient(135deg,#9085E9,#9085E9);color:white;'
-                f'border-radius:9px;font-weight:600;font-size:0.88rem;text-decoration:none;'
+                f'padding:10px 0;background:#FFFDF8;color:#0F1B26;'
+                f'border-radius:3px;font-weight:600;font-size:0.88rem;text-decoration:none;'
                 f'text-align:center;">Subscribe — ${price}/mo</a>'
             ) if link else (
-                f'<div style="margin-top:14px;font-size:0.82rem;color:#7c3aed;">'
+                f'<div style="margin-top:14px;font-size:0.82rem;color:rgba(255,253,248,0.7);">'
                 f'Set STRIPE_PAYMENT_LINK env var to activate.</div>'
             )
             st.markdown(f"""
-            <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:white;margin-bottom:4px;">Pro</div>
-              <div style="font-size:1.5rem;font-weight:800;color:white;">${price}<span style="font-size:0.9rem;color:#9AA8BF;font-weight:400;">/mo</span></div>
-              <hr style="border-color:rgba(255,255,255,0.15);margin:12px 0;">
-              <div style="font-size:0.85rem;color:#c7d2fe;">Up to 50 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:#c7d2fe;margin-top:4px;">Portfolio optimisation (Markowitz)</div>
-              <div style="font-size:0.85rem;color:#c7d2fe;margin-top:4px;">Crisis stress tests</div>
-              <div style="font-size:0.85rem;color:#c7d2fe;margin-top:4px;">Full Health Score breakdown</div>
-              <div style="font-size:0.85rem;color:#c7d2fe;margin-top:4px;">Unlimited analyses</div>
+            <div style="background:#0F1B26;border-top:2px solid #855615;border-radius:3px;padding:20px 22px;">
+              <div style="font-weight:700;font-size:1rem;color:#FFFDF8;margin-bottom:4px;">Pro</div>
+              <div style="font-size:1.5rem;font-weight:800;color:#FFFDF8;">${price}<span style="font-size:0.9rem;color:rgba(255,253,248,0.62);font-weight:400;">/mo</span></div>
+              <hr style="border-color:rgba(255,253,248,0.15);margin:12px 0;">
+              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);">Up to 50 assets per portfolio</div>
+              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Portfolio optimisation (Markowitz)</div>
+              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Crisis stress tests</div>
+              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Full Health Score breakdown</div>
+              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Unlimited analyses</div>
               {btn}
             </div>""", unsafe_allow_html=True)
 
@@ -2211,7 +1694,7 @@ def main():
             "Apprenez à connaître chaque actif avant de le ajouter à votre portefeuille."
         )
         st.title(title)
-        st.markdown(f"<p style='color:#64748b;margin-top:-12px;'>{subtitle}</p>",
+        st.markdown(f"<p style='color:#59636B;margin-top:-12px;'>{subtitle}</p>",
                     unsafe_allow_html=True)
 
         classes = sorted(set(v.get('asset_class', 'Unknown') for v in ASSET_INFO.values()))
@@ -2265,10 +1748,10 @@ def main():
             )
             st.markdown(f"""
             <div style="margin-bottom:6px;">
-              <h1 style="font-size:1.9rem;font-weight:900;color:#f1f5f9;letter-spacing:-0.03em;margin:0;">
+              <h1 style="font-size:1.9rem;font-weight:900;color:#0F1B26;letter-spacing:-0.03em;margin:0;">
                 {dash_title}
               </h1>
-              <p style="color:#475569;font-size:0.85rem;margin:4px 0 0;">{sub_info}</p>
+              <p style="color:#59636B;font-size:0.85rem;margin:4px 0 0;">{sub_info}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -2370,7 +1853,7 @@ def main():
                         "flat rather than counted as unchanged."
                         if lang == 'en' else
                         "La variation du jour ne couvre que les lignes ayant un "
-                        "cours précédent. Les prix saisis à la main n'en ont pas : "
+                        "cours précédent. Les prix saisis à la main n'en ont pas: "
                         "ils sont écartés plutôt que comptés comme stables."
                     )
 
@@ -2430,21 +1913,21 @@ def main():
 
                 CHART_LAYOUT = dict(
                     height=440,
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(family='Inter, sans-serif', size=12, color='#94a3b8'),
+                    paper_bgcolor='rgba(15,27,38,0)',
+                    plot_bgcolor='rgba(15,27,38,0)',
+                    font=dict(family='Inter, sans-serif', size=12, color='#33414D'),
                     margin=dict(l=10, r=10, t=48, b=10),
                     hovermode='x unified',
-                    hoverlabel=dict(bgcolor='#141C2B', bordercolor='rgba(57,135,229,0.35)',
-                                    font=dict(color='#EDF2F9', size=12)),
+                    hoverlabel=dict(bgcolor='#FFFDF8', bordercolor='rgba(31,74,114,0.35)',
+                                    font=dict(color='#0F1B26', size=12)),
                 )
                 AXIS_STYLE = dict(
                     showgrid=True,
-                    gridcolor='rgba(255,255,255,0.04)',
+                    gridcolor='rgba(15,27,38,0.04)',
                     gridwidth=1,
-                    linecolor='rgba(255,255,255,0.06)',
-                    tickfont=dict(size=11, color='#6B7A93'),
-                    zerolinecolor='rgba(255,255,255,0.05)',
+                    linecolor='rgba(15,27,38,0.06)',
+                    tickfont=dict(size=11, color='#59636B'),
+                    zerolinecolor='rgba(15,27,38,0.05)',
                 )
 
                 fig = go.Figure()
@@ -2455,7 +1938,7 @@ def main():
                     name=t("total_value", lang),
                     line=dict(color=_ACCENT, width=2.5),
                     fill='tozeroy',
-                    fillcolor='rgba(57,135,229,0.10)',
+                    fillcolor='rgba(31,74,114,0.10)',
                     # The currency the portfolio is actually denominated in.
                     # This read "$" on a euro book, on the one chart a person
                     # looks at to see what they are worth.
@@ -2465,7 +1948,7 @@ def main():
                 fig.update_layout(
                     title=dict(
                         text="Portfolio Value" if lang == 'en' else "Valeur du Portefeuille",
-                        font=dict(size=14, color='#EDF2F9', family='Inter'),
+                        font=dict(size=14, color='#0F1B26', family='Inter'),
                     ),
                     yaxis=dict(tickprefix=symbol, **AXIS_STYLE),
                     xaxis=AXIS_STYLE,
@@ -2496,21 +1979,21 @@ def main():
 
                 with syn_c1:
                     st.markdown(f"**{t('asset_class_breakdown', lang)}**")
-                    palette = ['#3987E5','#9085E9','#16B979','#E8A317','#E2504F',
-                               '#9085E9','#34d399','#fbbf24']
+                    palette = ['#1F4A72','#1F4A72','#22604A','#855615','#9A3A2C',
+                               '#1F4A72','#22604A','#855615']
                     fig_ac = go.Figure(data=[go.Pie(
                         labels=list(class_alloc.keys()),
                         values=[v * 100 for v in class_alloc.values()],
                         hole=0.50,
-                        marker=dict(colors=palette, line=dict(color='#0e1117', width=2)),
+                        marker=dict(colors=palette, line=dict(color='#FFFDF8', width=2)),
                         textinfo='label+percent',
                         textfont=dict(size=11, color='white'),
                         hovertemplate='<b>%{label}</b><br>%{value:.1f}%<extra></extra>',
                     )])
                     fig_ac.update_layout(
                         showlegend=False,
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        font=dict(family='Inter, sans-serif', color='#94a3b8'),
+                        paper_bgcolor='rgba(15,27,38,0)',
+                        font=dict(family='Inter, sans-serif', color='#33414D'),
                         height=300, margin=dict(l=10, r=10, t=10, b=10),
                     )
                     st.plotly_chart(fig_ac, use_container_width=True)
@@ -2519,11 +2002,11 @@ def main():
                     # Dominant asset
                     st.markdown(f"**{t('dominant_asset', lang)}**")
                     st.markdown(
-                        f"<div style='background:rgba(57,135,229,0.06);border:1px solid rgba(57,135,229,0.12);"
-                        f"border-radius:10px;padding:12px 16px;margin-bottom:12px;'>"
-                        f"<div style='font-size:1.1rem;font-weight:700;color:#3987E5;'>"
+                        f"<div style='background:rgba(31,74,114,0.06);border:1px solid rgba(31,74,114,0.12);"
+                        f"border-radius:3px;padding:12px 16px;margin-bottom:12px;'>"
+                        f"<div style='font-size:1.1rem;font-weight:700;color:#1F4A72;'>"
                         f"{top_name} ({top_ticker})</div>"
-                        f"<div style='font-size:0.82rem;color:#64748b;'>{top_pct:.1f}% "
+                        f"<div style='font-size:0.82rem;color:#59636B;'>{top_pct:.1f}% "
                         f"{'of portfolio' if lang == 'en' else 'du portefeuille'}</div>"
                         f"</div>",
                         unsafe_allow_html=True,
@@ -2534,21 +2017,21 @@ def main():
                     max_weight = max(analyzer.weights.values()) if analyzer.weights else 0
                     if n_classes >= 4 and max_weight < 0.30:
                         div_level = t("high_div", lang)
-                        div_color = "#10b981"
+                        div_color = "#22604A"
                     elif n_classes >= 3 and max_weight < 0.45:
                         div_level = t("medium_div", lang)
-                        div_color = "#f59e0b"
+                        div_color = "#855615"
                     elif n_classes >= 2 and max_weight < 0.60:
                         div_level = t("low_div", lang)
-                        div_color = "#ff8c00"
+                        div_color = "#9C5A1E"
                     else:
                         div_level = t("very_low_div", lang)
-                        div_color = "#E2504F"
+                        div_color = "#9A3A2C"
 
                     st.markdown(f"**{t('diversification', lang)}**")
                     st.markdown(
                         f"<div style='display:inline-block;background:{div_color}22;color:{div_color};"
-                        f"padding:4px 16px;border-radius:10px;font-size:0.9rem;font-weight:600;'>"
+                        f"padding:4px 16px;border-radius:3px;font-size:0.9rem;font-weight:600;'>"
                         f"{div_level}</div>",
                         unsafe_allow_html=True,
                     )
@@ -2566,21 +2049,21 @@ def main():
                     avg_risk = total_risk_score / total_w_risk if total_w_risk > 0 else 3
                     if avg_risk <= 1.5:
                         risk_label = "Low" if lang == 'en' else "Faible"
-                        risk_color = "#10b981"
+                        risk_color = "#22604A"
                     elif avg_risk <= 2.5:
                         risk_label = "Medium" if lang == 'en' else "Moyen"
-                        risk_color = "#f59e0b"
+                        risk_color = "#855615"
                     elif avg_risk <= 3.5:
                         risk_label = "Medium-High" if lang == 'en' else "Moyen-Élevé"
-                        risk_color = "#ff8c00"
+                        risk_color = "#9C5A1E"
                     else:
                         risk_label = "High" if lang == 'en' else "Élevé"
-                        risk_color = "#E2504F"
+                        risk_color = "#9A3A2C"
 
                     st.markdown(f"**{t('overall_risk', lang)}**")
                     st.markdown(
                         f"<div style='display:inline-block;background:{risk_color}22;color:{risk_color};"
-                        f"padding:4px 16px;border-radius:10px;font-size:0.9rem;font-weight:600;'>"
+                        f"padding:4px 16px;border-radius:3px;font-size:0.9rem;font-weight:600;'>"
                         f"{risk_label}</div>",
                         unsafe_allow_html=True,
                     )
@@ -2622,10 +2105,10 @@ def main():
             )
             summary_text = analyzer.generate_auto_summary(lang)
             import re as _re
-            summary_html = _re.sub(r'\*\*(.+?)\*\*', r'<strong style="color:#e2e8f0;">\1</strong>', summary_text)
+            summary_html = _re.sub(r'\*\*(.+?)\*\*', r'<strong style="color:#0F1B26;">\1</strong>', summary_text)
             st.markdown(f"""
-            <div style="background:rgba(57,135,229,0.04);border:1px solid rgba(57,135,229,0.12);
-                 border-radius:14px;padding:20px 24px;line-height:1.9;color:#94a3b8;font-size:0.93rem;">
+            <div style="background:rgba(31,74,114,0.04);border:1px solid rgba(31,74,114,0.12);
+                 border-radius:3px;padding:20px 24px;line-height:1.9;color:#33414D;font-size:0.93rem;">
               {summary_html}
             </div>
             """, unsafe_allow_html=True)
@@ -2697,7 +2180,7 @@ def main():
             st.warning(
                 f"Free plan: up to {max_assets} assets. Upgrade to Pro for up to 50."
                 if lang == 'en' else
-                f"Plan Free : jusqu'à {max_assets} actifs. Passez à Pro pour 50."
+                f"Plan Free: jusqu'à {max_assets} actifs. Passez à Pro pour 50."
             )
 
         tabs = st.tabs([t("search", lang), t("browse", lang)])
@@ -2859,18 +2342,18 @@ def main():
 
             if tier == 'pro':
                 alloc_html = "".join(
-                    f"<span style='display:inline-block;background:rgba(144,133,233,0.15);border-radius:8px;"
-                    f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#9AA8BF;"
-                    f"margin:3px;border:1px solid rgba(144,133,233,0.2);'>{tk} {w*100:.0f}%</span>"
+                    f"<span style='display:inline-block;background:rgba(31,74,114,0.15);border-radius:8px;"
+                    f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#33414D;"
+                    f"margin:3px;border:1px solid rgba(31,74,114,0.2);'>{tk} {w*100:.0f}%</span>"
                     for tk, w in model_data['allocation'].items()
                 )
             else:
                 n = len(model_data['allocation'])
                 locked_label = "assets" if lang == 'en' else "actifs"
                 alloc_html = (
-                    f"<span style='display:inline-block;background:rgba(144,133,233,0.08);border-radius:8px;"
-                    f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#64748b;"
-                    f"margin:3px;border:1px solid rgba(144,133,233,0.15);filter:blur(0px);'>"
+                    f"<span style='display:inline-block;background:rgba(31,74,114,0.08);border-radius:8px;"
+                    f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#59636B;"
+                    f"margin:3px;border:1px solid rgba(31,74,114,0.15);filter:blur(0px);'>"
                     f"🔒 {n} {locked_label} — Pro</span>"
                 )
             ret_label = t("expected_return", lang)
@@ -2878,18 +2361,18 @@ def main():
 
             st.markdown(f"""
             <div class="model-card">
-              <div style="font-size:1.05rem;font-weight:700;color:#f1f5f9;margin-bottom:5px;">{model_name}</div>
-              <div style="font-size:0.84rem;color:#64748b;margin-bottom:16px;line-height:1.5;">{description}</div>
+              <div style="font-size:1.05rem;font-weight:700;color:#0F1B26;margin-bottom:5px;">{model_name}</div>
+              <div style="font-size:0.84rem;color:#59636B;margin-bottom:16px;line-height:1.5;">{description}</div>
               <div style="display:flex;gap:28px;margin-bottom:16px;flex-wrap:wrap;">
                 <div>
-                  <div style="font-size:0.68rem;color:#4b5563;text-transform:uppercase;font-weight:600;
+                  <div style="font-size:0.68rem;color:#59636B;text-transform:uppercase;font-weight:600;
                               letter-spacing:0.07em;margin-bottom:3px;">{ret_label}</div>
-                  <div style="font-size:1.4rem;font-weight:800;color:#10b981;">+{ret_pct:.0f}%</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#22604A;">+{ret_pct:.0f}%</div>
                 </div>
                 <div>
-                  <div style="font-size:0.68rem;color:#4b5563;text-transform:uppercase;font-weight:600;
+                  <div style="font-size:0.68rem;color:#59636B;text-transform:uppercase;font-weight:600;
                               letter-spacing:0.07em;margin-bottom:3px;">{vol_label}</div>
-                  <div style="font-size:1.4rem;font-weight:800;color:#f59e0b;">{vol_pct:.0f}%</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#855615;">{vol_pct:.0f}%</div>
                 </div>
               </div>
               <div style="margin-bottom:4px;">{alloc_html}</div>
@@ -2928,7 +2411,7 @@ def main():
     elif page == "real_portfolio":
         st.title(t("real_portfolio", lang))
         st.markdown(
-            f"<p style='color:#64748b;margin-top:-12px;'>{t('real_portfolio_desc', lang)}</p>",
+            f"<p style='color:#59636B;margin-top:-12px;'>{t('real_portfolio_desc', lang)}</p>",
             unsafe_allow_html=True,
         )
 
@@ -3073,7 +2556,7 @@ def main():
                         f"Valued from a price you entered: {names}. These are your "
                         f"estimate, not a market quote."
                         if lang == 'en' else
-                        f"Valorisé à partir d'un prix que vous avez saisi : {names}. "
+                        f"Valorisé à partir d'un prix que vous avez saisi: {names}. "
                         f"Ce sont vos estimations, pas des cours de marché."
                     )
                 if price_report.get("dropped"):
@@ -3093,7 +2576,7 @@ def main():
                     st.caption(
                         f"Converted to {base} at today's rate: {names}."
                         if lang == 'en' else
-                        f"Converti en {base} au taux du jour : {names}."
+                        f"Converti en {base} au taux du jour: {names}."
                     )
 
                 if not prices:

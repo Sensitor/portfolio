@@ -39,7 +39,7 @@ def render_xray(ctx) -> None:
     weights = ctx.weights
 
     # ── Headline exposures — the "you own more of this than you think" row ───
-    section(tr("headline_exposures", lang).upper())
+    section(tr("headline_exposures", lang))
 
     headlines = X.headline_exposures(xray)
     if headlines:
@@ -63,7 +63,7 @@ def render_xray(ctx) -> None:
     note(tr("xray_note", lang))
 
     # ── Direct holdings versus resolved exposure ─────────────────────────────
-    section(tr("hidden_exposure", lang).upper(), tr("hidden_exposure_sub", lang))
+    section(tr("hidden_exposure", lang), tr("hidden_exposure_sub", lang))
 
     col_direct, col_resolved = st.columns(2, gap="large")
     with col_direct:
@@ -82,7 +82,7 @@ def render_xray(ctx) -> None:
         )
 
     # ── Every dimension ──────────────────────────────────────────────────────
-    section(tr("lookthrough", lang).upper())
+    section(tr("lookthrough", lang))
 
     tab_labels = [X.DIMENSION_LABELS[d][lang] for d in X.DIMENSIONS]
     tabs = st.tabs(tab_labels)
@@ -114,7 +114,7 @@ def render_xray(ctx) -> None:
                 )
 
     # ── Per-holding resolution ───────────────────────────────────────────────
-    section(tr("holdings", lang).upper(),
+    section(tr("holdings", lang),
             "Resolved per holding" if lang == "en" else "Résolu par position")
 
     rows = []
@@ -163,7 +163,7 @@ def _factor_block(ctx, lang: str) -> None:
     from ..integrations import market_data as market
     from ..ui.components import metric_card, num
 
-    section(tr("factor_exposure", lang).upper(), tr("factor_sub", lang))
+    section(tr("factor_exposure", lang), tr("factor_sub", lang))
 
     returns = ctx.portfolio_returns
     if returns is None or len(returns) < 90:

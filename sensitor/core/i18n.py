@@ -69,6 +69,23 @@ STRINGS: dict[str, dict[str, str]] = {
     "risk_concentration": {"en": "Risk Concentration", "fr": "Concentration du Risque"},
     "growth_of_capital": {"en": "Growth of Capital", "fr": "Évolution du Capital"},
     "things_to_review": {"en": "Things to Review", "fr": "Points à Examiner"},
+    "reading": {"en": "Reading", "fr": "Lecture"},
+    "reading_value": {
+        "en": "The portfolio goes from {start} to {end} over {period}, {ret}.",
+        "fr": "Le portefeuille passe de {start} à {end} sur la période {period}, soit {ret}.",
+    },
+    "reading_bench": {
+        "en": "{bench} returns {ret} over the same window.",
+        "fr": "{bench} fait {ret} sur la même fenêtre.",
+    },
+    "reading_drawdown": {
+        "en": "The deepest fall from a peak reaches {dd}.",
+        "fr": "La pire baisse depuis un sommet atteint {dd}.",
+    },
+    "reading_foot": {
+        "en": "Past data: it describes what happened, not what will.",
+        "fr": "Données passées : elles décrivent ce qui s'est produit, pas ce qui se produira.",
+    },
     "no_signals": {"en": "No thresholds crossed", "fr": "Aucun seuil franchi"},
     "no_signals_body": {
         "en": "None of the configured concentration, correlation, exposure or drawdown thresholds were crossed for this portfolio.",

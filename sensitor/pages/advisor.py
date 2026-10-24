@@ -44,7 +44,7 @@ def render_advisor(ctx) -> None:
 
 
 def _headline(summaries, lang) -> None:
-    section(tr("clients", lang).upper(), f"{len(summaries)}")
+    section(tr("clients", lang), f"{len(summaries)}")
 
     values = [s["total_value"] for s in summaries if s["total_value"] is not None]
     healths = [s["metrics"].get("health") for s in summaries
@@ -111,7 +111,7 @@ def _table(summaries, lang) -> None:
 
 
 def _cards(ctx, summaries, lang, store) -> None:
-    section(tr("clients", lang).upper() + " — " + tr("holdings", lang).upper())
+    section(tr("clients", lang) + " · " + tr("holdings", lang))
 
     for index, entry in enumerate(summaries):
         portfolio = entry["portfolio"]

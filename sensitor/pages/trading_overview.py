@@ -217,7 +217,7 @@ def _copilot_block(tctx, lang) -> None:
     from ..ai import trading_copilot as TC
 
     items = TC.combined(tctx.trades, lang=lang, limit=5)
-    section(tr("things_to_review", lang).upper(), f"{len(items)}" if items else "")
+    section(tr("things_to_review", lang), f"{len(items)}" if items else "")
 
     if not items:
         alert("good", tr("copilot_nothing_title", lang),
@@ -236,7 +236,7 @@ def _copilot_block(tctx, lang) -> None:
 # =============================================================================
 
 def _equity_block(tctx, metrics, lang, currency) -> None:
-    section(tr("equity_curve", lang).upper(),
+    section(tr("equity_curve", lang),
             f"{metrics['n']} {tr('trades', lang).lower()} · {tctx.period}")
 
     st.plotly_chart(
@@ -248,14 +248,14 @@ def _equity_block(tctx, metrics, lang, currency) -> None:
     left, right = st.columns([1.3, 1], gap="large")
 
     with left:
-        section(tr("daily_pnl", lang).upper())
+        section(tr("daily_pnl", lang))
         st.plotly_chart(
             C.trading_daily_pnl(tctx.daily_pnl, height=250, currency=currency),
             width="stretch", config=PLOTLY_CONFIG, key="tov_daily",
         )
 
     with right:
-        section(tr("r_distribution", lang).upper())
+        section(tr("r_distribution", lang))
         dist = tctx.r_distribution
         if dist and dist.get("counts"):
             st.plotly_chart(
@@ -271,7 +271,7 @@ def _equity_block(tctx, metrics, lang, currency) -> None:
 # =============================================================================
 
 def _breakdown_block(tctx, lang, currency) -> None:
-    section(tr("performance_by", lang).upper())
+    section(tr("performance_by", lang))
 
     labels = [tr(f"d_{d}", lang) for d in DIMENSIONS]
     chosen = st.selectbox(tr("performance_by", lang), labels, index=0,
@@ -345,7 +345,7 @@ def _recent_block(tctx, lang, currency) -> None:
     if not recent:
         return
 
-    section(tr("recent_trades", lang).upper())
+    section(tr("recent_trades", lang))
     rows = []
     for trade in recent:
         rows.append([

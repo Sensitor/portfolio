@@ -80,7 +80,7 @@ def render_trading_psychology(ctx=None) -> None:
 
 def _findings_block(tctx, lang) -> None:
     findings = tctx.findings
-    section(tr("what_your_data_shows", lang).upper(), f"{len(findings)}")
+    section(tr("what_your_data_shows", lang), f"{len(findings)}")
 
     if not findings:
         alert("good", tr("no_patterns_title", lang), tr("no_patterns_body", lang))
@@ -107,7 +107,7 @@ def _behaviour_block(tctx, psych, lang) -> None:
     if not (after_losses or after_wins or activity):
         return
 
-    section(tr("behaviour_around_streaks", lang).upper(),
+    section(tr("behaviour_around_streaks", lang),
             tr("behaviour_around_streaks_sub", lang))
 
     columns = st.columns(3, gap="medium")
@@ -199,7 +199,7 @@ def _mistakes_block(tctx, psych, lang) -> None:
     if not (by_mistake or frequency):
         return
 
-    section(tr("by_mistake", lang).upper())
+    section(tr("by_mistake", lang))
     left, right = st.columns([1.4, 1], gap="large")
 
     with left:
@@ -233,13 +233,13 @@ def _self_reported_block(tctx, psych, lang) -> None:
     discipline = psych.get("discipline", [])
 
     if not (emotions or discipline):
-        section(tr("by_emotion", lang).upper())
+        section(tr("by_emotion", lang))
         empty_state(tr("nothing_recorded_title", lang),
                     tr("nothing_recorded_body", lang), icon="◌")
         return
 
     if emotions:
-        section(tr("by_emotion", lang).upper(),
+        section(tr("by_emotion", lang),
                 f"{sum(r['group']['n'] for r in emotions)} {tr('trades', lang).lower()}")
         st.plotly_chart(
             C.trading_comparison(emotions, lang=lang),
@@ -248,7 +248,7 @@ def _self_reported_block(tctx, psych, lang) -> None:
         _comparison_table(emotions, tr("emotion_before", lang), tctx, lang)
 
     if discipline:
-        section(tr("by_discipline", lang).upper())
+        section(tr("by_discipline", lang))
         rows = []
         for row in discipline:
             rows.append({**row, "display": row["labels"].get(lang, row["label"])})

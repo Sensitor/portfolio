@@ -72,7 +72,7 @@ def _sizing_block(tctx, risk, lang) -> None:
     profile = risk.get("profile", {})
     currency = tctx.currency
 
-    section(tr("risk_per_trade", lang).upper())
+    section(tr("risk_per_trade", lang))
 
     if not profile.get("n_with_stop"):
         alert("warning", tr("stop_coverage", lang), tr("no_stops_at_all", lang),
@@ -152,7 +152,7 @@ def _drift_block(tctx, risk, lang) -> None:
     if not series:
         return
 
-    section(tr("risk_drift", lang).upper(),
+    section(tr("risk_drift", lang),
             f"{len(series)} {tr('rolling_windows', lang)}")
 
     chart_col, stat_col = st.columns([2.2, 1], gap="large")
@@ -197,7 +197,7 @@ def _stops_block(tctx, risk, lang) -> None:
     if not stops.get("n_losses"):
         return
 
-    section(tr("stop_discipline", lang).upper())
+    section(tr("stop_discipline", lang))
 
     c1, c2, c3 = st.columns(3, gap="medium")
     share = stops["share_beyond_stop"]
@@ -249,7 +249,7 @@ def _exposure_block(tctx, risk, lang) -> None:
     if not exposure and not activity:
         return
 
-    section(tr("simultaneous_risk", lang).upper())
+    section(tr("simultaneous_risk", lang))
     c1, c2, c3 = st.columns(3, gap="medium")
 
     with c1:
@@ -296,7 +296,7 @@ def _streak_block(tctx, risk, lang) -> None:
     if not streaks:
         return
 
-    section(tr("expected_streak", lang).upper())
+    section(tr("expected_streak", lang))
 
     observed = streaks["observed_max_losses"]
     expected = streaks["expected_max_losses"]

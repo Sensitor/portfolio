@@ -55,7 +55,7 @@ def render_portfolios(ctx) -> None:
 # =============================================================================
 
 def _save_block(ctx, lang, store, email) -> None:
-    section(tr("save_current", lang).upper(),
+    section(tr("save_current", lang),
             f"{len(ctx.tickers)} {tr('assets', lang).lower()} · {ctx.period}")
 
     name_col, client_col, button_col = st.columns([2, 2, 1], gap="medium")
@@ -95,7 +95,7 @@ def _save_block(ctx, lang, store, email) -> None:
 
 def _list_block(ctx, lang, store, email) -> None:
     summaries = store.portfolio_summaries(email)
-    section(tr("saved_portfolios", lang).upper(), f"{len(summaries)}")
+    section(tr("saved_portfolios", lang), f"{len(summaries)}")
 
     if not summaries:
         empty_state(tr("no_saved_portfolios", lang), tr("no_saved_body", lang), icon="◌")

@@ -98,7 +98,7 @@ def _form_body(lang, store, email, existing) -> None:
     directions = [tr("long", lang), tr("short", lang)]
 
     with st.form(f"{prefix}_form", clear_on_submit=existing is None):
-        section(tr("execution", lang).upper())
+        section(tr("execution", lang))
 
         c1, c2, c3, c4 = st.columns(4, gap="medium")
         with c1:
@@ -416,7 +416,7 @@ def _open_positions(tctx, lang) -> None:
     if not open_trades:
         return
 
-    section(tr("open_position", lang).upper(), f"{len(open_trades)}")
+    section(tr("open_position", lang), f"{len(open_trades)}")
     rows = []
     for trade in open_trades:
         rows.append([
@@ -444,7 +444,7 @@ def _problems(tctx, lang) -> None:
     if not problems:
         return
 
-    section(tr("data_problems", lang).upper(), f"{len(problems)}")
+    section(tr("data_problems", lang), f"{len(problems)}")
     for entry in problems[:10]:
         alert("warning", f"{entry['symbol']} · {entry['id'][:8]}",
               " · ".join(entry["problems"]))
@@ -457,7 +457,7 @@ def _problems(tctx, lang) -> None:
 
 def _trade_list(tctx, lang, store, email) -> None:
     trades = list(tctx.scoped.closed().sorted_by("closed_at"))
-    section(tr("trades", lang).upper(), f"{len(trades)}")
+    section(tr("trades", lang), f"{len(trades)}")
 
     if not trades:
         empty_state(tr("no_trades_title", lang), tr("no_trades_body", lang), icon="◌")

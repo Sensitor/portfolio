@@ -403,7 +403,60 @@ mise en page.
   composants communs ; la vérification se fait sur un échantillon par parcours
   et sur la page de chaque type de bloc.
 
-### Étape 3 · Investissement et analyseur de portefeuille
+### Étape 3 · Investissement et analyseur de portefeuille (faite le 24 octobre 2026)
+
+**Fait.** L'application d'analyse (`portfolio_optimizer_saas.py`, 23 pages) passe
+du thème sombre au Carnet de bord. Aucun calcul, aucune donnée ni aucune route
+ne change ; Space Grotesk reste pour les titres Monnaie et crypto (option A).
+
+- **Jetons** (`sensitor/ui/themes.py`) : papier, feuille, encre, filets et rôles
+  du Carnet (plan, gain, perte, annotation). Le vert et la brique restent
+  distincts. `fade(jeton, alpha)` remplace les teintes `rgba` écrites à la main
+  dans les graphiques et les composants.
+- **Palette de séries** recalculée pour le fond clair et revalidée avec
+  `validate_palette.js` (daltonisme, contraste, plancher en vision normale) ;
+  rampe séquentielle bleue validée en ordinal ; échelle divergente brique,
+  gris chaud, bleu.
+- **Ancienne feuille de style** : le bloc `<style>` de 500 lignes du script est
+  remplacé par `inject_legacy()`, qui habille les anciennes classes avec les
+  jetons (verdict du score en marine, cartes en feuilles, recommandations en
+  notes de marge). Les couleurs écrites en dur dans le script sont ramenées aux
+  jetons ; un test vérifie qu'il n'en reste aucune hors du Carnet.
+- **Titres** : Newsreader pour les titres de page, de section et les `###` ;
+  les titres de section ne sont plus forcés en capitales (63 appels).
+- **Barre latérale** : la reliure marine avec son quadrillage ; marque, libellés
+  et badge de formule en clair sur marine (la marque était devenue invisible
+  au premier passage).
+- **Grammaire des données** :
+  - performance : un point et la valeur en bout de ligne, avec une pastille de
+    la couleur de la série ; les étiquettes proches s'écartent ; au-delà de
+    quatre séries, la légende seule ;
+  - drawdown : zone de risque hachurée à 30° (motif Plotly tourné en CSS ; un
+    navigateur qui l'ignore garde une hachure horizontale) ;
+  - vue d'ensemble : marge « Lecture » à côté de l'évolution du capital, trois
+    phrases calculées (valeur de départ et d'arrivée, indice de référence, pire
+    baisse) et la mention « Données passées ».
+- **Barre d'outils des graphiques** : affichée au survol (ou au toucher) ; en
+  permanence, elle couvrait la légende sur téléphone.
+- **Chiffres** : proportionnels, comme dans l'Academy (la virgule tabulaire de
+  Schibsted ouvre un blanc).
+
+Vérifié : 23 pages capturées à 1440 px avant et après, vue d'ensemble, risque,
+santé, simulateur et compte à 390 px (aucun défilement horizontal), suite de
+tests complète, dont 13 contrôles ajoutés à `test_sensitor_pages`. Les pages
+« Améliorer » et « Tableau de bord » échouent avec le portefeuille fictif des
+tests avant comme après (limite de ce portefeuille, pas de l'étape). Comparaisons :
+`docs/assets/analyseur-vue-ensemble-avant-apres.png`,
+`analyseur-risque-avant-apres.png`, `analyseur-compte-avant-apres.png`,
+`analyseur-mobile.png`.
+
+Reste proposé, à valider : la marge « Lecture » sur les écrans risque,
+corrélations et stress tests ; l'allocation en registre plutôt qu'en barres ;
+le nom de la marque dans la barre latérale (« Portfolio Health Pro » ou
+Sensitor) ; les tirets longs qui restent dans des textes de l'application
+d'analyse (contenu, hors de cette étape).
+
+Plan d'origine :
 
 C'est l'écart le plus grand : l'application d'analyse a un thème sombre
 « fintech » (`sensitor/ui/themes.py`, 17 pages).

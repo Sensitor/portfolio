@@ -21,8 +21,8 @@ from __future__ import annotations
 import html as _html
 
 from .themes import (
-    ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, POS,
-    RADIUS_SM, STATUS, STATUS_ICON, html,
+    ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, NEUTRAL, POS,
+    RADIUS_SM, STATUS, STATUS_ICON, fade, html,
 )
 
 # =============================================================================
@@ -358,7 +358,7 @@ def data_table(headers: list[str], rows: list[list], align: str | None = None,
                     f'gap:8px;justify-content:flex-end;">'
                     f'<span>{_esc(text)}</span>'
                     f'<div style="width:54px;height:5px;border-radius:3px;'
-                    f'background:rgba(154,168,191,0.13);overflow:hidden;flex:none;">'
+                    f'background:{fade(NEUTRAL, 0.13)};overflow:hidden;flex:none;">'
                     f'<div style="width:{frac * 100:.0f}%;height:100%;background:{color};'
                     f'border-radius:3px;"></div></div></div></td>'
                 )
@@ -385,11 +385,25 @@ def note(text: str, icon: str = "ⓘ") -> None:
     """Methodology footnote — where approximations and assumptions get stated."""
     html(
         f'<div style="display:flex;gap:8px;align-items:flex-start;padding:9px 12px;'
-        f'background:rgba(154,168,191,0.04);border:1px solid {BORDER};'
+        f'background:{fade(NEUTRAL, 0.04)};border:1px solid {BORDER};'
         f'border-radius:{RADIUS_SM};margin-top:10px;">'
         f'<span style="color:{INK_FAINT};font-size:0.75rem;">{icon}</span>'
         f'<span style="font-size:0.73rem;color:{INK_MUTED};line-height:1.55;">'
         f'{_esc(text)}</span></div>'
+    )
+
+
+def reading(label: str, lines: list[str], foot: str = "") -> None:
+    """
+    The « Lecture » margin of the Carnet: what the chart beside it says, in plain
+    sentences. Every figure in `lines` is computed by the caller; nothing here is
+    advice. `foot` carries the caveat (past data, synthetic data).
+    """
+    items = "".join(f'<p>{_esc(line)}</p>' for line in lines if line)
+    tail = f'<div class="snr-reading-f">{_esc(foot)}</div>' if foot else ""
+    html(
+        f'<aside class="snr-reading"><div class="snr-reading-l">{_esc(label)}</div>'
+        f'{items}{tail}</aside>'
     )
 
 

@@ -54,7 +54,7 @@ def render_optimize(ctx) -> None:
     min_vol = result.get("min_volatility")
 
     # ── Named portfolios ─────────────────────────────────────────────────────
-    section(tr("efficient_frontier", lang).upper(),
+    section(tr("efficient_frontier", lang),
             f"{len(result['tickers'])} {tr('assets', lang).lower()} · {ctx.period}")
 
     c1, c2, c3 = st.columns(3, gap="medium")
@@ -98,7 +98,7 @@ def render_optimize(ctx) -> None:
     note(tr("frontier_note", lang))
 
     # ── Move to a target allocation ──────────────────────────────────────────
-    section(tr("allocation_change", lang).upper())
+    section(tr("allocation_change", lang))
 
     targets = {}
     if max_sharpe:

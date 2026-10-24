@@ -39,7 +39,7 @@ def render_risk(ctx) -> None:
     var95, var99 = ctx.var, ctx.var99
 
     # ── 1. How much risk ─────────────────────────────────────────────────────
-    section(tr("risk_metrics", lang).upper())
+    section(tr("risk_metrics", lang))
 
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1:
@@ -62,7 +62,7 @@ def render_risk(ctx) -> None:
                     tooltip=define("calmar", lang))
 
     # ── 2. Tail risk ─────────────────────────────────────────────────────────
-    section(tr("return_distribution", lang).upper(),
+    section(tr("return_distribution", lang),
             "1-day horizon" if lang == "en" else "horizon 1 jour")
 
     if var95:
@@ -119,7 +119,7 @@ def render_risk(ctx) -> None:
         note(tr("var_method_note", lang))
 
     # ── 3. Where the risk comes from ─────────────────────────────────────────
-    section(tr("risk_contribution", lang).upper(), tr("risk_contribution_sub", lang))
+    section(tr("risk_contribution", lang), tr("risk_contribution_sub", lang))
     single_asset_note(ctx)
 
     rc = ctx.risk_contribution
@@ -146,7 +146,7 @@ def render_risk(ctx) -> None:
 
     # ── Correlation ──────────────────────────────────────────────────────────
     if not ctx.is_single_asset:
-        section(tr("correlation_matrix", lang).upper())
+        section(tr("correlation_matrix", lang))
 
         k1, k2, k3 = st.columns(3, gap="medium")
         conc = ctx.concentration
@@ -179,7 +179,7 @@ def render_risk(ctx) -> None:
         note(define("correlation", lang))
 
         # ── Concentration ────────────────────────────────────────────────────
-        section(tr("concentration_analysis", lang).upper())
+        section(tr("concentration_analysis", lang))
         n1, n2, n3, n4 = st.columns(4, gap="medium")
         with n1:
             metric_card(tr("top1", lang), pct(conc.get("top1", 0), 1),
@@ -204,7 +204,7 @@ def render_risk(ctx) -> None:
         )
 
     # ── 4. Drawdown record ───────────────────────────────────────────────────
-    section(tr("drawdown_analysis", lang).upper())
+    section(tr("drawdown_analysis", lang))
     dd = ctx.drawdown
     if dd:
         d1, d2, d3, d4 = st.columns(4, gap="medium")

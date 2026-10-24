@@ -201,6 +201,7 @@ def main() -> int:
     checks += _persistence_flow(failures)
     checks += _simulation_flow(failures)
     checks += _deep_link_flow(failures)
+    checks += _carnet_flow(failures)
 
     print(f"\n{checks} render checks, {len(failures)} failures")
     for scenario, page, error in failures:
@@ -366,6 +367,85 @@ def _persistence_flow(failures) -> int:
              and int(orphans) == 0,
              f"orphans {orphans}")
 
+    return checks
+
+
+def _carnet_flow(failures) -> int:
+    """
+    Step 3 of the « Carnet de bord » direction, on the analytics application: the
+    palette is the Carnet's, no colour outside it is left in the legacy script,
+    performance curves carry end labels, a drawdown is a hatched risk zone, and
+    the overview carries a « Lecture » margin built from computed figures.
+    """
+    import re
+    from sensitor.ui import charts as C
+    from sensitor.ui import themes as T
+
+    checks = 0
+
+    def check(label, ok, detail=""):
+        nonlocal checks
+        checks += 1
+        print(f"  {'ok  ' if ok else 'FAIL'}  carnet       {label}")
+        if not ok:
+            failures.append(("carnet", label, detail or "failed"))
+
+    check("paper, ink and plan tokens",
+          (T.BG_DEEP, T.SURFACE, T.INK, T.ACCENT, T.POS, T.NEG, T.WARNING)
+          == ("#F3F0E8", "#FFFDF8", "#0F1B26", "#1F4A72", "#22604A", "#9A3A2C", "#855615"))
+    check("gain and loss are distinct", T.POS != T.NEG)
+    check("fade() keeps the token's colour", T.fade("#1F4A72", 0.2) == "rgba(31,74,114,0.2)")
+
+    # Every hex literal left in the legacy script belongs to the Carnet.
+    allowed = {"#1F4A72", "#59636B", "#0F1B26", "#33414D", "#22604A", "#855615",
+               "#9A3A2C", "#FFFDF8", "#9C5A1E", "#EEE9DD", "#F3E0DA", "#F2E7D2",
+               "#E1E9F1", "#DDEBE2", "#D8D2C3", "#2F6A9E"}
+    with open(APP, encoding="utf-8") as fh:
+        legacy = fh.read()
+    stray = sorted({h.upper() for h in re.findall(r"#[0-9a-fA-F]{6}\b", legacy)} - allowed)
+    check("legacy script uses Carnet colours only", not stray, ", ".join(stray))
+
+    # Section titles are set in Newsreader, in the case they were written in.
+    upper_calls = []
+    pages_dir = os.path.join(os.path.dirname(APP), "sensitor", "pages")
+    for name in sorted(os.listdir(pages_dir)):
+        if name.endswith(".py"):
+            with open(os.path.join(pages_dir, name), encoding="utf-8") as fh:
+                for line in fh:
+                    if re.match(r"\s*section\(", line) and ".upper()" in line:
+                        upper_calls.append(name)
+    check("section titles are not forced to capitals", not upper_calls, ", ".join(upper_calls))
+
+    index = pd.date_range("2024-01-01", periods=60, freq="B")
+    a = pd.Series(np.linspace(100, 130, 60), index=index)
+    b = pd.Series(np.linspace(100, 129, 60), index=index)
+    fig = C.cumulative_performance({"Portfolio": a, "Benchmark": b}, value_prefix="$")
+    notes = fig.layout.annotations
+    check("one end label per series", len(notes) == 2)
+    check("end labels carry the last values",
+          {"$130", "$129"} <= {n.text.split("</span> ")[-1] for n in notes})
+    ys = sorted(n.y for n in notes)
+    check("close end labels are pushed apart", ys[1] - ys[0] > 1.0)
+    many = {f"S{i}": a + i for i in range(5)}
+    check("no end labels beyond four series",
+          len(C.cumulative_performance(many).layout.annotations) == 0)
+
+    dd = pd.Series(np.minimum(0, np.sin(np.linspace(0, 6, 60))) * 0.05, index=index)
+    trace = C.underwater(dd).data[0]
+    check("drawdown is a hatched zone", trace.fillpattern.shape == "-")
+    with open(T.__file__, encoding="utf-8") as fh:
+        check("the hatch is turned to 30 degrees",
+              ".js-plotly-plot pattern {{ transform: rotate(-30deg); }}" in fh.read())
+
+    analyzer = make_portfolio(SCENARIOS["diversified (7 assets)"])
+    for lang, label, word in (("fr", "Lecture", "sur la période"),
+                              ("en", "Reading", "over")):
+        app = run_page("overview", analyzer, lang=lang)
+        markup = " ".join(m.value for m in app.markdown)
+        ok = (not app.exception and "snr-reading" in markup
+              and label in markup and word in markup)
+        check(f"overview carries the reading margin [{lang}]", ok,
+              str(app.exception[0].value)[:300] if app.exception else "")
     return checks
 
 

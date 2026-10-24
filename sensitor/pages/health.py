@@ -59,7 +59,7 @@ def render_health(ctx) -> None:
         )
 
     with col_break:
-        section(tr("score_breakdown", lang).upper(), tr("why_this_score", lang))
+        section(tr("score_breakdown", lang), tr("why_this_score", lang))
         for key in _COMPONENT_ORDER:
             component = components[key]
             detail = (
@@ -78,7 +78,7 @@ def render_health(ctx) -> None:
     note(tr("health_method", lang))
 
     # ── Component contributions to the total ─────────────────────────────────
-    section("CONTRIBUTION",
+    section("Contribution",
             "Component score × weight" if lang == "en"
             else "Score de la composante × pondération")
 
@@ -95,7 +95,7 @@ def render_health(ctx) -> None:
             )
 
     # ── Portfolio DNA ────────────────────────────────────────────────────────
-    section(tr("portfolio_dna", lang).upper(), tr("dna_sub", lang))
+    section(tr("portfolio_dna", lang), tr("dna_sub", lang))
 
     dna = ctx.dna
     axes = ["growth", "risk", "diversification", "liquidity", "income", "defensive"]
@@ -114,7 +114,7 @@ def render_health(ctx) -> None:
             score_bar(tr(f"dna_{axis}", lang), dna[axis], 100)
 
     # ── Underlying statistics ────────────────────────────────────────────────
-    section(tr("risk_metrics", lang).upper())
+    section(tr("risk_metrics", lang))
     stats = ctx.stats
     conc = ctx.concentration
 
