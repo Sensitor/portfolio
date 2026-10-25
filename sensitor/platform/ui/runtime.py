@@ -45,7 +45,7 @@ COOKIE_OP = "ac_cookie_op"
 
 ROUTE_KEY = "ac_route"
 TOKEN_KEY = "session_token"
-ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review", "session")
+ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review", "session", "asset")
 
 
 def tools_url() -> str:

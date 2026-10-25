@@ -70,7 +70,7 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, prop firm challenge simulator, exercises) |
 | VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
 | VII | Salle des marchés | Trader | live | `market`, `market_session`, `market_edit` (coaches) |
-| VIII | Portefeuille et risque | Investir | live | `portfolio` (build), `pf_overview`, `pf_performance`, `pf_health`, `pf_xray`, `pf_risk`, `pf_stress`, `pf_optimize`, `pf_simulator`, `pf_copilot`, `pf_reports`, `pf_portfolios`; the old `tools` address opens `portfolio` |
+| VIII | Portefeuille et risque | Investir | live | `portfolio` (build), `pf_models`, `pf_assets`, `pf_overview`, `pf_performance`, `pf_health`, `pf_xray`, `pf_risk`, `pf_stress`, `pf_optimize`, `pf_simulator`, `pf_copilot`, `pf_reports`, `pf_portfolios`; the old `tools` address opens `portfolio` |
 | IX | Communauté | Échanger | preparing | `community` |
 
 The analytics app honours `?page=` only for `overview`, `trading_overview` and
@@ -195,9 +195,28 @@ stylesheet is byte for byte what it was).
 * **Navigation.** The separate app's page changes (the copilot sending a change
   to the simulator, the portfolios page asking for a new analysis of a saved
   allocation) become the platform's pages.
+* **Allocations types** (`pf_models`): the analyzer's eight model portfolios,
+  from the most prudent to the most aggressive, framed as compositions to study,
+  never as advice. Each shows its lines and weights and its share by kind of
+  asset (shares, bonds, gold and commodities, listed real estate, crypto),
+  computed from the weights and the library's sectors (`composition`). The
+  catalogue's hand-written expected return and volatility are not shown: the
+  figures are those the analysis computes once the allocation is loaded. Names
+  and descriptions are written for the platform, without a figure or a promise.
+  « Étudier cette allocation » analyses it and makes it the working portfolio.
+* **Actifs** (`pf_assets`, a sheet with `asset=`): the asset library, searched
+  by symbol, name or sector and filtered by class. A sheet gives the asset's
+  description, class, sector and geography in French, its risk level and its
+  liquidity in words, and the role usually given to it, marked as a reading and
+  not a sizing advice; a crypto sheet points to the course « Bitcoin, une
+  réserve de valeur ? ». Market cap, dividend yield and allocation ranges are
+  left out, and so is any sentence of the catalogue's prose that carries a
+  figure (`plain`): none of them is sourced. « Ajouter » puts the asset in the
+  working portfolio (an equal share, the other lines keeping their proportions,
+  within the free account's five lines) or, in real mode, in the holdings with
+  its quantity.
 * **Still in the separate app**, and said on the building page with a link when
-  `SENSITOR_TOOLS_URL` is set: model portfolios, the asset library and the
-  MetaTrader 5 analytics.
+  `SENSITOR_TOOLS_URL` is set: the MetaTrader 5 analytics.
 
 ### Adding a space
 

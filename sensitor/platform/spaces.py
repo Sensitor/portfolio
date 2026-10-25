@@ -106,13 +106,13 @@ SPACES: tuple[Space, ...] = (
                    ("Construire un scénario de liquidité", "lesson:liquidite-et-scenarios/scenario-liquidite"),
                    ("Lire le calendrier économique", "lesson:trader-l-actualite/calendrier-economique"))),
     Space("tools", "Portefeuille et risque", "investir", LIVE,
-          "Simuler une allocation ou suivre son portefeuille réel au prix du jour, puis le lire : performance, "
-          "santé, radiographie, risque, stress tests, optimisation, simulation et Monte Carlo.",
+          "Simuler une allocation, partir d'une allocation type ou suivre son portefeuille réel au prix du jour, "
+          "puis le lire : performance, santé, radiographie, risque, stress tests, optimisation, simulation et "
+          "Monte Carlo. Une bibliothèque d'actifs décrit chaque ligne.",
           entry="portfolio",
-          pages=("portfolio", "pf_overview", "pf_performance", "pf_health", "pf_xray", "pf_risk", "pf_stress",
-                 "pf_optimize", "pf_simulator", "pf_copilot", "pf_reports", "pf_portfolios"),
+          pages=("portfolio", "pf_models", "pf_assets", "pf_overview", "pf_performance", "pf_health", "pf_xray",
+                 "pf_risk", "pf_stress", "pf_optimize", "pf_simulator", "pf_copilot", "pf_reports", "pf_portfolios"),
           numeral="VIII",
-          planned=("Les portefeuilles modèles et la bibliothèque d'actifs",),
           related=(("Investir dans la crypto avec méthode", "course:investir-avec-methode"),)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",

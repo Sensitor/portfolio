@@ -39,6 +39,8 @@ RENDERERS = {
     "market_edit": market_room.edit_page,
     "community": spaces_view.preparing,
     "portfolio": portfolio_space.RENDERERS["portfolio"],
+    "pf_models": portfolio_space.RENDERERS["pf_models"],
+    "pf_assets": portfolio_space.RENDERERS["pf_assets"],
     "pf_overview": portfolio_space.RENDERERS["pf_overview"],
     "pf_performance": portfolio_space.RENDERERS["pf_performance"],
     "pf_health": portfolio_space.RENDERERS["pf_health"],

@@ -1237,6 +1237,13 @@ __DA__ .sx-c-blank ol { list-style: none; margin: 1rem 0 0; padding: 0; display:
 __DA__ .sx-c-blank li { border-top: 1px solid var(--c-rule-strong); padding-top: .6rem; font: 400 14px/1.5 var(--c-text); color: var(--c-graphite); margin: 0 !important; }
 __DA__ .sx-c-blank li b { display: block; font-weight: 600; color: var(--c-ink); }
 @media (max-width: 1000px) { __DA__ .sx-c-blank ol { grid-template-columns: 1fr; } __DA__ .sx-c-blank { padding: 1.3rem 1.1rem 1.1rem; } }
+/* Portefeuille et risque: an allocation type, an asset sheet. */
+__DA__ .sx-c-blank.sx-c-model { margin-top: 1.4rem; }
+__DA__ .sx-c-blank .sx-c-mix { font: 600 14px/1.5 var(--c-text); color: var(--c-ink); margin: .8rem 0 0; }
+__DA__ .sx-c-scroll { overflow-x: auto; margin-top: .6rem; }
+__DA__ .sx-c-scroll td:last-child, __DA__ .sx-c-scroll th:last-child { white-space: nowrap; text-align: right; }
+__DA__ .sx-c-blank .sx-kicker { margin-top: 1.1rem; }
+__DA__ .sx-c-blank .sx-note { margin-top: .4rem; }
 
 __DA__ .sx-plan .n { font: 600 12px var(--c-text); letter-spacing: 0; color: var(--c-note); }
 __DA__ .sx-plan .x { font: 400 15px/1.55 var(--c-text); }

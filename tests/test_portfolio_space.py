@@ -1,7 +1,8 @@
 """
 The « Portefeuille et risque » space inside the platform: the analyzer's pages,
-the building page, the shared working portfolio, and the separate app's
-navigation translated into the platform's.
+the building page, the shared working portfolio, the separate app's
+navigation translated into the platform's, the model allocations and the asset
+library.
 
     python tests/test_portfolio_space.py
 
@@ -15,6 +16,7 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+from html import unescape
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -65,6 +67,11 @@ def run(route: dict, tok: str | None = None, *, analyzer=None, state: dict | Non
 
 def text(app: AppTest) -> str:
     return "\n".join(m.value for m in app.markdown)
+
+
+def page_text(app: AppTest) -> str:
+    """The page's markdown without the stylesheets, entities decoded."""
+    return unescape("\n".join(m.value for m in app.markdown if not m.value.lstrip().startswith("<style")))
 
 
 def error(app: AppTest) -> str:
@@ -162,7 +169,7 @@ def main() -> int:
     check("the building page renders for a visitor, and says nothing is kept",
           "Composer le portefeuille" in text(build) and "Sans compte" in text(build) and not build.exception, error(build))
     check("it says what stays in the full app, and that its address is not configured",
-          "portefeuilles modèles" in text(build) and "pas renseignée" in text(build))
+          "MetaTrader 5" in text(build) and "portefeuilles modèles" not in text(build) and "pas renseignée" in text(build))
     built = run({"page": "portfolio"}, alice, analyzer=analyzer)
     check("with an analysis, the building page shows it and offers to read it",
           "Portefeuille analysé" in text(built) and any(b.label == "Lire la vue d'ensemble" for b in built.button))
@@ -239,6 +246,103 @@ def main() -> int:
           and "255\u202f000" in body, body[-600:] if "Portefeuille réel" not in body else "")
     other = run({"page": "portfolio"}, token("frank@example.com"))
     check("another member sees none of it", "APPARTEMENT" not in text(other) and "255\u202f000" not in text(other))
+
+    print("\nModel allocations: for study, figures computed, none promised")
+    from sensitor.investment import assets
+    for key, model in assets.MODEL_PORTFOLIOS.items():
+        mix = PS.composition(model["allocation"])
+        check(f"{key}: a French name and text, a composition that adds up to 100 %",
+              key in PS.MODEL_NAMES and key in PS.MODEL_TEXTS and abs(sum(v for _k, v in mix) - 1) < 1e-9
+              and all(t in assets.ASSET_INFO for t in model["allocation"]))
+    check("the platform's texts carry no figure and no long dash",
+          not any(PS._has_figure(x) or "\u2014" in x or "\u2013" in x
+                  for x in [*PS.MODEL_TEXTS.values(), *PS.MODEL_NAMES.values()]))
+    check("the classic 60/40 is computed as 60 % shares",
+          dict(PS.composition(assets.MODEL_PORTFOLIOS["Classic 60/40"]["allocation"]))["actions"] == 0.6)
+    check("sorted from the most prudent to the most aggressive",
+          [m["profile"] for _k, m in PS.ordered_models()]
+          == sorted((m["profile"] for m in assets.MODEL_PORTFOLIOS.values()),
+                    key=["safe", "balanced", "aggressive"].index))
+    gina = token("gina@example.com")
+    models = run({"page": "pf_models"}, gina)
+    body = page_text(models)
+    shown = [w * 100 for m in assets.MODEL_PORTFOLIOS.values() for w in m["allocation"].values()]
+    check("the page shows every allocation, says it is for study, and promises no return",
+          not models.exception and body.count("sx-c-model") == len(assets.MODEL_PORTFOLIOS)
+          and "Pour l'étude, pas un conseil" in body and "rendement attendu" not in body.lower()
+          and not any(f"{m['expected_return'] * 100:.0f} %" in body for m in assets.MODEL_PORTFOLIOS.values()
+                      if round(m["expected_return"] * 100) not in [round(x) for x in shown]), error(models))
+    check("no long dash on the page", not any(d in m.value for m in models.markdown if not m.value.startswith("<style")
+                                              for d in ("\u2014", "\u2013")))
+    first_key, first = PS.ordered_models()[0]
+    [b for b in models.button if b.key == "pf_model_1"][0].click().run()
+    ws = store().load_workspace("gina@example.com")
+    check("« Étudier cette allocation » analyses it and opens the overview",
+          not models.exception and models.session_state["ac_route"]["page"] == "pf_overview"
+          and models.session_state["current_portfolio"] is not None
+          and models.session_state["user_profile"] == first["profile"], error(models))
+    check("the allocation becomes the member's working portfolio", ws is not None
+          and ws.holdings == first["allocation"], str(ws))
+    other = run({"page": "portfolio"}, token("hugo@example.com"))
+    check("another member does not get it", all(not (m.value or []) for m in other.multiselect))
+
+    print("\nThe asset library: what the asset is, without unsourced figures or sizing")
+    check("the search finds by symbol, name and sector, and filters by class",
+          [t for t, _i in PS.search("cw8")] == ["CW8.PA"]
+          and {t for t, _i in PS.search("", "Crypto")} == {t for t, i in assets.ASSET_INFO.items()
+                                                           if i["asset_class"] == "Crypto"}
+          and all(i["sector"] == "Fixed Income" for _t, i in PS.search("fixed income"))
+          and len(PS.search("")) == len(assets.ASSET_INFO))
+    check("a figure leaves the prose, a name with digits stays",
+          PS.plain("Frais faibles (0,03%). Réplique 3 700 titres. Le Web3 aussi.") == "Frais faibles. Le Web3 aussi."
+          and PS.plain("Exposition S&P 500 à faible coût") == "Exposition S&P 500 à faible coût")
+    check("every asset keeps a description once its figures are gone",
+          all(PS.plain(i["description_fr"]) for i in assets.ASSET_INFO.values()))
+    library = run({"page": "pf_assets"}, gina)
+    check("the library lists every asset", not library.exception
+          and f"{len(assets.ASSET_INFO)} actifs" in text(library), error(library))
+    library.text_input(key="pf_asset_q").set_value("lvmh").run()
+    check("a search narrows the list", "1 actif</b> sur" in text(library) and "LVMH" in page_text(library))
+    sheet = run({"page": "pf_assets", "asset": "CW8.PA"}, gina)
+    body = text(sheet)
+    check("an asset sheet: what it is, its risk and liquidity, the role it is given, framed",
+          not sheet.exception and "Amundi" in body and "Niveau de risque" in body and "Liquidité" in body
+          and "Le rôle qu'on lui prête" in body and "ni un conseil de taille de position" in body, error(sheet))
+    check("no allocation range, yield or market cap on the sheet",
+          "40-80" not in body and "%" not in body.split("fiche de la bibliothèque", 1)[1].split("</div>", 1)[0]
+          and "capitalisation" not in body.lower())
+    btc = run({"page": "pf_assets", "asset": "BTC-USD"}, gina)
+    check("a crypto sheet points to the course that debates the store of value",
+          any(b.key == "pf_asset_course_BTC_USD" for b in btc.button))
+    before = list(store().load_workspace("gina@example.com").holdings)
+    [b for b in sheet.button if b.key == "pf_asset_add_CW8_PA"][0].click().run()
+    ws = store().load_workspace("gina@example.com")
+    check("« Ajouter » puts the asset in the working portfolio and opens the building page",
+          not sheet.exception and sheet.session_state["ac_route"]["page"] == "portfolio"
+          and ws.holdings and set(ws.holdings) == set(before) | {"CW8.PA"}
+          and set(sheet.multiselect(key="pf_tickers").value) == set(before) | {"CW8.PA"},
+          str(ws.holdings if ws else None))
+    check("the new line takes an equal share, the others keep their proportions, the total stays 100 %",
+          abs(sum(ws.holdings.values()) - 1) < 1e-9 and abs(ws.holdings["CW8.PA"] - 1 / (len(before) + 1)) < 1e-9
+          and abs(ws.holdings[before[0]] / ws.holdings[before[1]]
+                  - first["allocation"][before[0]] / first["allocation"][before[1]]) < 1e-9)
+    same = run({"page": "pf_assets", "asset": "SPY"}, gina)
+    check("an asset already held says so", "déjà dans votre portefeuille" in page_text(same)
+          and not any(b.key == "pf_asset_add_SPY" for b in same.button))
+    full = run({"page": "pf_assets", "asset": "QQQ"}, gina)
+    check("a free account at five lines is told so, with no button", len(before) + 1 == 5
+          and "un compte gratuit en compose 5 au plus" in page_text(full)
+          and not any(b.key == "pf_asset_add_QQQ" for b in full.button), str(before))
+    real = run({"page": "pf_assets", "asset": "VNQ"}, erin)
+    real.number_input(key="pf_asset_qty_VNQ").set_value(3.0).run()
+    [b for b in real.button if b.key == "pf_asset_add_VNQ"][0].click().run()
+    check("in real mode it is added with its quantity, to that member's holdings only",
+          real.session_state["real_portfolio_holdings"].get("VNQ") == 3.0
+          and store().load_workspace("erin@example.com").quantities.get("VNQ") == 3.0
+          and "VNQ" not in (store().load_workspace("gina@example.com").holdings or {}),
+          str(real.session_state["real_portfolio_holdings"]))
+    unknown = run({"page": "pf_assets", "asset": "NOPE"}, gina)
+    check("an unknown asset says so", "n'est pas dans la bibliothèque" in page_text(unknown) and not unknown.exception)
 
     print("\nThe separate app's navigation, translated")
     hop = run({"page": "pf_copilot"}, alice, analyzer=analyzer, state={"page": "simulator"})

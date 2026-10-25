@@ -12,8 +12,15 @@ working portfolio stored per member (`pages._workspace`), so a portfolio built
 here is the one the separate app opens, and the other way round.
 
 What stays in the separate app for now, and says so on the building page: the
-real portfolio in quantities, prices entered by hand, model portfolios, the
-asset library and the MetaTrader 5 analytics.
+MetaTrader 5 analytics.
+
+The model allocations and the asset library read the analyzer's catalogue
+(`investment.assets`) but not all of it. A model's hand-written expected return
+and volatility are left out, as are an asset's market cap, dividend yield and
+allocation ranges, and any sentence of the catalogue's prose that carries a
+figure: none of them is sourced, and a figure the platform shows is sourced or
+computed. A model's composition by kind of asset is computed from its weights,
+and its figures come from the analysis, once it is loaded.
 
 The analyzer itself is kept in session state, as in the separate app: it belongs
 to this browser session only, and only the allocation is written to the store,
@@ -23,6 +30,8 @@ under the verified email.
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
+
+import re
 
 import streamlit as st
 
@@ -41,7 +50,7 @@ from ...pages._shared import get_store as analysis_store
 from ...ui import themes as analysis_theme
 from .. import spaces
 from . import runtime as rt
-from .components import crumbs, esc, footer, html, note, notice, page_header, section
+from .components import crumbs, esc, footer, html, icon, note, notice, page_header, section, tap
 
 BUILD = "portfolio"
 TABS = (
@@ -57,11 +66,49 @@ TABS = (
     ("pf_reports", "Rapports", render_reports),
     ("pf_portfolios", "Portefeuilles", render_portfolios),
 )
-PAGES = (BUILD,) + tuple(page for page, _label, _render in TABS)
+MODELS, ASSETS = "pf_models", "pf_assets"
+PAGES = (BUILD, MODELS, ASSETS) + tuple(page for page, _label, _render in TABS)
 PROFILES = {"safe": "Prudent", "balanced": "Équilibré", "aggressive": "Dynamique"}
 HISTORY_DAYS = 730
-ELSEWHERE = ("les portefeuilles modèles et la bibliothèque d'actifs", "l'analytique des trades synchronisés depuis "
-             "MetaTrader 5")
+ELSEWHERE = ("l'analytique des trades synchronisés depuis MetaTrader 5, que le Journal de trading de la plateforme "
+             "ne remplace pas encore",)
+MODEL_NAMES = {"Capital Preservation": "Préservation du capital", "Defensive Income": "Revenu défensif",
+               "Classic 60/40": "Le classique 60/40", "Global Growth": "Croissance mondiale",
+               "Tech Leaders": "Leaders de la tech", "Crypto & Innovation": "Crypto et innovation",
+               "Dividend Champion": "Champions du dividende", "All-Weather": "Toutes saisons"}
+# Written for the platform, without a figure or a promise; the composition line is computed.
+MODEL_TEXTS = {
+    "Capital Preservation": "Surtout des obligations, de l'or et une petite part d'actions américaines : une "
+                            "composition qui cherche d'abord à moins baisser, au prix d'une croissance faible.",
+    "Defensive Income": "Des actions à dividendes, des obligations, de l'immobilier coté et de l'or, avec peu "
+                        "d'actions de croissance.",
+    "Classic 60/40": "Inspiré du « 60/40 » des gestionnaires : une majorité d'actions, et un reste réparti ici entre "
+                     "obligations, or et immobilier coté, pas seulement en obligations.",
+    "Global Growth": "Des actions américaines, des pays développés hors États-Unis et des pays émergents, avec une "
+                     "part d'obligations, d'or et d'immobilier coté.",
+    "Tech Leaders": "Six grandes valeurs technologiques américaines et rien d'autre : un seul secteur, un seul pays.",
+    "Crypto & Innovation": "Bitcoin, Ether et des valeurs technologiques : la composition la plus risquée de la "
+                           "liste, sans aucune poche défensive.",
+    "Dividend Champion": "Des actions à dividendes de secteurs réputés défensifs (santé, banque, énergie), de "
+                         "l'immobilier coté et de l'or.",
+    "All-Weather": "Inspiré de l'idée de Ray Dalio : répartir le risque entre actions, obligations longues et "
+                   "matières premières. Aucune allocation ne traverse tous les environnements sans perte.",
+}
+KINDS = {"Fixed Income": "obligations", "Commodities": "or et matières premières", "Real Estate": "immobilier coté",
+         "Cryptocurrency": "cryptomonnaies", "Crypto": "cryptomonnaies"}
+CLASSES = {"Stock": "Action", "ETF": "ETF", "Crypto": "Cryptomonnaie"}
+RISKS = {"Low": "faible", "Low-Medium": "faible à moyen", "Medium": "moyen", "Medium-High": "moyen à élevé",
+         "High": "élevé", "Very High": "très élevé"}
+SECTORS = {"Automotive": "Automobile", "Commodities": "Matières premières", "Consumer": "Consommation",
+           "Crypto": "Crypto", "Cryptocurrency": "Cryptomonnaie", "Disruptive Tech": "Technologies de rupture",
+           "Diversified": "Diversifié", "Dividend/Income": "Dividendes", "Emerging Markets": "Marchés émergents",
+           "Energy": "Énergie", "Financials": "Finance", "Fixed Income": "Obligations", "Healthcare": "Santé",
+           "Industrials": "Industrie", "International Developed": "Pays développés hors États-Unis",
+           "International Diversified": "International diversifié", "Materials": "Matériaux",
+           "Real Estate": "Immobilier", "Technology": "Technologie", "Technology-Heavy": "Dominante technologique",
+           "Telecom": "Télécoms", "Utilities": "Services publics"}
+GEOGRAPHIES = {"Developed Ex-US": "Pays développés hors États-Unis", "Emerging Markets": "Marchés émergents",
+               "Ex-US Global": "Monde hors États-Unis", "France": "France", "Global": "Monde", "USA": "États-Unis"}
 MODES = {"simulation": "Simulation, en poids", "real": "Portefeuille réel, en quantités"}
 MAX_CUSTOM = 24
 
@@ -191,6 +238,8 @@ def _context():
 def _nav(page: str) -> None:
     with st.container(key="jnav_portfolio", horizontal=True):
         rt.link("Construire", BUILD, key="pfnav_build", kind="primary" if page == BUILD else "secondary")
+        rt.link("Allocations types", MODELS, key="pfnav_models", kind="primary" if page == MODELS else "secondary")
+        rt.link("Actifs", ASSETS, key="pfnav_assets", kind="primary" if page == ASSETS else "secondary")
         for target, label, _render in TABS:
             rt.link(label, target, key=f"pfnav_{target}", kind="primary" if page == target else "secondary")
 
@@ -485,8 +534,7 @@ def _hop(email: str | None) -> None:
         return
     if target == BUILD:
         st.session_state["current_portfolio"] = None
-        for key in [k for k in st.session_state if str(k) == "pf_tickers" or str(k).startswith("pf_w_")]:
-            del st.session_state[key]           # the form opens on the loaded allocation
+        _reset_form(st.session_state)           # the form opens on the loaded allocation
         _persist(email)
     rt.go(target)
     st.rerun()
@@ -524,4 +572,221 @@ def _page(page: str, render):
     return renderer
 
 
-RENDERERS = {BUILD: build_page, **{page: _page(page, render) for page, _label, render in TABS}}
+# =============================================================================
+# Model allocations
+# =============================================================================
+
+MODELS_NOTE = ("Des allocations types, construites pour l'étude : comparer une composition prudente, équilibrée ou "
+               "dynamique, voir ce qu'elle porte et comment elle se comporte. Aucune n'est une recommandation adaptée à "
+               "votre situation, et aucune ne promet un rendement : leurs chiffres sont ceux que l'analyse calcule sur "
+               "les deux dernières années, une fois l'allocation chargée.")
+
+
+def composition(allocation: dict[str, float]) -> list[tuple[str, float]]:
+    """The share of each kind of asset, from the weights and the library's sectors, largest first."""
+    shares: dict[str, float] = {}
+    for ticker, weight in allocation.items():
+        kind = KINDS.get((assets.ASSET_INFO.get(ticker) or {}).get("sector"), "actions")
+        shares[kind] = shares.get(kind, 0.0) + float(weight)
+    total = sum(shares.values()) or 1.0
+    return sorted(((k, v / total) for k, v in shares.items()), key=lambda kv: (-kv[1], kv[0]))
+
+
+def ordered_models() -> list[tuple[str, dict]]:
+    order = {"safe": 0, "balanced": 1, "aggressive": 2}
+    return sorted(assets.MODEL_PORTFOLIOS.items(), key=lambda kv: order.get(kv[1].get("profile"), 1))
+
+
+def models_page(catalog, email, route) -> None:
+    space = _space()
+    _prepare(email)
+    crumbs("Sensitor", space.label, "Allocations types")
+    page_header(f"Espace {space.numeral} · {esc(space.label)}", "Des allocations types, <em>pour les étudier</em>.",
+                f"{len(assets.MODEL_PORTFOLIOS)} compositions, de la plus prudente à la plus risquée. Chargez-en une "
+                "pour la lire avec tous les écrans de l'espace, ou pour vous en servir de point de départ.")
+    _nav(MODELS)
+    notice("Pour l'étude, pas un conseil", MODELS_NOTE, "info")
+    for index, (key, model) in enumerate(ordered_models(), start=1):
+        allocation = model["allocation"]
+        mix = " · ".join(f"{kind} {share * 100:.0f}\u202f%" for kind, share in composition(allocation))
+        mix = mix[:1].upper() + mix[1:]
+        rows = "".join(f"<tr><td><b>{esc(t)}</b></td><td>{esc(_name(t))}</td>"
+                       f"<td>{esc(CLASSES.get((assets.ASSET_INFO.get(t) or {}).get('asset_class'), ''))}</td>"
+                       f"<td>{w * 100:.0f}\u202f%</td></tr>"
+                       for t, w in sorted(allocation.items(), key=lambda kv: (-kv[1], kv[0])))
+        html(f'<div class="sx-c-blank sx-c-model"><div class="rub">Allocation {index:02d} · profil '
+             f'{esc(PROFILES.get(model.get("profile"), ""))} · {len(allocation)} lignes</div>'
+             f'<h3>{esc(MODEL_NAMES.get(key, key))}</h3><p>{esc(MODEL_TEXTS.get(key, ""))}</p>'
+             f'<p class="sx-c-mix">{esc(mix)}</p>'
+             f'<div class="sx-c-scroll"><table><thead><tr><th>Ligne</th><th>Nom</th><th>Classe</th><th>Poids</th>'
+             f'</tr></thead><tbody>{rows}</tbody></table></div></div>')
+        if st.button("Étudier cette allocation", key=f"pf_model_{index}"):
+            state = st.session_state
+            state["analysis_mode"] = "simulation"
+            state["selected_tickers"] = list(allocation)
+            state["weights"] = dict(allocation)
+            state["user_profile"] = model.get("profile", "balanced")
+            state["current_portfolio"] = None
+            _reset_form(state)
+            if _analyse(list(allocation), dict(allocation)):
+                _persist(email)
+                rt.go("pf_overview")
+                st.rerun()
+    _persist(email)
+    footer()
+
+
+def _reset_form(state) -> None:
+    """Drop the building form's widget state, so it opens on the allocation just set."""
+    for key in [k for k in state if str(k) == "pf_tickers" or str(k).startswith("pf_w_")]:
+        del state[key]
+
+
+# =============================================================================
+# The asset library
+# =============================================================================
+
+NAMED = ("S&P 500", "CAC 40", "Layer 2", "60/40")                   # names that carry digits and no figure
+FIGURE = re.compile(r"(?<![A-Za-z])\d")              # a digit that is not part of a word, as in Web3
+
+
+def _has_figure(text: str) -> bool:
+    for name in NAMED:
+        text = text.replace(name, "")
+    return bool(FIGURE.search(text))
+
+
+def plain(text: str | None) -> str:
+    """The catalogue's prose without its figures: a bracket holding one goes, then any sentence still holding one."""
+    text = re.sub(r"\s*\([^)]*\)", lambda m: "" if _has_figure(m.group()) else m.group(), str(text or ""))
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    return " ".join(x for x in sentences if x and not _has_figure(x))
+
+
+def _liquidity(score) -> str:
+    try:
+        value = float(score)
+    except (TypeError, ValueError):
+        return ""
+    return "très liquide" if value >= 90 else "liquide" if value >= 70 else "liquidité moyenne" if value >= 40 \
+        else "peu liquide"
+
+
+def where(info: dict) -> str:
+    """Sector and geography in French, the geography left out when it only repeats the sector."""
+    sector = SECTORS.get(info.get("sector"), info.get("sector", ""))
+    place = GEOGRAPHIES.get(info.get("geography"), info.get("geography", ""))
+    return " · ".join(x for x in dict.fromkeys([sector, place]) if x)
+
+
+def _slug(ticker: str) -> str:
+    return re.sub(r"[^A-Za-z0-9]", "_", ticker)
+
+
+def search(query: str, kind: str = "") -> list[tuple[str, dict]]:
+    """The library's assets matching a class and a text (symbol, name or sector), by name."""
+    q = (query or "").strip().lower()
+    return [(t, i) for t, i in sorted(assets.ASSET_INFO.items(), key=lambda kv: str(kv[1].get("name", kv[0])).lower())
+            if (not kind or i.get("asset_class") == kind)
+            and (not q or q in t.lower() or q in str(i.get("name", "")).lower()
+                 or q in str(i.get("sector", "")).lower() or q in SECTORS.get(i.get("sector"), "").lower())]
+
+
+def assets_page(catalog, email, route) -> None:
+    space = _space()
+    _prepare(email)
+    crumbs("Sensitor", space.label, "Actifs")
+    page_header(f"Espace {space.numeral} · {esc(space.label)}", "Connaître un actif <em>avant de le détenir</em>.",
+                "Ce qu'il est, le rôle qu'on lui prête dans un portefeuille et le risque qu'il porte, pour les "
+                f"{len(assets.ASSET_INFO)} actions, ETF et cryptomonnaies de la bibliothèque.")
+    _nav(ASSETS)
+    chosen = route.get("asset")
+    info = assets.ASSET_INFO.get(chosen or "")
+    if info:
+        _asset_sheet(chosen, info, email)
+    elif chosen:
+        note(f"« {chosen} » n'est pas dans la bibliothèque.")
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        query = st.text_input("Chercher", key="pf_asset_q", placeholder="Un nom, un symbole, un secteur")
+    with c2:
+        classes = ["", *CLASSES]
+        kind = st.selectbox("Classe", classes, key="pf_asset_class",
+                            format_func=lambda c: "Toutes" if not c else CLASSES[c])
+    listed = search(query, kind)
+    total = len(assets.ASSET_INFO)
+    html(f'<p class="sx-c-summary"><b>{len(listed)} actif{"s" if len(listed) > 1 else ""}</b>'
+         f'{" sur " + str(total) if len(listed) != total else ""}.</p>')
+    for ticker, i in listed:
+        tap(f"pf_asset_{_slug(ticker)}",
+            f'<div class="sx-c-space"><span class="n">{esc(CLASSES.get(i.get("asset_class"), "")[:1])}</span>'
+            f'<span class="t">{esc(i.get("name", ticker))}</span><span class="s">{esc(ticker)} · {esc(where(i))}</span>'
+            f'<span class="st sep">risque {esc(RISKS.get(i.get("risk_level"), "non renseigné"))}</span>'
+            f'<span class="go">{icon("arrow")}</span></div>',
+            f"Fiche de {i.get('name', ticker)}", ASSETS, asset=ticker)
+    if not listed:
+        note("Aucun actif ne correspond à cette recherche.")
+    _persist(email)
+    footer()
+
+
+def _asset_sheet(ticker: str, info: dict, email) -> None:
+    state = st.session_state
+    facts = [f"{CLASSES.get(info.get('asset_class'), info.get('asset_class', ''))} · {where(info)}.",
+             f"Niveau de risque : {RISKS.get(info.get('risk_level'), 'non renseigné')}.",
+             f"Liquidité : {_liquidity(info.get('liquidity')) or 'non renseignée'}."]
+    role = plain(info.get("utility_fr"))
+    html(f'<div class="sx-c-blank"><div class="rub">{esc(ticker)} · fiche de la bibliothèque</div>'
+         f'<h3>{esc(info.get("name", ticker))}</h3><p>{esc(plain(info.get("description_fr")))}</p>'
+         f'<ul class="sx-c-facts">{"".join(f"<li>{esc(x)}</li>" for x in facts)}</ul>'
+         + (f'<div class="sx-kicker">Le rôle qu\'on lui prête</div><p>{esc(role)}</p>'
+            '<p class="sx-note">Une lecture courante, à confronter aux cours : ni une certitude, ni un conseil de '
+            'taille de position.</p>' if role else "")
+         + '</div>')
+    if info.get("asset_class") in ("Crypto",) or info.get("sector") == "Cryptocurrency":
+        rt.link("Bitcoin, une réserve de valeur ? Le cours", "course", key=f"pf_asset_course_{_slug(ticker)}",
+                course="bitcoin-reserve-de-valeur")
+    real = state.get("analysis_mode") == "real"
+    holdings = dict(state.get("real_portfolio_holdings") or {})
+    tickers = [t for t in state.get("selected_tickers") or [] if t in assets.ASSET_INFO]
+    if real:
+        c1, c2 = st.columns([1, 2], vertical_alignment="bottom")
+        with c1:
+            qty = st.number_input("Quantité détenue", min_value=0.0001, value=1.0, step=0.1, format="%.4f",
+                                  key=f"pf_asset_qty_{_slug(ticker)}")
+        with c2:
+            add = st.button("Ajouter à mon portefeuille réel", key=f"pf_asset_add_{_slug(ticker)}", type="primary")
+        if add:
+            holdings[ticker] = holdings.get(ticker, 0.0) + float(qty)
+            state["real_portfolio_holdings"] = holdings
+            state["current_portfolio"] = None
+            _persist(email)
+            rt.go(BUILD)
+            st.rerun()
+        return
+    allowed = core_config.tier_limits(state.get("user_tier", "free"))["max_assets"]
+    if ticker in tickers:
+        note("Cet actif est déjà dans votre portefeuille de travail.")
+        return
+    if len(tickers) >= allowed:
+        note(f"Votre portefeuille de travail compte {len(tickers)} lignes ; un compte gratuit en compose {allowed} au "
+             "plus. Retirez-en une sur la page Construire pour faire de la place.")
+        return
+    if st.button("Ajouter à mon portefeuille de travail", key=f"pf_asset_add_{_slug(ticker)}", type="primary"):
+        # The new line takes an equal share; the others keep their proportions in the rest.
+        saved = {t: float((state.get("weights") or {}).get(t, 0.0)) for t in tickers}
+        total = sum(saved.values())
+        share = 1 / (len(tickers) + 1)
+        weights = {t: (w / total if total > 0 else 1 / len(tickers)) * (1 - share) for t, w in saved.items()}
+        weights[ticker] = share
+        state["selected_tickers"] = [*tickers, ticker]
+        state["weights"] = weights
+        state["current_portfolio"] = None
+        _reset_form(state)
+        _persist(email)
+        rt.go(BUILD)
+        st.rerun()
+
+
+RENDERERS = {BUILD: build_page, MODELS: models_page, ASSETS: assets_page,
+             **{page: _page(page, render) for page, _label, render in TABS}}
