@@ -1,0 +1,49 @@
+id = "confirmations-attaquant"
+title = "Combien de confirmations attendre ?"
+context = """
+Le livre blanc donne, pour un attaquant détenant une part **q** de la puissance, la probabilité de rattraper la chaîne honnête après **z** confirmations. Quelques valeurs, recalculées par Sensitor :
+
+| z | q = 10 % | q = 30 % |
+|---|---|---|
+| 1 | 0,2045873 | 0,6277491 |
+| 5 | 0,0009137 | 0,1773523 |
+| 6 | 0,0002428 | 0,1321112 |
+| 10 | 0,0000012 | 0,0416605 |
+
+Un vendeur veut que la probabilité d'annulation reste **sous 0,1 %**.
+"""
+conclusion = """
+Face à un attaquant à 10 %, cinq confirmations suffisent : environ 50 minutes. Face à un attaquant à 30 %, il en faut 24, environ quatre heures. C'est pourquoi les montants importants attendent davantage de confirmations, et pourquoi la répartition de la puissance de calcul entre de nombreux mineurs compte pour la sécurité.
+"""
+
+[[step]]
+id = "six"
+prompt = "Avec q = 10 % et 6 confirmations, quelle est la probabilité de succès de l'attaquant, en % ? (Trois décimales.)"
+unit = "%"
+answer = 0.024
+tolerance = 0.0006
+solution = "0,0002428 × 100 = **0,024 %**."
+
+[[step]]
+id = "seuil-10"
+prompt = "Combien de confirmations faut-il, au minimum, pour rester sous 0,1 % face à un attaquant à 10 % ?"
+unit = "confirmations"
+answer = 5
+tolerance = 0
+solution = "Après 4 confirmations, 0,35 % ; après 5, 0,091 % : **5 confirmations**."
+
+[[step]]
+id = "duree"
+prompt = "Combien de minutes cela représente-t-il, à dix minutes par bloc ?"
+unit = "minutes"
+answer = 50
+tolerance = 0.5
+solution = "5 × 10 = **50 minutes** environ."
+
+[[step]]
+id = "seuil-30"
+prompt = "Le même calcul donne 24 confirmations face à un attaquant à 30 %. Combien d'heures, à dix minutes par bloc ?"
+unit = "heures"
+answer = 4
+tolerance = 0.01
+solution = "24 × 10 = 240 minutes, soit **4 heures**."

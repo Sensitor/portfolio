@@ -1,0 +1,33 @@
+id = "analyser-un-projet-crypto"
+path = "altcoins-analyse"
+title = "Analyser un projet crypto"
+summary = "Sept leçons pour regarder un jeton au-delà de son prix : capitalisation et valorisation totalement diluée, calendrier d'émission et déblocages, revenus réels et incitations, prêts et liquidations, pools et perte impermanente, risques propres à la DeFi, puis une grille d'analyse à appliquer à n'importe quel projet."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Calculer la capitalisation, la valorisation totalement diluée et l'effet d'un déblocage de jetons.",
+  "Distinguer les revenus réels d'un protocole des incitations qu'il distribue.",
+  "Calculer le facteur de santé et le prix de liquidation d'un prêt, et la perte impermanente d'une position de liquidité.",
+  "Appliquer une grille d'analyse et reconnaître les signaux d'alerte d'un projet.",
+]
+prerequisites = ["Utiliser la crypto en sécurité"]
+final_quiz = "analyse-crypto-validation"
+
+[[module]]
+id = "jeton"
+title = "Le jeton"
+summary = "Ce que vaut l'ensemble des jetons, combien il en arrivera, et ce qui peut leur donner une valeur."
+lessons = ["prix-et-capitalisation", "emission-et-deblocages", "revenus-et-incitations"]
+
+[[module]]
+id = "defi"
+title = "La finance décentralisée"
+summary = "Prêter, emprunter, fournir de la liquidité : les mécanismes, les calculs, et les risques qui leur sont propres."
+lessons = ["preter-emprunter", "perte-impermanente", "risques-defi"]
+
+[[module]]
+id = "grille"
+title = "La grille d'analyse"
+summary = "Les questions à poser à n'importe quel projet, les signaux d'alerte, puis le quiz de validation."
+lessons = ["grille-analyse"]

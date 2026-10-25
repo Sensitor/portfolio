@@ -131,11 +131,11 @@ def _risk_concentration(weights, rc, out):
         "critical" if risk_share >= THRESHOLDS["risk_share_critical"] else "serious",
         "Risk concentrated in one holding", "Risque concentré sur une position",
         (f"{ticker} carries {risk_share * 100:.0f}% of total portfolio volatility from "
-         f"{weight * 100:.1f}% of the capital — {top['risk_ratio']:.1f} times its weight. "
+         f"{weight * 100:.1f}% of the capital, {top['risk_ratio']:.1f} times its weight. "
          f"That gap comes from its own volatility and from how closely it moves with the "
          f"rest of the book, so its weight alone understates how much it drives outcomes."),
         (f"{ticker} porte {risk_share * 100:.0f}% de la volatilité totale pour "
-         f"{weight * 100:.1f}% du capital — soit {top['risk_ratio']:.1f} fois son poids. "
+         f"{weight * 100:.1f}% du capital, soit {top['risk_ratio']:.1f} fois son poids. "
          f"Cet écart vient de sa volatilité propre et de sa co-évolution avec le reste du "
          f"portefeuille : son poids seul sous-estime son influence sur le résultat."),
         [

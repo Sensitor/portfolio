@@ -1,0 +1,228 @@
+id = "inflation-validation"
+title = "Quiz de validation : L'inflation"
+course = "l-inflation"
+lesson = "recap-inflation"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "definition"
+prompt = "L'inflation est :"
+kind = "single"
+lesson = "inflation-definition"
+
+[[question.option]]
+id = "generale"
+text = "une hausse générale et durable des prix."
+correct = true
+explanation = "Donc une baisse du pouvoir d'achat de la monnaie."
+
+[[question.option]]
+id = "un-prix"
+text = "la hausse du prix d'un produit."
+explanation = "Un prix relatif n'est pas l'inflation."
+
+[[question.option]]
+id = "monnaie"
+text = "toute hausse de la masse monétaire."
+explanation = "C'est une cause possible, pas la définition."
+
+[[question]]
+id = "deflation"
+prompt = "Lequel est une déflation ?"
+kind = "single"
+lesson = "inflation-definition"
+
+[[question.option]]
+id = "baisse"
+text = "Les prix baissent de façon générale et durable."
+correct = true
+explanation = "C'est la définition."
+
+[[question.option]]
+id = "ralentit"
+text = "L'inflation passe de 5 % à 2 %."
+explanation = "C'est une désinflation."
+
+[[question.option]]
+id = "relatif"
+text = "Le prix de l'électronique baisse."
+explanation = "C'est un prix relatif."
+
+[[question]]
+id = "ipch"
+prompt = "Quel indice la BCE suit-elle ?"
+kind = "single"
+lesson = "mesurer-les-prix"
+
+[[question.option]]
+id = "ipch"
+text = "L'IPCH, calculé par Eurostat selon les mêmes règles dans chaque pays."
+correct = true
+explanation = "Il permet les comparaisons européennes."
+
+[[question.option]]
+id = "ipc"
+text = "L'IPC de l'INSEE."
+explanation = "C'est l'indice français."
+
+[[question.option]]
+id = "cac"
+text = "Le CAC 40."
+explanation = "C'est un indice boursier."
+
+[[question]]
+id = "energie"
+prompt = "Pourquoi l'énergie a-t-elle tant pesé sur l'inflation de 2022 en zone euro, malgré un poids d'environ un dixième ?"
+kind = "single"
+lesson = "demande-et-couts"
+
+[[question.option]]
+id = "hausse"
+text = "Parce que sa hausse a dépassé 40 % sur un an, et qu'elle s'est diffusée aux autres prix."
+correct = true
+explanation = "Contribution = poids × hausse, plus les effets indirects."
+
+[[question.option]]
+id = "poids"
+text = "Parce qu'elle représente la moitié du panier."
+explanation = "Elle en représente environ un dixième."
+
+[[question.option]]
+id = "aucun"
+text = "Elle n'a pas pesé."
+explanation = "Elle a été le premier moteur."
+
+[[question]]
+id = "total"
+prompt = "Énergie 10 % à +30 %, alimentation 20 % à +12 %, biens 25 % à +5 %, services 45 % à +4 %. Inflation totale ?"
+kind = "single"
+lesson = "demande-et-couts"
+
+[[question.option]]
+id = "845"
+text = "8,45 %"
+correct = true
+explanation = "3 + 2,4 + 1,25 + 1,8."
+
+[[question.option]]
+id = "1275"
+text = "12,75 %"
+explanation = "C'est la moyenne non pondérée des hausses."
+
+[[question.option]]
+id = "51"
+text = "51 %"
+explanation = "On ne fait pas la somme des hausses."
+
+[[question]]
+id = "correlation"
+prompt = "M3 croît vite, puis l'inflation monte. Peut-on conclure que la monnaie a causé l'inflation ?"
+kind = "single"
+lesson = "monnaie-credit-prix"
+
+[[question.option]]
+id = "non"
+text = "Pas à partir de ces seules courbes : d'autres causes ont pu agir en même temps."
+correct = true
+explanation = "Corrélation n'est pas causalité."
+
+[[question.option]]
+id = "oui"
+text = "Oui, c'est démontré."
+explanation = "Deux courbes ne prouvent pas un lien de cause."
+
+[[question.option]]
+id = "inverse"
+text = "Non, la monnaie ne joue jamais aucun rôle."
+explanation = "C'est l'excès inverse."
+
+[[question]]
+id = "anticipations"
+prompt = "Une banque centrale crédible :"
+kind = "single"
+lesson = "anticipations-salaires"
+
+[[question.option]]
+id = "ancre"
+text = "ancre les anticipations d'inflation près de sa cible."
+correct = true
+explanation = "Ce qui évite qu'une poussée s'installe."
+
+[[question.option]]
+id = "zero"
+text = "garantit une inflation nulle."
+explanation = "Elle vise 2 %, et ne garantit rien."
+
+[[question.option]]
+id = "imprime"
+text = "finance l'État sans limite."
+explanation = "C'est l'inverse de la crédibilité."
+
+[[question]]
+id = "volcker"
+prompt = "Quel a été le coût de la désinflation du début des années 1980 aux États-Unis ?"
+kind = "single"
+lesson = "episodes-inflation"
+
+[[question.option]]
+id = "recession"
+text = "Deux récessions et un chômage supérieur à 10 %."
+correct = true
+explanation = "Les taux ont atteint 19,1 % en juin 1981."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun."
+explanation = "Le coût en emplois a été élevé."
+
+[[question.option]]
+id = "hyper"
+text = "Une hyperinflation."
+explanation = "L'inflation est retombée."
+
+[[question]]
+id = "ecoles"
+prompt = "Pour les post-keynésiens, la monnaie est endogène. Cela signifie :"
+kind = "single"
+lesson = "ecoles-de-pensee"
+
+[[question.option]]
+id = "suit"
+text = "que les banques créent la monnaie que l'économie demande : elle suit l'activité et les prix."
+correct = true
+explanation = "Plutôt qu'elle ne les cause."
+
+[[question.option]]
+id = "fixe"
+text = "que la quantité de monnaie est fixée par la banque centrale."
+explanation = "C'est la lecture inverse."
+
+[[question.option]]
+id = "or"
+text = "que la monnaie devrait être convertible en or."
+explanation = "Rien à voir."
+
+[[question]]
+id = "france"
+prompt = "Selon Eurostat, que valaient en janvier 2026 100 € de janvier 1996, en pouvoir d'achat, en France ?"
+kind = "single"
+lesson = "pouvoir-achat"
+
+[[question.option]]
+id = "5982"
+text = "Environ 59,82 €."
+correct = true
+explanation = "Les prix ont monté de 67,2 % en trente ans."
+
+[[question.option]]
+id = "100"
+text = "100 €."
+explanation = "C'est leur valeur nominale, pas leur pouvoir d'achat."
+
+[[question.option]]
+id = "33"
+text = "Environ 33 €."
+explanation = "C'est bien moins que la perte réelle."

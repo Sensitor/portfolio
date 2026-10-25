@@ -1,0 +1,73 @@
+id = "check-minage-et-pools"
+title = "Contrôle : le minage et les pools"
+course = "metriques-on-chain"
+lesson = "minage-et-pools"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "revenu"
+prompt = "Pourquoi ce que rapporte une unité de puissance, en bitcoins, baisse-t-il sans cesse ?"
+kind = "single"
+lesson = "minage-et-pools"
+
+[[question.option]]
+id = "concurrence"
+text = "Parce que la puissance du réseau croît plus vite que le revenu des mineurs, et que chaque halving le réduit."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "prix"
+text = "Parce que le prix du bitcoin baisse."
+explanation = "La mesure est en bitcoins, pas en euros."
+
+[[question.option]]
+id = "frais"
+text = "Parce que les frais disparaissent."
+explanation = "Ce n'est pas la raison principale."
+
+[[question]]
+id = "etiquette"
+prompt = "Comment Sensitor identifie-t-il le pool d'un bloc ?"
+kind = "single"
+lesson = "minage-et-pools"
+
+[[question.option]]
+id = "tag"
+text = "Par l'étiquette que le pool inscrit dans la coinbase."
+correct = true
+explanation = "Oui ; certains blocs n'en ont pas."
+
+[[question.option]]
+id = "adresse"
+text = "Par l'adresse IP du mineur."
+explanation = "Elle n'est pas inscrite dans la chaîne."
+
+[[question.option]]
+id = "pays"
+text = "Par le pays du mineur."
+explanation = "Le pays n'est pas inscrit dans la chaîne."
+
+[[question]]
+id = "nakamoto"
+prompt = "Que mesure le coefficient de Nakamoto du minage ?"
+kind = "single"
+lesson = "minage-et-pools"
+
+[[question.option]]
+id = "nombre"
+text = "Le nombre de pools qu'il faut additionner pour dépasser la moitié des blocs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "puissance"
+text = "La puissance du réseau."
+explanation = "C'est une mesure de concentration."
+
+[[question.option]]
+id = "temps"
+text = "Le temps entre deux blocs."
+explanation = "Ce n'est pas sa définition."

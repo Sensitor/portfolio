@@ -1,0 +1,73 @@
+id = "check-monnaie-credit-prix"
+title = "Contrôle : monnaie, crédit et prix"
+course = "l-inflation"
+lesson = "monnaie-credit-prix"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "identite"
+prompt = "M × V = P × Y est :"
+kind = "single"
+lesson = "monnaie-credit-prix"
+
+[[question.option]]
+id = "identite"
+text = "une identité, vraie par construction, qui ne dit pas ce qui cause quoi."
+correct = true
+explanation = "La causalité vient des hypothèses qu'on y ajoute."
+
+[[question.option]]
+id = "loi"
+text = "une loi qui prouve que la monnaie cause l'inflation."
+explanation = "Elle ne prouve aucun sens de causalité."
+
+[[question.option]]
+id = "fausse"
+text = "une relation fausse."
+explanation = "Elle est toujours vraie."
+
+[[question]]
+id = "vitesse"
+prompt = "La monnaie croît de 8 %, la production de 2 %, la vitesse baisse de 5 %. Hausse des prix impliquée ?"
+kind = "single"
+lesson = "monnaie-credit-prix"
+
+[[question.option]]
+id = "06"
+text = "Environ 0,6 %."
+correct = true
+explanation = "1,08 × 0,95 ÷ 1,02 − 1."
+
+[[question.option]]
+id = "59"
+text = "Environ 5,9 %."
+explanation = "C'est le cas où la vitesse ne change pas."
+
+[[question.option]]
+id = "6"
+text = "Exactement 6 %."
+explanation = "On ne soustrait pas simplement les taux."
+
+[[question]]
+id = "2007"
+prompt = "En 2007, M3 croissait de plus de 12 % dans la zone euro. Que s'est-il passé pour l'inflation ?"
+kind = "single"
+lesson = "monnaie-credit-prix"
+
+[[question.option]]
+id = "pas"
+text = "Elle n'a pas suivi durablement : corrélation et causalité ne vont pas toujours ensemble."
+correct = true
+explanation = "La crise de 2008 a fait chuter le crédit."
+
+[[question.option]]
+id = "hyper"
+text = "Elle a dépassé 10 % dès 2008."
+explanation = "Ce n'est pas ce que montrent les données."
+
+[[question.option]]
+id = "meme"
+text = "Elle a suivi exactement le même rythme."
+explanation = "Les courbes divergent nettement."

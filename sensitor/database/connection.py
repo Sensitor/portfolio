@@ -175,7 +175,9 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str]]] = {
     "workspace": [("manual_prices", "TEXT")],
     "users": [("password_hash", "TEXT"), ("last_login_at", "TEXT"),
               ("failed_logins", "INTEGER NOT NULL DEFAULT 0"),
-              ("locked_until", "TEXT")],
+              ("locked_until", "TEXT"), ("email_verified_at", "TEXT"),
+              ("role", "TEXT NOT NULL DEFAULT ''")],
+    "journal_entries": [("checks", "TEXT")],
 }
 
 
@@ -211,6 +213,25 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # no existing row is touched. An older database simply gains an empty
     # workspace, which restores to "nothing saved yet" — the correct answer for
     # someone who has never had one.
+    #
+    # Version 6 adds the Academy tables, `lesson_progress` and `quiz_attempts`.
+    # New tables only — `executescript` has created them — so, as for version 4,
+    # no existing row is touched.
+    #
+    # Version 7 adds `account_tokens` (password reset, address verification)
+    # and `users.email_verified_at`: a new table and a new nullable column,
+    # both applied above.
+    #
+    # Version 8 adds `journal_entries`, the private reflection journal. A new
+    # table only, so, as for versions 4 and 6, no existing row is touched.
+    #
+    # Version 9 adds `journal_entries.checks`, the routine items ticked on a
+    # note. A nullable column, applied above; existing notes keep NULL, which
+    # reads as « no routine offered » and keeps them out of the routine counts.
+    #
+    # Version 10 adds `trading_plans` and `trade_reviews`, the journal's plan and
+    # the requests for a coach's review, and `users.role`. New tables and a
+    # column with a default, applied above; no existing row is touched.
     #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.

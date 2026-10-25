@@ -1,0 +1,73 @@
+id = "check-arnaques"
+title = "Contrôle : les arnaques"
+course = "crypto-en-securite"
+lesson = "arnaques"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "support"
+prompt = "Après une question sur un réseau social, un « conseiller » vous contacte pour vous aider. Que faire ?"
+kind = "single"
+lesson = "arnaques"
+
+[[question.option]]
+id = "ignorer"
+text = "Ne pas répondre : un vrai support ne démarche pas, et ne demande jamais de phrase."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "phrase"
+text = "Lui donner la phrase pour qu'il règle le problème."
+explanation = "C'est le but de l'escroquerie."
+
+[[question.option]]
+id = "acces"
+text = "Lui donner un accès à distance à l'ordinateur."
+explanation = "Il pourrait alors tout voir et tout signer."
+
+[[question]]
+id = "rendement"
+prompt = "Une plateforme garantit 3 % par semaine. Signal d'alerte ?"
+kind = "single"
+lesson = "arnaques"
+
+[[question.option]]
+id = "oui"
+text = "Oui : aucun placement réel ne garantit un rendement élevé."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "non"
+text = "Non, si le tableau de bord montre des gains."
+explanation = "Un tableau de bord se fabrique ; le retrait est le vrai test."
+
+[[question.option]]
+id = "parfois"
+text = "Seulement si elle n'a pas de site."
+explanation = "Les faux placements ont souvent un site soigné."
+
+[[question]]
+id = "recuperation"
+prompt = "Après un vol, une société propose de récupérer vos fonds contre paiement. Que faire ?"
+kind = "single"
+lesson = "arnaques"
+
+[[question.option]]
+id = "refuser"
+text = "Refuser : c'est souvent un second vol."
+correct = true
+explanation = "Oui : porter plainte et signaler, mais ne rien payer."
+
+[[question.option]]
+id = "payer"
+text = "Payer, c'est la seule chance."
+explanation = "Les vrais services ne démarchent pas les victimes."
+
+[[question.option]]
+id = "moitie"
+text = "Payer la moitié d'avance."
+explanation = "Même une avance partielle est perdue."

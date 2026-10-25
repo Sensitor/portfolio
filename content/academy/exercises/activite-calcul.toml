@@ -1,0 +1,34 @@
+id = "activite-calcul"
+title = "Estimer l'activité du réseau à partir de l'échantillon"
+context = """
+En septembre 2026, les blocs de l'échantillon contiennent en moyenne **4 589** transactions, et leur remplissage moyen est de **99,9 %**. Ce mois-là, le réseau produit **150,0** blocs par jour, d'après la durée de la période de difficulté.
+
+Un bloc pèse au plus **4 000 000** unités de poids.
+"""
+conclusion = """
+Environ 688 400 transactions par jour : l'ordre de grandeur que donne le graphique. Le poids moyen utilisé, environ 3 996 000 unités par bloc, dit que l'espace reste presque plein. C'est ce manque de place, plus que le nombre de transactions, qui décide du niveau des frais.
+"""
+
+[[step]]
+id = "par-jour"
+prompt = "Combien de transactions par jour, environ ? (Arrondi à la centaine.)"
+unit = "transactions"
+answer = 688400.0
+tolerance = 60
+solution = "4 589 × 150,0 ≈ **688 400** transactions par jour."
+
+[[step]]
+id = "poids"
+prompt = "Quel poids moyen par bloc cela représente-t-il, en unités ? (Arrondi au millier.)"
+unit = "unités"
+answer = 3996000.0
+tolerance = 600
+solution = "99,9 % × 4 000 000 ≈ **3 996 000** unités."
+
+[[step]]
+id = "reste"
+prompt = "Quelle place reste libre en moyenne dans un bloc, en % ? (Une décimale.)"
+unit = "%"
+answer = 0.1
+tolerance = 0.06
+solution = "100 − 99,9 = **0,1 %**."

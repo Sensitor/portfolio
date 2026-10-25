@@ -1,0 +1,73 @@
+id = "check-frais-budget-securite"
+title = "Contrôle : les frais et la sécurité"
+course = "metriques-on-chain"
+lesson = "frais-budget-securite"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "formule"
+prompt = "Comment calcule-t-on les frais d'un bloc ?"
+kind = "single"
+lesson = "frais-budget-securite"
+
+[[question.option]]
+id = "coinbase"
+text = "Montant de la coinbase moins la récompense du protocole."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "somme"
+text = "La somme des montants envoyés dans le bloc."
+explanation = "Ce sont les frais, pas les montants envoyés."
+
+[[question.option]]
+id = "prix"
+text = "À partir du prix du bitcoin."
+explanation = "Aucun prix n'intervient."
+
+[[question]]
+id = "840000"
+prompt = "Bloc 840 000 : coinbase de 40,75 BTC, récompense de 3,125 BTC. Frais ?"
+kind = "single"
+lesson = "frais-budget-securite"
+
+[[question.option]]
+id = "3763"
+text = "Environ 37,63 BTC"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "4075"
+text = "40,75 BTC"
+explanation = "Il faut retirer la récompense."
+
+[[question.option]]
+id = "3125"
+text = "3,125 BTC"
+explanation = "C'est la récompense."
+
+[[question]]
+id = "halving"
+prompt = "Que fait un halving au revenu des mineurs ?"
+kind = "single"
+lesson = "frais-budget-securite"
+
+[[question.option]]
+id = "moitie"
+text = "Il coupe presque de moitié la part qui vient de la récompense."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "double"
+text = "Il le double."
+explanation = "La récompense est divisée par deux."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "La récompense est divisée par deux."

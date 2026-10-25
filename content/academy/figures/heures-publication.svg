@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Les heures de publication à Paris</title>
+<desc id="d">Une frise de 10 h à 21 h : inflation de la zone euro à 11 h, décision de la BCE à 14 h 15, emploi ou inflation américains à 14 h 30, conférence de la BCE à 14 h 45, décision de la Fed à 20 h et sa conférence à 20 h 30.</desc>
+<line x1="40.0" y1="150" x2="612.0" y2="150" stroke="#1b2733" stroke-width="1.6"/>
+<line x1="40.0" y1="146" x2="40.0" y2="154" stroke="#1b2733"/>
+<text x="40.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">10 h</text>
+<line x1="92.0" y1="146" x2="92.0" y2="154" stroke="#1b2733"/>
+<text x="92.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">11 h</text>
+<line x1="144.0" y1="146" x2="144.0" y2="154" stroke="#1b2733"/>
+<text x="144.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">12 h</text>
+<line x1="196.0" y1="146" x2="196.0" y2="154" stroke="#1b2733"/>
+<text x="196.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">13 h</text>
+<line x1="248.0" y1="146" x2="248.0" y2="154" stroke="#1b2733"/>
+<text x="248.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">14 h</text>
+<line x1="300.0" y1="146" x2="300.0" y2="154" stroke="#1b2733"/>
+<text x="300.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">15 h</text>
+<line x1="352.0" y1="146" x2="352.0" y2="154" stroke="#1b2733"/>
+<text x="352.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">16 h</text>
+<line x1="404.0" y1="146" x2="404.0" y2="154" stroke="#1b2733"/>
+<text x="404.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">17 h</text>
+<line x1="456.0" y1="146" x2="456.0" y2="154" stroke="#1b2733"/>
+<text x="456.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">18 h</text>
+<line x1="508.0" y1="146" x2="508.0" y2="154" stroke="#1b2733"/>
+<text x="508.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">19 h</text>
+<line x1="560.0" y1="146" x2="560.0" y2="154" stroke="#1b2733"/>
+<text x="560.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">20 h</text>
+<line x1="612.0" y1="146" x2="612.0" y2="154" stroke="#1b2733"/>
+<text x="612.0" y="172" text-anchor="middle" font-size="10.5" fill="#5b646b">21 h</text>
+<circle cx="92.0" cy="150" r="5" fill="#86672f"/>
+<line x1="92.0" y1="144" x2="92.0" y2="78" stroke="#86672f" stroke-dasharray="2 3"/>
+<text x="92.0" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">11 h 00</text>
+<text x="92.0" y="55" text-anchor="middle" font-size="11.5" fill="#1b2733">Inflation zone euro,</text>
+<text x="92.0" y="69" text-anchor="middle" font-size="11.5" fill="#1b2733">estimation rapide</text>
+<circle cx="261.0" cy="150" r="5" fill="#86672f"/>
+<line x1="261.0" y1="144" x2="261.0" y2="60" stroke="#86672f" stroke-dasharray="2 3"/>
+<text x="255.0" y="22" text-anchor="end" font-size="12" font-weight="700" fill="#86672f">14 h 15</text>
+<text x="255.0" y="37" text-anchor="end" font-size="11.5" fill="#1b2733">BCE :</text>
+<text x="255.0" y="51" text-anchor="end" font-size="11.5" fill="#1b2733">décision</text>
+<circle cx="274.0" cy="150" r="5" fill="#284764"/>
+<line x1="274.0" y1="156" x2="274.0" y2="192" stroke="#284764" stroke-dasharray="2 3"/>
+<text x="274.0" y="204" text-anchor="middle" font-size="12" font-weight="700" fill="#284764">14 h 30</text>
+<text x="274.0" y="219" text-anchor="middle" font-size="11.5" fill="#1b2733">États-Unis : emploi</text>
+<text x="274.0" y="233" text-anchor="middle" font-size="11.5" fill="#1b2733">ou inflation</text>
+<circle cx="287.0" cy="150" r="5" fill="#86672f"/>
+<line x1="287.0" y1="144" x2="287.0" y2="112" stroke="#86672f" stroke-dasharray="2 3"/>
+<text x="293.0" y="74" text-anchor="start" font-size="12" font-weight="700" fill="#86672f">14 h 45</text>
+<text x="293.0" y="89" text-anchor="start" font-size="11.5" fill="#1b2733">BCE :</text>
+<text x="293.0" y="103" text-anchor="start" font-size="11.5" fill="#1b2733">conférence</text>
+<circle cx="560.0" cy="150" r="5" fill="#284764"/>
+<line x1="560.0" y1="144" x2="560.0" y2="78" stroke="#284764" stroke-dasharray="2 3"/>
+<text x="560.0" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#284764">20 h 00</text>
+<text x="560.0" y="55" text-anchor="middle" font-size="11.5" fill="#1b2733">Fed :</text>
+<text x="560.0" y="69" text-anchor="middle" font-size="11.5" fill="#1b2733">décision</text>
+<circle cx="586.0" cy="150" r="5" fill="#284764"/>
+<line x1="586.0" y1="156" x2="586.0" y2="192" stroke="#284764" stroke-dasharray="2 3"/>
+<text x="586.0" y="204" text-anchor="middle" font-size="12" font-weight="700" fill="#284764">20 h 30</text>
+<text x="586.0" y="219" text-anchor="middle" font-size="11.5" fill="#1b2733">Fed :</text>
+<text x="586.0" y="233" text-anchor="middle" font-size="11.5" fill="#1b2733">conférence</text>
+<circle cx="40" cy="262" r="5" fill="#86672f"/><text x="50" y="266" font-size="11" fill="#5b646b">Zone euro</text>
+<circle cx="130" cy="262" r="5" fill="#284764"/><text x="140" y="266" font-size="11" fill="#5b646b">États-Unis</text>
+<text x="610" y="266" text-anchor="end" font-size="11" fill="#7b8389">Heure de Paris, hors semaines décalées.</text>
+</svg>

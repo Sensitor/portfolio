@@ -1,0 +1,73 @@
+id = "check-portefeuilles"
+title = "Contrôle : les portefeuilles"
+course = "crypto-en-securite"
+lesson = "portefeuilles"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "cles"
+prompt = "Sur un portefeuille de plateforme, qui détient les clés ?"
+kind = "single"
+lesson = "portefeuilles"
+
+[[question.option]]
+id = "plateforme"
+text = "La plateforme."
+correct = true
+explanation = "Oui : vos fonds sont une créance sur elle."
+
+[[question.option]]
+id = "vous"
+text = "Vous."
+explanation = "C'est le cas d'un portefeuille personnel."
+
+[[question.option]]
+id = "personne"
+text = "Personne."
+explanation = "Quelqu'un détient toujours les clés."
+
+[[question]]
+id = "ftx"
+prompt = "Que montre la faillite de FTX en novembre 2022 ?"
+kind = "single"
+lesson = "portefeuilles"
+
+[[question.option]]
+id = "contrepartie"
+text = "Le risque de contrepartie : les fonds laissés sur une plateforme peuvent devenir inaccessibles."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "bitcoin"
+text = "Que le réseau Bitcoin a été piraté."
+explanation = "Le réseau n'était pas en cause : c'était la plateforme."
+
+[[question.option]]
+id = "rien"
+text = "Rien qui concerne ses clients."
+explanation = "Ses clients n'avaient plus accès à leurs fonds."
+
+[[question]]
+id = "froid"
+prompt = "Quel est l'avantage principal d'un portefeuille froid ?"
+kind = "single"
+lesson = "portefeuilles"
+
+[[question.option]]
+id = "horsligne"
+text = "Il signe sans exposer la clé à un appareil connecté."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rendement"
+text = "Il rapporte un intérêt."
+explanation = "Un portefeuille ne rapporte rien."
+
+[[question.option]]
+id = "perte"
+text = "Il rend la perte de la phrase sans conséquence."
+explanation = "Sans phrase, la perte de l'appareil reste une perte."

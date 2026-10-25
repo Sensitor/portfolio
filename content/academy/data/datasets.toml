@@ -1,0 +1,415 @@
+# Les données des graphiques de l'Academy.
+#
+# Chaque jeu de données dit d'où il vient, sous quelle licence et à quelle date
+# il a été récupéré ou calculé. Le chargeur refuse un jeu sans ces informations,
+# et la ligne de source affichée sous chaque graphique en est tirée.
+#
+# kind = "file"     : un fichier CSV de ce dossier, tel que récupéré.
+# kind = "computed" : calculé par un générateur Python testé (sensitor/academy).
+# synthetic = true  : exemple construit pour une leçon, signalé comme tel.
+
+[[dataset]]
+id = "btc-emission"
+title = "Émission de Bitcoin par époque de halving"
+kind = "computed"
+generator = "bitcoin-issuance"
+source = "règles du protocole Bitcoin (récompense initiale de 50 BTC, divisée par deux tous les 210 000 blocs, arrondie au satoshi) ; dates des halvings passés relevées sur la chaîne, dates futures estimées à 10 minutes par bloc"
+url = "https://bitcoin.org/bitcoin.pdf"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-17
+unit = "BTC"
+columns = ["annee", "date", "recompense", "offre", "part", "estimation"]
+notes = "Les dates à partir de 2028 sont des estimations : la durée réelle d'une époque dépend du rythme de production des blocs."
+
+[[dataset]]
+id = "taux-directeurs"
+title = "Taux de la BCE et de la Réserve fédérale, mensuels, depuis 1999"
+kind = "file"
+file = "taux-directeurs.csv"
+source = "Banque centrale européenne, Data Portal, série FM.D.U2.EUR.4F.KR.DFR.LEV (taux de la facilité de dépôt, valeur en fin de mois) ; Board of Governors of the Federal Reserve System, série FEDFUNDS (taux effectif des fonds fédéraux, moyenne mensuelle), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV"
+license = "statistiques BCE réutilisables avec mention de la source ; données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "bce_depot", "fed_funds"]
+notes = "Les deux séries ne mesurent pas exactement la même chose : la BCE fixe le taux de sa facilité de dépôt, la Réserve fédérale vise une fourchette dont la série donne la moyenne effective du mois."
+
+[[dataset]]
+id = "credit-amortissement"
+title = "Un crédit de 200 000 € à 4 % sur 20 ans, année par année"
+kind = "computed"
+generator = "loan-amortisation"
+source = "formule de l'annuité constante, mensualités, taux fixe ; exemple pédagogique de la leçon sur le taux d'intérêt"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-17
+unit = "€"
+columns = ["annee", "interets", "capital", "restant"]
+notes = "Un crédit réel ajoute assurance, frais de dossier et de garantie, que l'exemple ne compte pas."
+
+[[dataset]]
+id = "inflation-zone-euro-france-us"
+title = "Inflation annuelle : zone euro, France, États-Unis, mensuelle depuis 1997"
+kind = "file"
+file = "inflation-zone-euro-france-us.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, taux de variation annuel, ensemble des biens et services), zone euro et France ; U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers (CPIAUCSL, corrigé des variations saisonnières), via FRED, taux annuel calculé par Sensitor"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE) ; données publiques du Bureau of Labor Statistics"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "zone_euro", "france", "etats_unis"]
+notes = "L'indice américain d'octobre 2025 n'a pas été publié : le point manque, il n'est pas interpolé."
+
+[[dataset]]
+id = "inflation-composantes-zone-euro"
+title = "Inflation de la zone euro par composante, mensuelle depuis 2015"
+kind = "file"
+file = "inflation-composantes-zone-euro.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, taux de variation annuel) : ensemble, énergie, alimentation y compris alcool et tabac, biens industriels hors énergie, services, et ensemble hors énergie, alimentation, alcool et tabac"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "ensemble", "energie", "alimentation", "biens", "services", "sous_jacente"]
+
+[[dataset]]
+id = "m3-inflation-zone-euro"
+title = "Croissance de la masse monétaire M3 et inflation, zone euro, depuis 1999"
+kind = "file"
+file = "m3-inflation-zone-euro.csv"
+source = "Banque centrale européenne, Data Portal, série BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A (M3, taux de croissance annuel) ; Eurostat, jeu prc_hicp_minr (IPCH, taux de variation annuel)"
+url = "https://data.ecb.europa.eu/data/datasets/BSI/BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A"
+license = "statistiques BCE réutilisables avec mention de la source ; données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "m3", "inflation"]
+
+[[dataset]]
+id = "pouvoir-achat-france"
+title = "Ce que valent 100 € de janvier 1996, en France, chaque janvier depuis"
+kind = "file"
+file = "pouvoir-achat-france.csv"
+source = "Eurostat, jeu prc_hicp_minr (IPCH, ECOICOP ver. 2, indice base 2025 = 100), France ; valeur réelle calculée par Sensitor : 100 × indice de janvier 1996 ÷ indice du mois"
+url = "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table"
+license = "données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "€"
+columns = ["mois", "indice", "valeur_reelle_100"]
+
+[[dataset]]
+id = "inflation-taux-etats-unis"
+title = "Inflation et taux des fonds fédéraux aux États-Unis, mensuels, depuis 1960"
+kind = "file"
+file = "inflation-taux-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers (CPIAUCSL, corrigé des variations saisonnières), taux annuel calculé par Sensitor ; Board of Governors of the Federal Reserve System, Federal Funds Effective Rate (FEDFUNDS) ; via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/CPIAUCSL"
+license = "données publiques du Bureau of Labor Statistics et de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "inflation", "fed_funds"]
+notes = "L'indice d'octobre 2025 n'a pas été publié : le point manque."
+
+[[dataset]]
+id = "taux-reel-bce"
+title = "Taux de la facilité de dépôt de la BCE, inflation de la zone euro et taux réel, depuis 1999"
+kind = "file"
+file = "taux-reel-bce.csv"
+source = "Banque centrale européenne, Data Portal, série FM.D.U2.EUR.4F.KR.DFR.LEV (fin de mois) ; Eurostat, jeu prc_hicp_minr (IPCH, taux de variation annuel, zone euro) ; taux réel calculé par Sensitor : taux nominal moins inflation sur un an"
+url = "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV"
+license = "statistiques BCE réutilisables avec mention de la source ; données Eurostat réutilisables avec mention de la source (décision 2011/833/UE)"
+retrieved = 2026-10-17
+unit = "%"
+columns = ["mois", "taux_nominal", "inflation", "taux_reel"]
+notes = "Le taux réel est calculé avec l'inflation passée sur un an, par simple différence ; les économistes utilisent souvent l'inflation attendue, qui n'est pas observée directement."
+
+[[dataset]]
+id = "emploi-etats-unis"
+title = "Créations d'emplois mensuelles aux États-Unis, depuis 2023"
+kind = "file"
+file = "emploi-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, All Employees, Total Nonfarm (PAYEMS, en milliers, corrigé des variations saisonnières), via FRED, Federal Reserve Bank of St. Louis ; variation d'un mois sur l'autre calculée par Sensitor"
+url = "https://fred.stlouisfed.org/series/PAYEMS"
+license = "données publiques du Bureau of Labor Statistics, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "milliers"
+columns = ["mois", "creations"]
+notes = "Les chiffres sont ceux de la dernière révision, pas ceux annoncés le jour de la publication : chaque mois est révisé deux fois, puis une fois par an."
+
+[[dataset]]
+id = "chomage-etats-unis"
+title = "Taux de chômage aux États-Unis, mensuel, depuis 1948"
+kind = "file"
+file = "chomage-etats-unis.csv"
+source = "U.S. Bureau of Labor Statistics, Unemployment Rate (UNRATE, corrigé des variations saisonnières), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/UNRATE"
+license = "données publiques du Bureau of Labor Statistics, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "chomage"]
+notes = "Le taux d'octobre 2025 n'a pas été publié : le point manque, il n'est pas interpolé."
+
+[[dataset]]
+id = "taux-2-ans-fed"
+title = "Rendement du Trésor américain à 2 ans et taux des fonds fédéraux, mensuels, depuis 2015"
+kind = "file"
+file = "taux-2-ans-fed.csv"
+source = "Board of Governors of the Federal Reserve System, Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity (GS2, moyenne mensuelle) et Federal Funds Effective Rate (FEDFUNDS), via FRED, Federal Reserve Bank of St. Louis"
+url = "https://fred.stlouisfed.org/series/GS2"
+license = "données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "deux_ans", "fed_funds"]
+
+[[dataset]]
+id = "courbe-taux-us"
+title = "Rendements du Trésor américain à 10 et 2 ans, et leur écart, mensuels, depuis 1977"
+kind = "file"
+file = "courbe-taux-us.csv"
+source = "Board of Governors of the Federal Reserve System, Market Yield on U.S. Treasury Securities at 10-Year et 2-Year Constant Maturity (GS10 et GS2, moyennes mensuelles), via FRED, Federal Reserve Bank of St. Louis ; écart calculé par Sensitor"
+url = "https://fred.stlouisfed.org/series/GS10"
+license = "données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-19
+unit = "%"
+columns = ["mois", "dix_ans", "deux_ans", "ecart"]
+notes = "Écart en points de pourcentage : 10 ans moins 2 ans. Négatif, la courbe est dite inversée."
+
+[[dataset]]
+id = "rattrapage-attaquant"
+title = "Probabilité qu'un attaquant rattrape la chaîne honnête, selon le nombre de confirmations"
+kind = "computed"
+generator = "bitcoin-catch-up"
+source = "formule de la section 11 du livre blanc de Bitcoin (Nakamoto, 2008), calculée par Sensitor pour un attaquant détenant 10 %, 20 % ou 30 % de la puissance de calcul"
+url = "https://bitcoin.org/bitcoin.pdf"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-19
+unit = ""
+columns = ["confirmations", "q10", "q20", "q30"]
+notes = "Le modèle suppose une puissance constante et un attaquant qui prépare sa chaîne en secret ; il ne tient pas compte du coût de l'attaque."
+
+[[dataset]]
+id = "mois-de-trading"
+title = "Un mois de trading, trade par trade : la courbe réalisée et celle du plan seul"
+kind = "computed"
+generator = "process-case-month"
+source = "journal construit pour la leçon : 24 trades en R, dont 6 qui enfreignent une règle du plan ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-19
+synthetic = true
+unit = "R"
+columns = ["trade", "realise", "plan", "ecart"]
+notes = "La courbe du plan seul compte zéro pour chaque trade qui enfreint une règle : c'est ce qu'aurait donné le mois si ces trades n'avaient pas été pris, toutes choses égales par ailleurs."
+
+[[dataset]]
+id = "reseau-bitcoin"
+title = "Difficulté, durée des périodes et puissance de calcul du réseau Bitcoin, depuis 2009"
+kind = "file"
+file = "reseau-bitcoin.csv"
+source = "données publiques de la chaîne Bitcoin : en-tête du premier bloc de chaque période de 2 016 blocs (horodatage et champ bits), relevé via l'API publique de mempool.space et identique sur tout nœud Bitcoin ; difficulté décodée du champ bits, durée des périodes et puissance de calcul calculées par Sensitor"
+url = "https://mempool.space/docs/api/rest"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-19
+unit = "EH/s"
+columns = ["date", "hauteur", "horodatage", "bits", "horodatage_suivant", "hauteur_suivante", "difficulte", "jours", "puissance"]
+notes = "La puissance de calcul est une estimation : difficulté × 2³² ÷ temps moyen entre deux blocs de la période. Les horodatages des blocs sont fixés par les mineurs et peuvent s'écarter de quelques minutes ou heures de l'heure réelle."
+
+[[dataset]]
+id = "offre-monnaie-comparee"
+title = "Croissance sur un an de l'offre de bitcoins, de la masse monétaire M3 de la zone euro et de M2 aux États-Unis, depuis 2014"
+kind = "file"
+file = "offre-monnaie-comparee.csv"
+source = "Bitcoin : offre calculée par Sensitor à partir des règles d'émission et de la hauteur de bloc au début de chaque mois, interpolée entre les en-têtes de la chaîne (jeu « reseau-bitcoin ») ; zone euro : Banque centrale européenne, série BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A (M3, taux de croissance annuel) ; États-Unis : Board of Governors of the Federal Reserve System, série M2SL (M2, corrigé des variations saisonnières), via FRED, taux annuel calculé par Sensitor"
+url = "https://fred.stlouisfed.org/series/M2SL"
+license = "faits publics de la chaîne Bitcoin et calcul Sensitor ; statistiques BCE réutilisables avec mention de la source ; données publiques de la Réserve fédérale, diffusées par FRED"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["mois", "bitcoin", "zone_euro_m3", "etats_unis_m2", "stock_flux_bitcoin"]
+notes = "Le stock-to-flow de Bitcoin est l'offre existante divisée par l'émission de l'année écoulée : 100 divisé par le taux de croissance. Les derniers mois de M3 et de M2 ne sont pas encore publiés."
+
+[[dataset]]
+id = "perte-impermanente-courbe"
+title = "La perte impermanente selon la variation du prix relatif"
+kind = "computed"
+generator = "impermanent-loss"
+source = "formule de la perte impermanente d'un pool à produit constant (Adams, Zinsmeister et Robinson, 2020) ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["rapport", "perte"]
+
+[[dataset]]
+id = "liquidation-par-ratio"
+title = "La baisse de la garantie qui déclenche la liquidation, selon le ratio prêt-garantie"
+kind = "computed"
+generator = "liquidation-by-ltv"
+source = "facteur de santé d'un prêt surcollatéralisé, seuil de liquidation de 80 % ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["ratio", "baisse"]
+
+[[dataset]]
+id = "deblocages-exemple"
+title = "Un calendrier de déblocage de jetons, mois par mois"
+kind = "computed"
+generator = "token-unlocks"
+source = "jeton construit pour la leçon : 20 % au lancement, équipe 20 % (blocage 12 mois, puis 24 mois), investisseurs 15 % (6 mois, puis 18), communauté 45 % sur 48 mois"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "% de l'offre"
+columns = ["mois", "lancement", "equipe", "investisseurs", "communaute"]
+
+[[dataset]]
+id = "dilution-staking"
+title = "La part de l'offre conservée avec et sans staking, à 8 % d'émission par an"
+kind = "computed"
+generator = "staking-dilution"
+source = "émission de staking de 8 % par an, exemple de la leçon ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "%"
+columns = ["annee", "staking", "sans_staking"]
+
+[[dataset]]
+id = "volatilite-part-crypto"
+title = "La volatilité d'un patrimoine selon la part de crypto"
+kind = "computed"
+generator = "volatility-by-share"
+source = "volatilité de deux actifs (Markowitz, 1952), hypothèses de la leçon : 10 % pour le reste, 60 % pour la crypto, corrélation 0,2 ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["part", "volatilite"]
+notes = "Les hypothèses sont des exemples, pas des estimations de marché."
+
+[[dataset]]
+id = "dca-exemple"
+title = "Investir 100 € chaque mois sur une trajectoire de prix construite"
+kind = "computed"
+generator = "dca-example"
+source = "trajectoire de prix construite pour la leçon : baisse de 60 % en un an, puis remontée ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "€"
+columns = ["mois", "prix", "prix_de_revient", "en_une_fois"]
+
+[[dataset]]
+id = "derive-allocation"
+title = "La part de crypto, laissée libre ou rééquilibrée chaque trimestre"
+kind = "computed"
+generator = "rebalancing-drift"
+source = "même trajectoire de prix construite que la leçon sur l'investissement progressif, reste du patrimoine à +0,4 % par mois ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "%"
+columns = ["mois", "sans_reequilibrage", "reequilibre"]
+
+[[dataset]]
+id = "stress-poches"
+title = "Ce que coûte chaque poche dans le scénario de crise de la leçon"
+kind = "computed"
+generator = "stress-pockets"
+source = "scénario construit : crypto −80 %, actions −30 %, fonds en euros stables, patrimoine de 200 000 € ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "€"
+columns = ["poche", "contribution"]
+
+[[dataset]]
+id = "hausse-necessaire"
+title = "La hausse nécessaire pour effacer une baisse"
+kind = "computed"
+generator = "recovery-needed"
+source = "formule : 1 ÷ (1 − baisse) − 1 ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["baisse", "hausse_necessaire"]
+
+[[dataset]]
+id = "indicateurs-exemple"
+title = "Prix réalisé, MVRV et NUPL sur un marché construit de 1 000 pièces"
+kind = "computed"
+generator = "price-indicators-example"
+source = "marché construit pour la leçon : 1 000 pièces dont le dernier prix d'échange est connu, 5 % des plus anciennes changeant de mains chaque mois au prix du mois ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = ""
+columns = ["mois", "prix", "prix_realise", "mvrv", "nupl"]
+notes = "Les séries réelles de ces indicateurs demandent un historique de prix sous licence commerciale, que Sensitor n'a pas encore : elles ne sont pas reproduites."
+
+[[dataset]]
+id = "force-phrase"
+title = "Le temps nécessaire pour essayer toutes les phrases de récupération, selon leur longueur"
+kind = "computed"
+generator = "seed-strength"
+source = "norme BIP 39 (11 bits par mot, somme de contrôle), attaquant hypothétique à mille milliards d'essais par seconde ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "ans"
+columns = ["mots", "annees"]
+
+[[dataset]]
+id = "frais-gaz"
+title = "Ce que coûte un envoi sur Ethereum selon le prix du gaz"
+kind = "computed"
+generator = "gas-costs"
+source = "21 000 unités de gaz pour un transfert d'ether, 65 000 pour un jeton, ether à 3 000 dollars, hypothèses de la leçon ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+synthetic = true
+unit = "$"
+columns = ["gwei", "ether", "jeton"]
+
+[[dataset]]
+id = "impact-pool"
+title = "L'impact sur le prix d'un achat dans un pool à produit constant, selon sa taille"
+kind = "computed"
+generator = "pool-impact"
+source = "formule du produit constant x × y = k, sans commission ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-20
+unit = "%"
+columns = ["part", "impact"]
+
+[[dataset]]
+id = "blocs-echantillon"
+title = "Un bloc par jour de la chaîne Bitcoin, depuis 2009"
+kind = "file"
+file = "blocs-echantillon.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = ""
+columns = ["jour", "hauteur", "transactions", "taille", "poids", "coinbase_sats", "coinbase_script"]
+
+[[dataset]]
+id = "activite-on-chain"
+title = "Transactions, frais, remplissage, taille et revenu des mineurs, en moyenne mensuelle, depuis 2009"
+kind = "file"
+file = "activite-on-chain.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = ""
+columns = ["mois", "echantillon", "transactions_par_jour", "frais_par_bloc", "part_frais", "remplissage", "taille_mo", "revenu_jour", "revenu_par_eh"]
+notes = "Estimations à partir d'un bloc par jour : une trentaine de blocs par mois. Le revenu par EH/s utilise la puissance déduite de la difficulté (jeu « reseau-bitcoin »)."
+
+[[dataset]]
+id = "pools-par-annee"
+title = "Part des blocs par pool de minage, chaque année depuis 2013, selon l'étiquette de la coinbase"
+kind = "file"
+file = "pools-par-annee.csv"
+source = "chaîne Bitcoin : un bloc par jour, celui de midi en temps universel, du 9 janvier 2009 au 30 septembre 2026 (6 474 blocs), relevé via les API publiques Esplora de blockstream.info et de mempool.space, identique sur tout nœud Bitcoin ; frais = coinbase − récompense du protocole ; moyennes mensuelles et rythme des blocs calculés par Sensitor ; pools identifiés par l'étiquette inscrite dans le script de la coinbase"
+url = "https://github.com/Blockstream/esplora/blob/master/API.md"
+license = "faits publics de la chaîne Bitcoin, calcul Sensitor ; aucune donnée tierce sous licence"
+retrieved = 2026-10-21
+unit = "%"
+columns = ["annee", "echantillon", "foundry_usa", "antpool", "btc_guild", "btc_com", "f2pool", "btc_top", "viabtc", "binance_pool", "btcc", "poolin", "autres", "non_identifie", "coefficient_nakamoto"]
+notes = "Environ 365 blocs par an : chaque part est une estimation, à quelques points près. Les blocs sans étiquette connue sont comptés comme non identifiés."

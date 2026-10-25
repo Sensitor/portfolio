@@ -199,11 +199,92 @@ def main() -> int:
     # `if st.button(...)` body is unexercised by the 159 above — which is where
     # the store's signatures are actually used.
     checks += _persistence_flow(failures)
+    checks += _simulation_flow(failures)
+    checks += _deep_link_flow(failures)
+    checks += _carnet_flow(failures)
+    checks += _no_long_dash(failures)
 
     print(f"\n{checks} render checks, {len(failures)} failures")
     for scenario, page, error in failures:
         print(f"\n--- {page} / {scenario} ---\n{error}")
     return 1 if failures else 0
+
+
+def _simulation_flow(failures) -> int:
+    """
+    Build a simulated portfolio from the sliders and press « Analyse ».
+
+    The render harness above injects a ready-made analyzer, so it never reaches
+    the button that builds one. That is how a NameError in this branch shipped:
+    every page rendered, and the one action that leads to them failed.
+    """
+    import numpy as np
+    from sensitor.investment import portfolio as engine
+
+    class FakeTicker:
+        def __init__(self, symbol):
+            self.symbol = symbol
+
+        def history(self, start=None, **_):
+            rng = np.random.default_rng(abs(hash(self.symbol)) % 2**31)
+            index = pd.bdate_range("2024-01-02", periods=400)
+            return pd.DataFrame({"Close": 100 * (1 + rng.normal(0.0004, 0.011, 400)).cumprod()}, index=index)
+
+    original = engine.yf.Ticker
+    engine.yf.Ticker = FakeTicker
+    checks = 0
+    try:
+        app = AppTest.from_file(APP, default_timeout=240)
+        app.session_state["authenticated"] = True
+        app.session_state["user_email"] = "builder@example.com"
+        app.session_state["session_token"] = _session_for("builder@example.com")
+        app.session_state["user_tier"] = "pro"
+        app.session_state["language"] = "en"
+        app.session_state["user_profile"] = "balanced"
+        app.session_state["analysis_mode"] = "simulation"
+        app.session_state["selected_tickers"] = ["SPY", "AGG"]
+        app.session_state["weights"] = {"SPY": 0.6, "AGG": 0.4}
+        app.session_state["unanalysed_holdings"] = {"OLD": 1.0}
+        app.session_state["page"] = "new_analysis"
+        app.run()
+        app.slider(key="ws_SPY").set_value(60.0)
+        app.slider(key="ws_AGG").set_value(40.0)
+        app.run()
+        next(b for b in app.button if b.label == "Analyse Portfolio").click().run()
+        state = {k: app.session_state[k] for k in ("page", "current_portfolio", "unanalysed_holdings")
+                 if k in app.session_state}
+        built = getattr(state.get("current_portfolio"), "tickers", [])
+        for label, ok, detail in (
+                ("simulation: « Analyse » runs without an exception", not app.exception,
+                 str(app.exception[0].value)[:200] if app.exception else ""),
+                ("simulation: it opens the overview", state.get("page") == "overview", str(state.get("page"))),
+                ("simulation: the analysed book is the one built", sorted(built) == ["AGG", "SPY"], str(built)),
+                ("simulation: no stale « not analysed » notice", state.get("unanalysed_holdings") == {}, "")):
+            checks += 1
+            print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+            if not ok:
+                failures.append(f"{label}: {detail}")
+    finally:
+        engine.yf.Ticker = original
+    return checks
+
+
+def _deep_link_flow(failures) -> int:
+    """The platform opens the journal or the portfolio with `?page=`; nothing else is honoured."""
+    checks = 0
+    for requested, expected in (("trading_overview", "trading_overview"), ("trading_journal", "trading_journal"),
+                                ("overview", "overview"), ("advisor", "overview"), ("../../etc", "overview")):
+        app = AppTest.from_file(APP, default_timeout=240)
+        app.query_params["page"] = requested
+        app.run()
+        landed = app.session_state["page"] if "page" in app.session_state else None
+        ok = landed == expected and not app.exception
+        checks += 1
+        label = f"deep link « {requested} » opens « {expected} »"
+        print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+        if not ok:
+            failures.append(f"{label}: got {landed}")
+    return checks
 
 
 def _persistence_flow(failures) -> int:
@@ -287,6 +368,167 @@ def _persistence_flow(failures) -> int:
              and int(orphans) == 0,
              f"orphans {orphans}")
 
+    return checks
+
+
+def _carnet_flow(failures) -> int:
+    """
+    Step 3 of the « Carnet de bord » direction, on the analytics application: the
+    palette is the Carnet's, no colour outside it is left in the legacy script,
+    performance curves carry end labels, a drawdown is a hatched risk zone, and
+    the overview carries a « Lecture » margin built from computed figures.
+    """
+    import re
+    from sensitor.ui import charts as C
+    from sensitor.ui import themes as T
+
+    checks = 0
+
+    def check(label, ok, detail=""):
+        nonlocal checks
+        checks += 1
+        print(f"  {'ok  ' if ok else 'FAIL'}  carnet       {label}")
+        if not ok:
+            failures.append(("carnet", label, detail or "failed"))
+
+    check("paper, ink and plan tokens",
+          (T.BG_DEEP, T.SURFACE, T.INK, T.ACCENT, T.POS, T.NEG, T.WARNING)
+          == ("#F3F0E8", "#FFFDF8", "#0F1B26", "#1F4A72", "#22604A", "#9A3A2C", "#855615"))
+    check("gain and loss are distinct", T.POS != T.NEG)
+    check("fade() keeps the token's colour", T.fade("#1F4A72", 0.2) == "rgba(31,74,114,0.2)")
+
+    # Every hex literal left in the legacy script belongs to the Carnet.
+    allowed = {"#1F4A72", "#59636B", "#0F1B26", "#33414D", "#22604A", "#855615",
+               "#9A3A2C", "#FFFDF8", "#9C5A1E", "#EEE9DD", "#F3E0DA", "#F2E7D2",
+               "#E1E9F1", "#DDEBE2", "#D8D2C3", "#2F6A9E"}
+    with open(APP, encoding="utf-8") as fh:
+        legacy = fh.read()
+    stray = sorted({h.upper() for h in re.findall(r"#[0-9a-fA-F]{6}\b", legacy)} - allowed)
+    check("legacy script uses Carnet colours only", not stray, ", ".join(stray))
+
+    # Section titles are set in Newsreader, in the case they were written in.
+    upper_calls = []
+    pages_dir = os.path.join(os.path.dirname(APP), "sensitor", "pages")
+    for name in sorted(os.listdir(pages_dir)):
+        if name.endswith(".py"):
+            with open(os.path.join(pages_dir, name), encoding="utf-8") as fh:
+                for line in fh:
+                    if re.match(r"\s*section\(", line) and ".upper()" in line:
+                        upper_calls.append(name)
+    check("section titles are not forced to capitals", not upper_calls, ", ".join(upper_calls))
+
+    index = pd.date_range("2024-01-01", periods=60, freq="B")
+    a = pd.Series(np.linspace(100, 130, 60), index=index)
+    b = pd.Series(np.linspace(100, 129, 60), index=index)
+    fig = C.cumulative_performance({"Portfolio": a, "Benchmark": b}, value_prefix="$")
+    notes = fig.layout.annotations
+    check("one end label per series", len(notes) == 2)
+    check("end labels carry the last values",
+          {"$130", "$129"} <= {n.text.split("</span> ")[-1] for n in notes})
+    ys = sorted(n.y for n in notes)
+    check("close end labels are pushed apart", ys[1] - ys[0] > 1.0)
+    many = {f"S{i}": a + i for i in range(5)}
+    check("no end labels beyond four series",
+          len(C.cumulative_performance(many).layout.annotations) == 0)
+
+    dd = pd.Series(np.minimum(0, np.sin(np.linspace(0, 6, 60))) * 0.05, index=index)
+    trace = C.underwater(dd).data[0]
+    check("drawdown is a hatched zone", trace.fillpattern.shape == "-")
+    with open(T.__file__, encoding="utf-8") as fh:
+        check("the hatch is turned to 30 degrees",
+              ".js-plotly-plot pattern {{ transform: rotate(-30deg); }}" in fh.read())
+
+    analyzer = make_portfolio(SCENARIOS["diversified (7 assets)"])
+    for lang, label, word in (("fr", "Lecture", "sur la période"),
+                              ("en", "Reading", "over")):
+        app = run_page("overview", analyzer, lang=lang)
+        markup = " ".join(m.value for m in app.markdown)
+        ok = (not app.exception and "snr-reading" in markup
+              and label in markup and word in markup)
+        check(f"overview carries the reading margin [{lang}]", ok,
+              str(app.exception[0].value)[:300] if app.exception else "")
+
+    # Every synthesis screen has its margin; the risk page has one per question.
+    expected = {"performance": 1, "health": 1, "xray": 1, "risk": 3, "optimize": 1, "simulator": 2}
+    for page, count in expected.items():
+        for lang in ("fr", "en"):
+            app = run_page(page, analyzer, lang=lang)
+            markup = " ".join(m.value for m in app.markdown)
+            found = markup.count('class="snr-reading"')
+            check(f"{page} carries {count} reading margin(s) [{lang}]",
+                  not app.exception and found == count,
+                  str(app.exception[0].value)[:300] if app.exception else f"found {found}")
+
+    # The figures in a margin are the page's own: the risk page names the
+    # largest risk contributor that the table lists first.
+    app = run_page("risk", analyzer, lang="fr")
+    markup = " ".join(m.value for m in app.markdown)
+    quoted = re.search(r"<p>([A-Z][A-Z0-9.-]*) porte (\d+\.\d)% du risque", markup)
+    shares = [float(v) for v in re.findall(r"<span>(\d+\.\d)%</span>", markup)]
+    check("risk margin quotes the largest contributor",
+          bool(quoted) and bool(shares) and float(quoted.group(2)) == max(shares)
+          and f'<td class="k">{quoted.group(1)}</td>' in markup,
+          quoted.group(0) if quoted else "no sentence")
+
+    # The analyzer carries the Sensitor name.
+    app = run_page("overview", analyzer, lang="fr")
+    sidebar = " ".join(m.value for m in app.sidebar.markdown)
+    check("sidebar carries the Sensitor lockup",
+          "SENSITOR" in sidebar and "Portefeuille et risque" in sidebar
+          and "Portfolio Health Pro" not in sidebar)
+    return checks
+
+
+def _no_long_dash(failures) -> int:
+    """
+    The house rule: no em dash (U+2014) or en dash (U+2013) in the interface. Checked
+    twice: on every string literal of the code that feeds a screen (docstrings and
+    comments aside), and on what the pages actually render, in both languages.
+    """
+    import ast
+    from sensitor.core.i18n import na
+
+    checks = 0
+
+    def check(label, ok, detail=""):
+        nonlocal checks
+        checks += 1
+        print(f"  {'ok  ' if ok else 'FAIL'}  dashes       {label}")
+        if not ok:
+            failures.append(("long dash", label, detail or "failed"))
+
+    root = os.path.dirname(APP)
+    found = []
+    paths = [APP] + [os.path.join(dirpath, name)
+                     for dirpath, _, names in os.walk(os.path.join(root, "sensitor"))
+                     if "__pycache__" not in dirpath for name in names if name.endswith(".py")]
+    for path in paths:
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read())
+        docs = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.body:
+                first = node.body[0]
+                if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+                    docs.add(id(first.value))
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in docs
+                    and ("\u2014" in node.value or "\u2013" in node.value)):
+                found.append(f"{os.path.relpath(path, root)}:{node.lineno}")
+    check("no long dash in any string the code can show", not found, ", ".join(found[:10]))
+
+    check("a missing value reads n.d. in French and n/a in English",
+          na("fr") == "n.d." and na("en") == "n/a")
+
+    analyzer = make_portfolio(SCENARIOS["diversified (7 assets)"])
+    for lang in ("fr", "en"):
+        dashed = []
+        for page in PAGES:
+            app = run_page(page, analyzer, lang=lang)
+            text = " ".join(str(m.value) for m in list(app.markdown) + list(app.sidebar.markdown))
+            if "\u2014" in text or "\u2013" in text:
+                dashed.append(page)
+        check(f"no long dash on any rendered page [{lang}]", not dashed, ", ".join(dashed))
     return checks
 
 

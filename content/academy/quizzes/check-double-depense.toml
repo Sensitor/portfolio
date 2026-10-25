@@ -1,0 +1,73 @@
+id = "check-double-depense"
+title = "Contrôle : le problème de la double dépense"
+course = "bitcoin-fonctionnement"
+lesson = "double-depense"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "probleme"
+prompt = "Qu'est-ce que la double dépense ?"
+kind = "single"
+lesson = "double-depense"
+
+[[question.option]]
+id = "deux-fois"
+text = "Dépenser deux fois la même unité de monnaie numérique."
+correct = true
+explanation = "Oui : un fichier se copie, une monnaie ne doit pas pouvoir l'être."
+
+[[question.option]]
+id = "frais"
+text = "Payer deux fois des frais sur une transaction."
+explanation = "Ce n'est pas le problème que Bitcoin résout."
+
+[[question.option]]
+id = "change"
+text = "Changer de la monnaie dans deux devises."
+explanation = "Rien à voir avec le change."
+
+[[question]]
+id = "habituel"
+prompt = "Comment les paiements électroniques habituels empêchent-ils la double dépense ?"
+kind = "single"
+lesson = "double-depense"
+
+[[question.option]]
+id = "tiers"
+text = "Un tiers de confiance, la banque ou le réseau de paiement, tient le registre."
+correct = true
+explanation = "Oui : l'argent est déplacé d'une ligne à l'autre de son registre."
+
+[[question.option]]
+id = "fichier"
+text = "En chiffrant le fichier de la pièce."
+explanation = "Le chiffrement n'empêche pas de copier un fichier."
+
+[[question.option]]
+id = "rien"
+text = "Ils ne l'empêchent pas."
+explanation = "Ils l'empêchent, grâce au registre du tiers."
+
+[[question]]
+id = "bitcoin"
+prompt = "Quelle est la règle de Bitcoin en cas de désaccord sur le registre ?"
+kind = "single"
+lesson = "double-depense"
+
+[[question.option]]
+id = "travail"
+text = "La version qui a demandé le plus de travail l'emporte."
+correct = true
+explanation = "Oui : c'est ce qui rend coûteux de réécrire le passé."
+
+[[question.option]]
+id = "vote"
+text = "Un vote des détenteurs de bitcoins."
+explanation = "Il n'y a pas de vote des détenteurs."
+
+[[question.option]]
+id = "fondateur"
+text = "Satoshi Nakamoto tranche."
+explanation = "Personne ne tranche : la règle est dans le logiciel."

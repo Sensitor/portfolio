@@ -1,0 +1,54 @@
+id = "cas-inflation-us"
+title = "Le cas de l'inflation américaine, chiffré"
+context = """
+Reprenez les données de la leçon : consensus **+0,3 %**, publié **+0,5 %**, écart type des surprises **0,1 point**, indice à **6 000 points**, volatilité implicite sur un jour **24 %**, budget de risque **125 dollars**, **1 dollar par point** et par contrat, pas de **0,1 contrat**, stop de **30 points** et glissement estimé de **5 points**, stop habituel de **12 points**.
+"""
+conclusion = """
+Une surprise de +0,2 point, deux écarts types, et un mouvement attendu de 75 points : la séance justifiait la règle écrite la veille. La taille de 3,5 contrats garde le risque sous le budget, à 122,50 dollars. Avec la taille habituelle de 10,4 contrats, le même stop aurait coûté 364 dollars, 2,9 fois le budget.
+"""
+
+[[step]]
+id = "surprise"
+prompt = "Quelle est la surprise, en points ?"
+unit = "points"
+answer = 0.2
+tolerance = 0.001
+solution = "0,5 − 0,3 = **+0,2** point."
+
+[[step]]
+id = "normalisee"
+prompt = "Quelle est la surprise normalisée ?"
+answer = 2.0
+tolerance = 0.01
+solution = "0,2 ÷ 0,1 = **+2,0** écarts types : une surprise nettement hors de l'ordinaire."
+
+[[step]]
+id = "mouvement"
+prompt = "Quel est le mouvement attendu de l'indice sur un jour, en points ? (Arrondi à l'entier.)"
+unit = "points"
+answer = 75
+tolerance = 0.5
+solution = "6 000 × 0,24 × √(1/365) = **75 points**."
+
+[[step]]
+id = "taille"
+prompt = "Quelle taille, arrondie vers le bas au pas de 0,1 contrat ?"
+unit = "contrats"
+answer = 3.5
+tolerance = 0.001
+solution = "125 ÷ ((30 + 5) × 1) = 3,57, arrondi vers le bas : **3,5 contrats**."
+
+[[step]]
+id = "risque"
+prompt = "Quel est le risque effectif de cette position, en dollars ?"
+unit = "$"
+answer = 122.5
+tolerance = 0.01
+solution = "3,5 × 35 × 1 = **122,50 dollars**, sous le budget de 125."
+
+[[step]]
+id = "multiple"
+prompt = "La taille habituelle se calcule sur le stop de 12 points : 10,4 contrats. Combien de fois le budget le stop de 30 points plus 5 de glissement aurait-il coûté avec cette taille ? (Une décimale.)"
+answer = 2.9
+tolerance = 0.05
+solution = "10,4 × 35 = 364 dollars, soit 364 ÷ 125 = **2,9 fois** le budget."

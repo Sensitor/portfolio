@@ -1,0 +1,73 @@
+id = "check-biais-backtest"
+title = "Contrôle : les biais d'un backtest"
+course = "tester-une-strategie"
+lesson = "biais-backtest"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "anticipation"
+prompt = "Décider sur la clôture d'une bougie avant qu'elle ne soit close est un biais :"
+kind = "single"
+lesson = "biais-backtest"
+
+[[question.option]]
+id = "anticipation"
+text = "d'anticipation."
+correct = true
+explanation = "On utilise une information pas encore disponible."
+
+[[question.option]]
+id = "survivant"
+text = "du survivant."
+explanation = "Le biais du survivant porte sur le choix des instruments."
+
+[[question.option]]
+id = "recence"
+text = "de récence."
+explanation = "La récence concerne le poids des derniers résultats."
+
+[[question]]
+id = "instrument"
+prompt = "Tester sur six paires et ne garder que celle où la stratégie marche le mieux :"
+kind = "single"
+lesson = "biais-backtest"
+
+[[question.option]]
+id = "selection"
+text = "C'est un choix fait après coup, qui embellit le résultat."
+correct = true
+explanation = "Le chiffre gardé mesure en partie ce choix."
+
+[[question.option]]
+id = "prudence"
+text = "C'est de la prudence."
+explanation = "C'est l'inverse : le résultat est flatteur par construction."
+
+[[question.option]]
+id = "neutre"
+text = "C'est sans effet sur le résultat."
+explanation = "Le meilleur de six résultats est meilleur, en moyenne, que le résultat d'une paire choisie avant."
+
+[[question]]
+id = "sens"
+prompt = "Dans quel sens vont presque toujours ces biais ?"
+kind = "single"
+lesson = "biais-backtest"
+
+[[question.option]]
+id = "mieux"
+text = "Ils rendent la stratégie meilleure qu'elle n'est."
+correct = true
+explanation = "C'est pourquoi ils passent inaperçus."
+
+[[question.option]]
+id = "pire"
+text = "Ils la rendent pire qu'elle n'est."
+explanation = "On les remarquerait alors bien plus vite."
+
+[[question.option]]
+id = "hasard"
+text = "Dans un sens ou l'autre, au hasard."
+explanation = "Ils proviennent de choix faits en voyant les bons résultats."

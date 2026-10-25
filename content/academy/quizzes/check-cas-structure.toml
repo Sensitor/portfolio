@@ -1,0 +1,51 @@
+id = "check-cas-structure"
+title = "Contrôle : du constat à l'invalidation"
+course = "lire-la-structure"
+lesson = "cas-structure"
+feedback = "immediate"
+pass_threshold = 0.5
+version = 1
+
+[[question]]
+id = "placement"
+prompt = "Dans le cas pratique, pourquoi l'invalidation est-elle placée à 1,2746 et pas plus près de l'entrée ?"
+kind = "single"
+lesson = "cas-structure"
+
+[[question.option]]
+id = "structure"
+text = "Parce qu'au-dessus de ce niveau, le sommet plus bas n'en est plus un et le scénario perd son appui."
+correct = true
+explanation = "Oui : l'invalidation vient de la structure, la taille vient ensuite du budget."
+
+[[question.option]]
+id = "budget"
+text = "Parce que c'est le niveau où la perte fait exactement 50 $."
+explanation = "C'est l'inverse : on place l'invalidation d'abord, puis on calcule la taille."
+
+[[question.option]]
+id = "rond"
+text = "Parce que c'est un chiffre rond."
+explanation = "1,2746 n'a rien de rond : il découle du sommet plus bas et d'une marge."
+
+[[question]]
+id = "statut"
+prompt = "Une fois le plan chiffré, que sait-on du scénario baissier ?"
+kind = "single"
+lesson = "cas-structure"
+
+[[question.option]]
+id = "hypothese"
+text = "Que c'est une hypothèse plausible, et combien coûtera l'erreur si elle est fausse."
+correct = true
+explanation = "Exact : le plan maîtrise le coût de l'erreur, pas le résultat."
+
+[[question.option]]
+id = "confirme"
+text = "Qu'il est confirmé par le changement de structure."
+explanation = "Le changement de structure élimine une hypothèse ; il n'en confirme aucune."
+
+[[question.option]]
+id = "gagnant"
+text = "Qu'il a plus de chances d'être gagnant que perdant."
+explanation = "Rien dans l'exercice ne permet d'estimer cette probabilité."

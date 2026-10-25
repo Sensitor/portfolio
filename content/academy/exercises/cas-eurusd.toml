@@ -1,0 +1,62 @@
+id = "cas-eurusd"
+title = "Préparer un achat sur EURUSD"
+context = """
+Vous disposez d'un **compte de démonstration de 8 000 $** et vous avez fixé votre risque à **0,75 % par position**.
+
+Sur EURUSD, votre analyse repère un creux de swing à 1,0712. Vous envisagez un **achat à 1,0745**, avec un **stop à 1,0705**, sept pips sous le creux pour laisser de la marge au spread et aux fluctuations ordinaires. Votre objectif est **1,0825**, juste sous un ancien sommet.
+
+Votre courtier indique : lot standard de 100 000 unités, pas de volume de 0,01 lot. Le compte est en dollars et EURUSD est coté en dollars : 1 pip vaut 10 $ par lot.
+
+Hypothèses de coûts : spread de 0,9 pip, commission de 7 $ par lot aller-retour.
+"""
+conclusion = """
+Le plan est complet : si le scénario est faux, la perte prévue est de 60 $, soit 0,75 % du compte, plus 2,40 $ de coûts. Rien dans ce calcul ne dit si le scénario est bon : il garantit seulement qu'une erreur reste dans votre budget.
+"""
+
+[[step]]
+id = "montant"
+prompt = "Quel est le montant risqué sur ce trade, en dollars ?"
+unit = "$"
+answer = 60
+tolerance = 0.01
+solution = "8 000 × 0,75 ÷ 100 = **60 $**. C'est la perte maximale prévue si le stop est touché, hors coûts."
+
+[[step]]
+id = "distance"
+prompt = "Quelle est la distance entre l'entrée et le stop, en pips ?"
+unit = "pips"
+answer = 40
+tolerance = 0.01
+solution = "1,0745 − 1,0705 = 0,0040. Un pip valant 0,0001 sur EURUSD, la distance est de **40 pips**."
+
+[[step]]
+id = "perte-par-lot"
+prompt = "Combien coûterait le stop pour une position de 1 lot standard, en dollars ?"
+unit = "$"
+answer = 400
+tolerance = 0.01
+solution = "40 pips × 10 $ par pip et par lot = **400 $ par lot**. C'est trop : 1 lot risquerait plus de six fois le budget."
+
+[[step]]
+id = "taille"
+prompt = "Quelle taille de position, en lots, respecte le budget de risque ? (Arrondissez vers le bas au pas de 0,01.)"
+unit = "lots"
+answer = 0.15
+tolerance = 0.0001
+solution = "60 ÷ 400 = **0,15 lot**. Le résultat tombe juste sur le pas de 0,01 : aucun arrondi n'est nécessaire, et le risque effectif est bien de 60 $."
+
+[[step]]
+id = "ratio"
+prompt = "Quel est le ratio gain / risque de ce plan ?"
+unit = "R"
+answer = 2
+tolerance = 0.01
+solution = "Objectif : 1,0825 − 1,0745 = 80 pips. Stop : 40 pips. Ratio : 80 ÷ 40 = **2**. Si l'objectif est atteint, le gain prévu est de 2 × 60 = 120 $, avant coûts."
+
+[[step]]
+id = "couts"
+prompt = "Quel est le coût total estimé de l'aller-retour (spread et commission), en dollars ?"
+unit = "$"
+answer = 2.40
+tolerance = 0.01
+solution = "Spread : 0,9 pip × 10 $ × 0,15 lot = 1,35 $. Commission : 7 $ × 0,15 = 1,05 $. Total : **2,40 $**, soit 4 % du montant risqué."

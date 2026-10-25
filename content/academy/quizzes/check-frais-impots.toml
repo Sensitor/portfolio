@@ -1,0 +1,73 @@
+id = "check-frais-impots"
+title = "Contrôle : frais et impôt"
+course = "inflation-et-patrimoine"
+lesson = "frais-impots"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "frais"
+prompt = "10 000 € à 6 % pendant 30 ans, avec 1,5 % de frais par an : réduction du capital final ?"
+kind = "single"
+lesson = "frais-impots"
+
+[[question.option]]
+id = "365"
+text = "Environ 36,5 %."
+correct = true
+explanation = "Les frais se composent comme le rendement."
+
+[[question.option]]
+id = "15"
+text = "1,5 %."
+explanation = "Ils sont prélevés chaque année."
+
+[[question.option]]
+id = "45"
+text = "45 %, soit 1,5 % × 30."
+explanation = "Ce n'est pas une simple multiplication."
+
+[[question]]
+id = "compare"
+prompt = "Pour comparer deux placements, on regarde :"
+kind = "single"
+lesson = "frais-impots"
+
+[[question.option]]
+id = "net"
+text = "le rendement net de frais, d'impôt et d'inflation."
+correct = true
+explanation = "C'est ce qui reste en pouvoir d'achat."
+
+[[question.option]]
+id = "brut"
+text = "le rendement brut affiché."
+explanation = "Il ignore ce qui est prélevé."
+
+[[question.option]]
+id = "frais"
+text = "seulement les frais."
+explanation = "Le rendement compte aussi."
+
+[[question]]
+id = "impot"
+prompt = "Le taux d'impôt de 30 % retenu dans les exemples est :"
+kind = "single"
+lesson = "frais-impots"
+
+[[question.option]]
+id = "hyp"
+text = "une hypothèse de calcul, à vérifier pour sa situation."
+correct = true
+explanation = "Les règles fiscales dépendent du placement et changent."
+
+[[question.option]]
+id = "loi"
+text = "le taux légal applicable à tous les placements."
+explanation = "Ce n'est pas le cas."
+
+[[question.option]]
+id = "max"
+text = "un maximum garanti."
+explanation = "Ce n'est pas une information fiscale."

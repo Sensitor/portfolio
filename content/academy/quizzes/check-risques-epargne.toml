@@ -1,0 +1,73 @@
+id = "check-risques-epargne"
+title = "Contrôle : les risques d'une épargne"
+course = "inflation-et-patrimoine"
+lesson = "risques-epargne"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "reel"
+prompt = "Un compte courant pendant une forte inflation expose surtout à :"
+kind = "single"
+lesson = "risques-epargne"
+
+[[question.option]]
+id = "reel"
+text = "une perte réelle."
+correct = true
+explanation = "Les euros restent, leur pouvoir d'achat baisse."
+
+[[question.option]]
+id = "nominal"
+text = "une perte nominale."
+explanation = "Le solde en euros ne baisse pas."
+
+[[question.option]]
+id = "liquidite"
+text = "un risque de liquidité."
+explanation = "L'argent est disponible immédiatement."
+
+[[question]]
+id = "horizon"
+prompt = "Pour une somme dont on aura besoin dans six mois, un placement qui peut perdre 40 % en un an est :"
+kind = "single"
+lesson = "risques-epargne"
+
+[[question.option]]
+id = "inadapte"
+text = "inadapté : l'horizon est trop court."
+correct = true
+explanation = "L'horizon se fixe avant le placement."
+
+[[question.option]]
+id = "ideal"
+text = "idéal, car il peut aussi beaucoup monter."
+explanation = "Le risque de devoir vendre en perte est trop grand."
+
+[[question.option]]
+id = "neutre"
+text = "sans importance."
+explanation = "L'horizon décide du risque supportable."
+
+[[question]]
+id = "concentration"
+prompt = "Le risque de concentration concerne :"
+kind = "single"
+lesson = "risques-epargne"
+
+[[question.option]]
+id = "tout"
+text = "les actifs et les intermédiaires : un seul placement, une seule plateforme."
+correct = true
+explanation = "La faillite de FTX en est un exemple."
+
+[[question.option]]
+id = "actions"
+text = "seulement les actions."
+explanation = "Il concerne tous les actifs et les intermédiaires."
+
+[[question.option]]
+id = "rien"
+text = "rien si l'actif est solide."
+explanation = "Un seul actif reste exposé à son risque propre."

@@ -1,0 +1,73 @@
+id = "check-indicateurs-majeurs"
+title = "Contrôle : les indicateurs qui comptent"
+course = "trader-l-actualite"
+lesson = "indicateurs-majeurs"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "pce"
+prompt = "Quelle mesure des prix vise l'objectif de 2 % de la Réserve fédérale ?"
+kind = "single"
+lesson = "indicateurs-majeurs"
+
+[[question.option]]
+id = "pce"
+text = "L'indice des prix PCE."
+correct = true
+explanation = "Oui : la Fed définit son objectif sur le PCE."
+
+[[question.option]]
+id = "ppi"
+text = "Le PPI, les prix à la production."
+explanation = "Le PPI est suivi, mais l'objectif porte sur le PCE."
+
+[[question.option]]
+id = "ipch"
+text = "L'IPCH."
+explanation = "C'est la mesure de la BCE, pour la zone euro."
+
+[[question]]
+id = "revision"
+prompt = "Un rapport sur l'emploi contient quoi, en plus du mois nouveau ?"
+kind = "single"
+lesson = "indicateurs-majeurs"
+
+[[question.option]]
+id = "revisions"
+text = "La révision des deux mois précédents."
+correct = true
+explanation = "Oui : chaque mois est révisé deux fois, puis une fois par an."
+
+[[question.option]]
+id = "prevision"
+text = "La prévision du mois suivant."
+explanation = "Le BLS publie des mesures, pas des prévisions."
+
+[[question.option]]
+id = "rien"
+text = "Rien d'autre."
+explanation = "Les révisions font partie du rapport, et le marché y réagit."
+
+[[question]]
+id = "ralenti"
+prompt = "Que montrent les données de créations d'emplois américaines depuis 2023 ?"
+kind = "single"
+lesson = "indicateurs-majeurs"
+
+[[question.option]]
+id = "ralenti"
+text = "Un net ralentissement : de +210 000 par mois en moyenne en 2023 à +68 000 sur 2026."
+correct = true
+explanation = "Oui, avec sept mois négatifs depuis janvier 2025."
+
+[[question.option]]
+id = "accelere"
+text = "Une accélération continue."
+explanation = "Les moyennes annuelles baissent : 210 000, 122 000, 10 000, 68 000."
+
+[[question.option]]
+id = "stable"
+text = "Un rythme stable autour de 200 000."
+explanation = "C'était le rythme de 2023, pas celui des années suivantes."

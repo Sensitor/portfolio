@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Où se placent les ordres</title>
+<desc id="d">Une courbe de prix avec un sommet et un creux visibles. Au-dessus du sommet, des points représentent les stops des vendeurs ; sous le creux, ceux des acheteurs.</desc>
+<polyline points="40,160.0 120,80.0 190,150.0 270,96.0 340,180.0 430,108.0 520,136.0 600,100.0" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<line x1="100" y1="80.0" x2="610" y2="80.0" stroke="#284764" stroke-dasharray="5 4"/>
+<line x1="320" y1="180.0" x2="610" y2="180.0" stroke="#284764" stroke-dasharray="5 4"/>
+<circle cx="236" cy="72.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="262" cy="66.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="288" cy="60.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="314" cy="72.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="340" cy="66.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="366" cy="60.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="392" cy="72.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="418" cy="66.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="444" cy="60.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="470" cy="72.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="496" cy="66.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="522" cy="60.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="548" cy="72.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="574" cy="66.0" r="3" fill="#8a4a40" opacity=".75"/><circle cx="600" cy="60.0" r="3" fill="#8a4a40" opacity=".75"/>
+<circle cx="430" cy="188.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="456" cy="194.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="482" cy="200.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="508" cy="188.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="534" cy="194.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="560" cy="200.0" r="3" fill="#3f6553" opacity=".75"/><circle cx="586" cy="188.0" r="3" fill="#3f6553" opacity=".75"/>
+<text x="140" y="46.0" font-size="12" fill="#8a4a40">stops des vendeurs et ordres d'achat en attente</text>
+<text x="360" y="224.0" font-size="12" fill="#3f6553">stops des acheteurs et ordres de vente en attente</text>
+<text x="108" y="72.0" font-size="11.5" fill="#284764">sommet visible</text>
+<text x="326" y="196.0" font-size="11.5" fill="#284764">creux visible</text>
+<text x="40" y="282" font-size="11" fill="#7b8389">Hypothèse de méthode : des ordres s'accumulent au-delà des niveaux que tout le monde voit. Personne ne voit ces ordres.</text>
+</svg>

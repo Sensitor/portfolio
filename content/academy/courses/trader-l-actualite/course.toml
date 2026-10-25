@@ -1,0 +1,39 @@
+id = "trader-l-actualite"
+path = "macro-actualite"
+title = "Trader avec l'actualité économique"
+summary = "Neuf leçons pour comprendre pourquoi une publication fait bouger les prix : ce que le marché attend, les indicateurs qui comptent, ce que les banques centrales décident et ce que les taux anticipent, puis la manière de traiter un jour de publication, du calendrier à la taille de position, avec un cas complet sur l'inflation américaine."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Expliquer pourquoi un marché réagit à l'écart entre le chiffre publié et le consensus, plus qu'au chiffre lui-même.",
+  "Situer les indicateurs majeurs, leur heure de publication à Paris et ce qu'ils mesurent.",
+  "Lire ce que les taux et les contrats à terme anticipent d'une banque centrale.",
+  "Mesurer le mouvement attendu autour d'une publication et adapter la taille de position, glissement compris.",
+]
+prerequisites = ["Gérer le risque dans la durée", "Décider sous incertitude"]
+final_quiz = "macro-validation"
+
+[[module]]
+id = "attentes"
+title = "Ce que le marché attend"
+summary = "Un prix contient déjà des attentes : seule la surprise le déplace. Les indicateurs qui portent ces attentes, et ce qu'ils mesurent."
+lessons = ["attentes-et-surprises", "indicateurs-majeurs"]
+
+[[module]]
+id = "banques-centrales"
+title = "Banques centrales et taux"
+summary = "Ce que décident la Réserve fédérale et la BCE, comment le marché l'anticipe, et par quels canaux les taux se transmettent aux devises et aux actions."
+lessons = ["banques-centrales-marche", "taux-devises-actions"]
+
+[[module]]
+id = "publications"
+title = "Trader autour des publications"
+summary = "Lire un calendrier économique, savoir ce qui change au moment d'une publication, et choisir entre rester à l'écart, réduire ou attendre la réaction."
+lessons = ["calendrier-economique", "volatilite-evenementielle", "plan-publication"]
+
+[[module]]
+id = "cas"
+title = "Un cas complet"
+summary = "Une journée de publication de l'inflation américaine, de la préparation à la décision, puis le quiz de validation."
+lessons = ["cas-inflation-us", "recap-macro"]

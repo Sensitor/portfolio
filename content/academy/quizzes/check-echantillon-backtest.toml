@@ -1,0 +1,73 @@
+id = "check-echantillon-backtest"
+title = "Contrôle : ce que vaut un résultat"
+course = "tester-une-strategie"
+lesson = "echantillon"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "se"
+prompt = "Écart type 1,2R, 400 trades. Erreur type de l'espérance ?"
+kind = "single"
+lesson = "echantillon"
+
+[[question.option]]
+id = "006"
+text = "0,06R"
+correct = true
+explanation = "1,2 ÷ √400 = 1,2 ÷ 20."
+
+[[question.option]]
+id = "0003"
+text = "0,003R"
+explanation = "On divise par √n, pas par n."
+
+[[question.option]]
+id = "12"
+text = "1,2R"
+explanation = "C'est l'écart type des résultats eux-mêmes."
+
+[[question]]
+id = "conclure"
+prompt = "Espérance nette +0,20R, intervalle à 95 % de −0,17 à +0,57R. Que conclure ?"
+kind = "single"
+lesson = "echantillon"
+
+[[question.option]]
+id = "rien"
+text = "Le résultat ne permet pas d'exclure l'absence d'avantage."
+correct = true
+explanation = "L'intervalle contient zéro."
+
+[[question.option]]
+id = "avantage"
+text = "La stratégie a un avantage de 0,20R."
+explanation = "C'est la moyenne mesurée, pas un fait établi."
+
+[[question.option]]
+id = "perdante"
+text = "La stratégie est perdante."
+explanation = "Rien ne permet de le dire non plus."
+
+[[question]]
+id = "quatre"
+prompt = "Pour diviser par deux la largeur de l'intervalle, il faut :"
+kind = "single"
+lesson = "echantillon"
+
+[[question.option]]
+id = "quatre"
+text = "quatre fois plus de trades."
+correct = true
+explanation = "La largeur varie comme 1 ÷ √n."
+
+[[question.option]]
+id = "deux"
+text = "deux fois plus de trades."
+explanation = "√2 ne vaut pas 2."
+
+[[question.option]]
+id = "moitie"
+text = "deux fois moins de trades."
+explanation = "Moins de trades élargit l'intervalle."

@@ -1,0 +1,73 @@
+id = "check-fvg"
+title = "Contrôle : le Fair Value Gap"
+course = "zones-et-entrees"
+lesson = "fvg-definition"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "regle"
+prompt = "Bougie 1 : plus haut 1,0832. Bougie 3 : plus bas 1,0846. Que conclure ?"
+kind = "single"
+lesson = "fvg-definition"
+
+[[question.option]]
+id = "haussier"
+text = "Un FVG haussier de 1,0832 à 1,0846."
+correct = true
+explanation = "Le plus bas de la bougie 3 est au-dessus du plus haut de la bougie 1."
+
+[[question.option]]
+id = "baissier"
+text = "Un FVG baissier de 1,0832 à 1,0846."
+explanation = "Un FVG baissier demande que le plus haut de la bougie 3 soit sous le plus bas de la bougie 1."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun FVG, il faudrait connaître la taille de la bougie 2."
+explanation = "La règle ne porte que sur les mèches des bougies 1 et 3."
+
+[[question]]
+id = "milieu"
+prompt = "Un FVG va de 1,2650 à 1,2664. Où se trouve son milieu ?"
+kind = "single"
+lesson = "fvg-definition"
+
+[[question.option]]
+id = "57"
+text = "1,2657"
+correct = true
+explanation = "(1,2650 + 1,2664) ÷ 2 = 1,2657."
+
+[[question.option]]
+id = "14"
+text = "1,2614"
+explanation = "C'est confondre le milieu avec la taille, 14 pips."
+
+[[question.option]]
+id = "64"
+text = "1,2664"
+explanation = "C'est la borne haute."
+
+[[question]]
+id = "hypothese"
+prompt = "Qu'est-ce qui relève de l'hypothèse de méthode, et non de l'observation ?"
+kind = "single"
+lesson = "fvg-definition"
+
+[[question.option]]
+id = "retour"
+text = "Le prix reviendra souvent dans l'écart avant de poursuivre."
+correct = true
+explanation = "C'est une hypothèse, à mesurer sur un échantillon."
+
+[[question.option]]
+id = "ecart"
+text = "Les mèches des bougies 1 et 3 ne se recouvrent pas."
+explanation = "Cela se vérifie sur le graphique : c'est la définition."
+
+[[question.option]]
+id = "taille"
+text = "L'écart mesure 14 pips."
+explanation = "C'est une mesure, pas une hypothèse."

@@ -1,0 +1,73 @@
+id = "check-diversification"
+title = "Contrôle : la diversification"
+course = "inflation-et-patrimoine"
+lesson = "diversification"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "correlation"
+prompt = "Plus la corrélation entre deux actifs est faible :"
+kind = "single"
+lesson = "diversification"
+
+[[question.option]]
+id = "reduit"
+text = "plus la diversification réduit la volatilité."
+correct = true
+explanation = "Ils se compensent davantage."
+
+[[question.option]]
+id = "augmente"
+text = "plus la volatilité augmente."
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "rien"
+text = "plus rien ne change."
+explanation = "La corrélation est au cœur du calcul."
+
+[[question]]
+id = "petit"
+prompt = "15 % de volatilité, 5 % d'un actif à 60 % de volatilité, corrélation 0,2 : volatilité totale ?"
+kind = "single"
+lesson = "diversification"
+
+[[question.option]]
+id = "1514"
+text = "Environ 15,1 %."
+correct = true
+explanation = "Une petite part change peu le risque d'ensemble."
+
+[[question.option]]
+id = "1725"
+text = "17,25 %, la moyenne pondérée."
+explanation = "Ce serait le cas avec une corrélation de 1."
+
+[[question.option]]
+id = "60"
+text = "60 %."
+explanation = "C'est la volatilité de l'actif seul."
+
+[[question]]
+id = "crise"
+prompt = "Que deviennent souvent les corrélations en période de crise ?"
+kind = "single"
+lesson = "diversification"
+
+[[question.option]]
+id = "montent"
+text = "Elles montent : beaucoup d'actifs baissent ensemble."
+correct = true
+explanation = "La diversification protège alors moins."
+
+[[question.option]]
+id = "baissent"
+text = "Elles baissent."
+explanation = "C'est généralement l'inverse."
+
+[[question.option]]
+id = "fixes"
+text = "Elles restent fixes."
+explanation = "Elles changent dans le temps."

@@ -1,0 +1,73 @@
+id = "check-backtest-manuel"
+title = "Contrôle : le backtest manuel"
+course = "tester-une-strategie"
+lesson = "backtest-manuel"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "defilement"
+prompt = "Pourquoi faire défiler l'historique bougie par bougie ?"
+kind = "single"
+lesson = "backtest-manuel"
+
+[[question.option]]
+id = "anticipation"
+text = "Pour décider sans connaître la suite, comme en temps réel."
+correct = true
+explanation = "C'est la parade contre l'anticipation."
+
+[[question.option]]
+id = "vitesse"
+text = "Pour aller plus vite."
+explanation = "C'est plus lent, et c'est voulu."
+
+[[question.option]]
+id = "beau"
+text = "Pour mieux voir les beaux exemples."
+explanation = "Tous les exemples comptent, beaux ou non."
+
+[[question]]
+id = "nette"
+prompt = "Espérance brute +0,025R, coût 0,05R par trade. Espérance nette ?"
+kind = "single"
+lesson = "backtest-manuel"
+
+[[question.option]]
+id = "moins"
+text = "−0,025R"
+correct = true
+explanation = "0,025 − 0,05."
+
+[[question.option]]
+id = "plus"
+text = "+0,075R"
+explanation = "Les coûts se retranchent."
+
+[[question.option]]
+id = "brut"
+text = "+0,025R"
+explanation = "C'est l'espérance avant coûts."
+
+[[question]]
+id = "mauvaises"
+prompt = "La règle désigne une occurrence qui « ne paraît pas bonne ». Que faire ?"
+kind = "single"
+lesson = "backtest-manuel"
+
+[[question.option]]
+id = "noter"
+text = "La noter comme les autres : la règle la désigne."
+correct = true
+explanation = "Sinon, on teste une autre règle que celle qui est écrite."
+
+[[question.option]]
+id = "sauter"
+text = "La sauter, on ne l'aurait pas prise."
+explanation = "C'est le biais de sélection."
+
+[[question.option]]
+id = "modifier"
+text = "Modifier la règle pour l'exclure, puis continuer le même test."
+explanation = "On mélangerait deux versions de la règle."

@@ -1,0 +1,73 @@
+id = "check-fvg-criteres"
+title = "Contrôle : sélectionner un FVG"
+course = "zones-et-entrees"
+lesson = "fvg-criteres"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "comble"
+prompt = "FVG haussier de 1,0832 à 1,0846. Le prix redescend jusqu'à 1,0839. Quelle part est comblée ?"
+kind = "single"
+lesson = "fvg-criteres"
+
+[[question.option]]
+id = "50"
+text = "50 %"
+correct = true
+explanation = "1,0846 − 1,0839 = 7 pips sur 14 : la moitié."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Il faudrait atteindre 1,0832."
+
+[[question.option]]
+id = "0"
+text = "0 %"
+explanation = "Le prix est entré dans l'écart."
+
+[[question]]
+id = "invalide"
+prompt = "Quand un FVG haussier est-il invalidé, selon la convention du parcours ?"
+kind = "single"
+lesson = "fvg-criteres"
+
+[[question.option]]
+id = "cloture"
+text = "Quand une bougie clôture sous sa borne basse."
+correct = true
+explanation = "Oui : une clôture au-delà de la borne opposée."
+
+[[question.option]]
+id = "meche"
+text = "Dès qu'une mèche touche sa borne basse."
+explanation = "Une mèche qui atteint la borne le comble ; seule une clôture au-delà l'invalide."
+
+[[question.option]]
+id = "milieu"
+text = "Dès que le prix passe sous son milieu."
+explanation = "Le milieu est une convention de placement d'ordre, pas un seuil d'invalidation."
+
+[[question]]
+id = "avant"
+prompt = "Pourquoi écrire les critères de sélection avant de regarder le graphique ?"
+kind = "single"
+lesson = "fvg-criteres"
+
+[[question.option]]
+id = "recit"
+text = "Sans cela, chaque mouvement trouve après coup un FVG qui l'« explique »."
+correct = true
+explanation = "Un critère choisi après coup s'adapte au résultat."
+
+[[question.option]]
+id = "precision"
+text = "Pour que les FVG soient plus précis."
+explanation = "Les critères trient ; ils ne rendent pas une zone plus précise."
+
+[[question.option]]
+id = "obligation"
+text = "Parce que le courtier l'exige."
+explanation = "Aucun courtier n'intervient ici."

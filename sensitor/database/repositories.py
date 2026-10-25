@@ -152,6 +152,16 @@ class Store:
                 "SELECT COUNT(*) AS n FROM sessions WHERE user_email = ?", email),
             "workspace": self._count(
                 "SELECT COUNT(*) AS n FROM workspace WHERE user_email = ?", email),
+            "lesson_progress": self._count(
+                "SELECT COUNT(*) AS n FROM lesson_progress WHERE user_email = ?", email),
+            "quiz_attempts": self._count(
+                "SELECT COUNT(*) AS n FROM quiz_attempts WHERE user_email = ?", email),
+            "journal_entries": self._count(
+                "SELECT COUNT(*) AS n FROM journal_entries WHERE user_email = ?", email),
+            "trading_plans": self._count(
+                "SELECT COUNT(*) AS n FROM trading_plans WHERE user_email = ?", email),
+            "trade_reviews": self._count(
+                "SELECT COUNT(*) AS n FROM trade_reviews WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -163,6 +173,15 @@ class Store:
             conn.execute("DELETE FROM trading_accounts WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM portfolios WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM workspace WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM lesson_progress WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM quiz_attempts WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM journal_entries WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM trading_plans WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM trade_reviews WHERE user_email = ?", (email,))
+            # A departing coach's address leaves the answers they gave, which stay with
+            # the members who received them.
+            conn.execute("UPDATE trade_reviews SET coach_email = NULL WHERE coach_email = ?", (email,))
+            conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -176,7 +195,10 @@ class Store:
         """
         email = _email(email)
         return {
-            "user": self.get_user(email),
+            # The credential is not personal data the person needs back, and an
+            # export is a file that gets e-mailed and left in download folders.
+            "user": {k: v for k, v in (self.get_user(email) or {}).items()
+                     if k not in ("password_hash", "failed_logins", "locked_until")} or None,
             "portfolios": [
                 {
                     "portfolio": asdict(portfolio),
@@ -189,8 +211,309 @@ class Store:
                 self.load_workspace(email)),
             "accounts": [asdict(a) for a in self.list_accounts(email)],
             "trades": [t.to_dict() for t in self.list_trades(email)],
+            "lesson_progress": self.completed_lessons(email),
+            "quiz_attempts": self.quiz_attempts(email, limit=100_000),
+            "journal_entries": self.journal_entries(email, limit=100_000),
+            "trading_plan": self.get_trading_plan(email),
+            "trade_reviews": self.review_requests(email),
             "schema_version": SCHEMA_VERSION,
         }
+
+    # ── Academy ──────────────────────────────────────────────────────────────
+    #
+    # Every query below is scoped by `user_email`, like the rest of the store.
+    # There is no method that reads progress or attempts across users.
+
+    def mark_lesson_complete(self, user_email: str, course_id: str, lesson_id: str,
+                             *, version: int = 1) -> None:
+        user_email = _email(user_email)
+        if not user_email or not course_id or not lesson_id:
+            raise ValueError("user_email, course_id and lesson_id are all required")
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            conn.execute(
+                """INSERT INTO lesson_progress
+                     (user_email, course_id, lesson_id, lesson_version, completed_at)
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT(user_email, course_id, lesson_id) DO UPDATE SET
+                     lesson_version = excluded.lesson_version,
+                     completed_at = excluded.completed_at""",
+                (user_email, course_id, lesson_id, int(version), stamp),
+            )
+
+    def unmark_lesson(self, user_email: str, course_id: str, lesson_id: str) -> None:
+        with self._write() as conn:
+            conn.execute(
+                "DELETE FROM lesson_progress WHERE user_email = ? AND course_id = ? "
+                "AND lesson_id = ?", (_email(user_email), course_id, lesson_id))
+
+    def completed_lessons(self, user_email: str,
+                          course_id: str | None = None) -> list[dict]:
+        sql = ("SELECT course_id, lesson_id, lesson_version, completed_at "
+               "FROM lesson_progress WHERE user_email = ?")
+        params: tuple = (_email(user_email),)
+        if course_id:
+            sql += " AND course_id = ?"
+            params += (course_id,)
+        sql += " ORDER BY completed_at, lesson_id"
+        return [dict(r) for r in self._read(sql, params)]
+
+    def record_quiz_attempt(self, user_email: str, quiz_id: str, *, version: int,
+                            correct: int, total: int, passed: bool,
+                            responses: dict) -> int:
+        user_email = _email(user_email)
+        if not user_email or not quiz_id:
+            raise ValueError("user_email and quiz_id are required")
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            cursor = conn.execute(
+                """INSERT INTO quiz_attempts
+                     (user_email, quiz_id, quiz_version, correct, total, passed,
+                      responses, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                   RETURNING id""",
+                (user_email, quiz_id, int(version), int(correct), int(total),
+                 1 if passed else 0, json.dumps(responses, sort_keys=True), stamp),
+            )
+            return int(cursor.fetchone()[0])
+
+    def quiz_attempts(self, user_email: str, quiz_id: str | None = None, *,
+                      limit: int = 50) -> list[dict]:
+        """Newest first. `responses` is decoded; `passed` is a bool."""
+        sql = "SELECT * FROM quiz_attempts WHERE user_email = ?"
+        params: tuple = (_email(user_email),)
+        if quiz_id:
+            sql += " AND quiz_id = ?"
+            params += (quiz_id,)
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
+        params += (int(limit),)
+        rows = []
+        for row in self._read(sql, params):
+            item = dict(row)
+            item["responses"] = json.loads(item["responses"] or "{}")
+            item["passed"] = bool(item["passed"])
+            rows.append(item)
+        return rows
+
+    # ── Reflection journal ───────────────────────────────────────────────────
+    #
+    # Private notes. Every read and every delete carries the owner's address in
+    # its WHERE clause: an entry id on its own never reaches a row, so a guessed
+    # or replayed id from another member matches nothing.
+
+    def add_journal_entry(self, user_email: str, *, kind: str, body: str,
+                          mood: int | None = None, prompt: str = "",
+                          checks: list[str] | None = None) -> int:
+        user_email = _email(user_email)
+        if not user_email:
+            raise ValueError("user_email is required")
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            cursor = conn.execute(
+                """INSERT INTO journal_entries
+                     (user_email, kind, mood, prompt, body, checks, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
+                   RETURNING id""",
+                (user_email, kind, mood, prompt or "", body,
+                 None if checks is None else json.dumps(list(checks)), _now()),
+            )
+            return int(cursor.fetchone()[0])
+
+    def journal_entries(self, user_email: str, kind: str | None = None, *,
+                        limit: int = 200) -> list[dict]:
+        """Newest first. `checks` is decoded: a list, or None when no routine was offered."""
+        sql = ("SELECT id, kind, mood, prompt, body, checks, created_at FROM journal_entries "
+               "WHERE user_email = ?")
+        params: tuple = (_email(user_email),)
+        if kind:
+            sql += " AND kind = ?"
+            params += (kind,)
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
+        params += (int(limit),)
+        rows = []
+        for row in self._read(sql, params):
+            item = dict(row)
+            item["checks"] = None if item["checks"] is None else json.loads(item["checks"])
+            rows.append(item)
+        return rows
+
+    def delete_journal_entry(self, user_email: str, entry_id: int) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(
+                "DELETE FROM journal_entries WHERE user_email = ? AND id = ?",
+                (_email(user_email), int(entry_id)))
+            return cursor.rowcount > 0
+
+    # ── Trading plan and review requests ─────────────────────────────────────
+    #
+    # The plan and the requests are a member's own, read through methods scoped
+    # by their address like everything else. The one exception is deliberate and
+    # narrow: a coach reads the requests members chose to send, and nothing
+    # else. Those methods check the role inside the same query, so a caller that
+    # forgot to check it still gets nothing.
+
+    def get_trading_plan(self, user_email: str) -> dict | None:
+        rows = self._read("SELECT plan FROM trading_plans WHERE user_email = ?",
+                          (_email(user_email),))
+        return json.loads(rows[0]["plan"]) if rows else None
+
+    def save_trading_plan(self, user_email: str, plan: dict) -> None:
+        user_email = _email(user_email)
+        if not user_email:
+            raise ValueError("user_email is required")
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            conn.execute(
+                """INSERT INTO trading_plans (user_email, plan, updated_at) VALUES (?, ?, ?)
+                   ON CONFLICT(user_email) DO UPDATE SET plan = excluded.plan,
+                     updated_at = excluded.updated_at""",
+                (user_email, json.dumps(plan, ensure_ascii=False), _now()))
+
+    def create_review_request(self, user_email: str, *, trade_id: str, trade: dict,
+                              auto_review: dict, plan: dict | None, question: str) -> int:
+        user_email = _email(user_email)
+        if not user_email:
+            raise ValueError("user_email is required")
+        with self._write() as conn:
+            self._ensure_user(conn, user_email)
+            cursor = conn.execute(
+                """INSERT INTO trade_reviews
+                     (user_email, trade_id, trade, auto_review, plan, question, status, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
+                   RETURNING id""",
+                (user_email, str(trade_id), json.dumps(trade, ensure_ascii=False, default=str),
+                 json.dumps(auto_review, ensure_ascii=False),
+                 None if plan is None else json.dumps(plan, ensure_ascii=False), question, _now()))
+            return int(cursor.fetchone()[0])
+
+    @staticmethod
+    def _review_row(row) -> dict:
+        item = dict(row)
+        for key in ("trade", "auto_review", "plan", "feedback"):
+            if key in item:
+                item[key] = None if item[key] is None else json.loads(item[key])
+        return item
+
+    def review_requests(self, user_email: str) -> list[dict]:
+        """A member's own requests, newest first. The coach's address is not returned."""
+        rows = self._read(
+            "SELECT id, trade_id, trade, auto_review, plan, question, status, feedback, "
+            "created_at, answered_at, seen_at FROM trade_reviews WHERE user_email = ? "
+            "ORDER BY created_at DESC, id DESC", (_email(user_email),))
+        return [self._review_row(r) for r in rows]
+
+    def count_review_requests(self, user_email: str, since: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM trade_reviews WHERE user_email = ? "
+                           "AND created_at >= ?", _email(user_email), since)
+
+    def open_review_for_trade(self, user_email: str, trade_id: str) -> int | None:
+        rows = self._read("SELECT id FROM trade_reviews WHERE user_email = ? AND trade_id = ? "
+                          "AND status = 'pending'", (_email(user_email), str(trade_id)))
+        return int(rows[0]["id"]) if rows else None
+
+    def withdraw_review_request(self, user_email: str, review_id: int) -> bool:
+        """A member may withdraw a request the coach has not answered yet."""
+        with self._write() as conn:
+            cursor = conn.execute(
+                "DELETE FROM trade_reviews WHERE user_email = ? AND id = ? AND status = 'pending'",
+                (_email(user_email), int(review_id)))
+            return cursor.rowcount > 0
+
+    def mark_review_seen(self, user_email: str, review_id: int) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE trade_reviews SET seen_at = ? WHERE user_email = ? AND id = ? "
+                         "AND status = 'answered' AND seen_at IS NULL",
+                         (_now(), _email(user_email), int(review_id)))
+
+    def unseen_reviews(self, user_email: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM trade_reviews WHERE user_email = ? "
+                           "AND status = 'answered' AND seen_at IS NULL", _email(user_email))
+
+    # Coaches.
+
+    def set_role(self, email: str, role: str) -> bool:
+        if role not in ("", "coach"):
+            raise ValueError("role must be '' or 'coach'")
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE users SET role = ?, updated_at = ? WHERE email = ?",
+                                  (role, _now(), _email(email)))
+            return cursor.rowcount > 0
+
+    def is_coach(self, email: str) -> bool:
+        return bool(self._count("SELECT COUNT(*) AS n FROM users WHERE email = ? AND role = 'coach'",
+                                _email(email)))
+
+    def coach_queue(self, email: str, status: str = "pending", *, limit: int = 200) -> list[dict]:
+        """
+        The requests members sent, for the coach `email`: oldest pending first, or the latest
+        answered. Empty for anyone who is not a coach. The member is returned as an address only so the
+        page can derive a pseudonym; the page never shows it.
+        """
+        if status not in ("pending", "answered"):
+            raise ValueError("unknown status")
+        order = "r.created_at ASC, r.id ASC" if status == "pending" else "r.answered_at DESC, r.id DESC"
+        rows = self._read(
+            "SELECT r.id, r.user_email, r.trade_id, r.trade, r.auto_review, r.plan, r.question, "
+            "r.status, r.feedback, r.created_at, r.answered_at FROM trade_reviews r "
+            "WHERE r.status = ? AND EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach') "
+            f"ORDER BY {order} LIMIT ?", (status, _email(email), int(limit)))
+        return [self._review_row(r) for r in rows]
+
+    def answer_review(self, email: str, review_id: int, feedback: dict) -> bool:
+        """Record a coach's answer once. False when not a coach, or already answered."""
+        coach_email = _email(email)
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE trade_reviews SET status = 'answered', coach_email = ?, feedback = ?, "
+                "answered_at = ? WHERE id = ? AND status = 'pending' "
+                "AND EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach')",
+                (coach_email, json.dumps(feedback, ensure_ascii=False), _now(), int(review_id),
+                 coach_email))
+            return cursor.rowcount > 0
+
+    # ── Single-use account tokens ────────────────────────────────────────────
+
+    def create_account_token(self, email: str, fingerprint: str, *, purpose: str,
+                             expires_at: str) -> None:
+        """
+        Record a new token and retire every unused one of the same purpose.
+
+        Only the latest link sent works: asking twice for a reset must not leave
+        two live links in someone's mailbox.
+        """
+        email = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            self._ensure_user(conn, email)
+            conn.execute(
+                "UPDATE account_tokens SET used_at = ? WHERE user_email = ? "
+                "AND purpose = ? AND used_at IS NULL", (stamp, email, purpose))
+            conn.execute(
+                "INSERT INTO account_tokens (fingerprint, user_email, purpose, "
+                "created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+                (fingerprint, email, purpose, stamp, expires_at))
+
+    def account_token(self, fingerprint: str, purpose: str) -> dict | None:
+        """The token row if it exists for this purpose. Expiry is the caller's call."""
+        rows = self._read(
+            "SELECT * FROM account_tokens WHERE fingerprint = ? AND purpose = ?",
+            (fingerprint, purpose))
+        return dict(rows[0]) if rows else None
+
+    def use_account_token(self, fingerprint: str) -> bool:
+        """Mark a token used. False if it was already used: a link works once."""
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE account_tokens SET used_at = ? WHERE fingerprint = ? "
+                "AND used_at IS NULL", (_now(), fingerprint))
+            return cursor.rowcount == 1
+
+    def set_email_verified(self, email: str) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE users SET email_verified_at = ?, updated_at = ? "
+                         "WHERE email = ?", (_now(), _now(), _email(email)))
 
     # ── Credentials ──────────────────────────────────────────────────────────
 

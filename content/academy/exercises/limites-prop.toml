@@ -1,0 +1,50 @@
+id = "limites-prop"
+title = "Les limites d'un compte de challenge"
+context = """
+Un compte de challenge de **100 000 $** impose deux règles : une **perte journalière** maximale de **5 %** du solde de début de journée, et une **perte maximale** de **10 %** du solde initial. Le trader risque **1 %** du solde initial par trade, soit 1 000 $, et chaque perte touche le stop.
+
+Règles fictives, construites pour l'exercice : lisez toujours celles de votre propre compte.
+"""
+conclusion = """
+Avec 1 % par trade, il faut cinq pertes d'affilée pour atteindre la limite d'une journée et dix au total pour perdre le compte. Doubler le risque pour se refaire ramène la limite journalière à trois pertes : la règle qui protège le compte est atteinte deux fois plus vite.
+"""
+
+[[step]]
+id = "limite-jour"
+prompt = "À combien de dollars correspond la limite de perte journalière, un jour où le solde de départ est de 100 000 $ ?"
+unit = "$"
+answer = 5000
+tolerance = 0.01
+solution = "100 000 × 5 % = **5 000 $**."
+
+[[step]]
+id = "pertes-1pct"
+prompt = "Combien de pertes consécutives à 1 000 $ atteignent cette limite ?"
+unit = "pertes"
+answer = 5
+tolerance = 0
+solution = "5 000 ÷ 1 000 = **5 pertes**. La cinquième atteint exactement la limite."
+
+[[step]]
+id = "pertes-demi"
+prompt = "Et si le trader risquait 0,5 % par trade (500 $) ?"
+unit = "pertes"
+answer = 10
+tolerance = 0
+solution = "5 000 ÷ 500 = **10 pertes**. Diviser le risque par deux double la marge de la journée."
+
+[[step]]
+id = "reste-max"
+prompt = "Après une journée de cinq pertes, le solde est de 95 000 $. Combien de pertes de 1 000 $ restent avant la perte maximale ?"
+unit = "pertes"
+answer = 5
+tolerance = 0
+solution = "La perte maximale fixe le plancher à 100 000 − 10 000 = 90 000 $. Il reste 95 000 − 90 000 = 5 000 $, soit **5 pertes**."
+
+[[step]]
+id = "pertes-2pct"
+prompt = "Pour se refaire, le trader passe à 2 % (2 000 $) par trade. Combien de pertes consécutives suffisent à franchir la limite journalière de 5 000 $ ?"
+unit = "pertes"
+answer = 3
+tolerance = 0
+solution = "Deux pertes font 4 000 $, la troisième porte la perte à 6 000 $ : **3 pertes** suffisent, au lieu de cinq."

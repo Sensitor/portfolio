@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading import performance as P
 from ..trading.analytics import MIN_MEANINGFUL_SAMPLE
 from ..ui import charts as C
@@ -27,6 +27,7 @@ from ..ui.components import (
     section, spacer, stat_card,
 )
 from ..ui.themes import INK_FAINT, INK_MUTED, PALETTE, PLOTLY_CONFIG, STATUS, html
+from ._shared import chart_with_reading
 from ._trading_shared import (
     account_selector, duration_text, filter_panel, guard, period_selector,
     pf_text, r_text, sample_pill, trading_context,
@@ -67,7 +68,7 @@ def render_trading_analytics(ctx=None) -> None:
 # =============================================================================
 
 def _dna_block(tctx, lang) -> None:
-    section(tr("trading_dna", lang).upper(), tr("trading_dna_sub", lang))
+    section(tr("trading_dna", lang), tr("trading_dna_sub", lang))
 
     currency = tctx.currency
     symbols = tctx.breakdown("symbol")
@@ -82,11 +83,11 @@ def _dna_block(tctx, lang) -> None:
         total = sum(r["n"] for r in symbols) or 1
         metric_card(
             tr("most_traded", lang),
-            most["label"] if most else "—",
+            most["label"] if most else na(lang),
             bar=(most["n"] / total) if most else None,
             bar_color=PALETTE[0],
             caption=(f"{most['n']} {tr('trades', lang).lower()} · "
-                     f"{pct(most['n'] / total, 0)}" if most else "—"),
+                     f"{pct(most['n'] / total, 0)}" if most else na(lang)),
             compact=True,
         )
 
@@ -106,7 +107,7 @@ def _dna_block(tctx, lang) -> None:
         median_risk = risk.get("median_risk")
         metric_card(
             tr("typical_risk", lang),
-            money(median_risk, currency, decimals=2) if median_risk is not None else "—",
+            money(median_risk, currency, decimals=2) if median_risk is not None else na(lang),
             bar=risk.get("coverage"),
             bar_color=STATUS["good"] if (risk.get("coverage") or 0) >= 0.9
             else STATUS["warning"],
@@ -151,7 +152,7 @@ def _best_card(label, rows, currency, lang) -> None:
     """
     winner = P.best(rows, "expectancy")
     if not winner:
-        metric_card(label, "—", caption=tr("not_enough_data", lang), compact=True)
+        metric_card(label, na(lang), caption=tr("not_enough_data", lang), compact=True)
         return
 
     span = max(abs(r["expectancy"]) for r in rows if r["expectancy"] is not None) or 1
@@ -170,7 +171,7 @@ def _best_card(label, rows, currency, lang) -> None:
 # =============================================================================
 
 def _slicer_block(tctx, lang) -> None:
-    section(tr("performance_by", lang).upper())
+    section(tr("performance_by", lang))
 
     dim_labels = [tr(f"d_{d}", lang) for d in DIMENSIONS]
     metric_labels = [tr(_metric_key(m), lang) for m in METRICS]
@@ -191,9 +192,11 @@ def _slicer_block(tctx, lang) -> None:
         note(tr("not_enough_data", lang))
         return
 
-    st.plotly_chart(
+    chart_with_reading(
         C.trading_breakdown(rows, metric=metric, currency=tctx.currency, lang=lang),
-        width="stretch", config=PLOTLY_CONFIG, key=f"tan_bd_{dimension}_{metric}",
+        f"tan_bd_{dimension}_{metric}",
+        _breakdown_reading(rows, metric, tctx.currency, lang),
+        lang, foot=tr("reading_foot_small", lang),
     )
 
     _breakdown_table(rows, dim_choice, tctx, lang)
@@ -213,10 +216,10 @@ def _breakdown_table(rows, dim_label, tctx, lang) -> None:
         table.append([
             row["label"],
             (str(row["n"]), float(row["n"])),
-            pct(row["win_rate"], 0) if row["win_rate"] is not None else "—",
+            pct(row["win_rate"], 0) if row["win_rate"] is not None else na(lang),
             money(row["net_pnl"], currency),
             money(row["expectancy"], currency, decimals=2)
-            if row["expectancy"] is not None else "—",
+            if row["expectancy"] is not None else na(lang),
             pf_text(row["profit_factor"], lang),
             r_text(row["avg_r"]),
         ])
@@ -241,7 +244,7 @@ def _comparison_block(tctx, lang) -> None:
     if not concentration:
         return
 
-    section(tr("where_the_result_comes_from", lang).upper())
+    section(tr("where_the_result_comes_from", lang))
 
     profit_share = concentration.get("profit_share")
     busiest_share = concentration.get("busiest_share")
@@ -250,11 +253,11 @@ def _comparison_block(tctx, lang) -> None:
     with c1:
         metric_card(
             tr("top_contributor_share", lang),
-            pct(profit_share, 0) if profit_share is not None else "—",
+            pct(profit_share, 0) if profit_share is not None else na(lang),
             bar=min(max(profit_share or 0, 0), 1),
             bar_color=(STATUS["warning"] if (profit_share or 0) >= 0.6
                        else STATUS["neutral"]),
-            caption=(f"{concentration.get('most_profitable', '—')} · "
+            caption=(f"{concentration.get('most_profitable', na(lang))} · "
                      f"{concentration.get('reliable_buckets', 0)}/"
                      f"{concentration.get('n_buckets', 0)} "
                      f"{tr('reliable_buckets', lang)}"),
@@ -263,11 +266,11 @@ def _comparison_block(tctx, lang) -> None:
         spacer(10)
         metric_card(
             tr("busiest_instrument", lang),
-            concentration.get("busiest", "—"),
+            concentration.get("busiest", na(lang)),
             bar=min(max(busiest_share or 0, 0), 1),
             bar_color=PALETTE[0],
             caption=(f"{pct(busiest_share, 0)} {tr('of_trades_share', lang)}"
-                     if busiest_share is not None else "—"),
+                     if busiest_share is not None else na(lang)),
             compact=True,
         )
         # Concentration is stated, never judged. One instrument carrying most of
@@ -279,7 +282,7 @@ def _comparison_block(tctx, lang) -> None:
                 "warning",
                 tr("concentrated_result", lang),
                 tr("concentrated_result_body", lang).format(
-                    label=concentration.get("most_profitable", "—"),
+                    label=concentration.get("most_profitable", na(lang)),
                     share=f"{profit_share * 100:.0f}%"),
                 footnote=tr("concentrated_footnote", lang),
             )
@@ -293,3 +296,27 @@ def _comparison_block(tctx, lang) -> None:
             )
         else:
             note(tr("not_enough_data", lang))
+
+
+def _breakdown_reading(rows, metric: str, currency: str, lang: str) -> list[str]:
+    """The best and weakest group on the chosen measure, with their sample sizes."""
+    rows = [r for r in rows if r.get(metric) is not None]
+    if not rows:
+        return []
+
+    def fmt(value):
+        if metric in ("net_pnl", "expectancy", "avg_pnl"):
+            return money(value, currency, decimals=2)
+        if metric == "win_rate":
+            return pct(value, 0)
+        return f"{value:+.2f}"
+
+    best = max(rows, key=lambda r: r[metric])
+    worst = min(rows, key=lambda r: r[metric])
+    reliable = sum(1 for r in rows if r.get("reliable"))
+    return [
+        tr("rd_tan_best", lang).format(label=best["label"], v=fmt(best[metric]), n=best["n"]),
+        tr("rd_tan_worst", lang).format(label=worst["label"], v=fmt(worst[metric]), n=worst["n"])
+        if worst is not best else "",
+        tr("rd_tan_reliable", lang).format(k=reliable, n=len(rows)),
+    ]

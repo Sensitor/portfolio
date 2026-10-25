@@ -1,0 +1,228 @@
+id = "investir-validation"
+title = "Quiz de validation : Investir dans la crypto avec méthode"
+course = "investir-avec-methode"
+lesson = "recap-investir"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "conditions"
+prompt = "Laquelle n'est pas une condition à remplir avant d'investir dans un actif volatil ?"
+kind = "single"
+lesson = "avant-d-investir"
+
+[[question.option]]
+id = "tendance"
+text = "Être sûr que le marché va monter."
+correct = true
+explanation = "Exact : personne ne peut l'être."
+
+[[question.option]]
+id = "precaution"
+text = "Avoir une épargne de précaution."
+explanation = "C'est une condition."
+
+[[question.option]]
+id = "horizon"
+text = "Avoir un horizon long."
+explanation = "C'est une condition."
+
+[[question]]
+id = "part20"
+prompt = "Avec les hypothèses de la leçon, quelle volatilité pour 20 % de crypto ?"
+kind = "single"
+lesson = "allocation-et-taille"
+
+[[question.option]]
+id = "157"
+text = "Environ 15,7 %"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "20"
+text = "20 %"
+explanation = "La corrélation et le reste du patrimoine comptent."
+
+[[question.option]]
+id = "60"
+text = "60 %"
+explanation = "C'est la volatilité de la crypto seule."
+
+[[question]]
+id = "coeur"
+prompt = "Dans la répartition cœur, satellite, liquidités, que contient le cœur ?"
+kind = "single"
+lesson = "allocation-et-taille"
+
+[[question.option]]
+id = "btc"
+text = "Bitcoin, l'actif au plus long historique et à l'offre la plus vérifiable."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "nouveaux"
+text = "Les jetons les plus récents."
+explanation = "Ils vont dans le satellite."
+
+[[question.option]]
+id = "stable"
+text = "Des stablecoins."
+explanation = "Ils vont dans les liquidités."
+
+[[question]]
+id = "dca"
+prompt = "Pourquoi le prix de revient du DCA est-il inférieur ou égal à la moyenne des prix ?"
+kind = "single"
+lesson = "investissement-progressif"
+
+[[question.option]]
+id = "unites"
+text = "Parce que la même somme achète plus d'unités quand le prix est bas."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "prevision"
+text = "Parce qu'il prévoit les baisses."
+explanation = "Il ne prévoit rien."
+
+[[question.option]]
+id = "frais"
+text = "Parce qu'il évite les frais."
+explanation = "Ce n'est pas la raison."
+
+[[question]]
+id = "va"
+prompt = "Pourquoi la valeur cible demande-t-elle une réserve de liquidités ?"
+kind = "single"
+lesson = "valeur-cible"
+
+[[question.option]]
+id = "baisse"
+text = "Parce qu'une forte baisse peut demander un versement bien plus gros que d'habitude."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "frais"
+text = "Pour payer les frais."
+explanation = "C'est pour les gros versements."
+
+[[question.option]]
+id = "rien"
+text = "Elle n'en demande pas."
+explanation = "Elle en demande."
+
+[[question]]
+id = "derive"
+prompt = "Pourquoi rééquilibrer après une forte hausse ?"
+kind = "single"
+lesson = "reequilibrer"
+
+[[question.option]]
+id = "risque"
+text = "Parce que la part qui grandit, c'est le risque qui grandit."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "gain"
+text = "Pour encaisser un gain garanti."
+explanation = "Il n'y a rien de garanti."
+
+[[question.option]]
+id = "jamais"
+text = "Il ne faut pas rééquilibrer après une hausse."
+explanation = "C'est l'erreur fréquente décrite dans la leçon."
+
+[[question]]
+id = "rattrapage"
+prompt = "Après une baisse de 20,5 %, quelle hausse faut-il pour revenir au départ ?"
+kind = "single"
+lesson = "scenarios-defavorables"
+
+[[question.option]]
+id = "258"
+text = "Environ 25,8 %"
+correct = true
+explanation = "Oui : 1 ÷ 0,795 − 1."
+
+[[question.option]]
+id = "205"
+text = "20,5 %"
+explanation = "Il faut plus que la baisse."
+
+[[question.option]]
+id = "41"
+text = "41 %"
+explanation = "C'est trop."
+
+[[question]]
+id = "ecrire"
+prompt = "Quand écrire la conduite à tenir pendant une baisse ?"
+kind = "single"
+lesson = "scenarios-defavorables"
+
+[[question.option]]
+id = "avant"
+text = "Avant, au calme."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "pendant"
+text = "Pendant, quand on voit l'ampleur de la baisse."
+explanation = "C'est le moment où l'émotion décide."
+
+[[question.option]]
+id = "apres"
+text = "Après, pour en tirer les leçons."
+explanation = "Il faut l'avoir avant."
+
+[[question]]
+id = "305"
+prompt = "Le total des cessions de l'année est de 280 €. Imposable ?"
+kind = "single"
+lesson = "fiscalite-crypto"
+
+[[question.option]]
+id = "non"
+text = "Non : sous 305 € de cessions annuelles, c'est exonéré."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Un seuil d'exonération existe."
+
+[[question.option]]
+id = "moitie"
+text = "Oui, à moitié."
+explanation = "Il n'y a pas d'imposition partielle."
+
+[[question]]
+id = "taux"
+prompt = "Où vérifier le taux d'imposition applicable à une année donnée ?"
+kind = "single"
+lesson = "fiscalite-crypto"
+
+[[question.option]]
+id = "impots"
+text = "Sur impots.gouv.fr."
+correct = true
+explanation = "Oui : le taux a changé ces dernières années."
+
+[[question.option]]
+id = "forum"
+text = "Sur un forum crypto."
+explanation = "Ce n'est pas une source officielle."
+
+[[question.option]]
+id = "jamais"
+text = "Inutile, il ne change jamais."
+explanation = "Il a changé."

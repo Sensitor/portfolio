@@ -1,0 +1,62 @@
+id = "reperer-swings"
+title = "Appliquer la règle des deux bougies"
+context = """
+Voici neuf bougies EURUSD consécutives en H1, dans l'ordre. Appliquez la règle : une bougie est un sommet de swing si son plus haut est strictement supérieur aux plus hauts des deux bougies précédentes et des deux suivantes ; un creux de swing si son plus bas est strictement inférieur aux plus bas des deux précédentes et des deux suivantes.
+
+| Bougie | Plus haut | Plus bas |
+|---|---|---|
+| 1 | 1,0810 | 1,0791 |
+| 2 | 1,0824 | 1,0802 |
+| 3 | 1,0841 | 1,0818 |
+| 4 | 1,0835 | 1,0812 |
+| 5 | 1,0827 | 1,0801 |
+| 6 | 1,0819 | 1,0789 |
+| 7 | 1,0806 | 1,0776 |
+| 8 | 1,0814 | 1,0783 |
+| 9 | 1,0828 | 1,0797 |
+
+Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+La série contient exactement un sommet et un creux de swing. Les bougies 1, 2, 8 et 9 ne peuvent pas en être : il leur manque deux voisines d'un côté. Et le creux de la bougie 7, visible dès sa clôture, n'existait pas encore pour la règle avant la clôture de la bougie 9.
+"""
+
+[[step]]
+id = "sommet-bougie"
+prompt = "Quelle bougie est un sommet de swing ? (son numéro)"
+unit = "n°"
+answer = 3
+tolerance = 0
+solution = "La **bougie 3** : son plus haut, 1,0841, dépasse ceux des bougies 1 et 2 (1,0810 et 1,0824) et ceux des bougies 4 et 5 (1,0835 et 1,0827). La bougie 4 n'en est pas un : la bougie 3, juste avant elle, monte plus haut."
+
+[[step]]
+id = "sommet-prix"
+prompt = "À quel prix se situe ce sommet de swing ?"
+unit = "prix"
+answer = 1.0841
+tolerance = 0.00001
+solution = "**1,0841**, le plus haut de la bougie 3. La règle porte sur les plus hauts, mèches comprises."
+
+[[step]]
+id = "creux-bougie"
+prompt = "Quelle bougie est un creux de swing ? (son numéro)"
+unit = "n°"
+answer = 7
+tolerance = 0
+solution = "La **bougie 7** : son plus bas, 1,0776, est inférieur à ceux des bougies 5 et 6 (1,0801 et 1,0789) et à ceux des bougies 8 et 9 (1,0783 et 1,0797). La bougie 6 n'en est pas un : la bougie 7 descend plus bas."
+
+[[step]]
+id = "confirmation"
+prompt = "À la clôture de quelle bougie ce creux est-il confirmé par la règle ? (son numéro)"
+unit = "n°"
+answer = 9
+tolerance = 0
+solution = "À la clôture de la **bougie 9**, deuxième bougie après la bougie 7. Avant cela, la bougie 8 ou la bougie 9 aurait pu descendre plus bas et ôter à la bougie 7 son statut de creux."
+
+[[step]]
+id = "amplitude"
+prompt = "Quelle est l'amplitude du mouvement entre ce sommet et ce creux, en pips ?"
+unit = "pips"
+answer = 65
+tolerance = 0.01
+solution = "1,0841 − 1,0776 = 0,0065, soit **65 pips**."

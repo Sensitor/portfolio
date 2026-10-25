@@ -1,0 +1,73 @@
+id = "check-reserve-de-valeur"
+title = "Contrôle : la réserve de valeur"
+course = "bitcoin-reserve-de-valeur"
+lesson = "reserve-de-valeur"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "def"
+prompt = "Qu'est-ce qui distingue une réserve de valeur d'un placement ?"
+kind = "single"
+lesson = "reserve-de-valeur"
+
+[[question.option]]
+id = "revenu"
+text = "Une réserve de valeur ne rapporte pas de revenu : on attend seulement qu'elle conserve sa valeur."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "risque"
+text = "Une réserve de valeur est sans risque."
+explanation = "Aucune n'est parfaite, toutes ont des risques."
+
+[[question.option]]
+id = "rien"
+text = "Rien, ce sont des synonymes."
+explanation = "Un placement rapporte un revenu en échange d'un risque."
+
+[[question]]
+id = "rarete"
+prompt = "La rareté suffit-elle à donner de la valeur ?"
+kind = "single"
+lesson = "reserve-de-valeur"
+
+[[question.option]]
+id = "non"
+text = "Non : il faut aussi que d'autres veuillent acheter l'actif."
+correct = true
+explanation = "Oui : la rareté est un fait, la demande ne l'est pas."
+
+[[question.option]]
+id = "oui"
+text = "Oui, tout ce qui est rare a de la valeur."
+explanation = "Un objet rare que personne ne veut ne vaut rien."
+
+[[question.option]]
+id = "jamais"
+text = "Non, la rareté n'a aucun rôle."
+explanation = "Elle compte, mais ne suffit pas."
+
+[[question]]
+id = "examen"
+prompt = "Qu'est-ce qui se mesure, dans la thèse de Bitcoin réserve de valeur ?"
+kind = "single"
+lesson = "reserve-de-valeur"
+
+[[question.option]]
+id = "offre"
+text = "Son offre, sa création monétaire, son rapport stock-flux."
+correct = true
+explanation = "Oui ; sa valeur future se débat."
+
+[[question.option]]
+id = "prix"
+text = "Son prix dans dix ans."
+explanation = "Il ne se mesure pas à l'avance."
+
+[[question.option]]
+id = "adoption"
+text = "Son adoption future."
+explanation = "C'est une hypothèse, pas une mesure."

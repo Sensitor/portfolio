@@ -1,0 +1,33 @@
+id = "metriques-on-chain"
+path = "altcoins-analyse"
+title = "Lire les métriques on-chain de Bitcoin"
+summary = "Sept leçons et une quinzaine de graphiques pour lire ce que la chaîne Bitcoin dit d'elle-même, calculés par Sensitor sur un échantillon d'un bloc par jour depuis 2009 : l'activité, les frais et le budget de sécurité, l'espace de bloc, le minage et la concentration des pools, puis les indicateurs fondés sur le prix, expliqués sur un exemple construit."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Distinguer une donnée on-chain mesurée, une donnée estimée et une donnée qui dépend du prix.",
+  "Lire l'activité, les frais, le remplissage des blocs et le revenu des mineurs sur des séries calculées depuis la chaîne.",
+  "Mesurer la concentration du minage par pool.",
+  "Expliquer le prix réalisé, le MVRV et le NUPL, et leurs limites.",
+]
+prerequisites = ["Bitcoin : origines et fonctionnement"]
+final_quiz = "on-chain-validation"
+
+[[module]]
+id = "lire"
+title = "Lire la chaîne"
+summary = "Ce qu'est une donnée on-chain, et ce que l'on peut en tirer sans aucune donnée de prix."
+lessons = ["donnees-on-chain", "activite-reseau"]
+
+[[module]]
+id = "economie"
+title = "L'économie du réseau"
+summary = "Les frais, l'espace de bloc et le minage : qui paie, combien, et qui produit les blocs."
+lessons = ["frais-budget-securite", "espace-de-bloc", "minage-et-pools"]
+
+[[module]]
+id = "prix"
+title = "Les indicateurs fondés sur le prix"
+summary = "Prix réalisé, MVRV, NUPL : ce qu'ils mesurent, sur un exemple construit, puis le quiz de validation."
+lessons = ["indicateurs-de-prix", "recap-on-chain"]

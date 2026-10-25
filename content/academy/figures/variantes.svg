@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Tester beaucoup de variantes</title>
+<desc id="d">Un histogramme : la chance qu'au moins une variante sans avantage paraisse significative passe de 5 % pour une variante à 64,2 % pour vingt et 99,4 % pour cent.</desc>
+<line x1="80" y1="236.0" x2="610" y2="236.0" stroke="#5b646b"/>
+<line x1="80" y1="189.5" x2="610" y2="189.5" stroke="#d9d5cb"/>
+<text x="72" y="193.5" text-anchor="end" font-size="10.5" fill="#5b646b">25 %</text>
+<line x1="80" y1="143.0" x2="610" y2="143.0" stroke="#d9d5cb"/>
+<text x="72" y="147.0" text-anchor="end" font-size="10.5" fill="#5b646b">50 %</text>
+<line x1="80" y1="96.5" x2="610" y2="96.5" stroke="#d9d5cb"/>
+<text x="72" y="100.5" text-anchor="end" font-size="10.5" fill="#5b646b">75 %</text>
+<line x1="80" y1="50.0" x2="610" y2="50.0" stroke="#d9d5cb"/>
+<text x="72" y="54.0" text-anchor="end" font-size="10.5" fill="#5b646b">100 %</text>
+<rect x="104" y="226.7" width="50" height="9.3" fill="#86672f" opacity=".8"/>
+<text x="129" y="220.7" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">5,0 %</text>
+<text x="129" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">1 variante</text>
+<rect x="190" y="193.9" width="50" height="42.1" fill="#86672f" opacity=".8"/>
+<text x="215" y="187.9" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">22,6 %</text>
+<text x="215" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">5 variantes</text>
+<rect x="276" y="161.4" width="50" height="74.6" fill="#86672f" opacity=".8"/>
+<text x="301" y="155.4" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">40,1 %</text>
+<text x="301" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">10 variantes</text>
+<rect x="362" y="116.7" width="50" height="119.3" fill="#86672f" opacity=".8"/>
+<text x="387" y="110.7" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">64,2 %</text>
+<text x="387" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">20 variantes</text>
+<rect x="448" y="64.3" width="50" height="171.7" fill="#86672f" opacity=".8"/>
+<text x="473" y="58.3" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">92,3 %</text>
+<text x="473" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">50 variantes</text>
+<rect x="534" y="51.1" width="50" height="184.9" fill="#86672f" opacity=".8"/>
+<text x="559" y="45.1" text-anchor="middle" font-size="12" font-weight="700" fill="#86672f">99,4 %</text>
+<text x="559" y="252.0" text-anchor="middle" font-size="11" fill="#5b646b">100 variantes</text>
+<text x="80" y="30" font-size="12" fill="#1b2733">Chance qu'au moins une variante sans aucun avantage paraisse significative (seuil 5 %)</text>
+<text x="30" y="282" font-size="11" fill="#7b8389">Tests indépendants. Plus on essaie de variantes, plus la meilleure doit son résultat au hasard.</text>
+</svg>

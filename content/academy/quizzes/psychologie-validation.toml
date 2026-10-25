@@ -1,0 +1,229 @@
+id = "psychologie-validation"
+title = "Quiz de validation : Décider sous incertitude"
+course = "decider-sous-incertitude"
+lesson = "recap-psychologie"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "decision"
+prompt = "Un trader entre sans invalidation, avec 3 % du compte, et gagne. Comment juger ce trade ?"
+kind = "single"
+lesson = "processus-resultat"
+
+[[question.option]]
+id = "mauvaise"
+text = "Une mauvaise décision récompensée."
+correct = true
+explanation = "Le résultat ne change pas la qualité de la décision."
+
+[[question.option]]
+id = "bonne"
+text = "Une bonne décision, puisqu'elle a gagné."
+explanation = "C'est juger sur le résultat."
+
+[[question.option]]
+id = "neutre"
+text = "On ne peut rien en dire."
+explanation = "On peut juger la décision : elle ne respectait pas les règles."
+
+[[question]]
+id = "serie"
+prompt = "Une méthode à 50 % de réussite enchaîne cinq pertes. Qu'en conclure ?"
+kind = "single"
+lesson = "processus-resultat"
+
+[[question.option]]
+id = "rien"
+text = "Presque rien : une telle série est probable sur un an d'activité."
+correct = true
+explanation = "Sur 100 trades, sa probabilité est d'environ 81 %."
+
+[[question.option]]
+id = "cassee"
+text = "La méthode est cassée."
+explanation = "Cinq pertes ne permettent pas de le dire."
+
+[[question.option]]
+id = "doubler"
+text = "Il faut doubler la taille, le gain va venir."
+explanation = "Les trades sont indépendants : rien ne « doit » venir."
+
+[[question]]
+id = "recence"
+prompt = "2 gains sur les 5 derniers trades. Le vrai taux de réussite peut-il être de 70 % ?"
+kind = "single"
+lesson = "biais-recence"
+
+[[question.option]]
+id = "oui"
+text = "Oui : l'intervalle à 95 % va de 12 % à 77 %."
+correct = true
+explanation = "Cinq trades sont compatibles avec presque n'importe quelle méthode."
+
+[[question.option]]
+id = "non"
+text = "Non, il est de 40 %."
+explanation = "40 % est l'observation sur cinq trades."
+
+[[question.option]]
+id = "jamais"
+text = "Non, un taux de 70 % aurait donné au moins 3 gains."
+explanation = "Ce n'est pas garanti sur un si petit échantillon."
+
+[[question]]
+id = "confirmation"
+prompt = "Que faut-il écrire en premier pour limiter le biais de confirmation ?"
+kind = "single"
+lesson = "biais-confirmation"
+
+[[question.option]]
+id = "tort"
+text = "Ce qui me donnerait tort."
+correct = true
+explanation = "L'invalidation d'abord."
+
+[[question.option]]
+id = "arguments"
+text = "Mes arguments."
+explanation = "Ils orientent ensuite le choix de l'invalidation."
+
+[[question.option]]
+id = "objectif"
+text = "Mon objectif de gain."
+explanation = "Il ne protège pas du biais."
+
+[[question]]
+id = "fomo-seuil"
+prompt = "Entrée prévue à 2,28R, entrée poursuivie à 0,40R. Comment évolue le taux de réussite minimal pour ne pas perdre ?"
+kind = "single"
+lesson = "fomo"
+
+[[question.option]]
+id = "ok"
+text = "De 30 % à 71 %."
+correct = true
+explanation = "1 ÷ 3,28 et 1 ÷ 1,40."
+
+[[question.option]]
+id = "inverse"
+text = "De 71 % à 30 %."
+explanation = "C'est l'inverse : l'entrée poursuivie demande davantage."
+
+[[question.option]]
+id = "meme"
+text = "Il ne change pas, le scénario est le même."
+explanation = "Le seuil dépend du ratio, donc du prix d'entrée."
+
+[[question]]
+id = "fomo-stop"
+prompt = "Après une entrée poursuivie, on rapproche l'invalidation pour retrouver un bon ratio. Qu'en dit la leçon ?"
+kind = "single"
+lesson = "fomo"
+
+[[question.option]]
+id = "incoherent"
+text = "L'invalidation ne correspond plus à rien dans la structure : le plan perd sa cohérence."
+correct = true
+explanation = "On garde l'apparence du plan."
+
+[[question.option]]
+id = "bonne"
+text = "C'est une bonne gestion du risque."
+explanation = "Le risque paraît plus petit, mais le scénario n'est pas faux à ce niveau."
+
+[[question.option]]
+id = "indifferent"
+text = "C'est sans conséquence."
+explanation = "Les stops seront touchés plus souvent sans que le scénario soit faux."
+
+[[question]]
+id = "revanche-dd"
+prompt = "Trois pertes à 1 %, puis une quatrième à 3 % : quel drawdown si elle est perdue ?"
+kind = "single"
+lesson = "revanche"
+
+[[question.option]]
+id = "588"
+text = "5,88 %"
+correct = true
+explanation = "1 − 9 411,90 ÷ 10 000."
+
+[[question.option]]
+id = "394"
+text = "3,94 %"
+explanation = "C'est le drawdown avec une quatrième perte à 1 %."
+
+[[question.option]]
+id = "600"
+text = "6 %"
+explanation = "Le risque est calculé sur le capital courant à chaque trade."
+
+[[question]]
+id = "arret"
+prompt = "Lesquelles sont des règles d'arrêt au sens de la leçon ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "revanche"
+
+[[question.option]]
+id = "consecutives"
+text = "Après 2 pertes de suite, fin de la séance."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "jour"
+text = "À −2 % sur la journée, fin de la séance."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rattrapage"
+text = "Après 2 pertes, doubler la taille pour revenir à zéro."
+explanation = "C'est le trade de revanche, pas une règle d'arrêt."
+
+[[question]]
+id = "suractivite"
+prompt = "5 trades conformes à +0,22R net et 15 trades marginaux à −0,06R net : espérance de la semaine ?"
+kind = "single"
+lesson = "suractivite"
+
+[[question.option]]
+id = "020"
+text = "+0,20R"
+correct = true
+explanation = "1,10 − 0,90."
+
+[[question.option]]
+id = "110"
+text = "+1,10R"
+explanation = "C'est ce que rapportent les seuls trades conformes."
+
+[[question.option]]
+id = "moins090"
+text = "−0,90R"
+explanation = "C'est le coût des seuls trades marginaux."
+
+[[question]]
+id = "routine"
+prompt = "Pourquoi une routine protège-t-elle des comportements du parcours ?"
+kind = "single"
+lesson = "routines"
+
+[[question.option]]
+id = "calme"
+text = "Elle déplace les décisions difficiles vers un moment calme, avant la séance."
+correct = true
+explanation = "C'est l'idée commune aux trois comportements."
+
+[[question.option]]
+id = "gain"
+text = "Elle garantit des séances gagnantes."
+explanation = "Elle ne garantit aucun résultat."
+
+[[question.option]]
+id = "remplace"
+text = "Elle remplace la méthode d'analyse."
+explanation = "Elle protège la méthode ; elle ne la remplace pas."

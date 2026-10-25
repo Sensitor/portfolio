@@ -1,0 +1,39 @@
+id = "lire-la-structure"
+path = "structure-price-action"
+title = "Lire la structure du marché"
+summary = "Sept leçons pour décrire un graphique avec des règles explicites : swings, zones, cassures et changements de structure, lecture sur plusieurs unités de temps, puis un cas chiffré du constat jusqu'à la taille de position."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Repérer les swings avec une règle écrite, et savoir qu'ils ne se confirment qu'après coup.",
+  "Tracer des zones de support et de résistance plutôt que des lignes au pip près.",
+  "Distinguer une cassure de structure (BOS) d'un changement de structure (MSS), en clôture.",
+  "Relier plusieurs unités de temps sans chercher celle qui donne raison.",
+]
+prerequisites = ["Premiers pas sur les marchés"]
+final_quiz = "structure-validation"
+
+[[module]]
+id = "briques"
+title = "Les briques de la structure"
+summary = "Une définition des swings que l'on peut appliquer bougie par bougie, puis les zones que ces swings dessinent."
+lessons = ["swings-definition", "supports-resistances"]
+
+[[module]]
+id = "changement"
+title = "Quand la structure change"
+summary = "Ce qui confirme une tendance, ce qui l'interrompt, et pourquoi aucune des deux observations n'annonce la suite."
+lessons = ["cassure-de-structure", "changement-de-structure"]
+
+[[module]]
+id = "contexte"
+title = "Le contexte"
+summary = "Lire la même séquence sur plusieurs unités de temps, et tenir compte de leurs désaccords au lieu de les ignorer."
+lessons = ["multi-unites-de-temps"]
+
+[[module]]
+id = "pratique"
+title = "Mettre en pratique"
+summary = "Un cas complet, du constat de structure jusqu'à l'invalidation et la taille de position, puis le quiz de validation."
+lessons = ["cas-structure", "recap-structure"]

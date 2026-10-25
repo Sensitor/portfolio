@@ -1,0 +1,73 @@
+id = "check-blocs-et-chaine"
+title = "Contrôle : les blocs et la chaîne"
+course = "bitcoin-fonctionnement"
+lesson = "blocs-et-chaine"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "lettre"
+prompt = "On change une seule lettre d'un texte. Que devient son empreinte SHA-256 ?"
+kind = "single"
+lesson = "blocs-et-chaine"
+
+[[question.option]]
+id = "tout"
+text = "Elle change entièrement, sans rapport avec la précédente."
+correct = true
+explanation = "Oui : c'est ce qui rend toute modification visible."
+
+[[question.option]]
+id = "une"
+text = "Un seul caractère change."
+explanation = "Le moindre changement modifie toute l'empreinte."
+
+[[question.option]]
+id = "rien"
+text = "Elle reste la même."
+explanation = "La même empreinte n'est obtenue qu'avec la même donnée."
+
+[[question]]
+id = "lien"
+prompt = "Que contient l'en-tête d'un bloc qui le relie au passé ?"
+kind = "single"
+lesson = "blocs-et-chaine"
+
+[[question.option]]
+id = "precedent"
+text = "L'empreinte du bloc précédent."
+correct = true
+explanation = "Oui : la dernière empreinte dépend de toute l'histoire."
+
+[[question.option]]
+id = "adresse"
+text = "L'adresse du mineur précédent."
+explanation = "Ce n'est pas ce qui chaîne les blocs."
+
+[[question.option]]
+id = "date"
+text = "La date du premier bloc."
+explanation = "Seule l'empreinte du bloc précédent fait le lien."
+
+[[question]]
+id = "suffit"
+prompt = "Pourquoi le chaînage seul ne suffit-il pas à protéger le registre ?"
+kind = "single"
+lesson = "blocs-et-chaine"
+
+[[question.option]]
+id = "recalcul"
+text = "Un fraudeur pourrait recalculer toutes les empreintes suivantes en quelques secondes."
+correct = true
+explanation = "Oui : c'est la preuve de travail qui rend ce recalcul coûteux."
+
+[[question.option]]
+id = "chiffre"
+text = "Parce que les empreintes se déchiffrent."
+explanation = "Une empreinte ne se déchiffre pas."
+
+[[question.option]]
+id = "suffit"
+text = "Il suffit, la preuve de travail est inutile."
+explanation = "Sans travail, réécrire la chaîne serait facile."

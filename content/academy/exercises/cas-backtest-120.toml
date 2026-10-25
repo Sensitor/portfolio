@@ -1,0 +1,76 @@
+id = "cas-backtest-120"
+title = "Un backtest de 120 trades, puis 50 hors échantillon"
+context = """
+**Échantillon de construction (2021 et 2022)** : 120 trades exécutés. **52 gains** de **+1,9R** en moyenne, **68 pertes** de **−1R**. Écart type des résultats : **1,44R**.
+
+**Échantillon de test (2023)** : 50 trades. **20 gains** de **+1,8R** en moyenne, **30 pertes** de **−1R**.
+
+Coût moyen : **0,07R par trade**. Résultats fictifs, construits pour l'exercice.
+"""
+conclusion = """
+Une moyenne positive, +0,19R net, mais un intervalle de −0,07 à +0,44R qui contient zéro, et un taux de réussite dont la borne basse (35 %) frôle le seuil de rentabilité (34,5 %). Hors échantillon, +0,05R net, soit 73 % de dégradation. La règle n'est pas réfutée ; elle n'est pas démontrée. On continue à mesurer, sans la modifier.
+"""
+
+[[step]]
+id = "taux"
+prompt = "Quel est le taux de réussite dans l'échantillon de construction ? (Une décimale.)"
+unit = "%"
+answer = 43.3
+tolerance = 0.06
+solution = "52 ÷ 120 = **43,3 %**."
+
+[[step]]
+id = "brute"
+prompt = "Quelle est l'espérance brute par trade ? (Deux décimales.)"
+unit = "R"
+answer = 0.26
+tolerance = 0.005
+solution = "(52 × 1,9 − 68 × 1) ÷ 120 = (98,8 − 68) ÷ 120 = **+0,26R**."
+
+[[step]]
+id = "nette"
+prompt = "Quelle est l'espérance nette par trade ? (Deux décimales.)"
+unit = "R"
+answer = 0.19
+tolerance = 0.005
+solution = "0,257 − 0,07 = **+0,19R**."
+
+[[step]]
+id = "profit-factor"
+prompt = "Quel est le profit factor avant coûts ? (Deux décimales.)"
+unit = ""
+answer = 1.45
+tolerance = 0.006
+solution = "98,8 ÷ 68 = **1,45**."
+
+[[step]]
+id = "bas"
+prompt = "Quelle est la borne basse de l'intervalle à 95 % de l'espérance nette ?"
+unit = "R"
+answer = -0.07
+tolerance = 0.006
+solution = "Erreur type : 1,44 ÷ √120 = 0,131. Borne basse : 0,187 − 1,96 × 0,131 = **−0,07R** : l'intervalle contient zéro."
+
+[[step]]
+id = "seuil"
+prompt = "Avec des gains moyens de 1,9R, quel taux de réussite minimal faut-il pour ne pas perdre, hors coûts ? (Une décimale.)"
+unit = "%"
+answer = 34.5
+tolerance = 0.06
+solution = "1 ÷ (1 + 1,9) = **34,5 %**. L'intervalle du taux de réussite mesuré, de 35 % à 52 %, commence juste au-dessus."
+
+[[step]]
+id = "oos"
+prompt = "Quelle est l'espérance nette hors échantillon ?"
+unit = "R"
+answer = 0.05
+tolerance = 0.001
+solution = "(20 × 1,8 − 30) ÷ 50 = 0,12R brut, moins 0,07 : **+0,05R**."
+
+[[step]]
+id = "degradation"
+prompt = "Quelle est la dégradation de l'espérance nette entre les deux échantillons ? (À l'unité.)"
+unit = "%"
+answer = 73
+tolerance = 0.6
+solution = "1 − 0,05 ÷ 0,187 = **73 %**."

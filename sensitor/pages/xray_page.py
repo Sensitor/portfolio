@@ -18,14 +18,19 @@ import streamlit as st
 from ..ui import charts as C
 from ..investment import xray as X
 from ..ui.components import (
-    data_table, metric_card, note, page_header, pct, section, spacer,
+    data_table, metric_card, note, page_header, pct, reading, section, spacer,
 )
 from ..ui.themes import ACCENT, PLOTLY_CONFIG, STATUS, class_color
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ._shared import guard
 
 STATUS_GOOD = STATUS["good"]
 STATUS_WARNING = STATUS["warning"]
+
+
+def _named(buckets: dict) -> dict:
+    """The buckets worth naming in a sentence: "Other" and "Unknown" are remainders."""
+    return {k: v for k, v in buckets.items() if k not in ("Other", "Unknown")}
 
 
 def render_xray(ctx) -> None:
@@ -39,7 +44,7 @@ def render_xray(ctx) -> None:
     weights = ctx.weights
 
     # ── Headline exposures — the "you own more of this than you think" row ───
-    section(tr("headline_exposures", lang).upper())
+    section(tr("headline_exposures", lang))
 
     headlines = X.headline_exposures(xray)
     if headlines:
@@ -63,9 +68,9 @@ def render_xray(ctx) -> None:
     note(tr("xray_note", lang))
 
     # ── Direct holdings versus resolved exposure ─────────────────────────────
-    section(tr("hidden_exposure", lang).upper(), tr("hidden_exposure_sub", lang))
+    section(tr("hidden_exposure", lang), tr("hidden_exposure_sub", lang))
 
-    col_direct, col_resolved = st.columns(2, gap="large")
+    col_direct, col_resolved, col_read = st.columns([1, 1, 0.78], gap="large")
     with col_direct:
         st.markdown(f"**{tr('direct_holdings', lang)}**")
         direct = dict(sorted(weights.items(), key=lambda kv: -kv[1]))
@@ -74,15 +79,29 @@ def render_xray(ctx) -> None:
             width='stretch', config=PLOTLY_CONFIG, key="xray_direct",
         )
     with col_resolved:
-        st.markdown(f"**{tr('lookthrough', lang)} — {X.DIMENSION_LABELS['sector'][lang]}**")
+        st.markdown(f"**{tr('lookthrough', lang)} · {X.DIMENSION_LABELS['sector'][lang]}**")
         st.plotly_chart(
             C.exposure_bars(xray.get("sector", {}), max_items=10,
                             height=max(180, 33 * min(len(xray.get("sector", {})), 10) + 34)),
             width='stretch', config=PLOTLY_CONFIG, key="xray_sector_compare",
         )
+    with col_read:
+        sectors = _named(xray.get("sector", {}))
+        regions = _named(xray.get("geography", {}))
+        top_holding = next(iter(direct.items()), None)
+        top_sector = max(sectors.items(), key=lambda kv: kv[1]) if sectors else None
+        top_region = max(regions.items(), key=lambda kv: kv[1]) if regions else None
+        reading(tr("reading", lang), [
+            tr("rd_xray_direct", lang).format(t=top_holding[0], w=pct(top_holding[1], 1))
+            if top_holding else "",
+            tr("rd_xray_sector", lang).format(s=top_sector[0], w=pct(top_sector[1], 1))
+            if top_sector else "",
+            tr("rd_xray_geo", lang).format(g=top_region[0], w=pct(top_region[1], 1))
+            if top_region else "",
+        ], foot=tr("reading_foot_xray", lang))
 
     # ── Every dimension ──────────────────────────────────────────────────────
-    section(tr("lookthrough", lang).upper())
+    section(tr("lookthrough", lang))
 
     tab_labels = [X.DIMENSION_LABELS[d][lang] for d in X.DIMENSIONS]
     tabs = st.tabs(tab_labels)
@@ -114,7 +133,7 @@ def render_xray(ctx) -> None:
                 )
 
     # ── Per-holding resolution ───────────────────────────────────────────────
-    section(tr("holdings", lang).upper(),
+    section(tr("holdings", lang),
             "Resolved per holding" if lang == "en" else "Résolu par position")
 
     rows = []
@@ -142,7 +161,7 @@ def _top_bucket(profile: dict, dimension: str) -> str:
     """Largest bucket of a dimension, annotated when the holding is a blend."""
     buckets = profile.get(dimension) or {}
     if not buckets:
-        return "—"
+        return na()
     bucket, share = max(buckets.items(), key=lambda kv: kv[1])
     return bucket if share > 0.95 else f"{bucket} ({share * 100:.0f}%)"
 
@@ -163,7 +182,7 @@ def _factor_block(ctx, lang: str) -> None:
     from ..integrations import market_data as market
     from ..ui.components import metric_card, num
 
-    section(tr("factor_exposure", lang).upper(), tr("factor_sub", lang))
+    section(tr("factor_exposure", lang), tr("factor_sub", lang))
 
     returns = ctx.portfolio_returns
     if returns is None or len(returns) < 90:
@@ -205,7 +224,7 @@ def _factor_block(ctx, lang: str) -> None:
         top = significant[0] if significant else None
         metric_card(
             "Dominant factor" if lang == "en" else "Facteur dominant",
-            FA.factor_label(top["factor"], lang) if top else "—",
+            FA.factor_label(top["factor"], lang) if top else na(lang),
             bar=min(abs(top["loading"]) / 1.2, 1) if top else 0,
             caption=(f"{tr('factor_loading', lang)} {top['loading']:+.2f}" if top
                      else tr("not_significant", lang)),
@@ -226,7 +245,7 @@ def _factor_block(ctx, lang: str) -> None:
             [FA.factor_label(item["factor"], lang),
              num(item["loading"], 2),
              num(item["t_stat"], 1),
-             "✓" if item["significant"] else "—"]
+             "✓" if item["significant"] else na(lang)]
             for item in result["loadings"]
         ]
         data_table(

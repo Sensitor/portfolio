@@ -1,0 +1,73 @@
+id = "check-budget-de-risque"
+title = "Contrôle : le budget de risque"
+course = "premiers-pas"
+lesson = "budget-de-risque"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "montant"
+prompt = "Capital de 20 000 €, risque de 0,5 % par position. Quel est le montant risqué ?"
+kind = "single"
+lesson = "budget-de-risque"
+
+[[question.option]]
+id = "cent"
+text = "100 €"
+correct = true
+explanation = "20 000 × 0,5 ÷ 100 = 100 €."
+
+[[question.option]]
+id = "mille"
+text = "1 000 €"
+explanation = "Cela correspondrait à 5 % du capital, soit dix fois le budget fixé."
+
+[[question.option]]
+id = "dix"
+text = "10 €"
+explanation = "Cela correspondrait à 0,05 % : une virgule mal placée."
+
+[[question]]
+id = "ordre"
+prompt = "Dans quel ordre prend-on les décisions de risque ?"
+kind = "single"
+lesson = "budget-de-risque"
+
+[[question.option]]
+id = "bon"
+text = "Invalidation, puis budget de risque, puis taille de position."
+correct = true
+explanation = "Oui : le stop dépend du scénario, la taille découle du budget et de la distance au stop."
+
+[[question.option]]
+id = "taille-dabord"
+text = "Taille de position, puis stop, puis budget."
+explanation = "Choisir la taille en premier oblige à ajuster le stop ou le budget après coup."
+
+[[question.option]]
+id = "stop-ajuste"
+text = "Budget, puis taille, puis stop placé là où la taille le permet."
+explanation = "Le stop serait alors placé selon l'argent et non selon le scénario : il ne correspondrait plus à une invalidation."
+
+[[question]]
+id = "arrondi"
+prompt = "Le calcul donne 0,268 lot et le pas de volume est de 0,01. Quelle taille retenez-vous ?"
+kind = "single"
+lesson = "budget-de-risque"
+
+[[question.option]]
+id = "bas"
+text = "0,26 lot"
+correct = true
+explanation = "On arrondit vers le bas : c'est le seul arrondi qui garde la perte sous le budget."
+
+[[question.option]]
+id = "haut"
+text = "0,27 lot"
+explanation = "L'arrondi vers le haut dépasserait légèrement le budget de risque."
+
+[[question.option]]
+id = "large"
+text = "0,30 lot"
+explanation = "Cela dépasserait le budget d'environ 12 %."

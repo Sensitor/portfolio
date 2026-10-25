@@ -1,0 +1,39 @@
+id = "liquidite-et-scenarios"
+path = "liquidite-contexte"
+title = "Liquidité et scénarios"
+summary = "Sept leçons pour lire ce qui se passe autour des niveaux visibles : où s'accumulent les ordres, equal highs et equal lows, sweeps, fausses cassures, liquidité interne et externe, puis un scénario complet sur XAUUSD avec son invalidation."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Expliquer pourquoi des ordres s'accumulent au-delà des niveaux visibles, et ce que l'on n'en sait pas.",
+  "Repérer des equal highs et equal lows avec une tolérance écrite.",
+  "Distinguer un sweep d'une cassure, en clôture, et reconnaître une fausse cassure après coup seulement.",
+  "Construire un scénario autour de la liquidité, avec une invalidation et une taille de position.",
+]
+prerequisites = ["Lire la structure du marché"]
+final_quiz = "liquidite-validation"
+
+[[module]]
+id = "comprendre-liquidite"
+title = "Comprendre la liquidité"
+summary = "Où se trouvent les ordres que le prix vient chercher, et pourquoi certains niveaux attirent plus que d'autres."
+lessons = ["liquidite-ordres", "equal-highs-lows"]
+
+[[module]]
+id = "depassements"
+title = "Les dépassements"
+summary = "Quand le prix franchit un niveau : sweep, cassure ou fausse cassure, et ce que la clôture permet de dire."
+lessons = ["sweeps", "fausses-cassures"]
+
+[[module]]
+id = "cadre"
+title = "Le cadre"
+summary = "La terminologie de liquidité interne et externe, et la place qu'elle prend dans la lecture d'un range."
+lessons = ["interne-externe"]
+
+[[module]]
+id = "scenario"
+title = "Construire un scénario"
+summary = "Un cas complet sur XAUUSD, de l'observation des niveaux jusqu'à l'invalidation et la taille, puis le quiz de validation."
+lessons = ["scenario-liquidite", "recap-liquidite"]

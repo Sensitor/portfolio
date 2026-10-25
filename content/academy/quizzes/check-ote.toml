@@ -1,0 +1,73 @@
+id = "check-ote"
+title = "Contrôle : retracements et zone OTE"
+course = "zones-et-entrees"
+lesson = "ote-retracements"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "niveau"
+prompt = "Jambe haussière de 1,0800 à 1,0900. Où est le retracement de 62 % ?"
+kind = "single"
+lesson = "ote-retracements"
+
+[[question.option]]
+id = "38"
+text = "1,0838"
+correct = true
+explanation = "1,0900 − 0,62 × 0,0100 = 1,0838."
+
+[[question.option]]
+id = "62"
+text = "1,0862"
+explanation = "C'est 62 % mesuré depuis le départ, soit un retour de 38 % seulement."
+
+[[question.option]]
+id = "21"
+text = "1,0821"
+explanation = "C'est le niveau de 79 %."
+
+[[question]]
+id = "baissiere"
+prompt = "Jambe baissière de 2 450 à 2 410. Où se trouve la zone OTE ?"
+kind = "single"
+lesson = "ote-retracements"
+
+[[question.option]]
+id = "dessus"
+text = "De 2 434,80 à 2 441,60, au-dessus du creux."
+correct = true
+explanation = "Pour une jambe baissière, le retour se fait vers le haut."
+
+[[question.option]]
+id = "dessous"
+text = "De 2 385,20 à 2 378,40, sous le creux."
+explanation = "Un retracement reste entre le départ et la fin de la jambe."
+
+[[question.option]]
+id = "milieu"
+text = "Autour de 2 430, le milieu de la jambe."
+explanation = "2 430 est le niveau de 50 %, hors de la zone OTE."
+
+[[question]]
+id = "statut"
+prompt = "Que représente la zone de 62 à 79 % ?"
+kind = "single"
+lesson = "ote-retracements"
+
+[[question.option]]
+id = "convention"
+text = "Une convention de mesure, dont l'intérêt se juge sur un échantillon."
+correct = true
+explanation = "C'est la position du parcours."
+
+[[question.option]]
+id = "loi"
+text = "Une zone que le prix respecte en vertu des proportions de Fibonacci."
+explanation = "Aucune raison démontrée ne l'impose au prix."
+
+[[question.option]]
+id = "garantie"
+text = "La zone où le retour s'arrête dans la majorité des cas."
+explanation = "Cela n'est vrai que si on l'a mesuré sur son instrument, et rien ne le garantit."

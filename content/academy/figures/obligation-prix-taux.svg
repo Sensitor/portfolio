@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Prix d'une obligation et taux du marché</title>
+<desc id="d">Une courbe décroissante : le prix d'une obligation de 100 à coupon de 3 % sur 10 ans vaut 108,98 si le taux du marché est de 2 %, 100 à 3 % et 91,89 à 4 %.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5b646b"/></marker></defs>
+<polyline points="80.0,55.4 86.2,59.0 92.5,62.5 98.8,66.0 105.0,69.4 111.2,72.8 117.5,76.2 123.8,79.6 130.0,82.9 136.2,86.2 142.5,89.4 148.8,92.6 155.0,95.8 161.2,98.9 167.5,102.0 173.8,105.1 180.0,108.2 186.2,111.2 192.5,114.2 198.8,117.1 205.0,120.1 211.2,122.9 217.5,125.8 223.8,128.6 230.0,131.5 236.2,134.2 242.5,137.0 248.7,139.7 255.0,142.4 261.2,145.1 267.5,147.7 273.8,150.3 280.0,152.9 286.2,155.4 292.5,158.0 298.8,160.5 305.0,163.0 311.2,165.4 317.5,167.9 323.8,170.3 330.0,172.6 336.2,175.0 342.5,177.3 348.8,179.7 355.0,181.9 361.2,184.2 367.5,186.5 373.8,188.7 380.0,190.9 386.2,193.1 392.5,195.2 398.8,197.3 405.0,199.5 411.2,201.6 417.5,203.6 423.8,205.7 430.0,207.7 436.2,209.7 442.5,211.7 448.7,213.7 455.0,215.6 461.2,217.6 467.5,219.5 473.8,221.4 480.0,223.3 486.2,225.1 492.5,227.0 498.8,228.8 505.0,230.6 511.2,232.4 517.5,234.1 523.8,235.9 530.0,237.6 536.2,239.3 542.5,241.0 548.8,242.7 555.0,244.4 561.2,246.1 567.5,247.7 573.8,249.3 580.0,250.9" fill="none" stroke="#284764" stroke-width="2.2"/>
+<line x1="80" y1="209.2" x2="580" y2="209.2" stroke="#d9d5cb"/>
+<text x="72" y="213.2" text-anchor="end" font-size="10.5" fill="#5b646b">80</text>
+<line x1="80" y1="147.7" x2="580" y2="147.7" stroke="#d9d5cb"/>
+<text x="72" y="151.7" text-anchor="end" font-size="10.5" fill="#5b646b">100</text>
+<line x1="80" y1="86.2" x2="580" y2="86.2" stroke="#d9d5cb"/>
+<text x="72" y="90.2" text-anchor="end" font-size="10.5" fill="#5b646b">120</text>
+<text x="80.0" y="258" text-anchor="middle" font-size="10.5" fill="#5b646b">0 %</text>
+<text x="205.0" y="258" text-anchor="middle" font-size="10.5" fill="#5b646b">2 %</text>
+<text x="330.0" y="258" text-anchor="middle" font-size="10.5" fill="#5b646b">4 %</text>
+<text x="455.0" y="258" text-anchor="middle" font-size="10.5" fill="#5b646b">6 %</text>
+<text x="580.0" y="258" text-anchor="middle" font-size="10.5" fill="#5b646b">8 %</text>
+<circle cx="205.0" cy="120.1" r="4.5" fill="#86672f"/>
+<text x="213.0" y="112.1" font-size="11.5" fill="#86672f">à 2 % : 108,98</text>
+<circle cx="267.5" cy="147.7" r="4.5" fill="#86672f"/>
+<text x="275.5" y="139.7" font-size="11.5" fill="#86672f">à 3 % : 100,00</text>
+<circle cx="330.0" cy="172.6" r="4.5" fill="#86672f"/>
+<text x="338.0" y="164.6" font-size="11.5" fill="#86672f">à 4 % : 91,89</text>
+<text x="80" y="30" font-size="12" fill="#1b2733">Prix d'une obligation de 100, coupon de 3 %, 10 ans, selon le taux du marché</text>
+<text x="30" y="284" font-size="11" fill="#7b8389">Calcul exact, coupon annuel. Quand les taux montent, les obligations déjà émises valent moins, et l'inverse.</text>
+</svg>

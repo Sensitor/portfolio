@@ -1,0 +1,73 @@
+id = "check-taux-devises-actions"
+title = "Contrôle : taux, devises et actions"
+course = "trader-l-actualite"
+lesson = "taux-devises-actions"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ecart"
+prompt = "Rendement à 10 ans 3,90 %, à 2 ans 4,83 %. Quel est l'écart et que dit-il ?"
+kind = "single"
+lesson = "taux-devises-actions"
+
+[[question.option]]
+id = "inverse"
+text = "−0,93 point : la courbe est inversée."
+correct = true
+explanation = "Oui : 3,90 − 4,83, les taux courts dépassent les taux longs."
+
+[[question.option]]
+id = "positif"
+text = "+0,93 point : la courbe monte."
+explanation = "Le signe est inversé : 10 ans moins 2 ans."
+
+[[question.option]]
+id = "normal"
+text = "8,73 points : une courbe normale."
+explanation = "On soustrait, on n'additionne pas."
+
+[[question]]
+id = "devise"
+prompt = "Les taux attendus montent aux États-Unis et pas en zone euro. Quelle tendance pour EURUSD ?"
+kind = "single"
+lesson = "taux-devises-actions"
+
+[[question.option]]
+id = "baisse"
+text = "Plutôt à la baisse : le dollar tend à s'apprécier."
+correct = true
+explanation = "Oui, par l'écart de taux, comme tendance et non comme règle."
+
+[[question.option]]
+id = "hausse"
+text = "Plutôt à la hausse."
+explanation = "Un écart de taux en faveur du dollar tend à le renforcer."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun lien possible."
+explanation = "L'écart de taux est l'un des canaux principaux des devises."
+
+[[question]]
+id = "inversion"
+prompt = "Que retenir de l'inversion de juillet 2022 à août 2024 ?"
+kind = "single"
+lesson = "taux-devises-actions"
+
+[[question.option]]
+id = "limite"
+text = "La plus longue depuis 1977, sans hausse marquée du chômage à la date des données : un indicateur, pas un signal infaillible."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "recession"
+text = "Elle a été suivie d'une récession en 2023."
+explanation = "Les données ne montrent pas de hausse marquée du chômage : entre 3,4 % et 4,5 %."
+
+[[question.option]]
+id = "timing"
+text = "Elle donnait le moment exact pour vendre."
+explanation = "L'inversion n'a jamais été un signal de timing."

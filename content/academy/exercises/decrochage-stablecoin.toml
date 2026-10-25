@@ -1,0 +1,42 @@
+id = "decrochage-stablecoin"
+title = "Un stablecoin qui décroche"
+context = """
+Un trésorier d'entreprise détient **25 000 USDC**. Le 11 mars 2023, le jeton cote **0,88 dollar** au plus bas, avant de revenir à **1 dollar** deux jours plus tard.
+
+Il hésite entre vendre au plus bas et attendre.
+"""
+conclusion = """
+Au plus bas, le solde ne vaut plus que 22 000 dollars : vendre aurait cristallisé une perte de 3 000 dollars, 12 %. Attendre a permis de retrouver la valeur entière, mais seulement parce que les autorités ont garanti les dépôts de la banque. Le risque d'un stablecoin adossé à des réserves, c'est celui de ses réserves.
+"""
+
+[[step]]
+id = "valeur"
+prompt = "Que vaut le solde au plus bas, en dollars ?"
+unit = "$"
+answer = 22000
+tolerance = 0.5
+solution = "25 000 × 0,88 = **22 000 dollars**."
+
+[[step]]
+id = "perte"
+prompt = "Quelle perte aurait été cristallisée par une vente au plus bas, en dollars ?"
+unit = "$"
+answer = 3000
+tolerance = 0.5
+solution = "25 000 − 22 000 = **3 000 dollars**."
+
+[[step]]
+id = "pourcentage"
+prompt = "Et en pourcentage ?"
+unit = "%"
+answer = 12
+tolerance = 0.01
+solution = "3 000 ÷ 25 000 = **12 %**."
+
+[[step]]
+id = "remontee"
+prompt = "De combien le prix doit-il remonter, en %, pour revenir de 0,88 à 1 dollar ? (Une décimale.)"
+unit = "%"
+answer = 13.6
+tolerance = 0.06
+solution = "1 ÷ 0,88 − 1 = **13,6 %** : une baisse de 12 % demande une hausse de 13,6 % pour être effacée."

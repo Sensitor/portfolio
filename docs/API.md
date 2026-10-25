@@ -140,6 +140,25 @@ All accept `?period=`, `?account=`, `?symbol=` and `?lang=en|fr`.
 | `GET /portfolios/{id}/snapshots` | recorded history |
 | `GET /portfolios/{id}/latest` | the most recent snapshot |
 
+### Academy
+
+Public content answers without a token; member content and anything personal
+requires one. See [ACADEMY.md](ACADEMY.md).
+
+| | |
+|---|---|
+| `GET /academy/catalog` | every path; courses of the available ones |
+| `GET /academy/courses/{course}` | modules and lessons; the caller's progress when signed in |
+| `GET /academy/courses/{course}/lessons/{lesson}` | the lesson's blocks — 401 for a member lesson without a token |
+| `POST`/`DELETE …/lessons/{lesson}/complete` | mark or unmark a lesson as finished |
+| `GET /academy/quizzes/{quiz}` | questions **without** the answer key |
+| `POST /academy/quizzes/{quiz}/attempts` | grade `{"responses": {question: [option]}}`; stored when signed in; 422 on unknown ids |
+| `GET /academy/quizzes/{quiz}/attempts` | the caller's history |
+| `GET /academy/progress` | per-course progress, recent attempts, next step |
+| `GET /academy/resources` · `…/{id}/download` | the library; member files need a token |
+| `POST /academy/risk/plan` | risk amount, stop distance, R:R, and position size when a contract spec is given |
+| `POST /academy/risk/expectancy` | expectancy, break-even win rate, profit factor, exact risk of ruin, final-equity range |
+
 ---
 
 ## 4. Reading the responses

@@ -1,0 +1,42 @@
+id = "va-versements"
+title = "Les versements de la valeur cible"
+context = """
+La position doit valoir **100 €** après le premier mois, **200 €** après le deuxième, **300 €** après le troisième et **400 €** après le quatrième. Le prix d'une unité est successivement de **40 €**, **50 €**, **25 €** et **50 €**, comme dans l'exercice précédent.
+
+À chaque date : versement = valeur cible − valeur actuelle de la position, avant le versement.
+"""
+conclusion = """
+Les versements sont de 100 €, 75 €, 200 € puis −200 € : la méthode a acheté massivement pendant la baisse du troisième mois et vendu au quatrième. Le versement de 200 € du troisième mois était deux fois le versement habituel : sans réserve de liquidités, la méthode ne peut pas être suivie.
+"""
+
+[[step]]
+id = "m1"
+prompt = "Versement du premier mois, en € ?"
+unit = "€"
+answer = 100
+tolerance = 0.5
+solution = "La position est vide : **100 €**, soit 2,5 unités à 40 €."
+
+[[step]]
+id = "m2"
+prompt = "Versement du deuxième mois, en € ?"
+unit = "€"
+answer = 75
+tolerance = 0.5
+solution = "2,5 unités × 50 € = 125 € ; 200 − 125 = **75 €**, soit 1,5 unité."
+
+[[step]]
+id = "m3"
+prompt = "Versement du troisième mois, en € ?"
+unit = "€"
+answer = 200
+tolerance = 0.5
+solution = "4 unités × 25 € = 100 € ; 300 − 100 = **200 €**, soit 8 unités."
+
+[[step]]
+id = "m4"
+prompt = "Versement du quatrième mois, en € ? (Négatif s'il faut vendre.)"
+unit = "€"
+answer = -200
+tolerance = 0.5
+solution = "12 unités × 50 € = 600 € ; 400 − 600 = **−200 €** : on vend 4 unités."

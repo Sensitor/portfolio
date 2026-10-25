@@ -93,8 +93,8 @@ FACTOR_SPECS = {
     "inflation": {
         "long": "TIP", "short": "IEF",
         "en": "Inflation", "fr": "Inflation",
-        "desc_en": "Inflation-linked minus nominal Treasuries — a breakeven proxy.",
-        "desc_fr": "Obligations indexées moins nominales — proxy du point mort d'inflation.",
+        "desc_en": "Inflation-linked minus nominal Treasuries: a breakeven proxy.",
+        "desc_fr": "Obligations indexées moins nominales : proxy du point mort d'inflation.",
     },
     "commodities": {
         "long": "DBC", "short": None,

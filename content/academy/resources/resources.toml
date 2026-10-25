@@ -1,0 +1,232 @@
+# La bibliothèque. Une ressource n'est listée que si son fichier existe ici :
+# le chargeur refuse toute entrée qui pointe vers un fichier absent ou situé
+# hors de ce dossier.
+
+[[resource]]
+id = "fiche-vocabulaire-execution"
+title = "Le vocabulaire de l'exécution"
+description = "Bid, ask, spread, pip, lot, marge, swap, glissement et les trois familles d'ordres, définis sur une page."
+kind = "fiche"
+category = "Bases des marchés"
+level = "debutant"
+file = "fiche-vocabulaire-execution.md"
+pdf = "fiche-vocabulaire-execution.pdf"
+access = "public"
+lessons = ["fonctionnement-marche", "ordres-et-couts", "recapitulatif"]
+
+[[resource]]
+id = "checklist-avant-trade"
+title = "Checklist avant chaque trade"
+description = "Les questions à se poser avant d'envoyer un ordre : scénario, invalidation, budget, taille, coûts et conditions de marché."
+kind = "checklist"
+category = "Gestion du risque"
+level = "debutant"
+file = "checklist-avant-trade.md"
+pdf = "checklist-avant-trade.pdf"
+access = "member"
+lessons = ["budget-de-risque", "cas-pratique", "recapitulatif", "executer-seance"]
+
+[[resource]]
+id = "fiche-lire-la-structure"
+title = "Lire la structure"
+description = "Swings, zones, cassures et changements de structure, unités de temps : les définitions du parcours 2 sur une page."
+kind = "fiche"
+category = "Structure de marché"
+level = "debutant"
+file = "fiche-lire-la-structure.md"
+pdf = "fiche-lire-la-structure.pdf"
+access = "member"
+lessons = ["swings-definition", "supports-resistances", "multi-unites-de-temps", "cas-structure", "recap-structure"]
+
+[[resource]]
+id = "fiche-risque-duree"
+title = "Gérer le risque dans la durée"
+description = "Espérance, seuil de rentabilité, drawdown, risque de ruine, exposition et limites de perte : les formules et les repères du parcours 5."
+kind = "fiche"
+category = "Gestion du risque"
+level = "intermediaire"
+file = "fiche-risque-duree.md"
+pdf = "fiche-risque-duree.pdf"
+access = "member"
+lessons = ["esperance", "drawdown", "risque-de-ruine", "limites-de-perte", "recap-risque"]
+
+[[resource]]
+id = "fiche-liquidite"
+title = "Liquidité et scénarios"
+description = "Niveaux égaux, sweeps, cassures et fausses cassures, liquidité interne et externe, construction d'un scénario : les règles du parcours 3 sur une page."
+kind = "fiche"
+category = "Liquidité et contexte"
+level = "intermediaire"
+file = "fiche-liquidite.md"
+pdf = "fiche-liquidite.pdf"
+access = "member"
+lessons = ["liquidite-ordres", "equal-highs-lows", "interne-externe", "scenario-liquidite", "recap-liquidite"]
+
+[[resource]]
+id = "fiche-zones"
+title = "Zones d'intérêt et entrées"
+description = "FVG, order blocks, retracements et zone OTE, intervalle commun et ordre des questions avant une entrée : les règles du parcours 4 sur une page."
+kind = "fiche"
+category = "FVG, Order Blocks et OTE"
+level = "intermediaire"
+file = "fiche-zones.md"
+pdf = "fiche-zones.pdf"
+access = "member"
+lessons = ["fvg-definition", "fvg-criteres", "order-blocks", "ote-retracements", "confluence", "cas-entree", "recap-zones"]
+
+[[resource]]
+id = "routine-de-seance"
+title = "Routine de séance"
+description = "Avant, pendant et après la séance : les vérifications du parcours 6 et une grille pour écrire ses règles d'arrêt."
+kind = "checklist"
+category = "Psychologie du trading"
+level = "intermediaire"
+file = "routine-de-seance.md"
+pdf = "routine-de-seance.pdf"
+access = "member"
+lessons = ["processus-resultat", "biais-recence", "biais-confirmation", "fomo", "revanche", "suractivite", "routines", "recap-psychologie", "plan-publication", "preparer-seance"]
+
+[[resource]]
+id = "fiche-backtest"
+title = "Tester une stratégie"
+description = "La règle en six parties, les formules d'un backtest, les biais et leurs parades, et la liste à vérifier avant d'annoncer un résultat : le parcours 7 sur une page."
+kind = "fiche"
+category = "Stratégie et backtesting"
+level = "avance"
+file = "fiche-backtest.md"
+pdf = "fiche-backtest.pdf"
+access = "member"
+lessons = ["regles-explicites", "backtest-manuel", "biais-backtest", "echantillon", "surajustement", "hors-echantillon", "cas-backtest", "recap-backtest"]
+
+[[resource]]
+id = "fiche-la-monnaie"
+title = "La monnaie"
+description = "Fonctions et histoire de la monnaie, création monétaire par le crédit, banque centrale et taux, obligations, politique monétaire, monnaie et richesse : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-la-monnaie.md"
+pdf = "fiche-la-monnaie.pdf"
+access = "public"
+lessons = ["fonctions-monnaie", "histoire-monnaie", "monnaie-bancaire", "banque-centrale", "taux-interet", "dette-obligations", "politique-monetaire", "monnaie-liquidite-richesse", "recap-monnaie"]
+
+[[resource]]
+id = "fiche-inflation"
+title = "L'inflation"
+description = "Définitions, mesure, causes, formules et repères chiffrés de l'inflation en zone euro, en France et aux États-Unis : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-inflation.md"
+pdf = "fiche-inflation.pdf"
+access = "public"
+lessons = ["inflation-definition", "mesurer-les-prix", "demande-et-couts", "monnaie-credit-prix", "anticipations-salaires", "episodes-inflation", "ecoles-de-pensee", "pouvoir-achat", "recap-inflation"]
+
+[[resource]]
+id = "fiche-patrimoine"
+title = "Inflation et patrimoine"
+description = "Rendement réel, intérêts composés, coût de la volatilité, frais, diversification et les quatre risques d'une épargne, avec les repères chiffrés du cours."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-patrimoine.md"
+pdf = "fiche-patrimoine.pdf"
+access = "public"
+lessons = ["rendement-nominal-reel", "interets-composes", "simulateur-epargne", "frais-impots", "risques-epargne", "diversification", "bitcoin-patrimoine", "recap-patrimoine"]
+
+[[resource]]
+id = "fiche-macro"
+title = "Trader avec l'actualité économique"
+description = "Surprise et surprise normalisée, indicateurs majeurs, heures de publication à Paris et semaines décalées, taux implicites, courbe des taux, mouvement attendu et taille de position : le parcours 8 sur une page."
+kind = "fiche"
+category = "Macroéconomie et actualité"
+level = "intermediaire"
+file = "fiche-macro.md"
+pdf = "fiche-macro.pdf"
+access = "member"
+lessons = ["attentes-et-surprises", "indicateurs-majeurs", "banques-centrales-marche", "taux-devises-actions", "calendrier-economique", "volatilite-evenementielle", "plan-publication", "cas-inflation-us", "recap-macro"]
+
+[[resource]]
+id = "fiche-bitcoin-fonctionnement"
+title = "Bitcoin : origines et fonctionnement"
+description = "La double dépense, les précurseurs et les dates clés, les transactions et la phrase de récupération, les blocs, la preuve de travail, la sécurité des confirmations et l'émission : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "debutant"
+file = "fiche-bitcoin-fonctionnement.md"
+pdf = "fiche-bitcoin-fonctionnement.pdf"
+access = "member"
+lessons = ["double-depense", "precurseurs-bitcoin", "cles-et-transactions", "blocs-et-chaine", "preuve-de-travail", "consensus-securite", "emission-halvings", "recap-bitcoin-fonctionnement"]
+
+[[resource]]
+id = "fiche-crypto-securite"
+title = "Utiliser la crypto en sécurité"
+description = "Jetons et stablecoins, portefeuilles et risque de contrepartie, sauvegarde de la phrase de récupération, procédure d'envoi, pools automatiques et signaux d'alerte des arnaques : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "debutant"
+file = "fiche-crypto-securite.md"
+pdf = "fiche-crypto-securite.pdf"
+access = "public"
+lessons = ["au-dela-de-bitcoin", "stablecoins", "portefeuilles", "phrase-de-recuperation", "envoyer-recevoir", "plateformes-echange", "arnaques", "recap-crypto-securite"]
+
+[[resource]]
+id = "modele-plan-de-trading"
+title = "Modèle de plan de trading"
+description = "Les sept parties d'un plan de trading à remplir : objectif, marchés, stratégies en six parties, risque, limites, routine, revue, avec le test du remplaçant. Le parcours 10 en un document de travail."
+kind = "guide"
+category = "Processus de trading"
+level = "avance"
+file = "modele-plan-de-trading.md"
+pdf = "modele-plan-de-trading.pdf"
+access = "member"
+lessons = ["processus-ou-resultats", "plan-de-trading", "limites-de-risque", "preparer-seance", "executer-seance", "journal-mesures", "revue-amelioration", "cas-mois-de-trading", "recap-processus"]
+
+[[resource]]
+id = "fiche-reserve-de-valeur"
+title = "Bitcoin, une réserve de valeur ?"
+description = "Définitions, comparaison de Bitcoin, de l'or et de l'euro, création monétaire comparée, stock-to-flow, objections, et ce qui est établi ou débattu : le cours sur une page."
+kind = "fiche"
+category = "Monnaie et Bitcoin"
+level = "intermediaire"
+file = "fiche-reserve-de-valeur.md"
+pdf = "fiche-reserve-de-valeur.pdf"
+access = "member"
+lessons = ["reserve-de-valeur", "proprietes-comparees", "creation-monetaire-comparee", "stock-to-flow", "objections-reserve", "recap-reserve-de-valeur"]
+
+[[resource]]
+id = "fiche-analyse-crypto"
+title = "Analyser un projet crypto"
+description = "Capitalisation, valorisation diluée, déblocages, revenus nets, facteur de santé, perte impermanente, risques de la DeFi et grille d'analyse en douze questions : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "intermediaire"
+file = "fiche-analyse-crypto.md"
+pdf = "fiche-analyse-crypto.pdf"
+access = "member"
+lessons = ["prix-et-capitalisation", "emission-et-deblocages", "revenus-et-incitations", "preter-emprunter", "perte-impermanente", "risques-defi", "grille-analyse"]
+
+[[resource]]
+id = "fiche-investir"
+title = "Investir dans la crypto avec méthode"
+description = "Conditions préalables, part de crypto et effet sur le risque, investissement en une fois, progressif ou vers une valeur cible, rééquilibrage, scénarios défavorables et fiscalité française : le parcours sur une page."
+kind = "fiche"
+category = "Investissement"
+level = "intermediaire"
+file = "fiche-investir.md"
+pdf = "fiche-investir.pdf"
+access = "member"
+lessons = ["avant-d-investir", "allocation-et-taille", "investissement-progressif", "valeur-cible", "reequilibrer", "scenarios-defavorables", "fiscalite-crypto", "recap-investir"]
+
+[[resource]]
+id = "fiche-on-chain"
+title = "Lire les métriques on-chain de Bitcoin"
+description = "Les trois familles de métriques, les formules du cours, les repères de septembre 2026 et les dates de l'espace de bloc : le cours sur une page."
+kind = "fiche"
+category = "Crypto"
+level = "intermediaire"
+file = "fiche-on-chain.md"
+pdf = "fiche-on-chain.pdf"
+access = "member"
+lessons = ["donnees-on-chain", "activite-reseau", "frais-budget-securite", "espace-de-bloc", "minage-et-pools", "indicateurs-de-prix", "recap-on-chain"]
+

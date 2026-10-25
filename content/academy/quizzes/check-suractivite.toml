@@ -1,0 +1,74 @@
+id = "check-suractivite"
+title = "Contrôle : la suractivité"
+course = "decider-sous-incertitude"
+lesson = "suractivite"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "net"
+prompt = "Un trade marginal à +0,02R brut, avec 0,08R de coûts. Quelle est son espérance nette ?"
+kind = "single"
+lesson = "suractivite"
+
+[[question.option]]
+id = "moins006"
+text = "−0,06R"
+correct = true
+explanation = "0,02 − 0,08."
+
+[[question.option]]
+id = "002"
+text = "+0,02R"
+explanation = "C'est l'espérance brute, avant coûts."
+
+[[question.option]]
+id = "010"
+text = "+0,10R"
+explanation = "Les coûts se retranchent, ils ne s'ajoutent pas."
+
+[[question]]
+id = "protection"
+prompt = "Lesquelles de ces règles limitent la suractivité ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "suractivite"
+
+[[question.option]]
+id = "max"
+text = "Un nombre maximal de trades par séance, écrit avant."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "heures"
+text = "Des heures de séance, graphiques fermés en dehors."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rattraper"
+text = "Rattraper une journée sans occasion en fin de séance."
+explanation = "C'est un déclencheur de suractivité, pas une protection."
+
+[[question]]
+id = "journee"
+prompt = "Une journée sans aucun trade, parce qu'aucun scénario n'a été déclenché, est :"
+kind = "single"
+lesson = "suractivite"
+
+[[question.option]]
+id = "normale"
+text = "Une journée où la méthode a fonctionné."
+correct = true
+explanation = "Ne pas trader quand rien ne remplit les règles est la méthode."
+
+[[question.option]]
+id = "perdue"
+text = "Une journée perdue."
+explanation = "Aucune décision contraire aux règles n'a été prise."
+
+[[question.option]]
+id = "rattraper"
+text = "Une journée à rattraper le lendemain."
+explanation = "Cela pousserait à la suractivité."

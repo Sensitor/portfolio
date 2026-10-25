@@ -25,8 +25,8 @@ import plotly.graph_objects as go
 
 from .themes import (
     ACCENT, AXIS, BORDER_STRONG, DIVERGING, GRID, INK, INK_2, INK_FAINT,
-    INK_MUTED, NEG, PALETTE, PALETTE_ALLPAIRS, POS, STATUS, SURFACE, SURFACE_2,
-    plotly_layout, series_color,
+    INK_MUTED, NEG, NEUTRAL, PALETTE, PALETTE_ALLPAIRS, POS, SERIOUS, STATUS, SURFACE, SURFACE_2,
+    WARNING, fade, plotly_layout, series_color,
 )
 
 _BAR_RADIUS = 4
@@ -61,6 +61,7 @@ def cumulative_performance(series_map: dict, height: int = 380,
     points — there it flattens the line against the top of the plot.
     """
     fig = go.Figure()
+    ends = []
     for i, (name, series) in enumerate(series_map.items()):
         if series is None or len(series) < 2:
             continue
@@ -71,15 +72,44 @@ def cumulative_performance(series_map: dict, height: int = 380,
             name=name, mode="lines",
             line=dict(color=color, width=width),
             fill="tozeroy" if fill and i == 0 and len(series_map) == 1 else None,
-            fillcolor=("rgba(57,135,229,0.10)"
+            fillcolor=(fade(ACCENT, 0.10)
                        if fill and i == 0 and len(series_map) == 1 else None),
             hovertemplate=f"<b>{name}</b>  {value_prefix}%{{y:,.2f}}<extra></extra>",
         ))
+        ends.append((name, series.index[-1], float(series.iloc[-1]), color))
+
+    # End labels: a dot on the last point and its value beside it, in ink. Up to
+    # four series are labelled; beyond that the legend alone carries identity.
+    annotations = []
+    if 0 < len(ends) <= 4:
+        lows = [float(s.min()) for s in series_map.values() if s is not None and len(s) > 1]
+        highs = [float(s.max()) for s in series_map.values() if s is not None and len(s) > 1]
+        gap = (max(highs) - min(lows)) * 0.07 or 1.0
+        placed = []
+        for name, x, y, color in sorted(ends, key=lambda e: e[2]):
+            label_y = max(y, placed[-1] + gap) if placed else y
+            placed.append(label_y)
+            fig.add_trace(go.Scatter(
+                x=[x], y=[y], mode="markers", showlegend=False, hoverinfo="skip",
+                marker=dict(color=color, size=8, line=dict(color=SURFACE, width=2)),
+            ))
+            value = f"{value_prefix}{y:,.0f}" if abs(y) >= 100 else f"{value_prefix}{y:,.2f}"
+            # The colour tag ties a nudged label back to its line; the value stays ink.
+            text = f'<span style="color:{color}">●</span> {value}'
+            # Anchored to the plot's right edge, in the margin: an annotation on the
+            # date axis would stretch that axis past the data to make room for it.
+            annotations.append(dict(
+                x=1, y=label_y, xref="paper", yref="y", xanchor="left", yanchor="middle",
+                xshift=6, showarrow=False, text=text,
+                font=dict(size=11, color=INK_2),
+            ))
 
     fig.update_layout(**plotly_layout(
         height=height,
         showlegend=len(series_map) > 1,
-        margin=dict(l=8, r=8, t=28 if len(series_map) > 1 else 8, b=8),
+        margin=dict(l=8, r=78 if annotations else 8,
+                    t=28 if len(series_map) > 1 else 8, b=8),
+        annotations=annotations,
         xaxis=dict(showspikes=True, spikecolor=BORDER_STRONG,
                    spikethickness=1, spikemode="across", spikedash="dot"),
     ))
@@ -93,7 +123,10 @@ def underwater(dd_series, height: int = 240) -> go.Figure:
         x=dd_series.index, y=dd_series.to_numpy() * 100,
         mode="lines", name="Drawdown",
         line=dict(color=NEG, width=1.6),
-        fill="tozeroy", fillcolor="rgba(226,80,79,0.16)",
+        # A risk zone: the Carnet hatch over a faint tint (see `.js-plotly-plot pattern`).
+        fill="tozeroy", fillcolor=fade(NEG, 0.05),
+        fillpattern=dict(shape="-", fgcolor=fade(NEG, 0.55), bgcolor=fade(NEG, 0.05),
+                         size=7, solidity=0.16),
         hovertemplate="<b>%{y:.2f}%</b><extra></extra>",
     ))
     fig.update_layout(**plotly_layout(
@@ -113,7 +146,7 @@ def rolling_metric(rolling_df, column: str, height: int = 220,
     fig.add_trace(go.Scatter(
         x=rolling_df.index, y=values, mode="lines",
         line=dict(color=ACCENT, width=2),
-        fill="tozeroy", fillcolor="rgba(57,135,229,0.09)",
+        fill="tozeroy", fillcolor=fade(ACCENT, 0.09),
         hovertemplate=("<b>%{y:.2f}" + ("%" if as_pct else "") + "</b><extra></extra>"),
         name=column,
     ))
@@ -188,7 +221,7 @@ def weight_vs_risk(rc_df, height: int | None = None,
         x=rc_df["weight"] * 100, y=tickers, orientation="h",
         name=label_weight,
         marker=_bar_marker(PALETTE[0], opacity=0.55),
-        hovertemplate="<b>%{y}</b> — " + label_weight + " %{x:.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_weight + " %{x:.1f}%<extra></extra>",
         width=0.34, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -197,7 +230,7 @@ def weight_vs_risk(rc_df, height: int | None = None,
         marker=_bar_marker(PALETTE[1]),
         text=[f"{v * 100:.0f}%" for v in rc_df["pct_contribution"]],
         textposition="outside", textfont=dict(size=11, color=INK_2),
-        hovertemplate="<b>%{y}</b> — " + label_risk + " %{x:.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_risk + " %{x:.1f}%<extra></extra>",
         width=0.34, offset=0.0,
     ))
 
@@ -326,7 +359,7 @@ def concentration_curve(sorted_weights, height: int = 260) -> go.Figure:
         x=ranks, y=cumulative, mode="lines+markers", name="Portfolio",
         line=dict(color=ACCENT, width=2.4),
         marker=dict(size=8, color=ACCENT, line=dict(width=2, color=SURFACE)),
-        fill="tonexty", fillcolor="rgba(57,135,229,0.12)",
+        fill="tonexty", fillcolor=fade(ACCENT, 0.12),
         hovertemplate="Top %{x} positions = %{y:.1f}%<extra></extra>",
     ))
     fig.update_layout(**plotly_layout(
@@ -422,15 +455,15 @@ def health_gauge(score: float, height: int = 250, label: str = "",
                       tickfont=dict(size=10, color=INK_MUTED),
                       tickvals=[0, 25, 50, 75, 100]),
             bar=dict(color=color, thickness=0.30),
-            bgcolor="rgba(154,168,191,0.07)",
+            bgcolor=fade(NEUTRAL, 0.07),
             borderwidth=0,
             # Band edges mirror health._band exactly, so the background zones,
             # the arc colour and the band label all agree.
             steps=[
-                dict(range=[0, 35], color="rgba(226,80,79,0.10)"),
-                dict(range=[35, 50], color="rgba(232,137,74,0.10)"),
-                dict(range=[50, 65], color="rgba(232,163,23,0.10)"),
-                dict(range=[65, 100], color="rgba(22,185,121,0.10)"),
+                dict(range=[0, 35], color=fade(NEG, 0.10)),
+                dict(range=[35, 50], color=fade(SERIOUS, 0.10)),
+                dict(range=[50, 65], color=fade(WARNING, 0.10)),
+                dict(range=[65, 100], color=fade(POS, 0.10)),
             ],
             threshold=dict(line=dict(color=INK, width=2), thickness=0.78, value=score),
         ),
@@ -463,13 +496,13 @@ def radar(labels, values, height: int = 320, max_value: float = 100,
             r=closed_compare, theta=closed_labels, fill="toself",
             name=compare_name or "Reference",
             line=dict(color=INK_FAINT, width=1.5, dash="dot"),
-            fillcolor="rgba(154,168,191,0.07)",
+            fillcolor=fade(NEUTRAL, 0.07),
             hovertemplate="<b>%{theta}</b>  %{r:.0f}<extra></extra>",
         ))
     fig.add_trace(go.Scatterpolar(
         r=closed_values, theta=closed_labels, fill="toself", name=name,
         line=dict(color=ACCENT, width=2.2),
-        fillcolor="rgba(57,135,229,0.20)",
+        fillcolor=fade(ACCENT, 0.20),
         marker=dict(size=8, color=ACCENT, line=dict(width=2, color=SURFACE)),
         hovertemplate="<b>%{theta}</b>  %{r:.0f}<extra></extra>",
     ))
@@ -518,7 +551,7 @@ def factor_bars(loadings, height: int | None = None, label_fn=None,
         labels.append(name if significant else f"{name}  ({ns_suffix})")
         values.append(item["loading"])
         base = POS if item["loading"] >= 0 else NEG
-        colors.append(base if significant else "rgba(154,168,191,0.45)")
+        colors.append(base if significant else fade(NEUTRAL, 0.45))
         texts.append(f"{item['loading']:+.2f}")
 
     height = height or max(200, 32 * len(labels) + 40)
@@ -573,7 +606,7 @@ def scenario_bars(rows, height: int | None = None,
         marker=_bar_marker([NEG if r["portfolio"] < 0 else POS for r in rows]),
         text=[f"{r['portfolio'] * 100:+.1f}%" for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK_2),
-        hovertemplate="<b>%{y}</b> — " + label_portfolio + " %{x:+.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_portfolio + " %{x:+.1f}%<extra></extra>",
         width=0.34, offset=-0.34,
     ))
     has_bench = any(r.get("benchmark") is not None for r in rows)
@@ -581,8 +614,8 @@ def scenario_bars(rows, height: int | None = None,
         fig.add_trace(go.Bar(
             x=[(r.get("benchmark") or 0) * 100 for r in rows], y=labels, orientation="h",
             name=label_benchmark,
-            marker=_bar_marker("rgba(154,168,191,0.42)"),
-            hovertemplate="<b>%{y}</b> — " + label_benchmark + " %{x:+.1f}%<extra></extra>",
+            marker=_bar_marker(fade(NEUTRAL, 0.42)),
+            hovertemplate="<b>%{y}</b> · " + label_benchmark + " %{x:+.1f}%<extra></extra>",
             width=0.34, offset=0.0,
         ))
 
@@ -629,10 +662,10 @@ def before_after_bars(rows, height: int | None = None,
     fig.add_trace(go.Bar(
         x=[norm(r, "before") for r in rows], y=labels, orientation="h",
         name=label_before,
-        marker=_bar_marker("rgba(154,168,191,0.40)"),
+        marker=_bar_marker(fade(NEUTRAL, 0.40)),
         text=[r["before_text"] for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK_MUTED),
-        hovertemplate="<b>%{y}</b> — " + label_before + " %{text}<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_before + " %{text}<extra></extra>",
         width=0.32, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -641,7 +674,7 @@ def before_after_bars(rows, height: int | None = None,
         marker=_bar_marker([STATUS[r.get("tone", "warning")] for r in rows]),
         text=[r["after_text"] for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK),
-        hovertemplate="<b>%{y}</b> — " + label_after + " %{text}<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_after + " %{text}<extra></extra>",
         width=0.32, offset=0.02,
     ))
     fig.update_layout(**plotly_layout(
@@ -687,7 +720,7 @@ def frontier_scatter(result: dict, height: int = 430, lang: str = "en") -> go.Fi
             x=[a["volatility"] * 100 for a in assets],
             y=[a["return"] * 100 for a in assets],
             mode="markers+text", name="Holdings" if lang == "en" else "Positions",
-            marker=dict(size=9, color="rgba(154,168,191,0.55)", symbol="circle",
+            marker=dict(size=9, color=fade(NEUTRAL, 0.55), symbol="circle",
                         line=dict(width=1.5, color=SURFACE)),
             text=[a["ticker"] for a in assets],
             textposition="top center",
@@ -805,16 +838,16 @@ def fan_chart(result: dict, height: int = 420, currency: str = "$",
         fig.add_trace(go.Scatter(
             x=np.concatenate([x, x[::-1]]),
             y=np.concatenate([percentiles[upper], percentiles[lower][::-1]]),
-            fill="toself", fillcolor=f"rgba(57,135,229,{opacity})",
+            fill="toself", fillcolor=fade(ACCENT, opacity),
             line=dict(width=0), hoverinfo="skip",
-            name=f"{lower}–{upper}% {band_label}",
+            name=f"{lower}-{upper}% {band_label}",
         ))
 
     for p, width, dash in ((10, 1, "dot"), (90, 1, "dot")):
         if p in percentiles:
             fig.add_trace(go.Scatter(
                 x=x, y=percentiles[p], mode="lines", name=f"P{p}",
-                line=dict(color="rgba(57,135,229,0.55)", width=width, dash=dash),
+                line=dict(color=fade(ACCENT, 0.55), width=width, dash=dash),
                 hovertemplate=f"P{p}  {currency}%{{y:,.0f}}<extra></extra>",
             ))
 
@@ -944,7 +977,7 @@ def trading_equity(points, height: int = 360, currency: str = "$",
             peaks.append(running)
         fig.add_trace(go.Scatter(
             x=x, y=peaks, mode="lines", name="Peak" if lang == "en" else "Sommet",
-            line=dict(color="rgba(154,168,191,0.35)", width=1, dash="dot"),
+            line=dict(color=fade(NEUTRAL, 0.35), width=1, dash="dot"),
             hoverinfo="skip",
         ))
 
@@ -954,7 +987,7 @@ def trading_equity(points, height: int = 360, currency: str = "$",
         x=x, y=y, mode="lines", name="P&L",
         line=dict(color=colour, width=2.4),
         fill="tozeroy",
-        fillcolor="rgba(22,185,121,0.10)" if final >= 0 else "rgba(226,80,79,0.10)",
+        fillcolor=fade(POS, 0.10) if final >= 0 else fade(NEG, 0.10),
         hovertemplate=f"{currency}%{{y:,.2f}}<extra></extra>",
     ))
     fig.add_hline(y=0, line=dict(color=AXIS, width=1))
@@ -1073,7 +1106,7 @@ def trading_breakdown(rows, height: int | None = None, metric: str = "net_pnl",
     labels = [f"{r['label']}  ({r['n']})" for r in rows]
     colours = [
         (POS if v >= 0 else NEG) if r["reliable"]
-        else ("rgba(22,185,121,0.40)" if v >= 0 else "rgba(226,80,79,0.40)")
+        else (fade(POS, 0.40) if v >= 0 else fade(NEG, 0.40))
         for v, r in zip(values, rows)
     ]
 
@@ -1132,7 +1165,7 @@ def trading_risk_over_time(points, height: int = 240, currency: str = "$",
 
     fig = go.Figure(go.Scatter(
         x=x, y=y, mode="lines", line=dict(color=ACCENT, width=2),
-        fill="tozeroy", fillcolor="rgba(57,135,229,0.09)",
+        fill="tozeroy", fillcolor=fade(ACCENT, 0.09),
         hovertemplate=f"{currency}%{{y:,.2f}}<extra></extra>",
     ))
     # Annotated on the right — at top left the label lands on the y-axis tick
@@ -1169,9 +1202,9 @@ def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.
     fig.add_trace(go.Bar(
         x=outside, y=labels, orientation="h",
         name="Rest" if lang == "en" else "Les autres",
-        marker=_bar_marker("rgba(154,168,191,0.42)"),
+        marker=_bar_marker(fade(NEUTRAL, 0.42)),
         customdata=[[r["rest"]["n"]] for r in rows],
-        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        hovertemplate="<b>%{y}</b> · %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
         width=0.32, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -1181,7 +1214,7 @@ def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.
         text=[f"{v:+.2f}  n={r['group']['n']}" for v, r in zip(inside, rows)],
         textposition="outside", textfont=dict(size=11, color=INK_2),
         customdata=[[r["group"]["n"]] for r in rows],
-        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        hovertemplate="<b>%{y}</b> · %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
         width=0.32, offset=0.02,
     ))
 

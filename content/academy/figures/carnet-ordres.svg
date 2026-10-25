@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Carnet d'ordres simplifié</title>
+<desc id="d">Trois niveaux de prix vendeurs au-dessus de trois niveaux de prix acheteurs. Le meilleur prix vendeur est 1,08508, le meilleur prix acheteur 1,08500 ; l'écart de 0,8 pip est le spread.</desc>
+<g font-size="12" fill="#5b646b"><text x="70" y="28" letter-spacing="1.5">PRIX</text><text x="190" y="28" letter-spacing="1.5">QUANTITÉ DISPONIBLE</text></g>
+<g font-size="13">
+<text x="70" y="62" fill="#8a4a40">1,08524</text><rect x="190" y="49" width="150" height="18" rx="2" fill="#a3564a" opacity=".22"/><text x="350" y="62" fill="#5b646b">3,0 M</text>
+<text x="70" y="92" fill="#8a4a40">1,08516</text><rect x="190" y="79" width="90" height="18" rx="2" fill="#a3564a" opacity=".22"/><text x="290" y="92" fill="#5b646b">1,8 M</text>
+<text x="70" y="122" fill="#8a4a40" font-weight="700">1,08508</text><rect x="190" y="109" width="60" height="18" rx="2" fill="#a3564a" opacity=".38"/><text x="260" y="122" fill="#5b646b">1,2 M</text>
+<text x="70" y="182" fill="#3f6553" font-weight="700">1,08500</text><rect x="190" y="169" width="75" height="18" rx="2" fill="#4e7461" opacity=".38"/><text x="275" y="182" fill="#5b646b">1,5 M</text>
+<text x="70" y="212" fill="#3f6553">1,08492</text><rect x="190" y="199" width="120" height="18" rx="2" fill="#4e7461" opacity=".22"/><text x="320" y="212" fill="#5b646b">2,4 M</text>
+<text x="70" y="242" fill="#3f6553">1,08484</text><rect x="190" y="229" width="170" height="18" rx="2" fill="#4e7461" opacity=".22"/><text x="370" y="242" fill="#5b646b">3,4 M</text>
+</g>
+<line x1="60" y1="150" x2="420" y2="150" stroke="#b9b4a7" stroke-dasharray="4 4"/>
+<g stroke="#284764" stroke-width="1.4" fill="none"><path d="M440 117 H458 V177 H440"/></g>
+<g font-size="13" fill="#1b2733"><text x="470" y="140" font-weight="700">Spread</text><text x="470" y="158" fill="#5b646b">0,8 pip</text></g>
+<g font-size="12"><text x="470" y="96" fill="#8a4a40">Vendeurs (ask)</text><text x="470" y="112" fill="#5b646b">vous achetez ici</text>
+<text x="470" y="204" fill="#3f6553">Acheteurs (bid)</text><text x="470" y="220" fill="#5b646b">vous vendez ici</text></g>
+<text x="70" y="282" font-size="11" fill="#7b8389">Chiffres illustratifs.</text>
+</svg>

@@ -1,0 +1,74 @@
+id = "check-regles"
+title = "Contrôle : une règle testable"
+course = "tester-une-strategie"
+lesson = "regles-explicites"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "test"
+prompt = "Quand une règle est-elle explicite ?"
+kind = "single"
+lesson = "regles-explicites"
+
+[[question.option]]
+id = "deux"
+text = "Quand deux lecteurs prennent exactement les mêmes trades sur le même historique."
+correct = true
+explanation = "C'est le test des deux lecteurs."
+
+[[question.option]]
+id = "courte"
+text = "Quand elle tient en une phrase."
+explanation = "Une règle courte laisse souvent plus de place à l'interprétation."
+
+[[question.option]]
+id = "gagne"
+text = "Quand elle donne un bon résultat."
+explanation = "Le résultat ne dit rien de la précision de la règle."
+
+[[question]]
+id = "vague"
+prompt = "Laquelle de ces formulations est testable ?"
+kind = "single"
+lesson = "regles-explicites"
+
+[[question.option]]
+id = "seuil"
+text = "Entrer au milieu d'un FVG d'au moins 5 pips en M15, après une cassure de structure en clôture."
+correct = true
+explanation = "Chaque terme est vérifiable."
+
+[[question.option]]
+id = "propre"
+text = "Entrer sur un FVG propre après un fort mouvement."
+explanation = "« Propre » et « fort » laissent place à l'interprétation."
+
+[[question.option]]
+id = "contexte"
+text = "Entrer quand le contexte s'y prête."
+explanation = "Le contexte n'est pas défini."
+
+[[question]]
+id = "parties"
+prompt = "Lesquelles font partie des six parties d'une règle ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "regles-explicites"
+
+[[question.option]]
+id = "invalidation"
+text = "L'invalidation."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "taille"
+text = "La taille."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "intuition"
+text = "L'intuition du moment."
+explanation = "Elle ne peut pas être testée."

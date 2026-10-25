@@ -1,0 +1,73 @@
+id = "check-hors-echantillon"
+title = "Contrôle : la validation hors échantillon"
+course = "tester-une-strategie"
+lesson = "hors-echantillon"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "role"
+prompt = "À quoi sert l'échantillon de test ?"
+kind = "single"
+lesson = "hors-echantillon"
+
+[[question.option]]
+id = "une"
+text = "À tester une seule fois la règle figée."
+correct = true
+explanation = "Il ne sert qu'une fois."
+
+[[question.option]]
+id = "ajuster"
+text = "À ajuster les seuils de la règle."
+explanation = "Il deviendrait alors un échantillon de construction."
+
+[[question.option]]
+id = "rien"
+text = "À rien, l'échantillon de construction suffit."
+explanation = "C'est la seule protection contre le surajustement."
+
+[[question]]
+id = "degradation"
+prompt = "+0,35R dans l'échantillon, +0,08R hors échantillon. Dégradation ?"
+kind = "single"
+lesson = "hors-echantillon"
+
+[[question.option]]
+id = "77"
+text = "Environ 77 %"
+correct = true
+explanation = "1 − 0,08 ÷ 0,35."
+
+[[question.option]]
+id = "27"
+text = "Environ 27 %"
+explanation = "C'est l'écart en R, 0,27R, pas la dégradation."
+
+[[question.option]]
+id = "23"
+text = "Environ 23 %"
+explanation = "C'est la part conservée, 0,08 ÷ 0,35."
+
+[[question]]
+id = "forward"
+prompt = "Qu'ajoute le test en temps réel au backtest ?"
+kind = "single"
+lesson = "hors-echantillon"
+
+[[question.option]]
+id = "execution"
+text = "L'exécution réelle et votre discipline face à une suite inconnue."
+correct = true
+explanation = "Aucun historique ne les mesure."
+
+[[question.option]]
+id = "preuve"
+text = "La preuve définitive que la stratégie marche."
+explanation = "Aucun test ne fournit de preuve définitive."
+
+[[question.option]]
+id = "rien"
+text = "Rien, si le backtest était bien fait."
+explanation = "L'exécution et la discipline restent à mesurer."

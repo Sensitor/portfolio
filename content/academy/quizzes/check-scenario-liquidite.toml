@@ -1,0 +1,52 @@
+id = "check-scenario-liquidite"
+title = "Contrôle : le scénario autour d'un sweep"
+course = "liquidite-et-scenarios"
+lesson = "scenario-liquidite"
+feedback = "immediate"
+pass_threshold = 0.5
+version = 1
+
+[[question]]
+id = "invalidation"
+prompt = "Pourquoi l'invalidation est-elle placée au-dessus du plus haut du sweep ?"
+kind = "single"
+lesson = "scenario-liquidite"
+
+[[question.option]]
+id = "au-dela"
+text = "Parce qu'au-dessus, le prix a tenu au-delà du niveau : le sweep n'en est plus un."
+correct = true
+explanation = "Oui : l'invalidation vient du constat, pas du budget."
+
+[[question.option]]
+id = "budget"
+text = "Parce que c'est là que la perte vaut exactement 100 $."
+explanation = "On place l'invalidation d'abord ; la taille s'adapte ensuite."
+
+[[question.option]]
+id = "habitude"
+text = "Par habitude, pour laisser de la marge."
+explanation = "La marge est utile, mais la raison est structurelle."
+
+[[question]]
+id = "specification"
+prompt = "Le même calcul avec un contrat de 10 onces par lot au lieu de 100 donnerait :"
+kind = "single"
+lesson = "scenario-liquidite"
+explanation = "Valeur d'un mouvement de 1 $ : 10 $ par lot. 100 ÷ (6,50 × 10) = 1,538, soit 1,53 lot."
+
+[[question.option]]
+id = "dix-fois"
+text = "Une taille environ dix fois plus grande en lots."
+correct = true
+explanation = "Oui : d'où l'importance de vérifier la spécification avant tout calcul."
+
+[[question.option]]
+id = "identique"
+text = "La même taille."
+explanation = "La valeur d'un mouvement par lot change : la taille aussi."
+
+[[question.option]]
+id = "dix-fois-moins"
+text = "Une taille dix fois plus petite."
+explanation = "Un contrat plus petit demande plus de lots pour le même risque."

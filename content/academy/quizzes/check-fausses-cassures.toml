@@ -1,0 +1,73 @@
+id = "check-fausses-cassures"
+title = "Contrôle : fausse ou vraie cassure"
+course = "liquidite-et-scenarios"
+lesson = "fausses-cassures"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "difference"
+prompt = "Qu'est-ce qui distingue une fausse cassure d'un sweep ?"
+kind = "single"
+lesson = "fausses-cassures"
+
+[[question.option]]
+id = "cloture"
+text = "Dans une fausse cassure, une clôture a franchi le niveau avant que le prix ne revienne."
+correct = true
+explanation = "Oui : dans un sweep, aucune clôture n'a franchi le niveau."
+
+[[question.option]]
+id = "taille"
+text = "La fausse cassure est plus grande."
+explanation = "La taille du dépassement ne fait pas la différence ; la clôture, si."
+
+[[question.option]]
+id = "rien"
+text = "Rien, ce sont deux noms pour la même chose."
+explanation = "La convention de clôture les distingue nettement."
+
+[[question]]
+id = "savoir"
+prompt = "Au moment où une bougie clôture au-delà du niveau, peut-on savoir si la cassure est fausse ?"
+kind = "single"
+lesson = "fausses-cassures"
+
+[[question.option]]
+id = "non"
+text = "Non : les deux suites commencent par la même bougie."
+correct = true
+explanation = "Oui : on ne le sait qu'après coup."
+
+[[question.option]]
+id = "oui-meche"
+text = "Oui, à la taille de la mèche."
+explanation = "Aucun signe sur la bougie de cassure ne dit ce qui suivra."
+
+[[question.option]]
+id = "oui-heure"
+text = "Oui, selon l'heure de la journée."
+explanation = "L'heure peut influencer la volatilité, pas révéler la suite."
+
+[[question]]
+id = "retrospectif"
+prompt = "« Cette fausse cassure était évidente. » Quel biais cette phrase illustre-t-elle souvent ?"
+kind = "single"
+lesson = "fausses-cassures"
+
+[[question.option]]
+id = "retrospectif"
+text = "Le biais rétrospectif."
+correct = true
+explanation = "Oui : on juge avec une information qui n'existait pas au moment de décider."
+
+[[question.option]]
+id = "confirmation"
+text = "L'excès de prudence."
+explanation = "Ce n'est pas un excès de prudence : c'est une reconstruction après coup."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, c'est une observation."
+explanation = "« Évidente » décrit ce que l'on croit avoir pu savoir, pas ce que l'on savait."

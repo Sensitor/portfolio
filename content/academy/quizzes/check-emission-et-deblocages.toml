@@ -1,0 +1,73 @@
+id = "check-emission-et-deblocages"
+title = "Contrôle : émission et déblocages"
+course = "analyser-un-projet-crypto"
+lesson = "emission-et-deblocages"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "deblocage"
+prompt = "L'offre en circulation passe de 400 à 500 millions. Baisse de prix qui garde la capitalisation ?"
+kind = "single"
+lesson = "emission-et-deblocages"
+
+[[question.option]]
+id = "20"
+text = "−20 %"
+correct = true
+explanation = "Oui : 400 ÷ 500 − 1."
+
+[[question.option]]
+id = "25"
+text = "−25 %"
+explanation = "C'est la hausse de l'offre, pas la baisse de prix."
+
+[[question.option]]
+id = "0"
+text = "Aucune"
+explanation = "Sans demande nouvelle, le prix doit s'ajuster."
+
+[[question]]
+id = "staking"
+prompt = "Le staking rapporte 8 % et l'offre croît de 8 % par an. Que gagne celui qui stake ?"
+kind = "single"
+lesson = "emission-et-deblocages"
+
+[[question.option]]
+id = "part"
+text = "Il conserve sa part de l'offre, sans plus."
+correct = true
+explanation = "Oui : le rendement compense la dilution."
+
+[[question.option]]
+id = "huit"
+text = "8 % de richesse en plus."
+explanation = "L'offre croît d'autant."
+
+[[question.option]]
+id = "perte"
+text = "Il perd 8 %."
+explanation = "C'est celui qui ne stake pas qui est dilué."
+
+[[question]]
+id = "burn"
+prompt = "Qu'est-ce qu'un burn ?"
+kind = "single"
+lesson = "emission-et-deblocages"
+
+[[question.option]]
+id = "destruction"
+text = "La destruction de jetons, l'inverse de l'émission."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "vol"
+text = "Un vol de jetons."
+explanation = "C'est une destruction volontaire."
+
+[[question.option]]
+id = "frais"
+text = "Un frais de transaction."
+explanation = "Une partie des frais peut servir à détruire des jetons."

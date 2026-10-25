@@ -1,0 +1,42 @@
+id = "frais-ethereum"
+title = "Ce que coûte un envoi sur Ethereum"
+context = """
+Un transfert simple d'ether consomme **21 000 unités de gaz**. Le prix du gaz est de **20 gwei** ; un gwei vaut un milliardième d'ether. L'ether cote **3 000 dollars**. *Chiffres construits pour l'exercice.*
+
+Un transfert de jeton, lui, consomme ici **65 000 unités** de gaz.
+"""
+conclusion = """
+Le transfert d'ether coûte 0,00042 ETH, environ 1,26 dollar ; le transfert de jeton, trois fois plus de gaz, environ 3,90 dollars. Les frais dépendent du travail demandé au réseau et de la demande du moment, pas du montant envoyé : envoyer 10 dollars ou 10 000 dollars coûte la même chose.
+"""
+
+[[step]]
+id = "gwei"
+prompt = "Combien de gwei coûte le transfert d'ether ?"
+unit = "gwei"
+answer = 420000
+tolerance = 0.5
+solution = "21 000 × 20 = **420 000 gwei**."
+
+[[step]]
+id = "eth"
+prompt = "Et en ether ? (Cinq décimales.)"
+unit = "ETH"
+answer = 0.00042
+tolerance = 0.000001
+solution = "420 000 ÷ 1 000 000 000 = **0,00042 ETH**."
+
+[[step]]
+id = "dollars"
+prompt = "Et en dollars ?"
+unit = "$"
+answer = 1.26
+tolerance = 0.006
+solution = "0,00042 × 3 000 = **1,26 dollar**."
+
+[[step]]
+id = "jeton"
+prompt = "Que coûte le transfert de jeton, en dollars ?"
+unit = "$"
+answer = 3.90
+tolerance = 0.006
+solution = "65 000 × 20 = 1 300 000 gwei, soit 0,0013 ETH × 3 000 = **3,90 dollars**."

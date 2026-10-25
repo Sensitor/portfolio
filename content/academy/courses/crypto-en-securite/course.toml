@@ -1,0 +1,39 @@
+id = "crypto-en-securite"
+path = "blockchain-securite"
+title = "Utiliser la crypto en sécurité"
+summary = "Huit leçons pour passer de la théorie à la pratique sans perdre ses fonds : les autres réseaux et les jetons, les stablecoins et leurs risques, les portefeuilles et la phrase de récupération, l'envoi et la réception, les plateformes d'échange et les pools automatiques, puis les arnaques qui visent les débutants comme les initiés."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Distinguer une cryptomonnaie native, un jeton et un stablecoin, et les risques de chacun.",
+  "Choisir entre garder soi-même et confier, et sauvegarder une phrase de récupération correctement.",
+  "Envoyer des fonds sans erreur de réseau ni d'adresse, et calculer ce que coûte une transaction.",
+  "Reconnaître les arnaques courantes et les risques de contrepartie d'une plateforme.",
+]
+prerequisites = ["Bitcoin : origines et fonctionnement"]
+final_quiz = "crypto-securite-validation"
+
+[[module]]
+id = "reseaux"
+title = "Les réseaux et les jetons"
+summary = "Au-delà de Bitcoin : les réseaux programmables, les jetons qu'ils portent, et les stablecoins, censés valoir un dollar."
+lessons = ["au-dela-de-bitcoin", "stablecoins"]
+
+[[module]]
+id = "garder"
+title = "Garder ses fonds"
+summary = "Qui détient les clés, comment sauvegarder une phrase de récupération, et comment envoyer sans erreur irréversible."
+lessons = ["portefeuilles", "phrase-de-recuperation", "envoyer-recevoir"]
+
+[[module]]
+id = "plateformes"
+title = "Plateformes et arnaques"
+summary = "Les plateformes centralisées et les pools automatiques, ce qu'ils coûtent vraiment, et les escroqueries les plus répandues."
+lessons = ["plateformes-echange", "arnaques"]
+
+[[module]]
+id = "synthese"
+title = "Synthèse"
+summary = "La liste de contrôle d'un usage sûr, puis le quiz de validation."
+lessons = ["recap-crypto-securite"]

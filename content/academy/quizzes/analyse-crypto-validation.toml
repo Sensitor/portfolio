@@ -1,0 +1,228 @@
+id = "analyse-crypto-validation"
+title = "Quiz de validation : Analyser un projet crypto"
+course = "analyser-un-projet-crypto"
+lesson = "grille-analyse"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "cap"
+prompt = "Que faut-il comparer d'un projet à l'autre ?"
+kind = "single"
+lesson = "prix-et-capitalisation"
+
+[[question.option]]
+id = "cap"
+text = "La capitalisation, et la valorisation diluée."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "prix"
+text = "Le prix unitaire."
+explanation = "Il dépend du nombre de jetons."
+
+[[question.option]]
+id = "nom"
+text = "La notoriété du nom."
+explanation = "Elle ne mesure aucune valeur."
+
+[[question]]
+id = "prix"
+prompt = "Capitalisation 1 milliard, 10 milliards de jetons à terme. Prix à capitalisation inchangée ?"
+kind = "single"
+lesson = "prix-et-capitalisation"
+
+[[question.option]]
+id = "010"
+text = "0,10 dollar"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "1"
+text = "1 dollar"
+explanation = "Il faudrait une capitalisation de 10 milliards."
+
+[[question.option]]
+id = "050"
+text = "0,50 dollar"
+explanation = "C'est le prix de départ de l'exemple."
+
+[[question]]
+id = "non-staker"
+prompt = "Émission de staking de 8 % par an. Que devient la part de celui qui ne stake pas après un an ?"
+kind = "single"
+lesson = "emission-et-deblocages"
+
+[[question.option]]
+id = "926"
+text = "Environ 92,6 % de sa part initiale"
+correct = true
+explanation = "Oui : 1 ÷ 1,08."
+
+[[question.option]]
+id = "108"
+text = "108 %"
+explanation = "Il ne reçoit pas les nouveaux jetons."
+
+[[question.option]]
+id = "100"
+text = "100 %"
+explanation = "Sa part se dilue."
+
+[[question]]
+id = "subvention"
+prompt = "Un revenu net négatif signifie que :"
+kind = "single"
+lesson = "revenus-et-incitations"
+
+[[question.option]]
+id = "paie"
+text = "le protocole paie plus pour son activité qu'elle ne lui rapporte."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rentable"
+text = "le protocole est très rentable."
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "rien"
+text = "rien de particulier."
+explanation = "Cela ne peut pas durer."
+
+[[question]]
+id = "liquidation"
+prompt = "2 ETH en garantie, 3 000 USDC empruntés, seuil 80 %. Prix de liquidation ?"
+kind = "single"
+lesson = "preter-emprunter"
+
+[[question.option]]
+id = "1875"
+text = "1 875 dollars"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "1500"
+text = "1 500 dollars"
+explanation = "Il faut appliquer le seuil."
+
+[[question.option]]
+id = "2400"
+text = "2 400 dollars"
+explanation = "C'est 80 % de 3 000."
+
+[[question]]
+id = "cascade"
+prompt = "Qu'est-ce qu'une liquidation en cascade ?"
+kind = "single"
+lesson = "preter-emprunter"
+
+[[question.option]]
+id = "cascade"
+text = "Des liquidations qui vendent des garanties, font baisser les prix et déclenchent d'autres liquidations."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "une"
+text = "Une seule liquidation, très lente."
+explanation = "C'est un enchaînement rapide."
+
+[[question.option]]
+id = "gain"
+text = "Une série de gains."
+explanation = "C'est une série de ventes forcées."
+
+[[question]]
+id = "ip"
+prompt = "Le prix relatif quadruple. Perte impermanente ?"
+kind = "single"
+lesson = "perte-impermanente"
+
+[[question.option]]
+id = "20"
+text = "−20 %"
+correct = true
+explanation = "Oui : 2 × 2 ÷ 5 − 1."
+
+[[question.option]]
+id = "75"
+text = "−75 %"
+explanation = "C'est beaucoup trop."
+
+[[question.option]]
+id = "57"
+text = "−5,7 %"
+explanation = "C'est pour un prix qui double."
+
+[[question]]
+id = "oracle"
+prompt = "Qu'est-ce qu'une attaque d'oracle ?"
+kind = "single"
+lesson = "risques-defi"
+
+[[question.option]]
+id = "prix"
+text = "La manipulation du prix qu'utilise un contrat, pour liquider ou emprunter à tort."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "cle"
+text = "Le vol d'une phrase de récupération."
+explanation = "C'est un autre risque."
+
+[[question.option]]
+id = "vote"
+text = "Un vote de gouvernance."
+explanation = "C'est le risque de gouvernance."
+
+[[question]]
+id = "onchain"
+prompt = "Quelle différence entre données on-chain et données de marché ?"
+kind = "single"
+lesson = "risques-defi"
+
+[[question.option]]
+id = "verif"
+text = "Les premières se vérifient sur le registre ; les secondes demandent de faire confiance à leur source."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rien"
+text = "Aucune."
+explanation = "Leur fiabilité diffère."
+
+[[question.option]]
+id = "inverse"
+text = "Les données de marché se vérifient toujours mieux."
+explanation = "Elles peuvent contenir des échanges fictifs."
+
+[[question]]
+id = "signal"
+prompt = "Lequel de ces éléments suffit à écarter un projet ?"
+kind = "single"
+lesson = "grille-analyse"
+
+[[question.option]]
+id = "garanti"
+text = "Un rendement garanti très supérieur aux projets comparables, sans source expliquée."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "audit"
+text = "Un code public et audité."
+explanation = "C'est plutôt un bon signe."
+
+[[question.option]]
+id = "livre"
+text = "Un livre blanc qui décrit la répartition des jetons."
+explanation = "C'est ce qu'on attend."

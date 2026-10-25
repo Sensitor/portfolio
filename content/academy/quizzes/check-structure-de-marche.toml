@@ -1,0 +1,73 @@
+id = "check-structure-de-marche"
+title = "Contrôle : lire la structure"
+course = "premiers-pas"
+lesson = "structure-de-marche"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "decrire"
+prompt = "Sur un graphique, les sommets de swing successifs sont à 1,10, 1,12 puis 1,15 ; les creux à 1,08, 1,09 puis 1,11. Comment décrire la structure ?"
+kind = "single"
+lesson = "structure-de-marche"
+
+[[question.option]]
+id = "hausse"
+text = "Une tendance haussière."
+correct = true
+explanation = "Oui : chaque sommet dépasse le précédent et chaque creux reste au-dessus du précédent."
+
+[[question.option]]
+id = "baisse"
+text = "Une tendance baissière."
+explanation = "Une tendance baissière demanderait des sommets et des creux de plus en plus bas."
+
+[[question.option]]
+id = "range"
+text = "Un range."
+explanation = "Dans un range, sommets et creux butent sur des zones à peu près horizontales ; ici ils progressent."
+
+[[question]]
+id = "observation"
+prompt = "Laquelle de ces phrases est une observation, et non une interprétation ?"
+kind = "single"
+lesson = "structure-de-marche"
+
+[[question.option]]
+id = "cloture"
+text = "« Le prix a clôturé sous le dernier creux de swing en H4. »"
+correct = true
+explanation = "Oui : n'importe qui peut le vérifier sur le graphique."
+
+[[question.option]]
+id = "liquidite"
+text = "« Le marché va chercher la liquidité sous les plus bas. »"
+explanation = "C'est une hypothèse sur la suite : elle peut être juste ou fausse."
+
+[[question.option]]
+id = "vendeurs"
+text = "« Les vendeurs vont prendre le contrôle. »"
+explanation = "C'est une interprétation, et même une prévision. Elle devrait être accompagnée d'une invalidation."
+
+[[question]]
+id = "unites"
+prompt = "Sur le même actif, un trader décrit une tendance haussière en 15 minutes ; un autre, une tendance baissière en journalier. Qu'en conclure ?"
+kind = "single"
+lesson = "structure-de-marche"
+
+[[question.option]]
+id = "deux"
+text = "Les deux descriptions peuvent être exactes : elles portent sur des unités de temps différentes."
+correct = true
+explanation = "Oui. Une hausse de court terme peut s'inscrire dans une baisse de plus long terme."
+
+[[question.option]]
+id = "un"
+text = "L'un des deux se trompe forcément."
+explanation = "Pas nécessairement : chaque unité de temps a sa propre structure."
+
+[[question.option]]
+id = "court"
+text = "La tendance de plus court terme l'emporte toujours."
+explanation = "Aucune règle ne donne la priorité à une unité de temps ; c'est un choix de méthode."

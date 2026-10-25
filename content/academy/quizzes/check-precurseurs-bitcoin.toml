@@ -1,0 +1,73 @@
+id = "check-precurseurs-bitcoin"
+title = "Contrôle : les précurseurs"
+course = "bitcoin-fonctionnement"
+lesson = "precurseurs-bitcoin"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "hashcash"
+prompt = "Qu'apporte Hashcash, proposé par Adam Back en 1997 ?"
+kind = "single"
+lesson = "precurseurs-bitcoin"
+
+[[question.option]]
+id = "travail"
+text = "Une preuve de travail : coûteuse à produire, immédiate à vérifier."
+correct = true
+explanation = "Oui : imaginée contre le courrier indésirable."
+
+[[question.option]]
+id = "signature"
+text = "Les signatures aveugles."
+explanation = "C'est l'apport de David Chaum, en 1983."
+
+[[question.option]]
+id = "registre"
+text = "Le registre public de Bitcoin."
+explanation = "Il arrive avec le livre blanc de 2008."
+
+[[question]]
+id = "genese"
+prompt = "Que contient le bloc de genèse du 3 janvier 2009, en plus de sa transaction ?"
+kind = "single"
+lesson = "precurseurs-bitcoin"
+
+[[question.option]]
+id = "times"
+text = "Un titre du Times du jour, sur un second sauvetage des banques."
+correct = true
+explanation = "Oui : il prouve aussi que le bloc n'a pas été miné avant cette date."
+
+[[question.option]]
+id = "nom"
+text = "Le vrai nom de Satoshi Nakamoto."
+explanation = "Son identité reste inconnue."
+
+[[question.option]]
+id = "prix"
+text = "Le prix d'un bitcoin en dollars."
+explanation = "Il n'y avait pas de prix de marché en janvier 2009."
+
+[[question]]
+id = "premiere"
+prompt = "Quelle est la première transaction entre deux personnes ?"
+kind = "single"
+lesson = "precurseurs-bitcoin"
+
+[[question.option]]
+id = "finney"
+text = "10 bitcoins envoyés à Hal Finney, dans le bloc 170, le 12 janvier 2009."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "pizza"
+text = "Les deux pizzas payées 10 000 bitcoins."
+explanation = "C'est en mai 2010, l'un des premiers achats d'un bien réel."
+
+[[question.option]]
+id = "genese"
+text = "La récompense du bloc de genèse."
+explanation = "C'est une création de bitcoins, pas un échange."

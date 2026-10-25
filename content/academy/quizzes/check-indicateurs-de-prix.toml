@@ -1,0 +1,73 @@
+id = "check-indicateurs-de-prix"
+title = "Contrôle : les indicateurs fondés sur le prix"
+course = "metriques-on-chain"
+lesson = "indicateurs-de-prix"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "pr"
+prompt = "Qu'est-ce que le prix réalisé ?"
+kind = "single"
+lesson = "indicateurs-de-prix"
+
+[[question.option]]
+id = "moyen"
+text = "Le prix moyen auquel les pièces ont bougé pour la dernière fois : le prix d'acquisition moyen des détenteurs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "dernier"
+text = "Le dernier prix échangé sur une plateforme."
+explanation = "C'est le prix de marché."
+
+[[question.option]]
+id = "max"
+text = "Le plus haut historique."
+explanation = "Ce n'est pas sa définition."
+
+[[question]]
+id = "mvrv"
+prompt = "Prix de marché 45, prix réalisé 32,50. MVRV ?"
+kind = "single"
+lesson = "indicateurs-de-prix"
+
+[[question.option]]
+id = "138"
+text = "Environ 1,38"
+correct = true
+explanation = "Oui : 45 ÷ 32,50."
+
+[[question.option]]
+id = "072"
+text = "Environ 0,72"
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "125"
+text = "12,5"
+explanation = "C'est l'écart, pas le rapport."
+
+[[question]]
+id = "signal"
+prompt = "Un MVRV élevé est-il un signal de vente ?"
+kind = "single"
+lesson = "indicateurs-de-prix"
+
+[[question.option]]
+id = "non"
+text = "Non : c'est un thermomètre, qui peut rester élevé longtemps."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Aucun indicateur n'est un signal infaillible."
+
+[[question.option]]
+id = "seuil"
+text = "Oui, au-delà de 2."
+explanation = "Les seuils ont été ajustés après coup sur peu de cycles."

@@ -1,0 +1,80 @@
+id = "check-taux-interet"
+title = "Contrôle : le taux d'intérêt"
+course = "la-monnaie"
+lesson = "taux-interet"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "composantes"
+prompt = "Que rémunère un taux d'intérêt ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "taux-interet"
+
+[[question.option]]
+id = "temps"
+text = "Le temps pendant lequel le prêteur renonce à son argent."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "risque"
+text = "Le risque de non-remboursement."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "prix"
+text = "La baisse de pouvoir d'achat attendue."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "bien"
+text = "La valeur du bien acheté avec le crédit."
+explanation = "Elle fixe le montant emprunté, pas le taux."
+
+[[question]]
+id = "debut"
+prompt = "Au début d'un crédit amortissable, une mensualité paie surtout :"
+kind = "single"
+lesson = "taux-interet"
+
+[[question.option]]
+id = "interets"
+text = "des intérêts."
+correct = true
+explanation = "Le capital restant dû est encore élevé."
+
+[[question.option]]
+id = "capital"
+text = "du capital."
+explanation = "C'est le cas à la fin du crédit."
+
+[[question.option]]
+id = "egal"
+text = "autant d'intérêts que de capital, toujours."
+explanation = "La répartition change chaque mois."
+
+[[question]]
+id = "comparer"
+prompt = "Pour comparer deux crédits, on regarde d'abord :"
+kind = "single"
+lesson = "taux-interet"
+
+[[question.option]]
+id = "cout"
+text = "le coût total, à durée égale, assurance et frais compris."
+correct = true
+explanation = "La mensualité seule peut tromper."
+
+[[question.option]]
+id = "mensualite"
+text = "la mensualité la plus basse."
+explanation = "Allonger la durée la baisse mais augmente le coût."
+
+[[question.option]]
+id = "banque"
+text = "la notoriété de la banque."
+explanation = "Ce n'est pas un critère de coût."

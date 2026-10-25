@@ -22,7 +22,7 @@ from ..ui.components import (
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
 from ..core.i18n import define, tr
-from ._shared import guard, period_selector
+from ._shared import chart_with_reading, guard, period_selector
 
 
 def render_optimize(ctx) -> None:
@@ -54,7 +54,7 @@ def render_optimize(ctx) -> None:
     min_vol = result.get("min_volatility")
 
     # ── Named portfolios ─────────────────────────────────────────────────────
-    section(tr("efficient_frontier", lang).upper(),
+    section(tr("efficient_frontier", lang),
             f"{len(result['tickers'])} {tr('assets', lang).lower()} · {ctx.period}")
 
     c1, c2, c3 = st.columns(3, gap="medium")
@@ -91,14 +91,22 @@ def render_optimize(ctx) -> None:
             )
 
     spacer(10)
-    st.plotly_chart(
+    chart_with_reading(
         C.frontier_scatter(result, lang=lang),
-        width="stretch", config=PLOTLY_CONFIG_ZOOM, key="opt_frontier",
+        "opt_frontier",
+        [
+            tr("rd_opt_current", lang).format(period=ctx.period, r=pct(current["return"], 1),
+                                              v=pct(current["volatility"], 1)),
+            tr("rd_opt_sharpe", lang).format(r=pct(max_sharpe["return"], 1),
+                                             v=pct(max_sharpe["volatility"], 1)) if max_sharpe else "",
+            tr("rd_opt_minvol", lang).format(v=pct(min_vol["volatility"], 1)) if min_vol else "",
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM, foot=tr("reading_foot_estimate", lang),
     )
     note(tr("frontier_note", lang))
 
     # ── Move to a target allocation ──────────────────────────────────────────
-    section(tr("allocation_change", lang).upper())
+    section(tr("allocation_change", lang))
 
     targets = {}
     if max_sharpe:

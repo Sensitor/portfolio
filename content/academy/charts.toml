@@ -1,0 +1,736 @@
+# Les graphiques interactifs que les leçons appellent avec « ::: chart <id> ».
+# Chaque graphique lit un jeu de données de data/datasets.toml ; sa source
+# s'affiche automatiquement en dessous.
+
+[[chart]]
+id = "emission-bitcoin"
+dataset = "btc-emission"
+kind = "step"
+x = "date"
+x_label = "Début de l'époque"
+y_label = "BTC en circulation"
+highlight = "estimation"
+title = "L'offre de Bitcoin, époque par époque"
+
+[[chart.series]]
+column = "offre"
+label = "Offre en circulation (BTC)"
+
+[[chart]]
+id = "recompense-bitcoin"
+dataset = "btc-emission"
+kind = "bar"
+x = "date"
+x_label = "Début de l'époque"
+y_label = "BTC créés par bloc"
+highlight = "estimation"
+title = "La récompense de bloc, divisée par deux tous les 210 000 blocs"
+
+[[chart.series]]
+column = "recompense"
+label = "Récompense par bloc (BTC)"
+
+[[chart]]
+id = "taux-bce-fed"
+dataset = "taux-directeurs"
+kind = "step"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Le prix de l'argent fixé par deux banques centrales, depuis 1999"
+
+[[chart.series]]
+column = "bce_depot"
+label = "BCE, facilité de dépôt"
+
+[[chart.series]]
+column = "fed_funds"
+label = "États-Unis, fonds fédéraux (effectif)"
+
+[[chart]]
+id = "credit-interets-capital"
+dataset = "credit-amortissement"
+kind = "bar"
+stacked = true
+x = "annee"
+x_label = "Année du crédit"
+y_label = "Remboursé dans l'année, en €"
+title = "Ce que paie chaque année l'emprunteur : d'abord des intérêts, puis du capital"
+
+[[chart.series]]
+column = "interets"
+label = "Intérêts"
+
+[[chart.series]]
+column = "capital"
+label = "Capital remboursé"
+
+[[chart]]
+id = "inflation-trois-zones"
+dataset = "inflation-zone-euro-france-us"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Hausse des prix sur un an, en %"
+title = "L'inflation sur un an, depuis 1997"
+
+[[chart.series]]
+column = "zone_euro"
+label = "Zone euro"
+
+[[chart.series]]
+column = "france"
+label = "France"
+
+[[chart.series]]
+column = "etats_unis"
+label = "États-Unis"
+
+[[chart]]
+id = "inflation-composantes"
+dataset = "inflation-composantes-zone-euro"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Hausse des prix sur un an, en %"
+title = "Ce qui monte : l'inflation de la zone euro par composante"
+
+[[chart.series]]
+column = "energie"
+label = "Énergie"
+
+[[chart.series]]
+column = "alimentation"
+label = "Alimentation"
+
+[[chart.series]]
+column = "services"
+label = "Services"
+
+[[chart.series]]
+column = "biens"
+label = "Biens hors énergie"
+
+[[chart.series]]
+column = "sous_jacente"
+label = "Inflation sous-jacente"
+
+[[chart]]
+id = "m3-inflation"
+dataset = "m3-inflation-zone-euro"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux de croissance sur un an, en %"
+title = "La masse monétaire et les prix ne bougent pas au même rythme"
+
+[[chart.series]]
+column = "m3"
+label = "Masse monétaire M3"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart]]
+id = "pouvoir-achat-100-euros"
+dataset = "pouvoir-achat-france"
+kind = "area"
+x = "mois"
+x_label = "Janvier de chaque année"
+y_label = "Pouvoir d'achat, en € de janvier 1996"
+title = "100 € gardés en billets depuis janvier 1996"
+
+[[chart.series]]
+column = "valeur_reelle_100"
+label = "Valeur réelle de 100 €"
+
+[[chart]]
+id = "inflation-taux-us"
+dataset = "inflation-taux-etats-unis"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Soixante ans d'inflation et de taux aux États-Unis"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart.series]]
+column = "fed_funds"
+label = "Taux des fonds fédéraux (effectif)"
+
+[[chart]]
+id = "taux-reel"
+dataset = "taux-reel-bce"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Rémunération nominale, inflation et taux réel en zone euro"
+
+[[chart.series]]
+column = "taux_nominal"
+label = "Taux de dépôt de la BCE (nominal)"
+
+[[chart.series]]
+column = "inflation"
+label = "Inflation"
+
+[[chart.series]]
+column = "taux_reel"
+label = "Taux réel (nominal moins inflation)"
+
+[[chart]]
+id = "creations-emplois"
+dataset = "emploi-etats-unis"
+kind = "bar"
+x = "mois"
+x_label = "Mois"
+y_label = "Emplois créés, en milliers"
+title = "Les créations d'emplois aux États-Unis, mois par mois"
+
+[[chart.series]]
+column = "creations"
+label = "Emplois salariés non agricoles, variation mensuelle"
+
+[[chart]]
+id = "chomage-us"
+dataset = "chomage-etats-unis"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux de chômage, en %"
+title = "Le taux de chômage américain depuis 1948"
+
+[[chart.series]]
+column = "chomage"
+label = "Taux de chômage"
+
+[[chart]]
+id = "deux-ans-fed"
+dataset = "taux-2-ans-fed"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taux annuel, en %"
+title = "Le marché anticipe : le rendement à 2 ans devance la Réserve fédérale"
+
+[[chart.series]]
+column = "deux_ans"
+label = "Rendement du Trésor à 2 ans"
+
+[[chart.series]]
+column = "fed_funds"
+label = "Taux des fonds fédéraux (effectif)"
+
+[[chart]]
+id = "courbe-us"
+dataset = "courbe-taux-us"
+kind = "area"
+x = "mois"
+x_label = "Mois"
+y_label = "10 ans moins 2 ans, en points"
+title = "L'écart entre taux à 10 ans et à 2 ans aux États-Unis, depuis 1977"
+
+[[chart.series]]
+column = "ecart"
+label = "Écart 10 ans moins 2 ans"
+
+[[chart]]
+id = "rattrapage"
+dataset = "rattrapage-attaquant"
+kind = "line"
+x = "confirmations"
+x_label = "Confirmations attendues"
+y_label = "Probabilité de succès de l'attaquant"
+y_log = true
+title = "Chaque confirmation divise les chances d'un attaquant minoritaire"
+
+[[chart.series]]
+column = "q10"
+label = "Attaquant à 10 % de la puissance"
+
+[[chart.series]]
+column = "q20"
+label = "Attaquant à 20 %"
+
+[[chart.series]]
+column = "q30"
+label = "Attaquant à 30 %"
+
+[[chart]]
+id = "mois-de-trading"
+dataset = "mois-de-trading"
+kind = "line"
+x = "trade"
+x_label = "Trade du mois"
+y_label = "Résultat cumulé, en R"
+title = "Le même mois, avec et sans les écarts au plan"
+
+[[chart.series]]
+column = "realise"
+label = "Résultat réalisé"
+
+[[chart.series]]
+column = "plan"
+label = "Trades conformes au plan seulement"
+
+[[chart]]
+id = "puissance-reseau"
+dataset = "reseau-bitcoin"
+kind = "line"
+x = "date"
+x_label = "Début de la période de 2 016 blocs"
+y_label = "Puissance de calcul, en EH/s"
+y_log = true
+title = "La puissance de calcul du réseau Bitcoin, mesurée sur la chaîne depuis 2009"
+
+[[chart.series]]
+column = "puissance"
+label = "Puissance estimée (exahashes par seconde)"
+
+[[chart]]
+id = "duree-periodes"
+dataset = "reseau-bitcoin"
+kind = "bar"
+x = "date"
+x_label = "Début de la période de 2 016 blocs"
+y_label = "Durée de la période, en jours"
+title = "Quatorze jours visés : la durée réelle de chaque période de difficulté"
+
+[[chart.series]]
+column = "jours"
+label = "Durée réelle de la période"
+
+[[chart]]
+id = "offre-comparee"
+dataset = "offre-monnaie-comparee"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Croissance sur un an, en %"
+title = "Combien de monnaie nouvelle chaque année : Bitcoin, euro et dollar"
+
+[[chart.series]]
+column = "bitcoin"
+label = "Offre de bitcoins"
+
+[[chart.series]]
+column = "zone_euro_m3"
+label = "Zone euro, masse monétaire M3"
+
+[[chart.series]]
+column = "etats_unis_m2"
+label = "États-Unis, masse monétaire M2"
+
+[[chart]]
+id = "stock-flux-bitcoin"
+dataset = "offre-monnaie-comparee"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Années d'émission que représente le stock"
+title = "Le stock-to-flow de Bitcoin, calculé à partir du protocole"
+
+[[chart.series]]
+column = "stock_flux_bitcoin"
+label = "Stock ÷ émission des douze derniers mois"
+
+[[chart]]
+id = "perte-impermanente-courbe"
+dataset = "perte-impermanente-courbe"
+kind = "line"
+x = "rapport"
+x_label = "Multiplicateur du prix relatif (1 = aucune variation)"
+y_label = "Perte par rapport à la détention, en %"
+title = "La perte impermanente, du prix divisé par dix au prix multiplié par dix"
+
+[[chart.series]]
+column = "perte"
+label = "Perte impermanente"
+
+[[chart]]
+id = "liquidation-par-ratio"
+dataset = "liquidation-par-ratio"
+kind = "bar"
+x = "ratio"
+x_label = "Ratio prêt-garantie, en %"
+y_label = "Baisse qui déclenche la liquidation, en %"
+title = "Plus on emprunte, moins la garantie peut baisser"
+
+[[chart.series]]
+column = "baisse"
+label = "Baisse de la garantie avant liquidation"
+
+[[chart]]
+id = "deblocages-exemple"
+dataset = "deblocages-exemple"
+kind = "bar"
+stacked = true
+x = "mois"
+x_label = "Mois après le lancement"
+y_label = "Part de l'offre en circulation, en %"
+title = "Les jetons en circulation, poche par poche, sur quatre ans"
+
+[[chart.series]]
+column = "lancement"
+label = "Lancement"
+
+[[chart.series]]
+column = "equipe"
+label = "Équipe"
+
+[[chart.series]]
+column = "investisseurs"
+label = "Investisseurs"
+
+[[chart.series]]
+column = "communaute"
+label = "Communauté"
+
+[[chart]]
+id = "dilution-staking"
+dataset = "dilution-staking"
+kind = "line"
+x = "annee"
+x_label = "Années"
+y_label = "Part de l'offre conservée, en % de la part de départ"
+title = "Celui qui ne stake pas est dilué chaque année"
+
+[[chart.series]]
+column = "staking"
+label = "Avec staking"
+
+[[chart.series]]
+column = "sans_staking"
+label = "Sans staking"
+
+[[chart]]
+id = "volatilite-part-crypto"
+dataset = "volatilite-part-crypto"
+kind = "line"
+x = "part"
+x_label = "Part de crypto dans le patrimoine, en %"
+y_label = "Volatilité du patrimoine, en %"
+title = "Ce qu'une part de crypto fait à la volatilité d'un patrimoine"
+
+[[chart.series]]
+column = "volatilite"
+label = "Volatilité du patrimoine"
+
+[[chart]]
+id = "dca-exemple"
+dataset = "dca-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Euros"
+title = "Le prix de revient de l'investissement progressif, mois après mois"
+
+[[chart.series]]
+column = "prix"
+label = "Prix"
+
+[[chart.series]]
+column = "prix_de_revient"
+label = "Prix de revient, 100 € par mois"
+
+[[chart.series]]
+column = "en_une_fois"
+label = "Prix de revient, tout le premier mois"
+
+[[chart]]
+id = "derive-allocation"
+dataset = "derive-allocation"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Part de la crypto, en %"
+title = "Sans rééquilibrage, la part de crypto suit le prix"
+
+[[chart.series]]
+column = "sans_reequilibrage"
+label = "Sans rééquilibrage"
+
+[[chart.series]]
+column = "reequilibre"
+label = "Rééquilibrée chaque trimestre"
+
+[[chart]]
+id = "stress-poches"
+dataset = "stress-poches"
+kind = "bar"
+x = "poche"
+x_label = "Poche du patrimoine"
+y_label = "Contribution à la baisse, en €"
+title = "Où se loge la perte dans un scénario de crise"
+
+[[chart.series]]
+column = "contribution"
+label = "Contribution à la baisse"
+
+[[chart]]
+id = "hausse-necessaire"
+dataset = "hausse-necessaire"
+kind = "bar"
+x = "baisse"
+x_label = "Baisse, en %"
+y_label = "Hausse nécessaire pour revenir au départ, en %"
+title = "Plus la baisse est profonde, plus la remontée doit être forte"
+
+[[chart.series]]
+column = "hausse_necessaire"
+label = "Hausse nécessaire"
+
+[[chart]]
+id = "prix-realise-exemple"
+dataset = "indicateurs-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Prix"
+title = "Le prix de marché et le prix réalisé, sur un marché construit"
+
+[[chart.series]]
+column = "prix"
+label = "Prix de marché"
+
+[[chart.series]]
+column = "prix_realise"
+label = "Prix réalisé"
+
+[[chart]]
+id = "mvrv-exemple"
+dataset = "indicateurs-exemple"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "MVRV"
+title = "Le MVRV : valeur de marché sur valeur réalisée"
+
+[[chart.series]]
+column = "mvrv"
+label = "MVRV"
+
+[[chart]]
+id = "nupl-exemple"
+dataset = "indicateurs-exemple"
+kind = "bar"
+x = "mois"
+x_label = "Mois"
+y_label = "NUPL"
+title = "Le NUPL : plus-values latentes nettes, en part de la valeur de marché"
+
+[[chart.series]]
+column = "nupl"
+label = "NUPL"
+
+[[chart]]
+id = "force-phrase"
+dataset = "force-phrase"
+kind = "bar"
+x = "mots"
+x_label = "Longueur de la phrase"
+y_label = "Années pour tout essayer"
+y_log = true
+title = "Deviner une phrase de récupération : des durées hors d'échelle humaine"
+
+[[chart.series]]
+column = "annees"
+label = "Années, à mille milliards d'essais par seconde"
+
+[[chart]]
+id = "frais-gaz"
+dataset = "frais-gaz"
+kind = "line"
+x = "gwei"
+x_label = "Prix du gaz, en gwei"
+y_label = "Coût de l'envoi, en dollars"
+title = "Le coût d'un envoi suit le prix du gaz, pas le montant envoyé"
+
+[[chart.series]]
+column = "ether"
+label = "Transfert d'ether (21 000 unités)"
+
+[[chart.series]]
+column = "jeton"
+label = "Transfert de jeton (65 000 unités)"
+
+[[chart]]
+id = "impact-pool"
+dataset = "impact-pool"
+kind = "line"
+x = "part"
+x_label = "Dépôt, en % de la réserve du pool"
+y_label = "Impact sur le prix, en %"
+title = "Plus l'ordre est gros par rapport au pool, plus il paie cher"
+
+[[chart.series]]
+column = "impact"
+label = "Impact sur le prix"
+
+[[chart]]
+id = "transactions-jour"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Transactions par jour"
+title = "Les transactions inscrites chaque jour sur la chaîne Bitcoin"
+
+[[chart.series]]
+column = "transactions_par_jour"
+label = "Transactions par jour, moyenne mensuelle"
+
+[[chart]]
+id = "remplissage-blocs"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Part du poids maximal utilisée, en %"
+title = "À quel point les blocs sont pleins"
+
+[[chart.series]]
+column = "remplissage"
+label = "Remplissage moyen des blocs"
+
+[[chart]]
+id = "frais-par-bloc"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Frais par bloc, en BTC"
+title = "Les frais payés aux mineurs, par bloc"
+
+[[chart.series]]
+column = "frais_par_bloc"
+label = "Frais moyens par bloc"
+
+[[chart]]
+id = "part-frais"
+dataset = "activite-on-chain"
+kind = "area"
+x = "mois"
+x_label = "Mois"
+y_label = "Part des frais dans le revenu des mineurs, en %"
+title = "Ce que les frais pèsent dans le revenu des mineurs"
+
+[[chart.series]]
+column = "part_frais"
+label = "Part des frais"
+
+[[chart]]
+id = "revenu-mineurs"
+dataset = "activite-on-chain"
+kind = "step"
+x = "mois"
+x_label = "Mois"
+y_label = "BTC par jour"
+title = "Le revenu des mineurs, récompense et frais, en bitcoins par jour"
+
+[[chart.series]]
+column = "revenu_jour"
+label = "Revenu des mineurs par jour"
+
+[[chart]]
+id = "taille-blocs"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "Taille moyenne, en Mo"
+title = "La taille moyenne des blocs : SegWit, Taproot, inscriptions"
+
+[[chart.series]]
+column = "taille_mo"
+label = "Taille moyenne des blocs"
+
+[[chart]]
+id = "revenu-par-eh"
+dataset = "activite-on-chain"
+kind = "line"
+x = "mois"
+x_label = "Mois"
+y_label = "BTC par EH/s et par jour"
+y_log = true
+title = "Ce que rapporte une unité de puissance de calcul, en bitcoins"
+
+[[chart.series]]
+column = "revenu_par_eh"
+label = "Revenu par exahash par seconde et par jour"
+
+[[chart]]
+id = "pools-annee"
+dataset = "pools-par-annee"
+kind = "bar"
+x = "annee"
+x_label = "Année"
+y_label = "Part des blocs, en %"
+stacked = true
+title = "Qui produit les blocs : la part de chaque pool, année par année"
+
+[[chart.series]]
+column = "foundry_usa"
+label = "Foundry USA"
+
+[[chart.series]]
+column = "antpool"
+label = "AntPool"
+
+[[chart.series]]
+column = "btc_guild"
+label = "BTC Guild"
+
+[[chart.series]]
+column = "btc_com"
+label = "BTC.com"
+
+[[chart.series]]
+column = "f2pool"
+label = "F2Pool"
+
+[[chart.series]]
+column = "btc_top"
+label = "BTC.TOP"
+
+[[chart.series]]
+column = "viabtc"
+label = "ViaBTC"
+
+[[chart.series]]
+column = "binance_pool"
+label = "Binance Pool"
+
+[[chart.series]]
+column = "btcc"
+label = "BTCC"
+
+[[chart.series]]
+column = "poolin"
+label = "Poolin"
+
+[[chart.series]]
+column = "autres"
+label = "Autres pools identifiés"
+
+[[chart.series]]
+column = "non_identifie"
+label = "Non identifié"
+
+[[chart]]
+id = "nakamoto"
+dataset = "pools-par-annee"
+kind = "bar"
+x = "annee"
+x_label = "Année"
+y_label = "Nombre de pools"
+title = "Combien de pools faut-il pour dépasser la moitié des blocs ?"
+
+[[chart.series]]
+column = "coefficient_nakamoto"
+label = "Coefficient de Nakamoto du minage"

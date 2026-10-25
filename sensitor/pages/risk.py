@@ -22,8 +22,8 @@ from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
 from ..ui.themes import INK_MUTED, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
-from ._shared import guard, period_selector, single_asset_note
+from ..core.i18n import define, na, tr
+from ._shared import chart_with_reading, guard, period_selector, single_asset_note
 
 
 def render_risk(ctx) -> None:
@@ -39,7 +39,7 @@ def render_risk(ctx) -> None:
     var95, var99 = ctx.var, ctx.var99
 
     # ── 1. How much risk ─────────────────────────────────────────────────────
-    section(tr("risk_metrics", lang).upper())
+    section(tr("risk_metrics", lang))
 
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1:
@@ -62,7 +62,7 @@ def render_risk(ctx) -> None:
                     tooltip=define("calmar", lang))
 
     # ── 2. Tail risk ─────────────────────────────────────────────────────────
-    section(tr("return_distribution", lang).upper(),
+    section(tr("return_distribution", lang),
             "1-day horizon" if lang == "en" else "horizon 1 jour")
 
     if var95:
@@ -84,7 +84,7 @@ def render_risk(ctx) -> None:
                         tooltip=define("var", lang), caption=tr("historical", lang))
         with v4:
             gap = var95["historical_var"] - var95["parametric_var"]
-            metric_card(f"{tr('var_95', lang)} — {tr('parametric', lang)}",
+            metric_card(f"{tr('var_95', lang)} · {tr('parametric', lang)}",
                         pct(var95["parametric_var"], 2),
                         bar=min(var95["parametric_var"] / 0.08, 1),
                         bar_color=INK_MUTED, higher_is_better=False,
@@ -119,15 +119,26 @@ def render_risk(ctx) -> None:
         note(tr("var_method_note", lang))
 
     # ── 3. Where the risk comes from ─────────────────────────────────────────
-    section(tr("risk_contribution", lang).upper(), tr("risk_contribution_sub", lang))
+    section(tr("risk_contribution", lang), tr("risk_contribution_sub", lang))
     single_asset_note(ctx)
 
     rc = ctx.risk_contribution
     if rc is not None and not rc.empty:
-        st.plotly_chart(
+        top_rc = rc.loc[rc["pct_contribution"].idxmax()]
+        low_rc = rc.loc[rc["pct_contribution"].idxmin()]
+        top3 = float(rc["pct_contribution"].nlargest(3).sum())
+        chart_with_reading(
             C.weight_vs_risk(rc, label_weight=tr("weight", lang),
                              label_risk=tr("risk_contribution", lang)),
-            width='stretch', config=PLOTLY_CONFIG, key="risk_wvr",
+            "risk_wvr",
+            [
+                tr("rd_rc_top", lang).format(t=top_rc["ticker"], r=pct(top_rc["pct_contribution"], 1),
+                                             w=pct(top_rc["weight"], 1)),
+                tr("rd_rc_low", lang).format(t=low_rc["ticker"], r=pct(low_rc["pct_contribution"], 1),
+                                             w=pct(low_rc["weight"], 1)) if len(rc) > 1 else "",
+                tr("rd_rc_top3", lang).format(r=pct(top3, 1)) if len(rc) >= 4 else "",
+            ],
+            lang,
         )
         max_risk = float(rc["pct_contribution"].max()) or 1.0
         rows = [
@@ -146,7 +157,7 @@ def render_risk(ctx) -> None:
 
     # ── Correlation ──────────────────────────────────────────────────────────
     if not ctx.is_single_asset:
-        section(tr("correlation_matrix", lang).upper())
+        section(tr("correlation_matrix", lang))
 
         k1, k2, k3 = st.columns(3, gap="medium")
         conc = ctx.concentration
@@ -172,14 +183,23 @@ def render_risk(ctx) -> None:
                         tooltip=define("diversification_ratio", lang))
 
         spacer(10)
-        st.plotly_chart(
+        pairs = _pairs(ctx.correlation)
+        chart_with_reading(
             C.correlation_heatmap(ctx.correlation),
-            width='stretch', config=PLOTLY_CONFIG, key="risk_corr",
+            "risk_corr",
+            [
+                tr("rd_corr_high", lang).format(a=pairs[-1][0], b=pairs[-1][1], c=num(pairs[-1][2], 2))
+                if pairs else "",
+                tr("rd_corr_low", lang).format(a=pairs[0][0], b=pairs[0][1], c=num(pairs[0][2], 2))
+                if len(pairs) > 1 else "",
+                tr("rd_corr_avg", lang).format(c=num(ctx.avg_correlation, 2)) if pairs else "",
+            ],
+            lang,
         )
         note(define("correlation", lang))
 
         # ── Concentration ────────────────────────────────────────────────────
-        section(tr("concentration_analysis", lang).upper())
+        section(tr("concentration_analysis", lang))
         n1, n2, n3, n4 = st.columns(4, gap="medium")
         with n1:
             metric_card(tr("top1", lang), pct(conc.get("top1", 0), 1),
@@ -204,7 +224,7 @@ def render_risk(ctx) -> None:
         )
 
     # ── 4. Drawdown record ───────────────────────────────────────────────────
-    section(tr("drawdown_analysis", lang).upper())
+    section(tr("drawdown_analysis", lang))
     dd = ctx.drawdown
     if dd:
         d1, d2, d3, d4 = st.columns(4, gap="medium")
@@ -224,18 +244,28 @@ def render_risk(ctx) -> None:
         with d4:
             recovery = dd.get("avg_recovery_days")
             metric_card(tr("avg_recovery", lang),
-                        f"{recovery:.0f} {tr('days', lang)}" if recovery else "—",
+                        f"{recovery:.0f} {tr('days', lang)}" if recovery else na(lang),
                         bar=min((recovery or 0) / 365, 1), higher_is_better=False,
                         caption=f"{dd['n_episodes']} episodes" if lang == "en"
                                 else f"{dd['n_episodes']} épisodes")
 
         spacer(10)
-        st.plotly_chart(
-            C.underwater(dd["series"]),
-            width='stretch', config=PLOTLY_CONFIG_ZOOM, key="risk_uw",
-        )
-
         episodes = A.drawdown_episodes(ctx.portfolio_returns, top=5)
+        worst = episodes[0] if episodes else None
+        day = "%Y-%m-%d" if lang == "en" else "%d/%m/%Y"
+        chart_with_reading(
+            C.underwater(dd["series"]),
+            "risk_uw",
+            [
+                tr("rd_dd_worst", lang).format(
+                    d=pct(worst["depth"], 1), p=worst["peak_date"].strftime(day),
+                    t=worst["trough_date"].strftime(day), n=worst["decline_days"]) if worst else "",
+                (tr("rd_dd_recovered", lang).format(n=worst["recovery_days"]) if worst["recovered"]
+                 else tr("rd_dd_ongoing", lang)) if worst else "",
+                tr("rd_dd_under", lang).format(p=pct(dd["time_underwater_pct"], 0)),
+            ],
+            lang, config=PLOTLY_CONFIG_ZOOM,
+        )
         if episodes:
             spacer(8)
             rows = []
@@ -256,3 +286,14 @@ def render_risk(ctx) -> None:
                  "Decline" if lang == "en" else "Baisse", tr("recovery", lang)],
                 rows, align="lllll",
             )
+
+
+def _pairs(corr) -> list[tuple[str, str, float]]:
+    """Every distinct pair of the correlation matrix, from the least to the most linked."""
+    if corr is None or getattr(corr, "empty", True):
+        return []
+    names = list(corr.columns)
+    pairs = [(a, b, float(corr.loc[a, b]))
+             for i, a in enumerate(names) for b in names[i + 1:]
+             if corr.loc[a, b] == corr.loc[a, b]]
+    return sorted(pairs, key=lambda p: p[2])

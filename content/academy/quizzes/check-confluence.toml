@@ -1,0 +1,73 @@
+id = "check-confluence"
+title = "Contrôle : la confluence"
+course = "zones-et-entrees"
+lesson = "confluence"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "intervalle"
+prompt = "Zone OTE de 1,0821 à 1,0838, FVG de 1,0826 à 1,0845. Intervalle commun ?"
+kind = "single"
+lesson = "confluence"
+
+[[question.option]]
+id = "ok"
+text = "1,0826 à 1,0838"
+correct = true
+explanation = "Plus haute des bornes basses, plus basse des bornes hautes."
+
+[[question.option]]
+id = "union"
+text = "1,0821 à 1,0845"
+explanation = "C'est la réunion des deux zones, pas leur intersection."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun, les zones ne se recouvrent pas."
+explanation = "Elles se recouvrent sur 12 pips."
+
+[[question]]
+id = "double"
+prompt = "Un FVG et un order block issus de la même impulsion se recouvrent. Comment le lire ?"
+kind = "single"
+lesson = "confluence"
+
+[[question.option]]
+id = "meme"
+text = "Comme deux zones qui décrivent le même mouvement, pas deux preuves indépendantes."
+correct = true
+explanation = "C'est le double compte que la leçon met en garde contre."
+
+[[question.option]]
+id = "deux"
+text = "Comme deux confirmations indépendantes : la probabilité double."
+explanation = "Elles proviennent du même fait ; rien ne double."
+
+[[question.option]]
+id = "annule"
+text = "Comme un signal contradictoire."
+explanation = "Elles vont dans le même sens."
+
+[[question]]
+id = "criteres"
+prompt = "On ajoute des filtres à une règle jusqu'à ce que les exemples perdants du passé disparaissent. Comment s'appelle cette erreur ?"
+kind = "single"
+lesson = "confluence"
+
+[[question.option]]
+id = "surajustement"
+text = "Le surajustement."
+correct = true
+explanation = "La règle épouse le passé et perd sa valeur ensuite."
+
+[[question.option]]
+id = "confluence"
+text = "La confluence."
+explanation = "La confluence est un recouvrement de zones, pas une erreur."
+
+[[question.option]]
+id = "retrospectif"
+text = "Le biais rétrospectif."
+explanation = "Proche, mais le biais rétrospectif concerne le jugement d'une décision passée."

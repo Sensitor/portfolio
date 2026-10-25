@@ -1,0 +1,73 @@
+id = "check-investissement-progressif"
+title = "Contrôle : l'investissement progressif"
+course = "investir-avec-methode"
+lesson = "investissement-progressif"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "revient"
+prompt = "100 € investis à 40, 50, 25 puis 50 €. Prix de revient ?"
+kind = "single"
+lesson = "investissement-progressif"
+
+[[question.option]]
+id = "381"
+text = "Environ 38,10 €"
+correct = true
+explanation = "Oui : 400 € ÷ 10,5 unités."
+
+[[question.option]]
+id = "4125"
+text = "41,25 €"
+explanation = "C'est la moyenne des prix."
+
+[[question.option]]
+id = "50"
+text = "50 €"
+explanation = "C'est le dernier prix."
+
+[[question]]
+id = "vanguard"
+prompt = "Sur des marchés qui montent en moyenne, quelle méthode l'emporte le plus souvent ?"
+kind = "single"
+lesson = "investissement-progressif"
+
+[[question.option]]
+id = "une-fois"
+text = "L'investissement en une fois, environ deux fois sur trois selon Vanguard."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "dca"
+text = "Le DCA, toujours."
+explanation = "L'argent qui attend reste à l'écart de la hausse."
+
+[[question.option]]
+id = "aucune"
+text = "Aucune, c'est toujours égal."
+explanation = "Les résultats diffèrent."
+
+[[question]]
+id = "protege"
+prompt = "Le DCA protège-t-il d'une perte ?"
+kind = "single"
+lesson = "investissement-progressif"
+
+[[question.option]]
+id = "non"
+text = "Non : si le prix baisse durablement, chaque achat perd."
+correct = true
+explanation = "Oui ; il réduit le regret."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Il ne protège pas d'une baisse durable."
+
+[[question.option]]
+id = "parfois"
+text = "Oui, au bout de quatre achats."
+explanation = "Le nombre d'achats n'y change rien."

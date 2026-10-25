@@ -1,0 +1,73 @@
+id = "check-fiscalite-crypto"
+title = "Contrôle : la fiscalité"
+course = "investir-avec-methode"
+lesson = "fiscalite-crypto"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "echange"
+prompt = "Échanger du bitcoin contre de l'ether est-il imposable pour un particulier ?"
+kind = "single"
+lesson = "fiscalite-crypto"
+
+[[question.option]]
+id = "non"
+text = "Non : l'impôt est reporté à la conversion en euros."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, à chaque échange."
+explanation = "Les échanges entre actifs numériques sont en sursis."
+
+[[question.option]]
+id = "seuil"
+text = "Oui, au-delà de 305 €."
+explanation = "Le seuil de 305 € concerne le total des cessions imposables."
+
+[[question]]
+id = "formule"
+prompt = "Prix total d'acquisition 10 000 €, portefeuille de 25 000 €, vente de 5 000 €. Plus-value ?"
+kind = "single"
+lesson = "fiscalite-crypto"
+
+[[question.option]]
+id = "3000"
+text = "3 000 €"
+correct = true
+explanation = "Oui : 5 000 − 10 000 × 5 000 ÷ 25 000."
+
+[[question.option]]
+id = "5000"
+text = "5 000 €"
+explanation = "Il faut retirer la part du prix d'acquisition."
+
+[[question.option]]
+id = "15000"
+text = "15 000 €"
+explanation = "C'est la plus-value latente de tout le portefeuille."
+
+[[question]]
+id = "3916"
+prompt = "Que déclare le formulaire 3916-bis ?"
+kind = "single"
+lesson = "fiscalite-crypto"
+
+[[question.option]]
+id = "comptes"
+text = "Chaque compte d'actifs numériques ouvert auprès d'une plateforme établie à l'étranger."
+correct = true
+explanation = "Oui, même sans cession."
+
+[[question.option]]
+id = "plusvalues"
+text = "Les plus-values de l'année."
+explanation = "C'est le rôle du formulaire 2086."
+
+[[question.option]]
+id = "rien"
+text = "Rien de lié aux cryptoactifs."
+explanation = "Il concerne précisément les comptes d'actifs numériques à l'étranger."

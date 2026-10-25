@@ -1,0 +1,73 @@
+id = "check-liquidite"
+title = "Contrôle : où se trouvent les ordres"
+course = "liquidite-et-scenarios"
+lesson = "liquidite-ordres"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "stop-vendeur"
+prompt = "Le stop d'un vendeur placé au-dessus d'un sommet est, une fois déclenché, un ordre :"
+kind = "single"
+lesson = "liquidite-ordres"
+
+[[question.option]]
+id = "achat"
+text = "d'achat."
+correct = true
+explanation = "Oui : pour fermer une vente, il faut acheter."
+
+[[question.option]]
+id = "vente"
+text = "de vente."
+explanation = "Un vendeur ferme sa position en achetant."
+
+[[question.option]]
+id = "aucun"
+text = "neutre, il ne change rien au marché."
+explanation = "Déclenché, il devient un ordre au marché qui consomme de la liquidité."
+
+[[question]]
+id = "pourquoi"
+prompt = "Pourquoi les ordres s'accumulent-ils, selon l'hypothèse du parcours, au-delà des sommets et des creux visibles ?"
+kind = "single"
+lesson = "liquidite-ordres"
+
+[[question.option]]
+id = "visibles"
+text = "Parce que beaucoup de traders y placent leur invalidation ou leurs ordres d'entrée sur cassure."
+correct = true
+explanation = "Oui : tout le monde voit les mêmes niveaux."
+
+[[question.option]]
+id = "regle"
+text = "Parce qu'une règle de marché l'impose."
+explanation = "Aucune règle ne l'impose : c'est une conséquence des habitudes des traders."
+
+[[question.option]]
+id = "courtier"
+text = "Parce que les courtiers les y déplacent."
+explanation = "Les ordres sont placés par les traders eux-mêmes."
+
+[[question]]
+id = "verifier"
+prompt = "Peut-on vérifier sur un graphique que des stops se trouvent au-dessus d'un sommet ?"
+kind = "single"
+lesson = "liquidite-ordres"
+
+[[question.option]]
+id = "non"
+text = "Non : on ne voit pas les ordres des autres ; on observe seulement le prix autour du niveau."
+correct = true
+explanation = "Oui : c'est une hypothèse, à confronter à son historique."
+
+[[question.option]]
+id = "oui"
+text = "Oui, il suffit de regarder les mèches."
+explanation = "Les mèches montrent où le prix est allé, pas où se trouvaient des ordres."
+
+[[question.option]]
+id = "volume"
+text = "Oui, grâce au volume du courtier."
+explanation = "Le volume d'un courtier ne montre pas les ordres en attente de tout le marché."

@@ -1,0 +1,73 @@
+id = "check-creation-monetaire-comparee"
+title = "Contrôle : la création monétaire comparée"
+course = "bitcoin-reserve-de-valeur"
+lesson = "creation-monetaire-comparee"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "btc"
+prompt = "De combien l'offre de bitcoins a-t-elle crû sur les douze mois précédant septembre 2026 ?"
+kind = "single"
+lesson = "creation-monetaire-comparee"
+
+[[question.option]]
+id = "082"
+text = "0,82 %"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "5"
+text = "5 %"
+explanation = "C'est bien plus que la création de Bitcoin."
+
+[[question.option]]
+id = "0"
+text = "0 %"
+explanation = "De nouveaux bitcoins sont encore créés à chaque bloc."
+
+[[question]]
+id = "baisse"
+prompt = "Qu'a fait la masse monétaire M2 des États-Unis en avril 2023 ?"
+kind = "single"
+lesson = "creation-monetaire-comparee"
+
+[[question.option]]
+id = "baisse"
+text = "Elle a diminué de 4,6 % sur un an."
+correct = true
+explanation = "Oui, après +26,8 % en février 2021."
+
+[[question.option]]
+id = "hausse"
+text = "Elle a augmenté de 26,8 %."
+explanation = "C'était en février 2021."
+
+[[question.option]]
+id = "stable"
+text = "Elle est restée stable."
+explanation = "Elle a reculé."
+
+[[question]]
+id = "inflation"
+prompt = "Une faible création monétaire garantit-elle une protection contre l'inflation ?"
+kind = "single"
+lesson = "creation-monetaire-comparee"
+
+[[question.option]]
+id = "non"
+text = "Non : le prix dépend aussi de la demande, et Bitcoin a chuté en 2022."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "L'offre ne fixe pas le prix."
+
+[[question.option]]
+id = "ok"
+text = "Oui, à condition d'attendre un mois."
+explanation = "Aucun délai ne la garantit."

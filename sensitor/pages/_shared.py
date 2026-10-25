@@ -13,8 +13,29 @@ import streamlit as st
 
 from ..integrations import market_data as market
 from ..investment import currency as FX
-from ..ui.components import empty_state, note
+from ..ui.components import empty_state, note, reading
+from ..ui.themes import PLOTLY_CONFIG
 from ..core.i18n import tr
+
+
+def chart_with_reading(fig, key: str, lines: list[str], lang: str, *,
+                       config=None, foot: str | None = None, ratio=(3.3, 1)) -> None:
+    """
+    A chart and its « Lecture » margin. `lines` are sentences built by the page
+    from computed figures; an empty list leaves the chart alone at full width.
+    `foot` defaults to the past-data caveat.
+    """
+    config = config or PLOTLY_CONFIG
+    lines = [line for line in lines if line]
+    if not lines:
+        st.plotly_chart(fig, width='stretch', config=config, key=key)
+        return
+    chart_col, read_col = st.columns(list(ratio), gap="large")
+    with chart_col:
+        st.plotly_chart(fig, width='stretch', config=config, key=key)
+    with read_col:
+        reading(tr("reading", lang), lines,
+                foot=tr("reading_foot", lang) if foot is None else foot)
 
 
 def guard(ctx, lang: str) -> bool:
@@ -73,9 +94,9 @@ def benchmark_selector(ctx, key: str, default: str = market.DEFAULT_BENCHMARK) -
     base = (getattr(ctx.analyzer, "base_currency", None) or "USD").upper()
     if FX.settlement_currency(FX.quote_currency(ticker))[0].upper() != base:
         st.caption(
-            f"Converted to {base} — compared like for like with the portfolio."
+            f"Converted to {base}, compared like for like with the portfolio."
             if ctx.lang == "en" else
-            f"Converti en {base} — comparé à la même échelle que le portefeuille."
+            f"Converti en {base}, comparé à la même échelle que le portefeuille."
         )
     return ticker
 
@@ -289,11 +310,11 @@ def currency_notice(analyzer, lang: str) -> None:
         except Exception:                               # noqa: BLE001
             since = str(start)[:10]
         st.caption(
-            f"Measured from {since} — the first date every holding traded. "
+            f"Measured from {since}, the first date every holding traded. "
             f"{limited_by} has the shortest history, and a correlation over a period "
             f"when an asset did not exist is not a weaker figure, it is not a figure."
             if lang == "en" else
-            f"Mesuré depuis le {since} — la première date où toutes les lignes cotaient. "
+            f"Mesuré depuis le {since}, la première date où toutes les lignes cotaient. "
             f"{limited_by} a l'historique le plus court, et une corrélation sur une "
             f"période où un actif n'existait pas n'est pas un chiffre moins fiable, "
             f"ce n'est pas un chiffre."

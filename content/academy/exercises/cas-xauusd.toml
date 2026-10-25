@@ -1,0 +1,62 @@
+id = "cas-xauusd"
+title = "Un sweep de sommets égaux sur XAUUSD"
+context = """
+XAUUSD en H1, sur un **compte de démonstration en dollars**. Deux sommets de swing se trouvent à **2 412,40** et **2 412,90** ; la tolérance retenue est de 1,00 $. Une bougie monte ensuite à **2 415,30** puis clôture à **2 410,80**.
+
+Le scénario envisagé est une vente, avec une entrée hypothétique à **2 409,30** et une invalidation 0,50 $ au-dessus du plus haut du sweep.
+
+**Hypothèse de l'exercice** : 1 lot = 100 onces, donc un mouvement de 1,00 $ vaut 100 $ par lot. Vérifiez la spécification de votre courtier, qui peut être différente. Budget de risque : **100 $**. Pas de volume : 0,01 lot.
+
+Scénario fictif, construit pour l'exercice.
+"""
+conclusion = """
+Le plan est écrit : niveau, constat, invalidation, taille. Si le prix clôture au-dessus de 2 415,80, le scénario est faux, et la perte prévue est de 97,50 $, sous le budget de 100 $, avant spread et commission.
+"""
+
+[[step]]
+id = "ecart"
+prompt = "Quel est l'écart entre les deux sommets, en dollars ? Sont-ils égaux selon la tolérance ?"
+unit = "$"
+answer = 0.50
+tolerance = 0.001
+solution = "2 412,90 − 2 412,40 = **0,50 $**, sous la tolérance de 1,00 $ : ce sont des sommets égaux. Le niveau de référence est 2 412,90."
+
+[[step]]
+id = "depassement"
+prompt = "De combien de dollars le plus haut de la bougie dépasse-t-il le niveau de référence ?"
+unit = "$"
+answer = 2.40
+tolerance = 0.001
+solution = "2 415,30 − 2 412,90 = **2,40 $**."
+
+[[step]]
+id = "retour"
+prompt = "De combien de dollars la clôture se trouve-t-elle sous le niveau ?"
+unit = "$"
+answer = 2.10
+tolerance = 0.001
+solution = "2 412,90 − 2 410,80 = **2,10 $**. Mèche au-delà, clôture en deçà : sweep."
+
+[[step]]
+id = "invalidation"
+prompt = "À quel prix se situe l'invalidation ?"
+unit = "prix"
+answer = 2415.80
+tolerance = 0.001
+solution = "2 415,30 + 0,50 = **2 415,80**. Au-dessus, le sweep n'en est plus un : le prix a tenu au-delà du niveau."
+
+[[step]]
+id = "distance"
+prompt = "Quelle est la distance entre l'entrée et l'invalidation, en dollars ?"
+unit = "$"
+answer = 6.50
+tolerance = 0.001
+solution = "2 415,80 − 2 409,30 = **6,50 $**."
+
+[[step]]
+id = "taille"
+prompt = "Quelle taille de position respecte le budget de 100 $ ? (Arrondissez vers le bas au pas de 0,01.)"
+unit = "lots"
+answer = 0.15
+tolerance = 0.0001
+solution = "Coût de l'invalidation par lot : 6,50 × 100 = 650 $. Taille : 100 ÷ 650 = 0,1538, arrondie vers le bas à **0,15 lot**. Risque effectif : 0,15 × 650 = 97,50 $."

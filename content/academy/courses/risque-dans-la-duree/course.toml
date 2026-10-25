@@ -1,0 +1,39 @@
+id = "risque-dans-la-duree"
+path = "risk-management"
+title = "Gérer le risque dans la durée"
+summary = "Sept leçons pour passer du risque d'un trade au risque d'une série : espérance, taille d'échantillon, drawdown, risque de ruine, positions corrélées, limites journalières et règles de prop firm."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Calculer l'espérance d'une approche et son seuil de rentabilité.",
+  "Dire combien de trades il faut avant de tirer une conclusion, et avec quelle marge d'erreur.",
+  "Mesurer un drawdown et estimer le risque de ruine selon le risque par trade.",
+  "Compter son exposition réelle et respecter des limites de perte écrites à l'avance.",
+]
+prerequisites = ["Premiers pas sur les marchés"]
+final_quiz = "risque-validation"
+
+[[module]]
+id = "mesurer"
+title = "Mesurer une approche"
+summary = "Ce qu'un trade rapporte en moyenne, et à partir de combien de trades ce chiffre veut dire quelque chose."
+lessons = ["esperance", "taille-echantillon"]
+
+[[module]]
+id = "traverser"
+title = "Traverser les séries"
+summary = "Les baisses font partie du chemin. Les mesurer, et choisir un risque par trade qui permet de les traverser."
+lessons = ["drawdown", "risque-de-ruine"]
+
+[[module]]
+id = "encadrer"
+title = "Encadrer son exposition"
+summary = "Plusieurs positions peuvent porter le même risque. Des limites écrites à l'avance évitent qu'une mauvaise journée devienne une mauvaise année."
+lessons = ["correlation-exposition", "limites-de-perte"]
+
+[[module]]
+id = "bilan-risque"
+title = "Faire le point"
+summary = "Relier les notions du parcours et les vérifier avec un quiz de validation corrigé."
+lessons = ["recap-risque"]

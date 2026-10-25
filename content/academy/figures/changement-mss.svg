@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Changement de structure (MSS)</title>
+<desc id="d">Une tendance haussière casse son dernier creux plus haut en clôture : c'est un changement de structure. Le prix forme ensuite un sommet plus bas puis un creux plus bas.</desc>
+<polyline points="40,206.0 110,129.0 160,166.4 240,78.4 290,122.4 370,47.6 440,140.0 500,91.6 580,184.0" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<line x1="290" y1="122.4" x2="610" y2="122.4" stroke="#8a4a40" stroke-dasharray="5 4" stroke-width="1.2"/>
+<circle cx="290" cy="122.4" r="4.5" fill="#3f6553"/>
+<text x="290" y="144.4" text-anchor="middle" font-size="12" fill="#3f6553">dernier creux plus haut</text>
+<circle cx="370" cy="47.6" r="4.5" fill="#fbfaf6" stroke="#284764" stroke-width="1.6"/>
+<text x="370" y="37.6" text-anchor="middle" font-size="12" fill="#284764">dernier sommet plus haut</text>
+<text x="615" y="114.4" text-anchor="end" font-size="12" font-weight="700" fill="#8a4a40">clôture dessous : MSS</text>
+<circle cx="500" cy="91.6" r="4.5" fill="#fbfaf6" stroke="#284764" stroke-width="1.6"/>
+<text x="500" y="81.6" text-anchor="middle" font-size="12" fill="#1b2733">sommet plus bas</text>
+<text x="580" y="206.0" text-anchor="middle" font-size="12" fill="#1b2733">creux plus bas</text>
+<text x="40" y="285" font-size="11" fill="#7b8389">Le MSS interrompt la séquence haussière. Une baisse se lit ensuite : sommet plus bas, puis creux plus bas.</text>
+</svg>

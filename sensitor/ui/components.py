@@ -21,9 +21,10 @@ from __future__ import annotations
 import html as _html
 
 from .themes import (
-    ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, POS,
-    RADIUS_SM, STATUS, STATUS_ICON, html,
+    ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, NEUTRAL, POS,
+    RADIUS_SM, STATUS, STATUS_ICON, fade, html,
 )
+from ..core.i18n import na
 
 # =============================================================================
 # FORMATTERS
@@ -31,19 +32,19 @@ from .themes import (
 
 def pct(x, decimals: int = 1, sign: bool = False) -> str:
     if x is None:
-        return "—"
+        return na()
     return f"{x * 100:{'+' if sign else ''}.{decimals}f}%"
 
 
 def num(x, decimals: int = 2, sign: bool = False) -> str:
     if x is None:
-        return "—"
+        return na()
     return f"{x:{'+' if sign else ''}.{decimals}f}"
 
 
 def money(x, currency: str = "$", decimals: int = 0) -> str:
     if x is None:
-        return "—"
+        return na()
     if abs(x) >= 1_000_000:
         return f"{currency}{x / 1_000_000:.2f}M"
     if abs(x) >= 10_000:
@@ -156,7 +157,7 @@ def delta_html(value, label: str = "", as_pct: bool = True, decimals: int = 1,
                higher_is_better: bool = True) -> str:
     """Signed delta with an arrow glyph, so direction never rests on colour alone."""
     if value is None:
-        return f'<span style="color:{INK_FAINT};">—</span>'
+        return f'<span style="color:{INK_FAINT};">{na()}</span>'
     good = (value > 0) if higher_is_better else (value < 0)
     color = FLAT if abs(value) < 1e-12 else (POS if good else NEG)
     arrow = "▲" if value > 0 else ("▼" if value < 0 else "■")
@@ -358,7 +359,7 @@ def data_table(headers: list[str], rows: list[list], align: str | None = None,
                     f'gap:8px;justify-content:flex-end;">'
                     f'<span>{_esc(text)}</span>'
                     f'<div style="width:54px;height:5px;border-radius:3px;'
-                    f'background:rgba(154,168,191,0.13);overflow:hidden;flex:none;">'
+                    f'background:{fade(NEUTRAL, 0.13)};overflow:hidden;flex:none;">'
                     f'<div style="width:{frac * 100:.0f}%;height:100%;background:{color};'
                     f'border-radius:3px;"></div></div></div></td>'
                 )
@@ -385,11 +386,25 @@ def note(text: str, icon: str = "ⓘ") -> None:
     """Methodology footnote — where approximations and assumptions get stated."""
     html(
         f'<div style="display:flex;gap:8px;align-items:flex-start;padding:9px 12px;'
-        f'background:rgba(154,168,191,0.04);border:1px solid {BORDER};'
+        f'background:{fade(NEUTRAL, 0.04)};border:1px solid {BORDER};'
         f'border-radius:{RADIUS_SM};margin-top:10px;">'
         f'<span style="color:{INK_FAINT};font-size:0.75rem;">{icon}</span>'
         f'<span style="font-size:0.73rem;color:{INK_MUTED};line-height:1.55;">'
         f'{_esc(text)}</span></div>'
+    )
+
+
+def reading(label: str, lines: list[str], foot: str = "") -> None:
+    """
+    The « Lecture » margin of the Carnet: what the chart beside it says, in plain
+    sentences. Every figure in `lines` is computed by the caller; nothing here is
+    advice. `foot` carries the caveat (past data, synthetic data).
+    """
+    items = "".join(f'<p>{_esc(line)}</p>' for line in lines if line)
+    tail = f'<div class="snr-reading-f">{_esc(foot)}</div>' if foot else ""
+    html(
+        f'<aside class="snr-reading"><div class="snr-reading-l">{_esc(label)}</div>'
+        f'{items}{tail}</aside>'
     )
 
 

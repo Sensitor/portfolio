@@ -1,0 +1,73 @@
+id = "check-cas-entree"
+title = "Contrôle : le cas GBPUSD"
+course = "zones-et-entrees"
+lesson = "cas-entree"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ordre"
+prompt = "Dans quel ordre la méthode pose-t-elle ses questions ?"
+kind = "single"
+lesson = "cas-entree"
+
+[[question.option]]
+id = "ok"
+text = "Contexte, liquidité, confirmation, zone, risque."
+correct = true
+explanation = "C'est l'ordre du cas."
+
+[[question.option]]
+id = "zone"
+text = "Zone, risque, contexte, liquidité, confirmation."
+explanation = "Commencer par la zone conduit à en trouver une partout."
+
+[[question.option]]
+id = "risque"
+text = "Risque, zone, confirmation."
+explanation = "Le risque se calcule une fois la zone et l'invalidation fixées."
+
+[[question]]
+id = "taille"
+prompt = "Entrée 1,2657, invalidation 1,2625, budget 50 $, 10 $ par pip et par lot. Quelle taille ?"
+kind = "single"
+lesson = "cas-entree"
+
+[[question.option]]
+id = "15"
+text = "0,15 lot"
+correct = true
+explanation = "50 ÷ (32 × 10) = 0,156, arrondi vers le bas."
+
+[[question.option]]
+id = "16"
+text = "0,16 lot"
+explanation = "0,16 lot risquerait 51,20 $, au-delà du budget."
+
+[[question.option]]
+id = "1-5"
+text = "1,5 lot"
+explanation = "Erreur d'un facteur dix sur la valeur du pip."
+
+[[question]]
+id = "ratio"
+prompt = "Le plan affiche un ratio de 2,28R. Qu'en déduire ?"
+kind = "single"
+lesson = "cas-entree"
+
+[[question.option]]
+id = "plan"
+text = "Le gain possible vaut 2,28 fois le risque si l'objectif est atteint ; cela ne dit rien de la probabilité."
+correct = true
+explanation = "Le ratio décrit le plan, pas sa réussite."
+
+[[question.option]]
+id = "proba"
+text = "Le trade a 2,28 fois plus de chances de gagner que de perdre."
+explanation = "Un ratio n'est pas une probabilité."
+
+[[question.option]]
+id = "sur"
+text = "Le trade est rentable."
+explanation = "Seule une série de trades mesurés peut le dire."

@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 10
 
 TABLES: dict[str, str] = {
     "users": """
@@ -37,6 +37,14 @@ CREATE TABLE IF NOT EXISTS users (
     -- decides whether that is acceptable, so the distinction lives in one place
     -- rather than being inferred from a null check at every call site.
     password_hash TEXT,
+
+    -- When the address was proven to belong to the account holder, by a link
+    -- sent to it. NULL until then; nothing is gated on it yet, it is shown.
+    email_verified_at TEXT,
+
+    -- '' for a member, 'coach' for the staff who answer trade review requests.
+    -- Set by hand (`python -m sensitor.core.admin set-role`), like the tier.
+    role          TEXT NOT NULL DEFAULT '',
 
     last_login_at TEXT,
     -- Throttling state. Kept on the user rather than in memory so a restart
@@ -60,6 +68,20 @@ CREATE TABLE IF NOT EXISTS sessions (
     expires_at  TEXT NOT NULL,
     last_seen_at TEXT,
     label       TEXT
+)""",
+
+    # Single-use tokens sent by e-mail: password reset and address
+    # verification. Like sessions, only the fingerprint is stored, so a copy of
+    # the database cannot be turned into a working link.
+    "account_tokens": """
+CREATE TABLE IF NOT EXISTS account_tokens (
+    fingerprint TEXT PRIMARY KEY,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    purpose     TEXT NOT NULL CHECK (purpose IN ('reset', 'verify')),
+    created_at  TEXT NOT NULL,
+    expires_at  TEXT NOT NULL,
+    used_at     TEXT
 )""",
 
     # Every table below cascades from `users`. Deleting a person removes their
@@ -227,6 +249,97 @@ CREATE TABLE IF NOT EXISTS trades (
     updated_at       TEXT NOT NULL,
     PRIMARY KEY (user_email, id)
 )""",
+
+    # ── Academy ──────────────────────────────────────────────────────────────
+    # Course content lives in version-controlled files (content/academy/); what
+    # is stored here is what a member did with it. Ids are the stable string ids
+    # from those files, so renaming a lesson's title never orphans a row.
+    #
+    # One row per finished lesson. The version is recorded so a substantially
+    # rewritten lesson can later be offered for re-reading without guessing
+    # which edition someone read.
+    "lesson_progress": """
+CREATE TABLE IF NOT EXISTS lesson_progress (
+    user_email     TEXT NOT NULL REFERENCES users(email)
+                   ON DELETE CASCADE ON UPDATE CASCADE,
+    course_id      TEXT NOT NULL,
+    lesson_id      TEXT NOT NULL,
+    lesson_version INTEGER NOT NULL DEFAULT 1,
+    completed_at   TEXT NOT NULL,
+    PRIMARY KEY (user_email, course_id, lesson_id)
+)""",
+
+    # Every submitted attempt, kept: the history is what lets a member see that
+    # a concept they kept missing is now understood. Responses are stored as the
+    # option ids chosen, so a review can be rebuilt from the quiz file of the
+    # recorded version.
+    "quiz_attempts": """
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    quiz_id      TEXT NOT NULL,
+    quiz_version INTEGER NOT NULL DEFAULT 1,
+    correct      INTEGER NOT NULL CHECK (correct >= 0),
+    total        INTEGER NOT NULL CHECK (total > 0),
+    passed       INTEGER NOT NULL CHECK (passed IN (0, 1)),
+    responses    TEXT NOT NULL,            -- JSON {question_id: [option_id, ...]}
+    created_at   TEXT NOT NULL,
+    CHECK (correct <= total)
+)""",
+
+    # The reflection journal of the « Psychologie et discipline » space. Free
+    # text written by one member for themselves: it is read back only through
+    # methods scoped by `user_email`, exported with the account and deleted
+    # with it. `prompt` keeps the guided question the note answered, as text.
+    # `checks` is the JSON list of routine items ticked, or NULL when the note
+    # offered no routine (a free note, or one written before routines existed).
+    "journal_entries": """
+CREATE TABLE IF NOT EXISTS journal_entries (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email  TEXT NOT NULL REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    kind        TEXT NOT NULL CHECK (kind IN ('pre', 'post', 'free')),
+    mood        INTEGER CHECK (mood IS NULL OR mood BETWEEN 1 AND 5),
+    prompt      TEXT NOT NULL DEFAULT '',
+    body        TEXT NOT NULL CHECK (length(body) > 0),
+    checks      TEXT,
+    created_at  TEXT NOT NULL
+)""",
+
+    # ── Journal review ───────────────────────────────────────────────────────
+    # A member's written trading plan, as the JSON of `trading.review.TradingPlan`.
+    # One per member; the automatic review reads it, nothing else does.
+    "trading_plans": """
+CREATE TABLE IF NOT EXISTS trading_plans (
+    user_email  TEXT PRIMARY KEY REFERENCES users(email)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    plan        TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+)""",
+
+    # A trade a member chose to submit to a coach. The only member data a coach
+    # ever reads, and only what the member sent: a frozen copy of that one trade,
+    # its automatic review and the plan at the time, and the member's question.
+    # The rest of the journal stays private. The copy is frozen so a later edit
+    # of the trade cannot change what the coach answered about.
+    "trade_reviews": """
+CREATE TABLE IF NOT EXISTS trade_reviews (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    trade_id     TEXT NOT NULL,
+    trade        TEXT NOT NULL,          -- JSON, Trade.to_dict() without the broker payload
+    auto_review  TEXT NOT NULL,          -- JSON, TradeReview.to_dict()
+    plan         TEXT,                   -- JSON, TradingPlan.to_dict(), or NULL
+    question     TEXT NOT NULL DEFAULT '',
+    status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'answered')),
+    coach_email  TEXT,
+    feedback     TEXT,                   -- JSON, see trading.coaching.clean_feedback
+    created_at   TEXT NOT NULL,
+    answered_at  TEXT,
+    seen_at      TEXT
+)""",
 }
 
 INDEXES = """
@@ -238,6 +351,12 @@ CREATE INDEX IF NOT EXISTS idx_accounts_user ON trading_accounts(user_email);
 CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_email, closed_at);
 CREATE INDEX IF NOT EXISTS idx_trades_account ON trades(user_email, account_id);
 CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades(user_email, symbol);
+CREATE INDEX IF NOT EXISTS idx_tokens_user ON account_tokens(user_email, purpose);
+CREATE INDEX IF NOT EXISTS idx_progress_user ON lesson_progress(user_email, course_id);
+CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reviews_user ON trade_reviews(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_at);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

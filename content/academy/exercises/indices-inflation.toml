@@ -1,0 +1,50 @@
+id = "indices-inflation"
+title = "Lire un indice des prix"
+context = """
+Un indice des prix vaut **100** en janvier 2021, **105,1** en janvier 2022 et **114,0** en janvier 2023.
+
+Valeurs fictives, construites pour l'exercice.
+"""
+conclusion = """
+Les taux d'inflation se composent : 5,1 % puis 8,47 % font 14 % en deux ans, pas 13,57 %. Et 100 € de janvier 2021 n'achètent plus, en janvier 2023, que ce que 87,72 € achetaient alors.
+"""
+
+[[step]]
+id = "taux-2022"
+prompt = "Quelle est l'inflation entre janvier 2021 et janvier 2022, en % ?"
+unit = "%"
+answer = 5.1
+tolerance = 0.01
+solution = "105,1 ÷ 100 − 1 = **5,1 %**."
+
+[[step]]
+id = "taux-2023"
+prompt = "Et entre janvier 2022 et janvier 2023 ? (Deux décimales.)"
+unit = "%"
+answer = 8.47
+tolerance = 0.01
+solution = "114,0 ÷ 105,1 − 1 = **8,47 %**. On divise par l'indice de départ de la période, pas par 100."
+
+[[step]]
+id = "cumul"
+prompt = "Quelle est l'inflation cumulée sur les deux ans, en % ?"
+unit = "%"
+answer = 14
+tolerance = 0.01
+solution = "114,0 ÷ 100 − 1 = **14 %**, soit 1,051 × 1,0847 − 1."
+
+[[step]]
+id = "annualise"
+prompt = "À quel taux annuel constant cela correspond-il ? (Deux décimales.)"
+unit = "%"
+answer = 6.77
+tolerance = 0.01
+solution = "1,14^(1/2) − 1 = **6,77 %** par an."
+
+[[step]]
+id = "valeur-reelle"
+prompt = "Que valent, en pouvoir d'achat de janvier 2021, 100 € conservés jusqu'en janvier 2023 ? (Deux décimales.)"
+unit = "€"
+answer = 87.72
+tolerance = 0.01
+solution = "100 ÷ 1,14 = **87,72 €**."

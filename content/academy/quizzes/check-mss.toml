@@ -1,0 +1,80 @@
+id = "check-mss"
+title = "Contrôle : le changement de structure"
+course = "lire-la-structure"
+lesson = "changement-de-structure"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "quel-creux"
+prompt = "Tendance haussière : le dernier sommet est à 1,0912, et le mouvement qui l'a produit est parti d'un creux de swing à 1,0861. Quel niveau surveiller pour un changement de structure ?"
+kind = "single"
+lesson = "changement-de-structure"
+
+[[question.option]]
+id = "1-0861"
+text = "1,0861, le dernier creux plus haut."
+correct = true
+explanation = "Oui : c'est le point d'appui de la tendance."
+
+[[question.option]]
+id = "1-0912"
+text = "1,0912, le dernier sommet."
+explanation = "Une clôture au-dessus de ce sommet serait une cassure de structure haussière, pas un changement."
+
+[[question.option]]
+id = "derniere-bougie"
+text = "Le plus bas de la dernière bougie."
+explanation = "Le niveau est un creux de swing, pas le plus bas d'une bougie quelconque."
+
+[[question]]
+id = "suites"
+prompt = "Après un changement de structure dans une tendance haussière, quelles suites sont possibles ? Plusieurs réponses possibles."
+kind = "multiple"
+lesson = "changement-de-structure"
+
+[[question.option]]
+id = "retournement"
+text = "Un retournement baissier."
+correct = true
+explanation = "Oui, s'il est suivi d'un sommet plus bas puis d'un creux plus bas."
+
+[[question.option]]
+id = "range"
+text = "Un range."
+correct = true
+explanation = "Oui : le prix peut osciller sans direction nette."
+
+[[question.option]]
+id = "correction"
+text = "Une correction plus profonde, puis la reprise de la hausse."
+correct = true
+explanation = "Oui : un changement de structure n'interdit pas une reprise."
+
+[[question.option]]
+id = "certitude"
+text = "Une baisse certaine jusqu'au précédent creux majeur."
+explanation = "Aucune suite n'est certaine."
+
+[[question]]
+id = "tendance-baissiere"
+prompt = "Que faut-il, au minimum, pour parler de tendance baissière après un changement de structure ?"
+kind = "single"
+lesson = "changement-de-structure"
+
+[[question.option]]
+id = "sequence"
+text = "Un sommet plus bas, puis un creux plus bas."
+correct = true
+explanation = "Oui : la séquence baissière se lit comme la haussière, inversée."
+
+[[question.option]]
+id = "rien"
+text = "Rien : le changement de structure suffit."
+explanation = "Il interrompt la hausse ; il ne prouve pas la baisse."
+
+[[question.option]]
+id = "trois-bougies"
+text = "Trois bougies baissières consécutives."
+explanation = "La couleur des bougies ne décrit pas la structure."

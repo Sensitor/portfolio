@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Cassure de structure : mèche ou clôture</title>
+<desc id="d">Une tendance haussière. Une bougie dépasse le dernier sommet de swing par sa mèche mais clôture en dessous : pas de cassure. Une bougie suivante clôture au-dessus : cassure de structure.</desc>
+<line x1="70" y1="176.7" x2="70" y2="234.3" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="62.0" y="187.1" width="16" height="31.4" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="132" y1="103.3" x2="132" y2="197.6" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="124.0" y="113.8" width="16" height="73.3" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="194" y1="98.1" x2="194" y2="161.0" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="186.0" y="113.8" width="16" height="36.7" fill="#3b4a57" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="256" y1="134.8" x2="256" y2="192.4" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="248.0" y="150.5" width="16" height="26.2" fill="#3b4a57" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="318" y1="119.0" x2="318" y2="187.1" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="310.0" y="129.5" width="16" height="47.1" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="380" y1="90.2" x2="380" y2="140.0" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="372.0" y="119.0" width="16" height="10.5" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="442" y1="108.6" x2="442" y2="155.7" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="434.0" y="119.0" width="16" height="21.0" fill="#3b4a57" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="504" y1="82.4" x2="504" y2="145.2" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="496.0" y="87.6" width="16" height="52.4" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="566" y1="51.0" x2="566" y2="98.1" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="558.0" y="61.4" width="16" height="26.2" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="112" y1="98.1" x2="610" y2="98.1" stroke="#284764" stroke-dasharray="5 4" stroke-width="1.2"/>
+<text x="112" y="90.1" font-size="12" fill="#284764">Dernier sommet de swing</text>
+<text x="380" y="51.0" text-anchor="middle" font-size="12" fill="#8a4a40">mèche au-delà,</text>
+<text x="380" y="66.0" text-anchor="middle" font-size="12" fill="#8a4a40">clôture en dessous</text>
+<text x="380" y="171.4" text-anchor="middle" font-size="11.5" fill="#5b646b">pas de cassure</text>
+<text x="504" y="187.1" text-anchor="middle" font-size="12" font-weight="700" fill="#3f6553">clôture au-delà :</text>
+<text x="504" y="202.1" text-anchor="middle" font-size="12" font-weight="700" fill="#3f6553">cassure (BOS)</text>
+<text x="40" y="285" font-size="11" fill="#7b8389">Convention de ce parcours : une cassure exige une clôture au-delà du niveau. Une mèche seule est une tentative rejetée.</text>
+</svg>

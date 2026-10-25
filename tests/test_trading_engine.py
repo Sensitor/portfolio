@@ -113,7 +113,7 @@ def test_direction_and_session() -> None:
         raised = True
     check("rejects an unknown side instead of guessing", raised)
 
-    for hour, expected in ((2, "asia"), (9, "london"), (13, "overlap"),
+    for hour, expected in ((2, "asia"), (7, "london"), (9, "london"), (13, "overlap"),
                            (18, "new_york"), (23, "off_hours")):
         got = TM.session_for(datetime(2026, 1, 5, hour, tzinfo=UTC)).value
         check(f"{hour:02d}:00 UTC is {expected}", got == expected, got)

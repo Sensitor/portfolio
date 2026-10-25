@@ -39,6 +39,7 @@ from ..trading import analytics as A
 from ..trading import performance as P
 from ..trading import psychology as PSY
 from ..trading import risk as R
+from ..core.i18n import na
 
 # Below this, a book has not said enough for a threshold crossing to mean
 # anything. The engine's own sample floor for a meaningful comparison.
@@ -100,12 +101,12 @@ def _stop_coverage(profile, out):
         f"{missing} of {profile['n']} trades had no stop recorded, so "
         f"{coverage * 100:.0f}% of the book is what every R figure is computed "
         f"from. A trade without a stop has no amount risked and is excluded "
-        f"rather than counted as zero — which is correct, and means the average "
+        f"rather than counted as zero, which is correct, and means the average "
         f"R you see is not the average R of your trading.",
         f"{missing} trades sur {profile['n']} n'ont pas de stop enregistré : "
         f"{coverage * 100:.0f}% du carnet sert donc de base à tous les chiffres "
         f"en R. Un trade sans stop n'a pas de montant risqué et est exclu plutôt "
-        f"que compté comme zéro — ce qui est correct, et signifie que le R moyen "
+        f"que compté comme zéro, ce qui est correct, et signifie que le R moyen "
         f"affiché n'est pas le R moyen de votre trading.",
         {"coverage": coverage, "missing": missing, "n": profile["n"],
          "threshold": THRESHOLDS["stop_coverage"]},
@@ -124,14 +125,14 @@ def _sizing_consistency(profile, out):
         f"The spread of position risk is {consistency:.2f} times its own "
         f"average, against a threshold of {THRESHOLDS['sizing_consistency']:.2f}. "
         f"Your largest risk was {profile['largest_vs_median']:.1f}x your median "
-        f"one. That is a description of the sizing, not a judgement of it — but "
+        f"one. That is a description of the sizing, not a judgement of it, but "
         f"it does mean every average in the product is an average over trades "
         f"that were not comparable in size.",
         f"La dispersion du risque par position vaut {consistency:.2f} fois sa "
         f"propre moyenne, pour un seuil de {THRESHOLDS['sizing_consistency']:.2f}. "
         f"Votre plus gros risque valait {profile['largest_vs_median']:.1f}x votre "
         f"risque médian. C'est une description du dimensionnement, pas un "
-        f"jugement — mais cela signifie que chaque moyenne du produit porte sur "
+        f"jugement, mais cela signifie que chaque moyenne du produit porte sur "
         f"des trades qui n'étaient pas comparables en taille.",
         {"consistency": consistency,
          "largest_vs_median": profile.get("largest_vs_median"),
@@ -153,7 +154,7 @@ def _stop_discipline(stops, out):
         "Certaines pertes ont dépassé le stop",
         f"{stops['n_beyond_stop']} of {stops['n_losses']} losing trades closed "
         f"worse than -1R, the worst at {stops['worst_loss_r']:.2f}R. A loss past "
-        f"the stop means the stop did not do its job — moved, removed, gapped "
+        f"the stop means the stop did not do its job: moved, removed, gapped "
         f"through or slipped. Which of those it was is not in the data.",
         f"{stops['n_beyond_stop']} trades perdants sur {stops['n_losses']} ont "
         f"clôturé au-delà de -1R, le pire à {stops['worst_loss_r']:.2f}R. Une "
@@ -253,18 +254,18 @@ def _concentration(rows, dimension_key, out):
     share = summary.get("profit_share")
     if share is None or share < THRESHOLDS["concentration"]:
         return
-    label = summary.get("most_profitable", "—")
+    label = summary.get("most_profitable", na())
 
     out.append(_item(
         f"concentration:{dimension_key}", "neutral",
         f"Most of the profit came from one {dimension_key}",
         f"L'essentiel du profit vient d'un seul élément ({dimension_key})",
         f"{label} accounts for {share * 100:.0f}% of the gross profit across "
-        f"{summary['n_buckets']} groups. This is a description, not a verdict — "
+        f"{summary['n_buckets']} groups. This is a description, not a verdict: "
         f"a specialist's book looks like this, and so does one carried by a "
         f"single lucky run. Only a longer history separates them.",
         f"{label} représente {share * 100:.0f}% du profit brut sur "
-        f"{summary['n_buckets']} groupes. C'est une description, pas un verdict — "
+        f"{summary['n_buckets']} groupes. C'est une description, pas un verdict : "
         f"le carnet d'un spécialiste ressemble à cela, celui porté par une seule "
         f"série chanceuse aussi. Seul un historique plus long les distingue.",
         {"share": share, "label": label, "buckets": summary["n_buckets"],

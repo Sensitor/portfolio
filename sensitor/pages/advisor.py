@@ -17,7 +17,7 @@ from ..ui.components import (
     pill_html, section, spacer,
 )
 from ..ui.themes import INK, INK_MUTED, STATUS, html
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 
@@ -44,7 +44,7 @@ def render_advisor(ctx) -> None:
 
 
 def _headline(summaries, lang) -> None:
-    section(tr("clients", lang).upper(), f"{len(summaries)}")
+    section(tr("clients", lang), f"{len(summaries)}")
 
     values = [s["total_value"] for s in summaries if s["total_value"] is not None]
     healths = [s["metrics"].get("health") for s in summaries
@@ -62,13 +62,13 @@ def _headline(summaries, lang) -> None:
                     caption=f"{len(values)} {tr('with_snapshot', lang)}")
     with c2:
         metric_card(tr("total_aum", lang),
-                    money(sum(values), currency) if values else "—",
+                    money(sum(values), currency) if values else na(lang),
                     bar=1.0 if values else 0,
                     caption=tr("as_of_snapshot", lang))
     with c3:
         average = sum(healths) / len(healths) if healths else None
         metric_card(tr("avg_health", lang),
-                    f"{average:.0f}" if average is not None else "—",
+                    f"{average:.0f}" if average is not None else na(lang),
                     bar=(average or 0) / 100,
                     status=_tone(average))
     with c4:
@@ -81,7 +81,7 @@ def _headline(summaries, lang) -> None:
                                 f"{weakest['metrics']['health']:.0f}",
                         compact=True)
         else:
-            metric_card(tr("lowest_health", lang), "—", caption=tr("stale_snapshot", lang))
+            metric_card(tr("lowest_health", lang), na(lang), caption=tr("stale_snapshot", lang))
 
 
 def _table(summaries, lang) -> None:
@@ -91,14 +91,14 @@ def _table(summaries, lang) -> None:
         metrics = entry["metrics"] or {}
         snapshot = entry["snapshot"]
         rows.append([
-            portfolio.client_name or "—",
+            portfolio.client_name or na(lang),
             portfolio.name,
             money(entry["total_value"], portfolio.currency)
-            if entry["total_value"] is not None else "—",
-            pct(metrics.get("total_return")) if metrics.get("total_return") is not None else "—",
-            pct(metrics.get("volatility")) if metrics.get("volatility") is not None else "—",
-            num(metrics.get("sharpe")) if metrics.get("sharpe") is not None else "—",
-            f"{metrics.get('health'):.0f}" if metrics.get("health") is not None else "—",
+            if entry["total_value"] is not None else na(lang),
+            pct(metrics.get("total_return")) if metrics.get("total_return") is not None else na(lang),
+            pct(metrics.get("volatility")) if metrics.get("volatility") is not None else na(lang),
+            num(metrics.get("sharpe")) if metrics.get("sharpe") is not None else na(lang),
+            f"{metrics.get('health'):.0f}" if metrics.get("health") is not None else na(lang),
             snapshot.taken_at[:10] if snapshot else tr("stale_snapshot", lang),
         ])
 
@@ -111,7 +111,7 @@ def _table(summaries, lang) -> None:
 
 
 def _cards(ctx, summaries, lang, store) -> None:
-    section(tr("clients", lang).upper() + " — " + tr("holdings", lang).upper())
+    section(tr("clients", lang) + " · " + tr("holdings", lang))
 
     for index, entry in enumerate(summaries):
         portfolio = entry["portfolio"]
@@ -138,7 +138,7 @@ def _cards(ctx, summaries, lang, store) -> None:
             f'{portfolio.name}</div></div>'
             f'<div style="text-align:right;">'
             f'<div style="font-size:1.1rem;font-weight:700;color:{INK};">'
-            f'{money(entry["total_value"], portfolio.currency) if entry["total_value"] else "—"}</div>'
+            f'{money(entry["total_value"], portfolio.currency) if entry["total_value"] else na(lang)}</div>'
             f'<div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">'
             f'{"".join(badges)}</div></div></div>'
             f'<div style="font-size:0.76rem;color:{INK_MUTED};margin-top:10px;">'

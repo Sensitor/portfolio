@@ -1,0 +1,73 @@
+id = "check-preparer-seance"
+title = "Contrôle : préparer sa séance"
+course = "processus-de-trading"
+lesson = "preparer-seance"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "scenario"
+prompt = "Quelle est la forme d'un scénario utile ?"
+kind = "single"
+lesson = "preparer-seance"
+
+[[question.option]]
+id = "si-alors"
+text = "« Si telle situation, alors telle action », avec son invalidation."
+correct = true
+explanation = "Oui : une intention de mise en œuvre."
+
+[[question.option]]
+id = "prevision"
+text = "« Le marché va monter aujourd'hui. »"
+explanation = "C'est une prévision, sans condition ni invalidation."
+
+[[question.option]]
+id = "vague"
+text = "« Je verrai selon le marché. »"
+explanation = "C'est l'absence de préparation."
+
+[[question]]
+id = "rien"
+prompt = "La préparation ne trouve aucun scénario lisible. Que faire ?"
+kind = "single"
+lesson = "preparer-seance"
+
+[[question.option]]
+id = "rien"
+text = "Ne pas trader : c'est l'application du plan."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "forcer"
+text = "Chercher un trade pendant la séance."
+explanation = "C'est improviser."
+
+[[question.option]]
+id = "autre"
+text = "Changer d'instrument au hasard."
+explanation = "Le plan fixe les instruments."
+
+[[question]]
+id = "ecrit"
+prompt = "Pourquoi écrire la préparation ?"
+kind = "single"
+lesson = "preparer-seance"
+
+[[question.option]]
+id = "comparer"
+text = "Pour qu'elle ne s'adapte pas au prix pendant la séance, et puisse être comparée le soir."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "joli"
+text = "Pour avoir un beau journal."
+explanation = "L'enjeu est la comparaison, pas la présentation."
+
+[[question.option]]
+id = "inutile"
+text = "Ce n'est pas utile si l'on a de la mémoire."
+explanation = "La mémoire réécrit l'histoire."

@@ -1,0 +1,73 @@
+id = "check-interne-externe"
+title = "Contrôle : liquidité interne et externe"
+course = "liquidite-et-scenarios"
+lesson = "interne-externe"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "externe"
+prompt = "Dans un range, qu'appelle-t-on liquidité externe ?"
+kind = "single"
+lesson = "interne-externe"
+
+[[question.option]]
+id = "bornes"
+text = "Les niveaux qui bornent le range : son sommet et son creux."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "milieu"
+text = "Les swings mineurs à l'intérieur du range."
+explanation = "C'est la liquidité interne."
+
+[[question.option]]
+id = "autre-marche"
+text = "La liquidité d'un autre marché."
+explanation = "Le terme désigne une position dans la structure, pas un autre marché."
+
+[[question]]
+id = "alternance"
+prompt = "« Le prix alterne entre liquidité externe et interne. » De quoi s'agit-il ?"
+kind = "single"
+lesson = "interne-externe"
+
+[[question.option]]
+id = "cadre"
+text = "D'un cadre de méthode pour ordonner ses hypothèses."
+correct = true
+explanation = "Oui : il dit où regarder, pas ce qui va se passer."
+
+[[question.option]]
+id = "loi"
+text = "D'une loi du marché."
+explanation = "Rien n'oblige le prix à alterner."
+
+[[question.option]]
+id = "signal"
+text = "D'un signal d'entrée."
+explanation = "C'est un cadre de lecture, pas un déclencheur."
+
+[[question]]
+id = "unite"
+prompt = "Le sommet d'un range M15 se trouve au milieu d'une jambe H4. Pour le H4, ce niveau est plutôt :"
+kind = "single"
+lesson = "interne-externe"
+
+[[question.option]]
+id = "interne"
+text = "De la liquidité interne."
+correct = true
+explanation = "Oui : la famille d'un niveau dépend de l'unité de temps."
+
+[[question.option]]
+id = "externe"
+text = "De la liquidité externe."
+explanation = "Il est externe pour le M15, interne pour le H4."
+
+[[question.option]]
+id = "rien"
+text = "Rien du tout, il disparaît."
+explanation = "Il existe toujours ; seule sa famille change."

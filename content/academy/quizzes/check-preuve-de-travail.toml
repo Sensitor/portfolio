@@ -1,0 +1,73 @@
+id = "check-preuve-de-travail"
+title = "Contrôle : la preuve de travail"
+course = "bitcoin-fonctionnement"
+lesson = "preuve-de-travail"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "asymetrie"
+prompt = "Quelle asymétrie fait la preuve de travail ?"
+kind = "single"
+lesson = "preuve-de-travail"
+
+[[question.option]]
+id = "verifier"
+text = "Trouver demande un nombre immense d'essais ; vérifier n'en demande qu'un."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "inverse"
+text = "Trouver est immédiat ; vérifier est long."
+explanation = "C'est l'inverse."
+
+[[question.option]]
+id = "aucune"
+text = "Il n'y a pas d'asymétrie."
+explanation = "Elle est au cœur du mécanisme."
+
+[[question]]
+id = "ajuste"
+prompt = "Les 2 016 derniers blocs ont été trouvés en 12,6 jours. Que fait la difficulté ?"
+kind = "single"
+lesson = "preuve-de-travail"
+
+[[question.option]]
+id = "hausse"
+text = "Elle augmente d'environ 11,1 %."
+correct = true
+explanation = "Oui : 14 ÷ 12,6 = 1,111."
+
+[[question.option]]
+id = "baisse"
+text = "Elle baisse d'environ 10 %."
+explanation = "Les blocs sont arrivés trop vite : elle doit monter."
+
+[[question.option]]
+id = "stable"
+text = "Elle ne change pas."
+explanation = "Elle s'ajuste à chaque période de 2 016 blocs."
+
+[[question]]
+id = "part"
+prompt = "Un mineur détient 2 % de la puissance. Combien de temps en moyenne entre deux de ses blocs ?"
+kind = "single"
+lesson = "preuve-de-travail"
+
+[[question.option]]
+id = "500"
+text = "500 minutes"
+correct = true
+explanation = "Oui : 10 ÷ 0,02."
+
+[[question.option]]
+id = "10"
+text = "10 minutes"
+explanation = "C'est l'intervalle du réseau entier."
+
+[[question.option]]
+id = "20"
+text = "20 minutes"
+explanation = "On divise par la part, on ne multiplie pas par 2."

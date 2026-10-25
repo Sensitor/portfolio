@@ -1,0 +1,73 @@
+id = "check-cas-backtest"
+title = "Contrôle : le cas des 120 trades"
+course = "tester-une-strategie"
+lesson = "cas-backtest"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "brute"
+prompt = "52 gains de 1,9R et 68 pertes de 1R sur 120 trades. Espérance brute ?"
+kind = "single"
+lesson = "cas-backtest"
+
+[[question.option]]
+id = "026"
+text = "Environ +0,26R"
+correct = true
+explanation = "(98,8 − 68) ÷ 120."
+
+[[question.option]]
+id = "090"
+text = "+0,90R"
+explanation = "C'est 1,9 − 1, sans pondération par les fréquences."
+
+[[question.option]]
+id = "043"
+text = "+0,43R"
+explanation = "C'est le taux de réussite, 43 %."
+
+[[question]]
+id = "decision"
+prompt = "Espérance nette +0,19R, intervalle de −0,07 à +0,44R, hors échantillon +0,05R. Quelle décision ?"
+kind = "single"
+lesson = "cas-backtest"
+
+[[question.option]]
+id = "mesurer"
+text = "Continuer à mesurer en temps réel, petite taille, règle figée."
+correct = true
+explanation = "C'est la décision proportionnée aux preuves."
+
+[[question.option]]
+id = "augmenter"
+text = "Passer à 2 % de risque, la moyenne est positive."
+explanation = "L'avantage n'est pas démontré."
+
+[[question.option]]
+id = "ajuster"
+text = "Ajuster la règle pour améliorer 2023, puis la retester sur 2023."
+explanation = "L'échantillon de test serait consommé."
+
+[[question]]
+id = "seuil"
+prompt = "Gains moyens 1,9R : seuil de rentabilité hors coûts ?"
+kind = "single"
+lesson = "cas-backtest"
+
+[[question.option]]
+id = "345"
+text = "34,5 %"
+correct = true
+explanation = "1 ÷ 2,9."
+
+[[question.option]]
+id = "50"
+text = "50 %"
+explanation = "C'est le seuil d'un ratio de 1R."
+
+[[question.option]]
+id = "43"
+text = "43,3 %"
+explanation = "C'est le taux mesuré."

@@ -1,0 +1,60 @@
+id = "intervalle-esperance"
+title = "L'intervalle d'une espérance"
+context = """
+Un backtest mesure une espérance nette de **+0,20R** par trade, avec un écart type des résultats de **1,2R**.
+
+On compare deux cas : la mesure porte sur **40 trades**, ou sur **400 trades**.
+
+Rappel : erreur type = écart type ÷ √n ; intervalle à 95 % ≈ espérance ± 1,96 × erreur type.
+"""
+conclusion = """
+Sur 40 trades, l'intervalle va de −0,17 à +0,57R : il contient zéro, le résultat ne permet pas de conclure. Sur 400 trades, il va de +0,08 à +0,32R : un avantage devient probable. Pour une demi-largeur de 0,10R, il faudrait 554 trades.
+"""
+
+[[step]]
+id = "se-40"
+prompt = "Quelle est l'erreur type sur 40 trades, en R ? (Deux décimales.)"
+unit = "R"
+answer = 0.19
+tolerance = 0.005
+solution = "1,2 ÷ √40 = 1,2 ÷ 6,32 = **0,19R**."
+
+[[step]]
+id = "bas-40"
+prompt = "Quelle est la borne basse de l'intervalle à 95 % sur 40 trades ?"
+unit = "R"
+answer = -0.17
+tolerance = 0.006
+solution = "0,20 − 1,96 × 0,19 = **−0,17R**."
+
+[[step]]
+id = "haut-40"
+prompt = "Et sa borne haute ?"
+unit = "R"
+answer = 0.57
+tolerance = 0.006
+solution = "0,20 + 1,96 × 0,19 = **+0,57R**. L'intervalle contient zéro."
+
+[[step]]
+id = "se-400"
+prompt = "Quelle est l'erreur type sur 400 trades ?"
+unit = "R"
+answer = 0.06
+tolerance = 0.001
+solution = "1,2 ÷ √400 = 1,2 ÷ 20 = **0,06R**."
+
+[[step]]
+id = "bas-400"
+prompt = "Quelle est la borne basse de l'intervalle sur 400 trades ?"
+unit = "R"
+answer = 0.08
+tolerance = 0.006
+solution = "0,20 − 1,96 × 0,06 = **+0,08R** : au-dessus de zéro."
+
+[[step]]
+id = "trades-requis"
+prompt = "Combien de trades faudrait-il pour une demi-largeur de 0,10R ? (Arrondi à l'entier supérieur.)"
+unit = "trades"
+answer = 554
+tolerance = 1
+solution = "Il faut 1,96 × 1,2 ÷ √n = 0,10, soit √n = 23,52 et n = 553,2 : **554 trades**."

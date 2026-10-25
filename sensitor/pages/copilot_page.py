@@ -22,8 +22,8 @@ from ..investment import simulate as SI
 from ..ui.components import (
     data_table, empty_state, note, num, page_header, pct, pill_html, section, spacer,
 )
-from ..ui.themes import BORDER, INK, INK_2, INK_FAINT, STATUS, html
-from ..core.i18n import tr
+from ..ui.themes import BORDER, INK, INK_2, INK_FAINT, NEUTRAL, STATUS, fade, html
+from ..core.i18n import na, tr
 from ._shared import guard, period_selector
 
 DISMISSED_KEY = "sensitor_copilot_dismissed"
@@ -63,7 +63,7 @@ def render_copilot(ctx) -> None:
         count = len(items)
         label = (f"{count} " + ("item" if count == 1 else "items")) if lang == "en" \
             else (f"{count} " + ("élément" if count == 1 else "éléments"))
-        section(tr("things_to_review", lang).upper(), label)
+        section(tr("things_to_review", lang), label)
     with restore:
         if dismissed:
             if st.button(f"{tr('restore_ignored', lang)} ({len(dismissed)})",
@@ -128,7 +128,7 @@ def _render_item(ctx, lang, item, index, before, bundle_kwargs) -> None:
 
     if state == "why":
         html(
-            f'<div style="background:rgba(154,168,191,0.04);border:1px solid {BORDER};'
+            f'<div style="background:{fade(NEUTRAL, 0.04)};border:1px solid {BORDER};'
             f'border-radius:9px;padding:14px 16px;margin:4px 0 14px 0;'
             f'font-size:0.84rem;color:{INK_2};line-height:1.65;">'
             f'{item["why"][lang]}</div>'
@@ -167,7 +167,7 @@ def _render_impact(ctx, lang, item, index, before, bundle_kwargs) -> None:
             before_text, after_text = num(row["before"], 2), num(row["after"], 2)
 
         if row["improved"] is None:
-            verdict = "—"
+            verdict = na(lang)
         else:
             verdict = tr("improves" if row["improved"] else "worsens", lang)
 

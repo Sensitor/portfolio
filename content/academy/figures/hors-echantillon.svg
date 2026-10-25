@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Dans et hors échantillon</title>
+<desc id="d">En haut, une période 2019 à 2022 pour construire la règle et 2023 à 2024 pour la tester une seule fois. En bas, trois fenêtres glissantes de trois ans suivies chacune d'une année de test.</desc>
+<text x="30" y="40" font-size="12.5" font-weight="700" fill="#1b2733">Séparation simple</text>
+<rect x="90" y="52" width="340" height="34" fill="#284764" opacity=".25" stroke="#284764"/>
+<rect x="430" y="52" width="170" height="34" fill="#3f6553" opacity=".25" stroke="#3f6553"/>
+<text x="260.0" y="74" text-anchor="middle" font-size="12" fill="#284764">dans l'échantillon : on construit la règle</text>
+<text x="515.0" y="74" text-anchor="middle" font-size="12" fill="#3f6553">hors échantillon : un test</text>
+<text x="30" y="122" font-size="12.5" font-weight="700" fill="#1b2733">Fenêtres glissantes</text>
+<rect x="90" y="134" width="255" height="24" fill="#284764" opacity=".2" stroke="#284764"/>
+<rect x="345" y="134" width="85" height="24" fill="#3f6553" opacity=".25" stroke="#3f6553"/>
+<text x="387" y="150" text-anchor="middle" font-size="11" fill="#3f6553">test 2022</text>
+<rect x="175" y="168" width="255" height="24" fill="#284764" opacity=".2" stroke="#284764"/>
+<rect x="430" y="168" width="85" height="24" fill="#3f6553" opacity=".25" stroke="#3f6553"/>
+<text x="472" y="184" text-anchor="middle" font-size="11" fill="#3f6553">test 2023</text>
+<rect x="260" y="202" width="255" height="24" fill="#284764" opacity=".2" stroke="#284764"/>
+<rect x="515" y="202" width="85" height="24" fill="#3f6553" opacity=".25" stroke="#3f6553"/>
+<text x="557" y="218" text-anchor="middle" font-size="11" fill="#3f6553">test 2024</text>
+<text x="90" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2019</text>
+<text x="175" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2020</text>
+<text x="260" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2021</text>
+<text x="345" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2022</text>
+<text x="430" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2023</text>
+<text x="515" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2024</text>
+<text x="600" y="250" text-anchor="middle" font-size="10.5" fill="#5b646b">2025</text>
+<text x="30" y="282" font-size="11" fill="#7b8389">Les données de test ne servent jamais à choisir la règle. Une fois regardées, elles sont dans l'échantillon.</text>
+</svg>

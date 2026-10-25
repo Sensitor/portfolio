@@ -1,0 +1,229 @@
+id = "liquidite-validation"
+title = "Quiz de validation : Liquidité et scénarios"
+course = "liquidite-et-scenarios"
+lesson = "recap-liquidite"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "stop-vendeur"
+prompt = "Un vendeur place son stop au-dessus du dernier sommet. Quand le prix l'atteint, que devient cet ordre ?"
+kind = "single"
+lesson = "liquidite-ordres"
+
+[[question.option]]
+id = "achat"
+text = "Un ordre d'achat au marché."
+correct = true
+explanation = "Pour clôturer une vente, il faut acheter : le stop d'un vendeur est un ordre d'achat."
+
+[[question.option]]
+id = "vente"
+text = "Un ordre de vente au marché."
+explanation = "C'est le stop d'un acheteur, placé sous un creux, qui devient un ordre de vente."
+
+[[question.option]]
+id = "annule"
+text = "Un ordre annulé par le courtier."
+explanation = "Un stop atteint est exécuté, pas annulé."
+
+[[question]]
+id = "hypothese"
+prompt = "Que peut-on observer directement sur un graphique de Forex ou de CFD ?"
+kind = "single"
+lesson = "liquidite-ordres"
+
+[[question.option]]
+id = "prix"
+text = "Le comportement du prix autour des niveaux : dépassement, retour, clôture."
+correct = true
+explanation = "Oui. L'emplacement des ordres reste une hypothèse ; le prix, lui, s'observe."
+
+[[question.option]]
+id = "stops"
+text = "L'emplacement des stops des autres traders."
+explanation = "Personne ne les voit, et il n'existe pas de carnet central sur ces marchés."
+
+[[question.option]]
+id = "intentions"
+text = "Les intentions des gros intervenants."
+explanation = "On peut faire des hypothèses sur elles, pas les observer."
+
+[[question]]
+id = "tolerance"
+prompt = "Tolérance de 3 pips. Des sommets à 1,0942, 1,0944 et 1,0928 : quels sont les sommets égaux ?"
+kind = "single"
+lesson = "equal-highs-lows"
+
+[[question.option]]
+id = "deux"
+text = "1,0942 et 1,0944, avec un niveau de référence à 1,0944."
+correct = true
+explanation = "Ils sont à 2 pips l'un de l'autre ; 1,0928 est 14 pips plus bas. La référence est le plus haut."
+
+[[question.option]]
+id = "trois"
+text = "Les trois, avec un niveau de référence à 1,0942."
+explanation = "1,0928 est hors tolérance, et la référence d'un groupe de sommets est le plus haut."
+
+[[question.option]]
+id = "deux-bas"
+text = "1,0942 et 1,0944, avec un niveau de référence à 1,0942."
+explanation = "Le bon groupe, mais la référence est le plus haut des sommets : 1,0944."
+
+[[question]]
+id = "tolerance-large"
+prompt = "Pourquoi ne pas choisir une tolérance de 20 pips en H1 sur EURUSD ?"
+kind = "single"
+lesson = "equal-highs-lows"
+
+[[question.option]]
+id = "dilue"
+text = "Presque tous les sommets finiraient dans le même groupe, et le niveau ne voudrait plus rien dire."
+correct = true
+explanation = "Une tolérance trop large dilue le niveau."
+
+[[question.option]]
+id = "interdit"
+text = "Parce que la règle universelle est de 3 pips."
+explanation = "Il n'existe pas de tolérance universelle ; elle se fixe par instrument et unité de temps."
+
+[[question.option]]
+id = "aucun"
+text = "Parce qu'aucun sommet ne serait jamais égal."
+explanation = "C'est l'inverse : une tolérance large en regroupe trop."
+
+[[question]]
+id = "sweep-cassure"
+prompt = "Niveau de sommets égaux à 1,0944. Une bougie monte à 1,0951 et clôture à 1,0947. Comment la qualifier selon la convention du parcours ?"
+kind = "single"
+lesson = "sweeps"
+
+[[question.option]]
+id = "cassure"
+text = "Une cassure : la clôture est au-delà du niveau."
+correct = true
+explanation = "Un sweep demande une clôture revenue au niveau ou en dessous."
+
+[[question.option]]
+id = "sweep"
+text = "Un sweep : la mèche a dépassé le niveau."
+explanation = "La mèche ne suffit pas ; c'est la clôture qui décide."
+
+[[question.option]]
+id = "fausse"
+text = "Une fausse cassure."
+explanation = "Une fausse cassure demande un retour en clôture sous le niveau dans les bougies suivantes ; on ne le sait pas encore."
+
+[[question]]
+id = "sweep-limites"
+prompt = "Que ne prouve pas un sweep ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "sweeps"
+
+[[question.option]]
+id = "stops"
+text = "Que des stops se trouvaient au-delà du niveau."
+correct = true
+explanation = "On ne les voit pas : c'est l'hypothèse de départ, pas une observation."
+
+[[question.option]]
+id = "retournement"
+text = "Que le prix va se retourner."
+correct = true
+explanation = "Le prix peut revenir au-delà du niveau quelques bougies plus tard."
+
+[[question.option]]
+id = "cloture"
+text = "Que la bougie a clôturé en deçà du niveau."
+explanation = "Cela, il le prouve : c'est sa définition."
+
+[[question]]
+id = "fausse-cassure"
+prompt = "Règle écrite : une cassure est fausse si une clôture revient sous le niveau dans les trois bougies. Niveau 1,0944, cassure en clôture à 1,0947, puis clôtures à 1,0949 et 1,0956. Que conclure ?"
+kind = "single"
+lesson = "fausses-cassures"
+
+[[question.option]]
+id = "confirmee"
+text = "La cassure est confirmée selon la règle."
+correct = true
+explanation = "Aucune clôture n'est revenue sous 1,0944 : la cassure tient."
+
+[[question.option]]
+id = "fausse"
+text = "C'est une fausse cassure."
+explanation = "Il faudrait une clôture sous 1,0944 dans les trois bougies."
+
+[[question.option]]
+id = "sweep"
+text = "C'est un sweep."
+explanation = "La première bougie a clôturé au-delà du niveau : ce n'est pas un sweep."
+
+[[question]]
+id = "retrospectif"
+prompt = "Qu'appelle-t-on le biais rétrospectif ?"
+kind = "single"
+lesson = "fausses-cassures"
+
+[[question.option]]
+id = "juger"
+text = "Juger une décision passée avec une information qui n'existait pas au moment de la prendre."
+correct = true
+explanation = "C'est ce qui rend « évidentes » les fausses cassures sur un graphique terminé."
+
+[[question.option]]
+id = "tendance"
+text = "Supposer que la tendance passée va continuer."
+explanation = "C'est un autre raisonnement, sans rapport avec ce biais."
+
+[[question.option]]
+id = "pertes"
+text = "Se souvenir davantage de ses pertes que de ses gains."
+explanation = "Ce n'est pas la définition étudiée dans le parcours."
+
+[[question]]
+id = "interne-externe"
+prompt = "Le sommet d'un range M15 se trouve au milieu d'une jambe H4. Comment le classer ?"
+kind = "single"
+lesson = "interne-externe"
+
+[[question.option]]
+id = "depend"
+text = "Externe en M15, interne en H4 : la famille dépend de l'unité de temps."
+correct = true
+explanation = "On précise toujours l'unité de temps, et on lit du haut vers le bas."
+
+[[question.option]]
+id = "externe"
+text = "Externe, sur toutes les unités de temps."
+explanation = "Pour l'unité H4, il est à l'intérieur de la jambe : interne."
+
+[[question.option]]
+id = "interne"
+text = "Interne, sur toutes les unités de temps."
+explanation = "Pour l'unité M15, il borne le range : externe."
+
+[[question]]
+id = "taille"
+prompt = "Sur XAUUSD, contrat de 100 onces par lot, entrée 2 409,30, invalidation 2 415,80, budget de risque 100 $, pas de 0,01 lot. Quelle taille ?"
+kind = "single"
+lesson = "scenario-liquidite"
+
+[[question.option]]
+id = "quinze"
+text = "0,15 lot, pour un risque effectif de 97,50 $."
+correct = true
+explanation = "Distance 6,50 $ par once, soit 650 $ par lot ; 100 ÷ 650 = 0,153, arrondi vers le bas à 0,15."
+
+[[question.option]]
+id = "seize"
+text = "0,16 lot."
+explanation = "On arrondit vers le bas : 0,16 lot risquerait 104 $, au-delà du budget."
+
+[[question.option]]
+id = "un-cinq"
+text = "1,53 lot."
+explanation = "C'est le résultat avec un contrat de 10 onces : la spécification change tout."

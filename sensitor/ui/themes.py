@@ -3,18 +3,29 @@ Design system for Sensitor Portfolio Intelligence.
 
 Single source of truth for colour, spacing, typography and chart chrome.
 Everything visual in the app should read its values from here — never hardcode a
-hex in a page or component.
+hex in a page or component; a tint of a token is `fade(TOKEN, alpha)`.
+
+The analytics app wears the platform's « Carnet de bord » direction (see
+docs/DIRECTION_ARTISTIQUE.md): paper and sheet surfaces, ink text, the plan's
+blue for actions and the portfolio, green and brick for gains and losses, ochre
+for warnings, Newsreader titles and Schibsted Grotesk for the interface and
+every figure. The navy sidebar is the binding, the one place with the grid.
 
 Palette provenance
 ------------------
-The categorical series palette is the validated 8-slot dark set, checked against
-this app's own chart surface (#0E1522) with the data-viz validator:
+The categorical series palette is an 8-slot set in the direction's hues,
+checked against the chart surface (#FFFDF8) with the data-viz validator
+(validate_palette.js, light mode):
 
-    Lightness band      PASS  all 8 inside L 0.48-0.67
+    Lightness band      PASS  all 8 inside L 0.43-0.77
     Chroma floor        PASS  all 8 >= 0.1
-    CVD separation      PASS  worst adjacent dE 8.4 (protan)
-    Normal-vision floor PASS  worst adjacent dE 19.3
+    CVD separation      PASS  worst adjacent dE 9.5 (deutan)
+    Normal-vision floor PASS  worst adjacent dE 17.6
     Contrast vs surface PASS  all 8 >= 3:1
+
+The first three slots also pass with every pair compared (scatter forms): worst
+CVD dE 9.5, normal-vision dE 18.9. The sequential ramp passes the ordinal
+checks (monotone, steps >= 0.06 L, light end >= 2:1).
 
 Slots are assigned in fixed order and never cycled. Past 8 series, fold the tail
 into "Other" rather than generating a 9th hue.
@@ -27,35 +38,35 @@ import streamlit as st
 # TOKENS
 # =============================================================================
 
-# --- Surfaces (deep fintech dark) -------------------------------------------
-BG_DEEP = "#070B14"        # page plane
-SURFACE = "#0E1522"        # card / chart surface  (palette validated against this)
-SURFACE_2 = "#141C2B"      # raised surface, table headers, hovered rows
-SURFACE_3 = "#1B2435"      # input backgrounds, chips
+# --- Surfaces (the platform's paper, sheet and margin) ----------------------
+BG_DEEP = "#F3F0E8"        # page plane: paper
+SURFACE = "#FFFDF8"        # card / chart surface: sheet (palette validated against this)
+SURFACE_2 = "#EEE9DD"      # margin: table headers, hovered rows, notes
+SURFACE_3 = "#FFFDF8"      # input backgrounds, chips
 
 # --- Ink ---------------------------------------------------------------------
-INK = "#EDF2F9"            # primary text
-INK_2 = "#9AA8BF"          # secondary text
-INK_MUTED = "#6B7A93"      # axis labels, captions
-INK_FAINT = "#465065"      # disabled, hairline text
+INK = "#0F1B26"            # primary text            15.3:1 on paper
+INK_2 = "#33414D"          # secondary text           9.2:1
+INK_MUTED = "#59636B"      # axis labels, captions    5.4:1
+INK_FAINT = "#737B82"      # placeholders, hairline text
 
 # --- Lines -------------------------------------------------------------------
-BORDER = "rgba(154,168,191,0.14)"
-BORDER_STRONG = "rgba(154,168,191,0.26)"
-GRID = "rgba(154,168,191,0.08)"
-AXIS = "rgba(154,168,191,0.20)"
+BORDER = "#D8D2C3"
+BORDER_STRONG = "#B7B0A0"
+GRID = "rgba(15,27,38,0.07)"
+AXIS = "#B7B0A0"
 
 # --- Brand -------------------------------------------------------------------
-ACCENT = "#3987E5"         # Sensitor blue — primary action, portfolio series
-ACCENT_SOFT = "rgba(57,135,229,0.14)"
-ACCENT_GLOW = "rgba(57,135,229,0.30)"
+ACCENT = "#1F4A72"         # the plan's blue: primary action, portfolio series
+ACCENT_SOFT = "#E1E9F1"
+ACCENT_GLOW = "rgba(31,74,114,0.18)"   # selection only: no halos
 
 # --- Status (fixed roles, never reused as a series colour) -------------------
 # Each always ships with an icon + label so hue never carries meaning alone.
-GOOD = "#16B979"
-WARNING = "#E8A317"
-SERIOUS = "#E8894A"
-CRITICAL = "#E2504F"
+GOOD = "#22604A"
+WARNING = "#855615"
+SERIOUS = "#9C5A1E"
+CRITICAL = "#9A3A2C"
 
 STATUS = {
     "good": GOOD,
@@ -74,23 +85,24 @@ STATUS_ICON = {
 }
 
 # --- Directional (P&L) -------------------------------------------------------
-POS = "#16B979"
-NEG = "#E2504F"
+POS = "#22604A"
+NEG = "#9A3A2C"
 FLAT = INK_MUTED
+NEUTRAL = "#59636B"        # the grey of « not significant », « other », reference marks
 
 # =============================================================================
 # CATEGORICAL SERIES PALETTE — fixed order, never cycled
 # =============================================================================
 
 PALETTE = [
-    "#3987E5",  # 1 blue
-    "#D95926",  # 2 orange
-    "#199E70",  # 3 aqua
-    "#C98500",  # 4 yellow
-    "#D55181",  # 5 magenta
-    "#008300",  # 6 green
-    "#9085E9",  # 7 violet
-    "#E66767",  # 8 red
+    "#2F6A9E",  # 1 ink blue
+    "#B85C2B",  # 2 copper
+    "#13A07A",  # 3 sea green
+    "#B8861B",  # 4 ochre
+    "#A8507A",  # 5 plum
+    "#5E8B2C",  # 6 olive
+    "#5A5AA8",  # 7 indigo
+    "#C0473F",  # 8 brick red
 ]
 
 # Scatter / bubble / small-multiple forms use the all-pairs-safe head of the list.
@@ -98,17 +110,17 @@ PALETTE_ALLPAIRS = PALETTE[:3]
 
 # Sequential ramp (single hue, light -> dark) for magnitude encodings.
 SEQ_BLUE = [
-    "#CDE2FB", "#9EC5F4", "#6DA7EC", "#3987E5",
-    "#256ABF", "#1C5CAB", "#184F95", "#104281",
+    "#96B4D1", "#7397BC", "#5A82AE", "#44709E",
+    "#2F5B87", "#22476D", "#173553", "#0E253B",
 ]
 
-# Diverging pair for correlation / polarity: red <-> neutral <-> blue.
+# Diverging pair for correlation / polarity: brick <-> neutral <-> blue.
 DIVERGING = [
-    [0.0, "#E2504F"],
-    [0.25, "#C97F7E"],
-    [0.5, "#2A3444"],   # neutral midpoint — not a hue
-    [0.75, "#4E7FBE"],
-    [1.0, "#3987E5"],
+    [0.0, "#9A3A2C"],
+    [0.25, "#C98F84"],
+    [0.5, "#EEE9DD"],   # neutral midpoint, the margin's paper, not a hue
+    [0.75, "#7397BC"],
+    [1.0, "#2F5B87"],
 ]
 
 # =============================================================================
@@ -122,11 +134,23 @@ DIVERGING = [
 # list would break the descendant combinator in `{MAIN} h1`.
 MAIN = ':is([data-testid="stMain"], .main)'
 
-RADIUS = "14px"
-RADIUS_SM = "9px"
-RADIUS_PILL = "999px"
-FONT = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
-MONO = "'JetBrains Mono', 'SF Mono', Menlo, monospace"
+RADIUS = "3px"
+RADIUS_SM = "2px"
+RADIUS_PILL = "2px"
+FONT = "'Schibsted Grotesk', 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif"
+TITLE = "'Newsreader', Georgia, 'Times New Roman', serif"
+MONO = "'DM Mono', 'SF Mono', Menlo, monospace"
+ISO = ("repeating-linear-gradient(30deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
+       "repeating-linear-gradient(150deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
+       "repeating-linear-gradient(90deg, rgba(169,198,226,.035) 0 1px, transparent 1px 58.9px)")
+
+
+def fade(color: str, alpha: float) -> str:
+    """A token at an opacity, as rgba(): the one way a page or chart tints a colour."""
+    value = color.lstrip("#")
+    r, g, b = (int(value[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
+
 
 # Asset-class colours — stable identity across every chart in the app, so a class
 # never changes colour when the filter changes the series count.
@@ -141,8 +165,8 @@ ASSET_CLASS_COLORS = {
     "Commodities": PALETTE[3],
     "Real Estate": PALETTE[4],
     "Cash": PALETTE[6],
-    "Other": INK_MUTED,
-    "Unknown": INK_MUTED,
+    "Other": NEUTRAL,
+    "Unknown": NEUTRAL,
 }
 
 
@@ -210,6 +234,7 @@ def plotly_layout(height: int = 320, showlegend: bool = False, **overrides) -> d
             align="left",
         ),
         hovermode="x unified",
+        modebar=dict(bgcolor=fade(BG_DEEP, 0.9), color=INK_FAINT, activecolor=ACCENT),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
@@ -240,7 +265,8 @@ PLOTLY_CONFIG = {
 }
 
 PLOTLY_CONFIG_ZOOM = {
-    "displayModeBar": True,
+    # On hover (or tap) only: shown all the time it sat over the legend on a phone.
+    "displayModeBar": "hover",
     "displaylogo": False,
     "modeBarButtonsToRemove": [
         "select2d", "lasso2d", "autoScale2d", "toggleSpikelines",
@@ -257,15 +283,10 @@ def inject_theme() -> None:
     """Inject the full app stylesheet. Call once, early, in main()."""
     st.markdown(
         f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
-/* ---------- Base plane ---------- */
-.stApp {{
-  background:
-    radial-gradient(1200px 700px at 12% -8%, rgba(57,135,229,0.10), transparent 60%),
-    radial-gradient(900px 600px at 100% 0%, rgba(144,133,233,0.07), transparent 55%),
-    {BG_DEEP} !important;
-}}
+/* ---------- Base plane: paper, no halo ---------- */
+.stApp {{ background: {BG_DEEP} !important; }}
 html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 
 :is([data-testid="stMainBlockContainer"], .block-container) {{
@@ -282,118 +303,141 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 [data-testid="stHeader"] {{ height: 0 !important; min-height: 0 !important; }}
 [data-testid="stToolbar"], [data-testid="stDecoration"] {{ display: none !important; }}
 
-{MAIN} h1, {MAIN} h2, {MAIN} h3, {MAIN} h4 {{
-  color: {INK} !important;
-  letter-spacing: -0.025em !important;
-  font-weight: 700 !important;
+{MAIN} h1, {MAIN} h2 {{
+  color: {INK} !important; font-family: {TITLE} !important;
+  letter-spacing: -0.015em !important; font-weight: 600 !important;
+}}
+{MAIN} h3 {{
+  color: {INK} !important; font-family: {TITLE} !important;
+  letter-spacing: -0.01em !important; font-weight: 600 !important;
+}}
+{MAIN} h4 {{
+  color: {INK} !important; letter-spacing: -0.01em !important; font-weight: 600 !important;
 }}
 {MAIN} p, {MAIN} li, {MAIN} label {{ color: {INK_2} !important; }}
 
-/* Numbers align in columns; headline figures stay proportional. */
-.snr-num {{ font-variant-numeric: tabular-nums; }}
+/* Figures: proportional. The tabular set of Schibsted widens the comma, which
+   opens a gap in French decimals (« 12 ,5 »); columns align on the right. */
+.snr-num {{ font-variant-numeric: normal; }}
 
-/* ---------- Page header ---------- */
-.snr-page-head {{ margin: 0 0 22px 0; }}
+/* ---------- Page header: a rubric, a direct title ---------- */
+.snr-page-head {{ margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid {BORDER}; }}
 .snr-eyebrow {{
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; color: {ACCENT}; margin-bottom: 6px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: {INK_MUTED}; margin-bottom: 6px;
 }}
 .snr-title {{
-  font-size: 1.85rem; font-weight: 800; color: {INK};
-  letter-spacing: -0.035em; line-height: 1.1;
+  font-family: {TITLE}; font-size: 2.15rem; font-weight: 600; color: {INK};
+  letter-spacing: -0.02em; line-height: 1.1;
 }}
-.snr-sub {{ font-size: 0.9rem; color: {INK_MUTED}; margin-top: 6px; }}
+.snr-sub {{ font-size: 0.95rem; color: {INK_2}; margin-top: 8px; line-height: 1.55; max-width: 760px; }}
 
-/* ---------- Section header ---------- */
+/* ---------- Section header: a hairline and a question ---------- */
 .snr-section {{
-  display: flex; align-items: baseline; gap: 10px;
-  margin: 30px 0 14px 0; padding-bottom: 10px;
-  border-bottom: 1px solid {BORDER};
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  margin: 30px 0 14px 0; padding-top: 12px;
+  border-top: 1px solid {BORDER_STRONG};
 }}
 .snr-section-t {{
-  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: {INK};
+  font-family: {TITLE}; font-size: 1.3rem; font-weight: 600; letter-spacing: -0.01em;
+  text-transform: none; color: {INK};
 }}
-.snr-section-s {{ font-size: 0.8rem; color: {INK_MUTED}; }}
+.snr-section-s {{ font-size: 0.86rem; color: {INK_MUTED}; }}
 
-/* ---------- Cards ---------- */
+/* ---------- Cards: a sheet with its rule ---------- */
 .snr-card {{
   height: 100%;
   box-sizing: border-box;
-  background: linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.008)), {SURFACE};
+  background: {SURFACE};
   border: 1px solid {BORDER};
-  border-radius: {RADIUS};
+  border-top: 2px solid {INK};
+  border-radius: 0;
   padding: 16px 18px;
-  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  transition: border-color .18s ease;
 }}
-.snr-card:hover {{
-  border-color: {BORDER_STRONG};
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px -14px rgba(0,0,0,0.75);
-}}
+.snr-card:hover {{ border-color: {BORDER_STRONG}; border-top-color: {INK}; }}
 
 /* ---------- Metric card ---------- */
 .snr-metric {{ position: relative; overflow: hidden; }}
 .snr-metric-label {{
-  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em;
-  text-transform: uppercase; color: {INK_MUTED};
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0;
+  text-transform: none; color: {INK_MUTED};
   display: flex; align-items: center; gap: 6px;
 }}
 .snr-metric-value {{
-  font-size: 1.85rem; font-weight: 800; color: {INK};
-  letter-spacing: -0.035em; line-height: 1.15; margin-top: 8px;
+  font-size: 1.8rem; font-weight: 600; color: {INK};
+  letter-spacing: -0.025em; line-height: 1.15; margin-top: 6px;
 }}
 .snr-metric-value.sm {{ font-size: 1.35rem; }}
 .snr-metric-foot {{
   display: flex; align-items: center; justify-content: space-between;
-  gap: 8px; margin-top: 10px; font-size: 0.74rem; color: {INK_MUTED};
+  gap: 8px; margin-top: 10px; font-size: 0.8rem; color: {INK_MUTED};
   min-height: 30px;   /* reserved so cards in a row stay the same height */
 }}
-.snr-delta {{ font-weight: 700; font-variant-numeric: tabular-nums; }}
+.snr-delta {{ font-weight: 600; }}
 
 /* progress track */
 .snr-track {{
-  height: 5px; border-radius: 3px; background: rgba(154,168,191,0.13);
+  height: 4px; border-radius: 0; background: {fade(INK, 0.08)};
   margin-top: 11px; overflow: hidden;
 }}
-.snr-fill {{ height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.22,1,.36,1); }}
+.snr-fill {{ height: 100%; border-radius: 0; transition: width .5s cubic-bezier(.22,1,.36,1); }}
 
-/* segmented meter — the "██████░░░░" idea, done properly */
+/* segmented meter: one mark per step, like the platform's record */
 .snr-meter {{ display: flex; gap: 2px; margin-top: 11px; }}
-.snr-seg {{ flex: 1; height: 6px; border-radius: 1.5px; background: rgba(154,168,191,0.13); }}
+.snr-seg {{ flex: 1; height: 6px; border-radius: 0; background: {fade(INK, 0.08)}; }}
 
 /* ---------- Pills & badges ---------- */
 .snr-pill {{
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: {RADIUS_PILL};
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
+  padding: 3px 9px; border-radius: {RADIUS_PILL};
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
   white-space: nowrap;
 }}
 
-/* ---------- Alerts ---------- */
+/* ---------- Alerts: a note in the margin ---------- */
 .snr-alert {{
   display: flex; gap: 12px; align-items: flex-start;
-  background: {SURFACE}; border: 1px solid {BORDER};
-  border-left-width: 3px; border-radius: {RADIUS_SM};
+  background: {SURFACE_2}; border: 0;
+  border-left: 3px solid {BORDER_STRONG}; border-radius: 0;
   padding: 13px 15px; margin-bottom: 9px;
 }}
-.snr-alert-t {{ font-size: 0.86rem; font-weight: 700; color: {INK}; margin-bottom: 3px; }}
-.snr-alert-b {{ font-size: 0.8rem; color: {INK_2}; line-height: 1.55; }}
+.snr-alert-t {{ font-size: 0.9rem; font-weight: 600; color: {INK}; margin-bottom: 3px; }}
+.snr-alert-b {{ font-size: 0.86rem; color: {INK_2}; line-height: 1.55; }}
 
-/* ---------- Data table ---------- */
-.snr-table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+/* ---------- Lecture: the margin beside a chart ---------- */
+.snr-reading {{
+  border-left: 2px solid {WARNING}; padding: 4px 0 4px 16px; margin: 6px 0 0 0;
+}}
+.snr-reading-l {{
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: {WARNING}; margin-bottom: 10px;
+}}
+.snr-reading p {{
+  font-family: {TITLE}; font-style: italic; font-size: 1.02rem; line-height: 1.5;
+  color: {INK_2}; margin: 0 0 10px 0;
+}}
+.snr-reading-f {{ font-size: 0.74rem; color: {INK_MUTED}; line-height: 1.5; margin-top: 4px; }}
+
+/* ---------- Risk zones: the 30° hatch ----------
+   Patterns are used for risk zones only. Plotly draws its "-" pattern flat; the
+   rotation turns it into the Carnet hatch. A browser that ignores a CSS transform
+   on <pattern> keeps a horizontal hatch, which still reads as a zone. */
+.js-plotly-plot pattern {{ transform: rotate(-30deg); }}
+
+/* ---------- Data table: a ledger ---------- */
+.snr-table {{ width: 100%; border-collapse: collapse; font-size: 0.86rem; border-top: 2px solid {INK}; }}
 .snr-table th {{
-  text-align: left; padding: 9px 12px;
-  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.11em;
-  text-transform: uppercase; color: {INK_MUTED};
-  border-bottom: 1px solid {BORDER};
+  text-align: left; padding: 9px 12px 9px 0;
+  font-size: 0.76rem; font-weight: 600; letter-spacing: 0.01em;
+  text-transform: none; color: {INK_MUTED};
+  border-bottom: 1px solid {BORDER_STRONG};
 }}
 .snr-table td {{
-  padding: 10px 12px; color: {INK_2};
-  border-bottom: 1px solid rgba(154,168,191,0.06);
-  font-variant-numeric: tabular-nums;
+  padding: 10px 12px 10px 0; color: {INK_2};
+  border-bottom: 1px solid {BORDER};
 }}
-.snr-table tr:hover td {{ background: rgba(154,168,191,0.04); }}
+.snr-table tr:hover td {{ background: {SURFACE_2}; }}
 .snr-table td.k {{ color: {INK}; font-weight: 600; }}
 .snr-table td.r {{ text-align: right; }}
 
@@ -402,58 +446,61 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 .snr-tip-i {{
   width: 13px; height: 13px; border-radius: 50%;
   border: 1px solid {INK_FAINT}; color: {INK_MUTED};
-  font-size: 9px; font-weight: 700; line-height: 11px; text-align: center;
+  font-size: 9px; font-weight: 600; line-height: 11px; text-align: center;
 }}
 .snr-tip-body {{
   visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: -8px;
   width: 244px; padding: 10px 12px; z-index: 99;
-  background: {SURFACE_2}; border: 1px solid {BORDER_STRONG};
-  border-radius: {RADIUS_SM}; box-shadow: 0 14px 38px -12px rgba(0,0,0,0.85);
-  font-size: 0.74rem; font-weight: 400; line-height: 1.55;
+  background: {SURFACE}; border: 1px solid {BORDER_STRONG};
+  border-radius: {RADIUS_SM}; box-shadow: 0 10px 28px -14px {fade(INK, 0.35)};
+  font-size: 0.8rem; font-weight: 400; line-height: 1.55;
   color: {INK_2}; text-transform: none; letter-spacing: 0;
   transition: opacity .16s ease, visibility .16s ease;
 }}
 .snr-tip:hover .snr-tip-body {{ visibility: visible; opacity: 1; }}
 
-/* ---------- Sidebar ---------- */
+/* ---------- Sidebar: the navy binding, the one place with the grid ---------- */
 [data-testid="stSidebar"] {{
-  background: linear-gradient(180deg, #0A101C 0%, {BG_DEEP} 100%) !important;
-  border-right: 1px solid {BORDER};
+  background-color: {INK} !important; background-image: {ISO} !important;
+  border-right: 1px solid #1d2c3b;
 }}
-[data-testid="stSidebar"] * {{ color: {INK_2}; }}
+[data-testid="stSidebar"] > div {{ background: transparent !important; }}
+[data-testid="stSidebar"] * {{ color: #A9B7C4; }}
+[data-testid="stSidebar"] :is(h1, h2, h3, h4, b, strong) {{ color: #E9EEF2 !important; }}
 [data-testid="stSidebar"] .stButton > button {{
   background: transparent !important;
   border: 1px solid transparent !important;
-  color: {INK_2} !important;
+  color: #E9EEF2 !important;
   border-radius: {RADIUS_SM} !important;
-  font-weight: 500 !important; font-size: 0.84rem !important;
+  font-weight: 500 !important; font-size: 0.86rem !important;
   text-align: left !important; justify-content: flex-start !important;
   padding: 7px 12px !important;
   transition: background .15s ease, color .15s ease;
 }}
+[data-testid="stSidebar"] .stButton > button * {{ color: inherit !important; }}
 [data-testid="stSidebar"] .stButton > button:hover {{
-  background: rgba(154,168,191,0.07) !important; color: {INK} !important;
+  background: rgba(255,255,255,0.06) !important; color: #FFFFFF !important;
 }}
 [data-testid="stSidebar"] .stButton > button[kind="primary"] {{
-  background: {ACCENT_SOFT} !important;
-  border-color: rgba(57,135,229,0.30) !important;
-  color: {INK} !important; font-weight: 600 !important;
+  background: #223548 !important;
+  border-color: transparent !important; box-shadow: inset 3px 0 #A9C6E2 !important;
+  color: #FFFFFF !important; font-weight: 600 !important;
 }}
+[data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.10) !important; }}
 
 /* ---------- Inputs ---------- */
 /* Streamlit has migrated its inputs from BaseWeb to react-aria: the control is
-   now `.react-aria-ComboBox > div[role="group"]`, which paints its own light
-   surface. Both generations are covered so the theme holds either way. */
+   now `.react-aria-ComboBox > div[role="group"]`, which paints its own surface.
+   Both generations are covered so the theme holds either way. */
 :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
     [data-testid="stNumberInput"], [data-testid="stDateInput"],
     [data-testid="stTimeInput"], [data-testid="stMultiSelect"]) div[role="group"],
-/* The text input's inner wrapper carries no role, so the rule above misses it
-   and it keeps Streamlit's light default. Invisible on an ordinary input, where
-   the field covers the whole width — but a password input leaves a strip beside
-   it for the reveal button, and that strip is a white block on a dark form. */
+/* The text input's inner wrapper carries no role, so the rule above misses it.
+   A password input leaves a strip beside it for the reveal button, and that
+   strip would keep Streamlit's own default. */
 .react-aria-TextField > div {{
   background: {SURFACE_3} !important;
-  border: 1px solid {BORDER} !important;
+  border: 1px solid {BORDER_STRONG} !important;
   border-radius: {RADIUS_SM} !important;
 }}
 .react-aria-TextField > div > input {{ border: none !important; }}
@@ -467,9 +514,7 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
   color: {INK} !important;
 }}
 /* The chips a multiselect shows for chosen values. Streamlit's default paints
-   them in its own red, which on this palette reads as an error state — three
-   instruments chosen in a filter looked like three validation failures. The
-   chip is `span[data-tag]`, two levels inside the tags container. */
+   them in its own red, which reads as an error state. */
 [data-testid="stMultiSelectTagsContainer"] span[data-tag],
 [data-testid="stMultiSelectTagsContainer"] [data-baseweb="tag"] {{
   background: {ACCENT_SOFT} !important;
@@ -481,13 +526,11 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
   color: {INK} !important; fill: {INK_2} !important;
 }}
 /* The time input nests its segmented spinbuttons two levels below the group,
-   and paints a light surface on the wrapper rather than on the group. Without
-   this it is the one white control on a dark form — which is exactly how it
-   looked until the journal form was opened in a browser. */
+   and paints its surface on the wrapper rather than on the group. */
 [data-testid="stTimeInput"] [data-testid="stTimeInputTimeDisplay"],
 [data-testid="stTimeInput"] [data-testid="stTimeInputTimeDisplay"] > div {{
   background: {SURFACE_3} !important;
-  border-color: {BORDER} !important;
+  border-color: {BORDER_STRONG} !important;
   border-radius: {RADIUS_SM} !important;
 }}
 [data-testid="stTimeInput"] :is(span[role="spinbutton"], span[data-type="literal"]) {{
@@ -506,19 +549,16 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 [data-testid="stSelectbox"] svg,
 [data-testid="stMultiSelect"] svg,
 [data-testid="stNumberInput"] svg {{ fill: {INK_MUTED} !important; color: {INK_MUTED} !important; }}
-[data-testid="stWidgetLabel"] p {{ color: {INK_MUTED} !important; }}
+[data-testid="stWidgetLabel"] p {{ color: {INK_MUTED} !important; font-weight: 500 !important; }}
 
 /* Dropdown panels. Targeted by role as well as by class: this build emits no
-   `.react-aria-Popover` class on the multiselect's panel, only an emotion hash,
-   so a class-only rule left it white — visible as a white "No results" box
-   hanging under a dark filter panel. The `:has()` rule catches the panel that
-   wraps the list, which is what actually paints the surface. */
+   `.react-aria-Popover` class on the multiselect's panel, only an emotion hash. */
 .react-aria-Popover, .react-aria-ListBox,
 [role="listbox"], div:has(> [role="listbox"]) {{
-  background: {SURFACE_2} !important;
-  border-color: {BORDER} !important;
+  background: {SURFACE} !important;
+  border-color: {BORDER_STRONG} !important;
   border-radius: {RADIUS_SM} !important;
-  box-shadow: 0 16px 40px -14px rgba(0,0,0,0.85) !important;
+  box-shadow: 0 12px 30px -16px {fade(INK, 0.35)} !important;
 }}
 [role="listbox"] {{ color: {INK_2} !important; }}
 :is(.react-aria-ListBox, [role="listbox"]) [role="option"] {{
@@ -526,7 +566,7 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 }}
 :is(.react-aria-ListBox, [role="listbox"]) [role="option"][data-focused],
 :is(.react-aria-ListBox, [role="listbox"]) [role="option"]:hover {{
-  background: rgba(154,168,191,0.10) !important;
+  background: {SURFACE_2} !important;
 }}
 :is(.react-aria-ListBox, [role="listbox"]) [role="option"][data-selected] {{
   background: {ACCENT_SOFT} !important; color: {INK} !important;
@@ -536,7 +576,7 @@ div[data-baseweb="select"] > div,
 div[data-baseweb="select"] div[role="button"],
 .stTextInput input, .stNumberInput input {{
   background: {SURFACE_3} !important;
-  border-color: {BORDER} !important;
+  border-color: {BORDER_STRONG} !important;
   border-radius: {RADIUS_SM} !important;
   color: {INK} !important;
 }}
@@ -544,36 +584,43 @@ div[data-baseweb="select"] * {{ color: {INK} !important; }}
 div[data-baseweb="select"] svg {{ fill: {INK_MUTED} !important; }}
 div[data-baseweb="popover"] div[data-baseweb="menu"],
 div[data-baseweb="popover"] ul {{
-  background: {SURFACE_2} !important;
-  border: 1px solid {BORDER} !important;
+  background: {SURFACE} !important;
+  border: 1px solid {BORDER_STRONG} !important;
   border-radius: {RADIUS_SM} !important;
 }}
 div[data-baseweb="popover"] li {{ background: transparent !important; color: {INK_2} !important; }}
-div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !important; }}
+div[data-baseweb="popover"] li:hover {{ background: {SURFACE_2} !important; }}
 .stTextInput input:focus, .stNumberInput input:focus {{
   border-color: {ACCENT} !important;
-  box-shadow: 0 0 0 3px {ACCENT_SOFT} !important;
+  box-shadow: 0 0 0 2px {ACCENT_SOFT} !important;
 }}
 
+/* Inputs placed on the navy binding stay dark, so they read as part of it. */
+[data-testid="stSidebar"] :is(div[role="group"], .react-aria-TextField > div,
+    div[data-baseweb="select"] > div, div[data-baseweb="select"] div[role="button"]) {{
+  background: #18293A !important; border-color: #2B3F52 !important;
+}}
+[data-testid="stSidebar"] :is([data-testid="stSelectbox"], [data-testid="stTextInput"],
+    [data-testid="stNumberInput"], [data-testid="stMultiSelect"]) :is(input, button, span, div),
+[data-testid="stSidebar"] div[data-baseweb="select"] * {{ color: #E9EEF2 !important; }}
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {{ color: #A9B7C4 !important; }}
+
 /* ---------- Sliders ---------- */
-/* Streamlit's slider ships red, and red means "lost money" on every other
-   surface in this app. A weight slider is not a loss, and a row of scarlet
-   tracks above an allocation reads as one. The filled portion and the thumb
-   take the accent; the empty track stays a hairline. */
+/* Streamlit's slider ships red, and red means « lost money » on every other
+   surface in this app. The filled portion and the thumb take the accent. */
 [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"],
 [data-testid="stSlider"] div[role="slider"] {{
   background: {ACCENT} !important;
   border-color: {ACCENT} !important;
-  box-shadow: 0 0 0 3px rgba(57,135,229,0.18) !important;
+  box-shadow: 0 0 0 3px {ACCENT_SOFT} !important;
 }}
 /* The track is painted by the two inner divs of the BaseWeb slider: the first
-   is the filled run, the second the remainder. Targeting them by position is
-   ugly and is what the markup offers — there is no semantic hook here. */
+   is the filled run, the second the remainder. There is no semantic hook here. */
 [data-testid="stSlider"] [data-baseweb="slider"] > div > div:first-child {{
   background: {ACCENT} !important;
 }}
 [data-testid="stSlider"] [data-baseweb="slider"] > div > div:nth-child(2) {{
-  background: rgba(154,168,191,0.18) !important;
+  background: {fade(INK, 0.14)} !important;
 }}
 [data-testid="stSlider"] [data-testid="stThumbValue"],
 [data-testid="stSlider"] [data-testid="stTickBar"],
@@ -582,55 +629,40 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
   color: {INK_MUTED} !important;
 }}
 
-/* ---------- Main buttons ---------- */
+/* ---------- Main buttons: flat ink, the plan's blue on hover ---------- */
 /* A form's submit button is `kind="primaryFormSubmit"`, not `primary`, and so
-   fell through to Streamlit's own red default — a scarlet "Save trade" in the
-   middle of a blue product. Styled alongside the ordinary primary button so the
-   two cannot drift apart. */
-{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"] {{
-  background: linear-gradient(135deg, {ACCENT}, #2A6FC4) !important;
-  border: none !important; border-radius: {RADIUS_SM} !important;
-  color: #FFFFFF !important;
-  font-weight: 600 !important; letter-spacing: -0.01em !important;
-  box-shadow: 0 6px 20px -8px {ACCENT_GLOW} !important;
-  transition: transform .15s ease, box-shadow .15s ease;
-}}
-{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover {{
-  transform: translateY(-1px);
-  box-shadow: 0 10px 26px -8px {ACCENT_GLOW} !important;
-}}
-{MAIN} .stFormSubmitButton > button[kind="secondaryFormSubmit"] {{
-  background: {SURFACE_3} !important;
-  border: 1px solid {BORDER} !important;
-  color: {INK_2} !important; border-radius: {RADIUS_SM} !important;
-  font-weight: 500 !important;
-}}
+   fell through to Streamlit's own red default. Styled alongside the ordinary
+   primary button so the two cannot drift apart. */
+{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"],
 {MAIN} .stButton > button[kind="primary"] {{
-  background: linear-gradient(135deg, {ACCENT}, #2A6FC4) !important;
-  border: none !important; border-radius: {RADIUS_SM} !important;
-  font-weight: 600 !important; letter-spacing: -0.01em !important;
-  box-shadow: 0 6px 20px -8px {ACCENT_GLOW} !important;
-  transition: transform .15s ease, box-shadow .15s ease;
+  background: {INK} !important;
+  border: 1px solid {INK} !important; border-radius: {RADIUS_SM} !important;
+  color: {BG_DEEP} !important;
+  font-weight: 600 !important; letter-spacing: 0 !important;
+  box-shadow: none !important;
+  transition: background .15s ease, border-color .15s ease;
 }}
+{MAIN} :is(.stFormSubmitButton > button[kind="primaryFormSubmit"], .stButton > button[kind="primary"]) * {{
+  color: {BG_DEEP} !important;
+}}
+{MAIN} .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover,
 {MAIN} .stButton > button[kind="primary"]:hover {{
-  transform: translateY(-1px);
-  box-shadow: 0 10px 26px -8px {ACCENT_GLOW} !important;
+  background: {ACCENT} !important; border-color: {ACCENT} !important;
 }}
+{MAIN} .stFormSubmitButton > button[kind="secondaryFormSubmit"],
 {MAIN} .stButton > button[kind="secondary"] {{
-  background: {SURFACE_3} !important;
-  border: 1px solid {BORDER} !important;
-  color: {INK_2} !important; border-radius: {RADIUS_SM} !important;
+  background: transparent !important;
+  border: 1px solid {INK} !important;
+  color: {INK} !important; border-radius: {RADIUS_SM} !important;
   font-weight: 500 !important;
 }}
+{MAIN} .stButton > button[kind="secondary"]:hover {{ background: {INK} !important; color: {BG_DEEP} !important; }}
+{MAIN} .stButton > button[kind="secondary"]:hover * {{ color: {BG_DEEP} !important; }}
 
 /* ---------- Tabs ---------- */
 /* Both DOM generations are targeted. Streamlit moved tabs from BaseWeb to
-   react-aria, which left the app's original stylesheet in a bad half-state: its
-   `[data-baseweb="tab-list"]` and `[data-baseweb="tab"]` rules stopped matching,
-   while its `[aria-selected="true"]` rule — a generic attribute selector — kept
-   firing. The result was an orphaned gradient pill with no container around it,
-   sitting on every tab in the app. The selectors below carry the tab's testid
-   so they outrank that rule rather than racing it in the cascade. */
+   react-aria; the selectors carry the tab's testid so they outrank Streamlit's
+   own selected-tab rule rather than racing it in the cascade. */
 .stTabs :is([data-baseweb="tab-list"], [role="tablist"]) {{
   gap: 4px; border-bottom: 1px solid {BORDER};
   background: transparent !important; padding: 0 !important;
@@ -639,27 +671,24 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
 .stTabs :is([data-baseweb="tab"], [data-testid="stTab"]) {{
   background: none !important; background-color: transparent !important;
   border: none !important; box-shadow: none !important;
-  color: {INK_MUTED} !important; font-size: 0.8rem !important;
-  font-weight: 600 !important; letter-spacing: 0.02em;
+  color: {INK_MUTED} !important; font-size: 0.86rem !important;
+  font-weight: 500 !important; letter-spacing: 0;
   padding: 9px 14px !important; border-radius: 0 !important;
 }}
 .stTabs :is([data-baseweb="tab"], [data-testid="stTab"])[aria-selected="true"] {{
   background: none !important; background-color: transparent !important;
-  color: {INK} !important;
+  color: {INK} !important; font-weight: 600 !important;
   box-shadow: inset 0 -2px 0 0 {ACCENT} !important;
 }}
 .stTabs [data-testid="stTab"] :is(p, div, span) {{ color: inherit !important; }}
 /* Streamlit's own selected-tab bar, which it paints in its default red. */
 .stTabs .react-aria-SelectionIndicator {{ background: {ACCENT} !important; }}
-::selection {{ background: {ACCENT_GLOW}; color: {INK}; }}
+::selection {{ background: {ACCENT_SOFT}; color: {INK}; }}
 
 /* ---------- Checkboxes, toggles and the download button ---------- */
 /* Streamlit paints a checked box and a download button in its own red default.
    Neither carries a `kind` attribute or a testid on the painted element, so
-   they are reached by structure: the only filled element inside a checkbox is
-   its box, and a download button is the only button inside its container.
-   Same family as the form-submit button and the tab indicator — controls the
-   theme had simply never been pointed at. */
+   they are reached by structure. */
 [data-testid="stCheckbox"] div[class]:not([data-testid]),
 [data-testid="stToggle"] div[class]:not([data-testid]) {{
   background-color: {ACCENT} !important;
@@ -669,68 +698,166 @@ div[data-baseweb="popover"] li:hover {{ background: rgba(154,168,191,0.08) !impo
 [data-testid="stCheckbox"] :is(p, span) {{ color: {INK_2} !important; }}
 
 {MAIN} [data-testid="stDownloadButton"] > button {{
-  background: {SURFACE_3} !important;
-  border: 1px solid {BORDER} !important;
+  background: transparent !important;
+  border: 1px solid {INK} !important;
   color: {INK} !important;
   border-radius: {RADIUS_SM} !important;
   font-weight: 600 !important;
 }}
 {MAIN} [data-testid="stDownloadButton"] > button:hover {{
-  border-color: {ACCENT} !important; color: {INK} !important;
+  background: {INK} !important; color: {BG_DEEP} !important;
 }}
 {MAIN} [data-testid="stDownloadButton"] :is(p, span, div) {{ color: inherit !important; }}
 
-/* ---------- Expanders ---------- */
-/* Untouched, an open expander paints a white header and body — the journal's
-   trade form and the trading filter panel both live in one, so a light slab
-   opened in the middle of a dark page. Styled as a card so an expander reads
-   like the rest of the surface rather than like a different application. */
+/* ---------- Expanders: a sheet ---------- */
 [data-testid="stExpander"] details {{
   background: {SURFACE} !important;
   border: 1px solid {BORDER} !important;
-  border-radius: {RADIUS_SM} !important;
+  border-radius: 0 !important;
   overflow: hidden;
 }}
 [data-testid="stExpander"] summary {{
-  background: {SURFACE_3} !important;
-  color: {INK_2} !important;
-  font-size: 0.83rem !important; font-weight: 600 !important;
+  background: {SURFACE} !important;
+  color: {INK} !important;
+  font-size: 0.88rem !important; font-weight: 600 !important;
 }}
 [data-testid="stExpander"] summary:hover {{ background: {SURFACE_2} !important; }}
-[data-testid="stExpander"] summary :is(p, span, div) {{ color: {INK_2} !important; }}
+[data-testid="stExpander"] summary :is(p, span, div) {{ color: {INK} !important; }}
 [data-testid="stExpander"] details > div {{ background: transparent !important; }}
 
-/* ---------- Radio pills (period selector) ---------- */
+/* ---------- Radio chips (period selector): square, quiet ---------- */
 div[role="radiogroup"] {{ gap: 4px !important; flex-wrap: wrap; }}
 div[role="radiogroup"] label {{
-  background: {SURFACE_3} !important; border: 1px solid {BORDER} !important;
-  border-radius: {RADIUS_PILL} !important; padding: 4px 13px !important;
+  background: {SURFACE} !important; border: 1px solid {BORDER} !important;
+  border-radius: {RADIUS_PILL} !important; padding: 4px 12px !important;
   margin: 0 !important; transition: all .15s ease;
 }}
 div[role="radiogroup"] label:hover {{ border-color: {BORDER_STRONG} !important; }}
 div[role="radiogroup"] label > div > div:first-child {{ display: none !important; }}
 div[role="radiogroup"] label p {{
-  font-size: 0.75rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
+  font-size: 0.8rem !important; font-weight: 500 !important; color: {INK_MUTED} !important;
 }}
 div[role="radiogroup"] label:has(input:checked) {{
-  background: {ACCENT_SOFT} !important; border-color: rgba(57,135,229,0.45) !important;
+  background: {ACCENT_SOFT} !important; border-color: {ACCENT} !important;
 }}
-div[role="radiogroup"] label:has(input:checked) p {{ color: {INK} !important; }}
+div[role="radiogroup"] label:has(input:checked) p {{ color: {INK} !important; font-weight: 600 !important; }}
+[data-testid="stSidebar"] div[role="radiogroup"] label {{ background: transparent !important; border-color: #2B3F52 !important; }}
+[data-testid="stSidebar"] div[role="radiogroup"] label p {{ color: #A9B7C4 !important; }}
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {{ background: #223548 !important; border-color: #A9C6E2 !important; }}
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {{ color: #FFFFFF !important; }}
 
 /* ---------- Misc chrome ---------- */
 hr {{ border-color: {BORDER} !important; }}
 .streamlit-expanderHeader {{
   background: {SURFACE} !important; border: 1px solid {BORDER} !important;
-  border-radius: {RADIUS_SM} !important; color: {INK_2} !important;
+  border-radius: 0 !important; color: {INK} !important;
 }}
 [data-testid="stMetricValue"] {{ color: {INK} !important; }}
+[data-testid="stAlert"] {{ border-radius: 0 !important; }}
 ::-webkit-scrollbar {{ width: 9px; height: 9px; }}
 ::-webkit-scrollbar-track {{ background: transparent; }}
-::-webkit-scrollbar-thumb {{ background: rgba(154,168,191,0.18); border-radius: 5px; }}
-::-webkit-scrollbar-thumb:hover {{ background: rgba(154,168,191,0.30); }}
+::-webkit-scrollbar-thumb {{ background: {fade(INK, 0.18)}; border-radius: 0; }}
+::-webkit-scrollbar-thumb:hover {{ background: {fade(INK, 0.32)}; }}
 
 /* No horizontal overflow at any width. */
 [data-testid="stMainBlockContainer"], .snr-card {{ max-width: 100%; overflow-x: auto; }}
+</style>""",
+        unsafe_allow_html=True,
+    )
+
+
+# =============================================================================
+# LEGACY COMPONENTS
+# =============================================================================
+
+def inject_legacy() -> None:
+    """
+    The classes of the first-generation pages (Build, Workspace, Account), in the
+    same direction. Only components: the widgets, the sidebar and the page are
+    styled once, by `inject_theme`. Call before it.
+    """
+    st.markdown(
+        f"""<style>
+/* Health score: the page's one strong block. Navy, no glow, no grid. */
+.score-card {{
+  background: {INK}; border: 0; border-radius: 0;
+  padding: 28px 32px; margin: 16px 0; position: relative; overflow: hidden;
+}}
+.score-card::before, .score-card::after {{ display: none; }}
+.score-num {{ font-family: {TITLE}; font-size: 4.4rem; font-weight: 600; color: #F6F3EC; line-height: 1;
+  letter-spacing: -0.03em; text-shadow: none; }}
+.score-label {{ font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #A9C6E2; margin-bottom: 8px; }}
+.score-badge {{ display: inline-block; background: transparent; border: 1px solid #3D5468; border-radius: {RADIUS_PILL};
+  padding: 4px 12px; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; color: #E9EEF2; margin-top: 10px; }}
+.bar-bg {{ background: rgba(255,255,255,0.14); border-radius: 0; height: 5px; overflow: hidden; margin-top: 5px; }}
+.bar-fill {{ height: 100%; border-radius: 0; background: #A9C6E2; transition: width 0.7s ease-out; }}
+
+/* Figures and cards: a sheet with its rule. */
+.metric-card, .kpi-card, .asset-card, .model-card {{
+  background: {SURFACE}; border: 1px solid {BORDER}; border-top: 2px solid {INK}; border-radius: 0;
+  padding: 18px 22px; margin: 6px 0; transition: border-color .2s ease;
+}}
+.metric-card:hover, .kpi-card:hover, .asset-card:hover, .model-card:hover {{
+  border-color: {BORDER_STRONG}; border-top-color: {INK}; transform: none; box-shadow: none; background: {SURFACE};
+}}
+.kpi-card::before {{ display: none; }}
+.asset-card :is(p, span, div) {{ color: {INK_2} !important; }}
+.metric-label, .kpi-label {{ font-size: 0.8rem; font-weight: 500; letter-spacing: 0; text-transform: none;
+  color: {INK_MUTED}; margin-bottom: 6px; }}
+.metric-value, .kpi-value {{ font-size: 1.9rem; font-weight: 600; color: {INK}; line-height: 1.05;
+  letter-spacing: -0.025em; margin-bottom: 6px; }}
+.kpi-icon {{ display: none; }}
+.kpi-sub {{ font-size: 0.8rem; color: {INK_MUTED}; line-height: 1.45; }}
+.kpi-positive {{ color: {POS}; }} .kpi-negative {{ color: {NEG}; }}
+.kpi-neutral {{ color: {ACCENT}; }} .kpi-warning {{ color: {WARNING}; }}
+
+/* Recommendations: notes in the margin, the rule says the status. */
+.rec-card {{
+  background: {SURFACE_2}; border: 0; border-left: 3px solid {ACCENT}; border-radius: 0;
+  padding: 14px 18px; margin: 10px 0; transition: background .2s ease;
+}}
+.rec-card:hover {{ background: {SURFACE_2}; transform: none; box-shadow: none; }}
+.rec-card h4 {{ color: {INK} !important; margin: 0 0 6px 0; font-size: 0.95rem; font-weight: 600; }}
+.rec-card p {{ color: {INK_2} !important; margin: 4px 0; line-height: 1.6; font-size: 0.88rem; }}
+.rec-card.critical {{ border-left-color: {CRITICAL} !important; }}
+.rec-card.warning {{ border-left-color: {WARNING} !important; }}
+.rec-card.success {{ border-left-color: {GOOD} !important; }}
+.rec-card.info {{ border-left-color: {ACCENT} !important; }}
+
+/* Badges: square, quiet. */
+.asset-class-badge, .risk-badge {{ display: inline-block; padding: 3px 9px; border-radius: {RADIUS_PILL};
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: none; }}
+
+/* Bars */
+.progress-bar-bg {{ background: {fade(INK, 0.08)}; border-radius: 0; height: 6px; overflow: hidden; margin-top: 4px; }}
+.progress-bar-fill {{ height: 100%; border-radius: 0; transition: width 0.6s ease-out; }}
+.stProgress > div > div {{ background: {ACCENT} !important; }}
+
+/* Offers and locked features: a note, not a banner. */
+.upgrade-card, .paywall-block {{
+  background: {SURFACE_2}; border: 0; border-left: 3px solid {WARNING}; border-radius: 0;
+  padding: 22px 26px; text-align: left; margin: 16px 0;
+}}
+.upgrade-card h3 {{ color: {INK} !important; margin: 0 0 8px 0; }}
+.upgrade-card p {{ color: {INK_2} !important; font-size: 0.92rem; }}
+
+/* Section headers: a hairline and a title, no icon tile. */
+.section-header {{ display: flex; align-items: baseline; gap: 12px; margin: 30px 0 16px; padding-top: 12px;
+  border-top: 1px solid {BORDER_STRONG}; }}
+.section-icon {{ display: none; }}
+.section-title {{ font-family: {TITLE}; font-size: 1.3rem; font-weight: 600; color: {INK}; }}
+.section-sub {{ font-size: 0.86rem; color: {INK_MUTED}; margin-top: 2px; }}
+
+.tooltip-hint {{ background: {SURFACE_2}; border: 0; border-left: 3px solid {BORDER_STRONG}; border-radius: 0;
+  padding: 10px 14px; font-size: 0.86rem; color: {INK_2}; line-height: 1.55; }}
+.tooltip-hint strong {{ color: {ACCENT}; }}
+.ft-divider {{ height: 1px; background: {BORDER}; margin: 26px 0; border: none; }}
+
+[data-testid="stMetricValue"] {{ font-size: 1.9rem !important; font-weight: 600 !important; color: {INK} !important; }}
+[data-testid="stMetricLabel"] {{ font-size: 0.8rem !important; color: {INK_MUTED} !important; font-weight: 500 !important;
+  text-transform: none !important; letter-spacing: 0 !important; }}
+#MainMenu, footer, header {{ visibility: hidden; }}
 </style>""",
         unsafe_allow_html=True,
     )

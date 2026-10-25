@@ -1,0 +1,35 @@
+id = "pools-nakamoto"
+title = "Mesurer la concentration du minage"
+context = """
+Les parts des blocs de l'échantillon en 2026, par pool, selon l'étiquette de la coinbase :
+
+| Pool | Part des blocs |
+|---|---|
+| Foundry USA | 29,7 % |
+| AntPool | 18,3 % |
+| F2Pool | 12,5 % |
+| ViaBTC | 8,1 % |
+| Binance Pool | 0,7 % |
+| BTC Guild | 0,0 % |
+| Autres pools identifiés | 28,9 % |
+| Non identifié | 1,8 % |
+"""
+conclusion = """
+Les deux premiers pools produisent ensemble 48,0 % des blocs, et 3 pools suffisent à dépasser la moitié : c'est le coefficient de Nakamoto du minage. Ces parts sont des estimations sur environ 365 blocs ; elles disent surtout qu'un petit nombre de pools choisit la composition de la plupart des blocs.
+"""
+
+[[step]]
+id = "deux"
+prompt = "Quelle part des blocs produisent les deux premiers pools ensemble, en % ? (Une décimale.)"
+unit = "%"
+answer = 48.0
+tolerance = 0.06
+solution = "29,7 + 18,3 = **48,0 %**."
+
+[[step]]
+id = "coefficient"
+prompt = "Combien de pools faut-il additionner, dans l'ordre, pour dépasser 50 % des blocs ?"
+unit = "pools"
+answer = 3
+tolerance = 0
+solution = "1 pool : 29,7 % ; 2 pools : 48,0 % ; 3 pools : 60,5 % : **3 pools**."

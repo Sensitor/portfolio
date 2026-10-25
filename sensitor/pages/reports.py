@@ -56,7 +56,7 @@ def _portfolio_report(ctx, lang) -> None:
     period_selector(ctx, "rep_period")
 
     # ── Document settings ────────────────────────────────────────────────────
-    section(tr("generate_report", lang).upper())
+    section(tr("generate_report", lang))
 
     loaded = st.session_state.get("sensitor_loaded_portfolio") or {}
     default_title = loaded.get("name") or tr("portfolio", lang)
@@ -98,7 +98,7 @@ def _portfolio_report(ctx, lang) -> None:
         return
 
     # ── Result ───────────────────────────────────────────────────────────────
-    section(tr("report_ready", lang).upper())
+    section(tr("report_ready", lang))
 
     info_col, download_col = st.columns([2, 1], gap="medium")
     with info_col:
@@ -190,7 +190,7 @@ def _weekly_review(lang) -> None:
         note(tr("report_format_note", lang))
         return
 
-    section(tr("report_ready", lang).upper())
+    section(tr("report_ready", lang))
     info_col, download_col = st.columns([2, 1], gap="medium")
     with info_col:
         metric_card(

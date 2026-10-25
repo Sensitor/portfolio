@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Order block</title>
+<desc id="d">Cinq bougies sur GBPUSD. La deuxième balaie des creux égaux puis l'impulsion haussière casse un sommet de swing. La dernière bougie baissière avant l'impulsion est surlignée comme order block, et l'écart laissé par l'impulsion comme FVG.</desc>
+<rect x="206" y="193.8" width="420" height="34.2" fill="#284764" opacity=".14"/>
+<rect x="276" y="169.8" width="350" height="23.9" fill="#86672f" opacity=".18"/>
+<line x1="40" y1="224.5" x2="240" y2="224.5" stroke="#3f6553" stroke-dasharray="5 4"/>
+<line x1="40" y1="134.0" x2="380" y2="134.0" stroke="#8a4a40" stroke-dasharray="5 4"/>
+<line x1="150" y1="180.1" x2="150" y2="209.1" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="141.0" y="190.3" width="18" height="12.0" fill="#3b4a57" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="220" y1="193.8" x2="220" y2="227.9" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="211.0" y="200.6" width="18" height="20.5" fill="#3b4a57" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="290" y1="157.9" x2="290" y2="224.5" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="281.0" y="163.0" width="18" height="58.1" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="360" y1="104.9" x2="360" y2="169.8" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="351.0" y="113.5" width="18" height="49.5" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<line x1="430" y1="57.1" x2="430" y2="125.4" stroke="#1b2733" stroke-width="1.3"/>
+<rect x="421.0" y="70.8" width="18" height="42.7" fill="#fbfaf6" stroke="#1b2733" stroke-width="1.3"/>
+<text x="44" y="239.5" font-size="11" fill="#3f6553">creux égaux 1,2632</text>
+<text x="44" y="128.0" font-size="11" fill="#8a4a40">sommet de swing 1,2685</text>
+<text x="604" y="214.8" text-anchor="end" font-size="11.5" font-weight="700" fill="#284764">order block 1,2630 à 1,2650</text>
+<text x="604" y="185.8" text-anchor="end" font-size="11.5" font-weight="700" fill="#86672f">FVG 1,2650 à 1,2664</text>
+<text x="220" y="243.9" text-anchor="middle" font-size="10.5" fill="#5b646b">sweep</text>
+<text x="360" y="96.9" text-anchor="middle" font-size="10.5" fill="#5b646b">cassure en clôture</text>
+<text x="40" y="282" font-size="11" fill="#7b8389">Convention du cours : dernière bougie baissière avant l'impulsion qui casse la structure, de son plus bas à son plus haut.</text>
+</svg>

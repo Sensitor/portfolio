@@ -1,0 +1,32 @@
+id = "reequilibrage"
+title = "Rééquilibrer après une hausse"
+context = """
+Un patrimoine de **100 000 €** compte **10 %** de crypto, sa part cible. La crypto **double** ; le reste ne bouge pas.
+"""
+conclusion = """
+La crypto pèse désormais 18,2 % d'un patrimoine de 110 000 € : presque le double de la part choisie. Pour revenir à 10 %, il faut en vendre 9 000 €, et les placer dans le reste du patrimoine. La crypto vaut alors 11 000 €, 10 % de 110 000 €.
+"""
+
+[[step]]
+id = "total"
+prompt = "Que vaut le patrimoine après la hausse, en € ?"
+unit = "€"
+answer = 110000
+tolerance = 0.5
+solution = "20 000 + 90 000 = **110 000 €**."
+
+[[step]]
+id = "part"
+prompt = "Quelle part du patrimoine la crypto représente-t-elle, en % ? (Une décimale.)"
+unit = "%"
+answer = 18.2
+tolerance = 0.06
+solution = "20 000 ÷ 110 000 = **18,2 %**."
+
+[[step]]
+id = "vente"
+prompt = "Combien de crypto faut-il vendre pour revenir à 10 %, en € ?"
+unit = "€"
+answer = 9000
+tolerance = 0.5
+solution = "110 000 × (18,18 % − 10 %) = **9 000 €**."

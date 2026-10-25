@@ -1,0 +1,39 @@
+id = "bitcoin-fonctionnement"
+path = "bitcoin"
+title = "Bitcoin : origines et fonctionnement"
+summary = "Huit leçons pour comprendre comment fonctionne Bitcoin, sans jargon inutile : le problème qu'il résout, les travaux qui l'ont précédé, les clés et les transactions, les blocs et la chaîne, la preuve de travail, le consensus et sa sécurité, puis sa politique monétaire, calculée à partir des règles du protocole."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Expliquer le problème de la double dépense et la solution qu'y apporte Bitcoin.",
+  "Décrire une transaction : clés, signature, entrées, sorties, monnaie rendue et frais.",
+  "Expliquer comment la preuve de travail et l'ajustement de difficulté protègent le registre.",
+  "Calculer l'émission de Bitcoin, ses halvings et la sécurité apportée par les confirmations.",
+]
+prerequisites = ["La monnaie"]
+final_quiz = "bitcoin-fonctionnement-validation"
+
+[[module]]
+id = "probleme"
+title = "Le problème et ses précurseurs"
+summary = "Payer en ligne sans intermédiaire de confiance : pourquoi c'était difficile, et ce que vingt-cinq ans de travaux avaient déjà trouvé."
+lessons = ["double-depense", "precurseurs-bitcoin"]
+
+[[module]]
+id = "transactions"
+title = "Les transactions"
+summary = "Ce que possède vraiment un détenteur de bitcoins : une clé, qui signe des transactions. Et la seule information à ne jamais confier."
+lessons = ["cles-et-transactions"]
+
+[[module]]
+id = "registre"
+title = "Le registre commun"
+summary = "Comment des milliers d'ordinateurs qui ne se font pas confiance tiennent le même registre : les blocs, la preuve de travail, le consensus."
+lessons = ["blocs-et-chaine", "preuve-de-travail", "consensus-securite"]
+
+[[module]]
+id = "politique"
+title = "La politique monétaire"
+summary = "L'émission programmée, les halvings et les frais, la question ouverte de la sécurité à long terme, puis le quiz de validation."
+lessons = ["emission-halvings", "recap-bitcoin-fonctionnement"]

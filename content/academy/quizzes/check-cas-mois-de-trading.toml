@@ -1,0 +1,73 @@
+id = "check-cas-mois-de-trading"
+title = "Contrôle : le cas d'un mois"
+course = "processus-de-trading"
+lesson = "cas-mois-de-trading"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "decision"
+prompt = "Mois à −0,6R, trades conformes à +5,8R, écarts à −6,4R. Quelle décision ?"
+kind = "single"
+lesson = "cas-mois-de-trading"
+
+[[question.option]]
+id = "execution"
+text = "Garder la stratégie et travailler l'exécution."
+correct = true
+explanation = "Oui : la perte vient des écarts."
+
+[[question.option]]
+id = "changer"
+text = "Changer de stratégie."
+explanation = "Les trades conformes gagnent ; on emporterait les écarts dans la stratégie suivante."
+
+[[question.option]]
+id = "risque"
+text = "Doubler le risque pour rattraper le mois."
+explanation = "C'est l'écart le plus coûteux du mois."
+
+[[question]]
+id = "faiblesse"
+prompt = "Quelle faiblesse le journal révèle-t-il ?"
+kind = "single"
+lesson = "cas-mois-de-trading"
+
+[[question.option]]
+id = "perte"
+text = "L'après-perte : quatre écarts sur six suivent une perte."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "entree"
+text = "Les entrées dans la zone."
+explanation = "Un seul écart concerne la zone."
+
+[[question.option]]
+id = "aucune"
+text = "Aucune."
+explanation = "Les écarts ont coûté 6,4R."
+
+[[question]]
+id = "regle"
+prompt = "Quelle règle est ajoutée au plan ?"
+kind = "single"
+lesson = "cas-mois-de-trading"
+
+[[question.option]]
+id = "pause"
+text = "Une pause de trente minutes après toute perte complète."
+correct = true
+explanation = "Oui : une règle d'exécution."
+
+[[question.option]]
+id = "taille"
+text = "Une taille doublée après une perte."
+explanation = "C'est précisément l'écart à éviter."
+
+[[question.option]]
+id = "strategie"
+text = "Une nouvelle stratégie de sortie."
+explanation = "La stratégie n'est pas en cause."

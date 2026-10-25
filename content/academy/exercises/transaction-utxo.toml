@@ -1,0 +1,50 @@
+id = "transaction-utxo"
+title = "Les frais et la monnaie rendue"
+context = """
+Alice veut payer **0,6 BTC** à Bob. Son portefeuille dépense deux sorties qu'elle possède, de **0,5 BTC** et **0,3 BTC**. La transaction, avec deux entrées et deux sorties, mesure **209 octets virtuels** ; le prix du moment est de **12 satoshis par octet virtuel**. *Chiffres construits pour l'exercice.*
+
+Rappel : 1 BTC = 100 000 000 satoshis.
+"""
+conclusion = """
+Les frais de 2 508 satoshis ne dépendent que de la taille de la transaction, pas du montant envoyé. La monnaie rendue à Alice vaut 0,19997492 BTC. Si elle avait oublié la sortie de monnaie rendue, les 0,2 BTC de différence seraient partis en frais, soit près de 8 000 fois le nécessaire.
+"""
+
+[[step]]
+id = "entrees"
+prompt = "Quel est le total des entrées, en BTC ?"
+unit = "BTC"
+answer = 0.8
+tolerance = 0.0000001
+solution = "0,5 + 0,3 = **0,8 BTC**."
+
+[[step]]
+id = "frais-sats"
+prompt = "Quels sont les frais, en satoshis ?"
+unit = "sats"
+answer = 2508
+tolerance = 0.5
+solution = "209 × 12 = **2 508 satoshis**."
+
+[[step]]
+id = "frais-btc"
+prompt = "Et en BTC ? (Huit décimales.)"
+unit = "BTC"
+answer = 0.00002508
+tolerance = 0.000000005
+solution = "2 508 ÷ 100 000 000 = **0,00002508 BTC**."
+
+[[step]]
+id = "monnaie"
+prompt = "Quelle monnaie Alice doit-elle se rendre, en BTC ? (Huit décimales.)"
+unit = "BTC"
+answer = 0.19997492
+tolerance = 0.000000005
+solution = "0,8 − 0,6 − 0,00002508 = **0,19997492 BTC**."
+
+[[step]]
+id = "oubli"
+prompt = "Sans sortie de monnaie rendue, combien de BTC partiraient en frais ?"
+unit = "BTC"
+answer = 0.2
+tolerance = 0.0000001
+solution = "0,8 − 0,6 = **0,2 BTC**, entièrement laissés au mineur."

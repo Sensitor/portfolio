@@ -29,6 +29,8 @@ from .. import __product__, __version__
 from ..core.auth import auth_mode
 from ..database.models import SCHEMA_VERSION
 from .deps import single_user_key_configured
+from .routers import academy as academy_router
+from .routers import journal as journal_router
 from .routers import auth as auth_router
 from .routers import mobile as mobile_router
 from .routers import portfolios as portfolios_router
@@ -47,7 +49,7 @@ verification path.
 takes a user as a parameter, so none can be asked for somebody else's data.
 
 **Undefined is not zero.** A profit factor with no losing trades, an R multiple
-on a trade that had no stop, a percentage drawdown from a peak at zero — each
+on a trade that had no stop, a percentage drawdown from a peak at zero: each
 comes back `null`. Rendering those as `0` produces a confident wrong number.
 Sample sizes travel with every grouped figure for the same reason.
 """
@@ -62,8 +64,12 @@ def create_app() -> FastAPI:
             {"name": "auth", "description": "Sessions and identity."},
             {"name": "trading", "description": "The journal and its analytics."},
             {"name": "portfolios", "description": "Saved allocations and their history."},
-            {"name": "mobile", "description": "Aggregated, thinned and cacheable — "
+            {"name": "mobile", "description": "Aggregated, thinned and cacheable, "
                                               "shaped for a handset on a mobile network."},
+            {"name": "academy", "description": "Sensitor Academy: courses, lessons, "
+                                               "quizzes, progress and the risk lab."},
+            {"name": "journal", "description": "The private reflection journal of the "
+                                               "Psychologie et discipline space."},
             {"name": "meta", "description": "What this deployment is."},
         ],
     )
@@ -75,6 +81,8 @@ def create_app() -> FastAPI:
     app.include_router(trading_router.router)
     app.include_router(mobile_router.router)
     app.include_router(portfolios_router.router)
+    app.include_router(academy_router.router)
+    app.include_router(journal_router.router)
 
     @app.get("/health", tags=["meta"])
     def health() -> dict:

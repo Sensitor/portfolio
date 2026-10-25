@@ -1,0 +1,73 @@
+id = "check-stablecoins"
+title = "Contrôle : les stablecoins"
+course = "crypto-en-securite"
+lesson = "stablecoins"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "familles"
+prompt = "Quel type de stablecoin était TerraUSD, effondré en mai 2022 ?"
+kind = "single"
+lesson = "stablecoins"
+
+[[question.option]]
+id = "algo"
+text = "Algorithmique."
+correct = true
+explanation = "Oui : sa stabilité ne reposait que sur un mécanisme et la confiance."
+
+[[question.option]]
+id = "reserves"
+text = "Adossé à des réserves en dollars."
+explanation = "C'est le modèle de l'USDC, pas de TerraUSD."
+
+[[question.option]]
+id = "or"
+text = "Adossé à de l'or."
+explanation = "TerraUSD n'avait pas de réserve en or."
+
+[[question]]
+id = "usdc"
+prompt = "Pourquoi l'USDC a-t-il décroché en mars 2023 ?"
+kind = "single"
+lesson = "stablecoins"
+
+[[question.option]]
+id = "svb"
+text = "Une partie de ses réserves, 3,3 milliards de dollars, était déposée à la Silicon Valley Bank, en faillite."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "pirate"
+text = "Son contrat a été piraté."
+explanation = "Le contrat n'était pas en cause."
+
+[[question.option]]
+id = "algo"
+text = "Son algorithme a cessé de fonctionner."
+explanation = "L'USDC est adossé à des réserves, pas à un algorithme."
+
+[[question]]
+id = "valeur"
+prompt = "10 000 jetons à 0,88 dollar valent :"
+kind = "single"
+lesson = "stablecoins"
+
+[[question.option]]
+id = "8800"
+text = "8 800 dollars"
+correct = true
+explanation = "Oui : 10 000 × 0,88."
+
+[[question.option]]
+id = "10000"
+text = "10 000 dollars"
+explanation = "C'est leur valeur à la parité."
+
+[[question.option]]
+id = "1200"
+text = "1 200 dollars"
+explanation = "C'est la perte, pas la valeur."

@@ -79,7 +79,7 @@ def fresh_store(name="iso.db") -> Store:
         # keeps the tests independent of each other's leftovers.
         with store._write() as conn:                      # noqa: SLF001
             for table in ("snapshots", "sessions", "trades", "trading_accounts",
-                          "workspace", "portfolios", "users"):
+                          "workspace", "portfolios", "journal_entries", "users"):
                 conn.execute(f"DELETE FROM {table}")
         return store
 
@@ -222,6 +222,9 @@ def test_every_user_method_is_scoped():
         # holding it is what proves identity, and the lookup is how the user is
         # discovered rather than something to check the user against.
         "session", "touch_session", "revoke_session",
+        # E-mailed reset and verification tokens: the same construction, the
+        # same reasoning. The link is how the account is found.
+        "account_token", "use_account_token",
     }
     offenders = []
     for name, method in inspect.getmembers(Store, inspect.isfunction):
@@ -275,6 +278,11 @@ def test_user_lifecycle():
     store.save_workspace(ALICE, {"MC.PA": 0.6, "AAPL": 0.4}, base_currency="EUR")
     store.save_portfolio(BOB, "Bob's", {"QQQ": 1.0})
     store.save_trades(BOB, [a_trade("b1")])
+    store.add_journal_entry(ALICE, kind="pre", body="Plan écrit avant la séance.", mood=3)
+    store.add_journal_entry(BOB, kind="post", body="La note de Bob.")
+    store.save_trading_plan(ALICE, {"risk_pct": 1.0})
+    store.create_review_request(ALICE, trade_id="t1", trade={"id": "t1"}, auto_review={"checks": []},
+                                plan={"risk_pct": 1.0}, question="Mon stop était-il bien placé ?")
 
     check("a write registers the user without being asked",
           store.get_user(ALICE) is not None)
@@ -294,12 +302,22 @@ def test_user_lifecycle():
     check("an export is JSON-serialisable", bool(json.dumps(export, default=str)))
     check("an export does not reach another user",
           all(t["id"] != "b1" for t in export["trades"]))
+    check("an export carries the journal, and only the owner's notes",
+          [e["body"] for e in export["journal_entries"]] == ["Plan écrit avant la séance."])
+    check("an export carries the trading plan and the review requests",
+          export["trading_plan"] == {"risk_pct": 1.0} and len(export["trade_reviews"]) == 1)
 
     counts = store.delete_user(ALICE)
     check("deletion reports what it removed",
           counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
-                     "trades": 2, "sessions": 0, "workspace": 1},
+                     "trades": 2, "sessions": 0, "workspace": 1,
+                     "lesson_progress": 0, "quiz_attempts": 0, "journal_entries": 1,
+                     "trading_plans": 1, "trade_reviews": 1},
           f"got {counts}")
+    check("the plan and the requests are gone",
+          store.get_trading_plan(ALICE) is None and store.review_requests(ALICE) == [])
+    check("the journal is gone", store.journal_entries(ALICE) == [])
+    check("the other user's journal is untouched", len(store.journal_entries(BOB)) == 1)
     check("the user is gone", store.get_user(ALICE) is None)
     check("the portfolios are gone", store.list_portfolios(ALICE) == [])
     check("the working portfolio is gone", store.load_workspace(ALICE) is None)
@@ -472,6 +490,12 @@ def test_migration():
     check("portfolios now reference users",
           any(r["table"] == "users"
               for r in store._read("PRAGMA foreign_key_list(portfolios)")))
+    check("users gained the role column, empty for everyone",
+          "role" in [r["name"] for r in store._read("PRAGMA table_info(users)")]
+          and all(not u["role"] for u in store.list_users()))
+    check("the journal review tables exist",
+          {"trading_plans", "trade_reviews"} <= {r["name"] for r in
+                                                 store._read("SELECT name FROM sqlite_master WHERE type='table'")})
 
     # Nothing may be lost. This is the assertion the rebuild exists to satisfy.
     check("the portfolio survived", len(store.list_portfolios(ALICE)) == 1)
@@ -555,9 +579,124 @@ def test_fresh_database_is_not_migrated():
     check("and works", store.count_trades(ALICE) == 1)
 
 
+def test_journal():
+    print("\nReflection journal")
+    store = fresh_store("journal.db")
+    first = store.add_journal_entry(ALICE, kind="pre", body="Limite du jour : 2 %.", mood=2,
+                                    prompt="Quelle est ma limite de perte aujourd'hui ?")
+    second = store.add_journal_entry(ALICE, kind="post", body="Plan suivi.", mood=4)
+    store.add_journal_entry(BOB, kind="free", body="Note privée de Bob.")
+
+    mine = store.journal_entries(ALICE)
+    check("newest first", [e["id"] for e in mine] == [second, first])
+    check("the fields come back as written", mine[1]["mood"] == 2 and mine[1]["kind"] == "pre"
+          and mine[1]["prompt"].startswith("Quelle est"))
+    check("the user's address is not repeated in each row", "user_email" not in mine[0])
+    check("a filter by kind", [e["id"] for e in store.journal_entries(ALICE, "post")] == [second])
+    check("another member's notes are not listed",
+          all(e["body"] != "Note privée de Bob." for e in mine))
+    check("Bob cannot delete Alice's note by its id", store.delete_journal_entry(BOB, first) is False)
+    check("and it is still there", len(store.journal_entries(ALICE)) == 2)
+    check("the address is normalised", len(store.journal_entries("  ALICE@Example.com ")) == 2)
+    check("the owner can delete it", store.delete_journal_entry(ALICE, first) is True)
+    check("once", store.delete_journal_entry(ALICE, first) is False)
+    check("Bob's note is untouched", len(store.journal_entries(BOB)) == 1)
+
+    for label, fields in (("an unknown kind", {"kind": "diagnostic", "body": "x"}),
+                          ("a mood outside 1 to 5", {"kind": "pre", "body": "x", "mood": 6}),
+                          ("an empty body", {"kind": "pre", "body": ""})):
+        try:
+            store.add_journal_entry(ALICE, **fields)
+            refused = False
+        except Exception:
+            refused = True
+        check(f"the database refuses {label}", refused)
+    check("a refused write leaves nothing behind", len(store.journal_entries(ALICE)) == 1)
+    with_routine = store.add_journal_entry(ALICE, kind="pre", body="Routine faite.", checks=["etat", "limites"])
+    without = store.add_journal_entry(ALICE, kind="free", body="Sans routine.")
+    rows = {e["id"]: e for e in store.journal_entries(ALICE)}
+    check("ticked routine items come back as a list", rows[with_routine]["checks"] == ["etat", "limites"])
+    check("no routine comes back as None", rows[without]["checks"] is None)
+    store.add_journal_entry(ALICE, kind="post", body="Rien coché.", checks=[])
+    check("an empty routine is kept as an empty list", store.journal_entries(ALICE, "post")[0]["checks"] == [])
+    store.delete_journal_entry(ALICE, with_routine)
+    store.delete_journal_entry(ALICE, without)
+    store.delete_journal_entry(ALICE, store.journal_entries(ALICE, "post")[0]["id"])
+    try:
+        store.add_journal_entry("", kind="pre", body="x")
+        anonymous = False
+    except ValueError:
+        anonymous = True
+    check("a note needs an owner", anonymous)
+
+
+def test_trade_reviews():
+    print("\nTrading plans and coach reviews")
+    store = fresh_store("reviews.db")
+    coach = "coach@example.com"
+    store.upsert_user(coach)
+    store.save_trading_plan(ALICE, {"risk_pct": 1.0, "min_rr": 2.0})
+    store.save_trading_plan(ALICE, {"risk_pct": 0.5})
+    check("one plan per member, the last one saved", store.get_trading_plan(ALICE) == {"risk_pct": 0.5})
+    check("another member has no plan", store.get_trading_plan(BOB) is None)
+
+    first = store.create_review_request(ALICE, trade_id="t1", trade={"id": "t1", "symbol": "EURUSD"},
+                                        auto_review={"checks": []}, plan={"risk_pct": 0.5},
+                                        question="Mon entrée était-elle cohérente ?")
+    store.create_review_request(BOB, trade_id="b1", trade={"id": "b1"}, auto_review={"checks": []},
+                                plan=None, question="Question de Bob.")
+    mine = store.review_requests(ALICE)
+    check("a member lists their own request", [r["id"] for r in mine] == [first])
+    check("decoded, with the frozen trade", mine[0]["trade"]["symbol"] == "EURUSD" and mine[0]["status"] == "pending")
+    check("the address is not repeated, the coach's never shown",
+          "user_email" not in mine[0] and "coach_email" not in mine[0])
+    check("the open request is found for that trade only",
+          store.open_review_for_trade(ALICE, "t1") == first and store.open_review_for_trade(BOB, "t1") is None)
+    check("requests are counted for the quota", store.count_review_requests(ALICE, "2000-01-01") == 1)
+
+    check("a member is not a coach", store.is_coach(ALICE) is False)
+    check("a member's queue is empty", store.coach_queue(ALICE) == [] and store.coach_queue(coach) == [])
+    check("a member cannot answer", store.answer_review(BOB, first, {"comment": "x"}) is False)
+    check("the role is closed", _raises(lambda: store.set_role(coach, "admin")))
+    check("an unknown address gets no role", store.set_role("personne@example.com", "coach") is False)
+    store.set_role(coach, "coach")
+    queue = store.coach_queue(coach)
+    check("a coach sees every pending request, oldest first", [r["trade_id"] for r in queue] == ["t1", "b1"])
+    check("Bob cannot withdraw Alice's request", store.withdraw_review_request(BOB, first) is False)
+    check("the coach answers once", store.answer_review(coach, first, {"comment": "Bien."}) is True
+          and store.answer_review(coach, first, {"comment": "Encore."}) is False)
+    answered = store.review_requests(ALICE)[0]
+    check("the member reads the answer", answered["status"] == "answered" and answered["feedback"] == {"comment": "Bien."})
+    check("an answered request is no longer open", store.open_review_for_trade(ALICE, "t1") is None)
+    check("an answered request cannot be withdrawn", store.withdraw_review_request(ALICE, first) is False)
+    check("it counts as unseen", store.unseen_reviews(ALICE) == 1)
+    store.mark_review_seen(BOB, first)
+    check("Bob cannot mark it seen", store.unseen_reviews(ALICE) == 1)
+    store.mark_review_seen(ALICE, first)
+    check("the member can", store.unseen_reviews(ALICE) == 0)
+    check("the coach's answered list", [r["id"] for r in store.coach_queue(coach, "answered")] == [first])
+    bob_request = store.coach_queue(coach)[0]["id"]
+    check("a pending request can be withdrawn by its author", store.withdraw_review_request(BOB, bob_request) is True)
+    store.delete_user(coach)
+    row = store._read("SELECT coach_email FROM trade_reviews WHERE id = ?", (first,))[0]
+    check("a departing coach's address leaves the answers", row["coach_email"] is None
+          and store.review_requests(ALICE)[0]["feedback"] == {"comment": "Bien."})
+    check("the database refuses an unknown status",
+          _raises(lambda: store._conn.execute(
+              "UPDATE trade_reviews SET status = 'lost' WHERE id = ?", (first,))))
+
+
+def _raises(call) -> bool:
+    try:
+        call()
+    except Exception:
+        return True
+    return False
+
+
 def main() -> int:
     for test in (test_isolation, test_every_user_method_is_scoped,
-                 test_user_lifecycle, test_constraints, test_migration,
+                 test_user_lifecycle, test_journal, test_trade_reviews, test_constraints, test_migration,
                  test_fresh_database_is_not_migrated):
         test()
 

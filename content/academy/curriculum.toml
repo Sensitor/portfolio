@@ -1,0 +1,206 @@
+# Le programme Sensitor Academy.
+#
+# Quatre filières en deux univers complémentaires : le trading, et la monnaie avec
+# Bitcoin, la crypto et l'investissement. `universe = "trading"` ou "monnaie"
+# donne aux pages d'un cours la couleur et la police de son univers. Chaque parcours
+# appartient à une filière et y est numéroté ; la progression des membres est
+# enregistrée par cours et par leçon, jamais par numéro de parcours.
+#
+# `status = "published"` : le parcours est ouvert et ses cours sont lisibles.
+# `status = "planned"`   : annoncé dans le programme, sans contenu lisible.
+#                          Affiché comme « en préparation », jamais cliquable.
+#
+# `require_sources = true` : chaque leçon publiée de la filière doit citer ses
+# sources et porter la date de sa dernière relecture (`updated`).
+
+[[track]]
+id = "trading"
+title = "Trading"
+short = "Trading"
+code = "T"
+universe = "trading"
+summary = "Price action, liquidité, zones, gestion du risque, psychologie et backtesting : la méthode du trader, de la première bougie au processus discipliné."
+
+[[track]]
+id = "monnaie-bitcoin"
+title = "Monnaie et Bitcoin"
+short = "Monnaie et Bitcoin"
+code = "M"
+universe = "monnaie"
+summary = "Comprendre la monnaie, l'inflation et ce qui a conduit à Bitcoin, puis Bitcoin lui-même : son fonctionnement, sa politique monétaire, ses arguments et ses limites."
+require_sources = true
+
+[[track]]
+id = "crypto"
+title = "Crypto"
+short = "Crypto"
+code = "C"
+universe = "monnaie"
+summary = "Les bases techniques pour utiliser les cryptomonnaies en sécurité, puis l'analyse des protocoles, des tokens et des données on-chain."
+require_sources = true
+
+[[track]]
+id = "investissement"
+title = "Investissement"
+short = "Investissement"
+code = "I"
+universe = "monnaie"
+summary = "Construire et évaluer une stratégie d'investissement crypto cohérente avec son horizon et sa tolérance au risque."
+require_sources = true
+
+[[path]]
+id = "monnaie-inflation"
+track = "monnaie-bitcoin"
+number = 1
+title = "Monnaie, inflation et théorie monétaire"
+summary = "Ce qu'est la monnaie, comment elle est créée, ce qu'est l'inflation et ce qui la provoque, la différence entre rendement nominal et réel, la dette et la politique monétaire, et les grandes écoles de pensée qui en débattent."
+status = "published"
+courses = ["la-monnaie", "l-inflation", "inflation-et-patrimoine"]
+topics = ["La monnaie et sa création", "L'inflation et ses causes", "Rendement nominal et réel", "Écoles de pensée"]
+
+[[path]]
+id = "bitcoin"
+track = "monnaie-bitcoin"
+number = 2
+title = "Bitcoin en profondeur"
+summary = "Les origines et le fonctionnement de Bitcoin, sa politique monétaire, les arguments qui en font une réserve de valeur possible et leurs objections, son rapport à l'inflation, ses cycles et ses indicateurs."
+status = "published"
+courses = ["bitcoin-fonctionnement", "bitcoin-reserve-de-valeur"]
+topics = ["Origines et fonctionnement", "Émission et halvings", "Réserve de valeur", "Cycles et indicateurs"]
+
+[[path]]
+id = "blockchain-securite"
+track = "crypto"
+number = 1
+title = "Blockchain, wallets et sécurité"
+summary = "Blocs, hash, signatures et consensus ; wallets, seed phrase et sauvegarde ; exchanges, ordres, frais et stablecoins ; les arnaques et les erreurs qui font perdre des fonds."
+status = "published"
+courses = ["crypto-en-securite"]
+topics = ["Blocs et hash", "Wallets et seed phrase", "Exchanges et opérations", "Arnaques et erreurs"]
+
+[[path]]
+id = "altcoins-analyse"
+track = "crypto"
+number = 2
+title = "Altcoins et analyse crypto"
+summary = "Proposition de valeur et tokenomics, dilution, revenus et gouvernance ; DeFi et ses risques ; données on-chain et données de marché, et ce que chacune permet de dire."
+status = "published"
+courses = ["analyser-un-projet-crypto", "metriques-on-chain"]
+topics = ["Tokenomics", "DeFi et risques", "On-chain et marché"]
+
+[[path]]
+id = "strategies-crypto"
+track = "investissement"
+number = 1
+title = "Stratégies d'investissement crypto"
+summary = "DCA, VCA, investissement progressif ou en une fois, rééquilibrage, allocation entre Bitcoin, altcoins et liquidités, drawdowns et scénarios défavorables, avec leurs simulateurs."
+status = "published"
+courses = ["investir-avec-methode"]
+topics = ["DCA et VCA", "Allocation et rééquilibrage", "Drawdowns et scénarios"]
+
+[[path]]
+id = "methode-fondateur"
+track = "investissement"
+number = 2
+title = "La méthode du fondateur"
+summary = "La manière dont le fondateur de Sensitor analyse Bitcoin et les altcoins : convictions, indicateurs suivis, règles de risque, conditions d'invalidation et limites, avec les opinions séparées des faits."
+status = "planned"
+topics = ["Convictions et faits", "Indicateurs suivis", "Invalidation et limites"]
+
+[[path]]
+track = "trading"
+id = "bases-marches"
+number = 1
+title = "Les bases des marchés financiers"
+summary = "Comment se forme un prix, ce que coûte une transaction, les premiers éléments de structure et le calcul d'un budget de risque."
+status = "published"
+courses = ["premiers-pas"]
+
+[[path]]
+track = "trading"
+id = "structure-price-action"
+number = 2
+title = "Structure de marché et price action"
+summary = "Tendances, ranges, swings, supports et résistances, cassures de structure et lecture multi-unités de temps."
+status = "published"
+courses = ["lire-la-structure"]
+topics = ["Tendance et range", "BOS, MSS / CHOCH", "Multi-timeframe", "Observation et interprétation"]
+
+[[path]]
+track = "trading"
+id = "liquidite-contexte"
+number = 3
+title = "Liquidité et contexte"
+summary = "Equal highs et equal lows, sweeps, fausses cassures, construction de scénarios et invalidation."
+status = "published"
+courses = ["liquidite-et-scenarios"]
+topics = ["Concepts de liquidité", "Sweeps", "Scénarios et invalidation"]
+
+[[path]]
+track = "trading"
+id = "fvg-ob-ote"
+number = 4
+title = "FVG, Order Blocks et OTE"
+summary = "Définitions, critères de sélection, confluence, déclencheurs d'entrée et erreurs d'analyse fréquentes."
+status = "published"
+courses = ["zones-et-entrees"]
+topics = ["Fair Value Gaps", "Order Blocks", "Retracements et OTE"]
+
+[[path]]
+track = "trading"
+id = "risk-management"
+number = 5
+title = "Gestion du risque"
+summary = "Taille de position, espérance, séries de pertes, drawdown, risque de ruine, corrélations et contraintes des prop firms."
+status = "published"
+courses = ["risque-dans-la-duree"]
+topics = ["Espérance et échantillon", "Drawdown", "Risque de ruine", "Limites journalières"]
+
+[[path]]
+track = "trading"
+id = "psychologie"
+number = 6
+title = "Psychologie du trading"
+summary = "FOMO, revenge trading, suractivité, biais cognitifs, routines et journal émotionnel."
+status = "published"
+courses = ["decider-sous-incertitude"]
+topics = ["Biais cognitifs", "Processus et résultat", "Routines"]
+
+[[path]]
+track = "trading"
+id = "strategie-backtesting"
+number = 7
+title = "Construction de stratégie et backtesting"
+summary = "Règles explicites, tests historiques, biais rétrospectifs, taille d'échantillon et validation hors échantillon."
+status = "published"
+courses = ["tester-une-strategie"]
+topics = ["Règles explicites", "Biais", "Robustesse"]
+
+[[path]]
+track = "trading"
+id = "macro-actualite"
+number = 8
+title = "Macroéconomie et actualité"
+summary = "Inflation, emploi, banques centrales, attentes et publications, volatilité événementielle."
+status = "published"
+courses = ["trader-l-actualite"]
+topics = ["CPI, PPI, emploi", "Banques centrales", "Calendrier économique"]
+
+[[path]]
+track = "trading"
+id = "methode-sensitor"
+number = 9
+title = "La méthode Sensitor"
+summary = "Contexte, liquidité, confirmation structurelle, zone d'intérêt, confluence, invalidation et revue, y compris savoir quand ne pas trader."
+status = "planned"
+topics = ["Setups valides et invalides", "Documenter sa thèse", "Évaluer la décision"]
+
+[[path]]
+track = "trading"
+id = "processus-professionnel"
+number = 10
+title = "Processus de trading discipliné"
+summary = "Plan personnel, préparation, revue de session, journal, limites de risque et amélioration continue."
+status = "published"
+courses = ["processus-de-trading"]
+topics = ["Plan de trading", "Revue", "Amélioration continue"]

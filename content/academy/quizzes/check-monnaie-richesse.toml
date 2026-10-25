@@ -1,0 +1,73 @@
+id = "check-monnaie-richesse"
+title = "Contrôle : monnaie, liquidité et richesse"
+course = "la-monnaie"
+lesson = "monnaie-liquidite-richesse"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "liquide"
+prompt = "Lequel de ces actifs est le moins liquide ?"
+kind = "single"
+lesson = "monnaie-liquidite-richesse"
+
+[[question.option]]
+id = "immo"
+text = "Un appartement."
+correct = true
+explanation = "Le vendre prend des mois et coûte des frais."
+
+[[question.option]]
+id = "compte"
+text = "Un compte courant."
+explanation = "C'est l'actif le plus liquide."
+
+[[question.option]]
+id = "action"
+text = "Une action cotée."
+explanation = "Elle se vend en quelques jours au plus."
+
+[[question]]
+id = "riche"
+prompt = "Une personne a 50 000 € sur son compte et un crédit de 80 000 € à rembourser. Elle est :"
+kind = "single"
+lesson = "monnaie-liquidite-richesse"
+
+[[question.option]]
+id = "liquide"
+text = "liquide, mais sa richesse nette est négative."
+correct = true
+explanation = "Liquidité et richesse sont distinctes."
+
+[[question.option]]
+id = "riche"
+text = "riche de 50 000 €."
+explanation = "Il faut retrancher ce qu'elle doit."
+
+[[question.option]]
+id = "illiquide"
+text = "illiquide."
+explanation = "Elle dispose de 50 000 € immédiatement."
+
+[[question]]
+id = "opinion"
+prompt = "Comment la leçon présente-t-elle l'idée que Bitcoin préserve le patrimoine dans le temps ?"
+kind = "single"
+lesson = "monnaie-liquidite-richesse"
+
+[[question.option]]
+id = "opinion"
+text = "Comme l'opinion du fondateur, à examiner dans les cours suivants."
+correct = true
+explanation = "Elle est encadrée comme une opinion, pas comme un fait."
+
+[[question.option]]
+id = "fait"
+text = "Comme un fait démontré."
+explanation = "La leçon la présente comme une conviction à soumettre aux faits."
+
+[[question.option]]
+id = "faux"
+text = "Comme une idée fausse."
+explanation = "La leçon ne tranche pas : elle annonce son examen."

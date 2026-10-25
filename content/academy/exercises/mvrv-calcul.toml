@@ -1,0 +1,53 @@
+id = "mvrv-calcul"
+title = "Calculer un prix réalisé et un MVRV"
+context = """
+Un marché construit de **1 000 pièces** :
+
+| Pièces | Prix au dernier mouvement |
+|---|---|
+| 400 | 10 |
+| 300 | 25 |
+| 200 | 60 |
+| 100 | 90 |
+
+Le prix de marché est de **45**. *Exemple construit pour l'exercice.*
+"""
+conclusion = """
+Le prix réalisé est de 32,50 : c'est le prix d'acquisition moyen des détenteurs. Au prix de 45, le MVRV vaut 1,38 et le NUPL 0,28 : en moyenne, les détenteurs sont en gain, à hauteur de 28 % de la valeur de marché. Ceux qui ont reçu leurs pièces à 60 ou 90, eux, sont en perte : une moyenne cache des situations opposées.
+"""
+
+[[step]]
+id = "capitalisation"
+prompt = "Quelle est la capitalisation réalisée ?"
+answer = 32500
+tolerance = 0.5
+solution = "400 × 10 + 300 × 25 + 200 × 60 + 100 × 90 = 4 000 + 7 500 + 12 000 + 9 000 = **32 500**."
+
+[[step]]
+id = "prix-realise"
+prompt = "Quel est le prix réalisé ? (Deux décimales.)"
+answer = 32.5
+tolerance = 0.006
+solution = "32 500 ÷ 1 000 = **32,50**."
+
+[[step]]
+id = "mvrv"
+prompt = "Quel est le MVRV ? (Deux décimales.)"
+answer = 1.38
+tolerance = 0.006
+solution = "45 ÷ 32,50 = **1,38**."
+
+[[step]]
+id = "nupl"
+prompt = "Quel est le NUPL ? (Deux décimales.)"
+answer = 0.28
+tolerance = 0.006
+solution = "1 − 32,50 ÷ 45 = **0,28**."
+
+[[step]]
+id = "perte"
+prompt = "Combien de pièces sont détenues en perte au prix de 45 ?"
+unit = "pièces"
+answer = 300
+tolerance = 0
+solution = "Celles reçues à 60 et à 90 : 200 + 100 = **300 pièces**."

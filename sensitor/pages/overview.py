@@ -19,11 +19,11 @@ from ..ui.components import (
 from ..ui.themes import (
     ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS, class_color,
 )
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import (
-    benchmark_selector, currency_notice, guard, load_benchmark, period_selector,
-    single_asset_note,
+    benchmark_selector, chart_with_reading, currency_notice, guard, load_benchmark,
+    period_selector, single_asset_note,
 )
 
 
@@ -178,11 +178,11 @@ def render_overview(ctx) -> None:
                 compact=True,
             )
         else:
-            metric_card(tr("top_risk_driver", lang), "—", caption=tr("assets", lang))
+            metric_card(tr("top_risk_driver", lang), na(lang), caption=tr("assets", lang))
 
     # ── Hero chart ───────────────────────────────────────────────────────────
-    section(tr("growth_of_capital", lang).upper(),
-            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} — {ctx.period}")
+    section(tr("growth_of_capital", lang),
+            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} · {ctx.period}")
 
     series_map = {tr("portfolio", lang): values}
     if bench_aligned is not None:
@@ -190,10 +190,20 @@ def render_overview(ctx) -> None:
         bench_curve = A.cumulative(bench_aligned) * ctx.start_value
         series_map[bench_name] = bench_curve
 
-    st.plotly_chart(
+    chart_with_reading(
         C.cumulative_performance(series_map, height=390, value_prefix=ctx.currency),
-        width='stretch', config=PLOTLY_CONFIG_ZOOM,
-        key="ov_cumulative",
+        "ov_cumulative",
+        [
+            tr("reading_value", lang).format(
+                start=money(ctx.start_value, ctx.currency),
+                end=money(ctx.end_value, ctx.currency),
+                period=ctx.period, ret=pct(stats["total_return"], 1, sign=True)),
+            tr("reading_bench", lang).format(
+                bench=bench_name, ret=pct(bench_stats["total_return"], 1, sign=True),
+            ) if bench_stats else "",
+            tr("reading_drawdown", lang).format(dd=pct(stats["max_drawdown"], 1)),
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM,
     )
 
     # ── Signals + composition ────────────────────────────────────────────────
@@ -201,7 +211,7 @@ def render_overview(ctx) -> None:
     col_signals, col_own = st.columns([1.25, 1], gap="large")
 
     with col_signals:
-        section(tr("things_to_review", lang).upper())
+        section(tr("things_to_review", lang))
         signals = ctx.signals[:4]
         if signals:
             for signal in signals:
@@ -215,7 +225,7 @@ def render_overview(ctx) -> None:
             alert("good", tr("no_signals", lang), tr("no_signals_body", lang))
 
     with col_own:
-        section(tr("what_you_own", lang).upper())
+        section(tr("what_you_own", lang))
         xray = ctx.xray
         st.plotly_chart(
             C.exposure_bars(xray.get("asset_class", {}), color_map=class_color, height=150),
@@ -228,7 +238,7 @@ def render_overview(ctx) -> None:
         note(tr("xray_note", lang))
 
     # ── Holdings table ───────────────────────────────────────────────────────
-    section(tr("holdings", lang).upper(), f"{len(ctx.tickers)} {tr('assets', lang).lower()}")
+    section(tr("holdings", lang), f"{len(ctx.tickers)} {tr('assets', lang).lower()}")
     single_asset_note(ctx)
 
     rc = ctx.risk_contribution

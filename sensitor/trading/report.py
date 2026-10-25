@@ -36,7 +36,7 @@ from ..core.document import (
     ACCENT, INK, INK_2, INK_3, NEG, POS, RULE, SURFACE_2, _STYLE, _esc, _kpi,
     _money, _num, _pct, _table, svg_bars, svg_diverging_bars, svg_lines,
 )
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from . import analytics as A
 from . import performance as P
 from . import psychology as PSY
@@ -85,11 +85,11 @@ DISCLAIMER = {
 
 THIN_NOTICE = {
     "en": ("Only {n} closed trades this week. Most figures below describe these {n} "
-           "trades and should not be read as describing your method — a win rate "
+           "trades and should not be read as describing your method: a win rate "
            "over a handful of trades moves by tens of points on one outcome."),
     "fr": ("Seulement {n} trades clôturés cette semaine. La plupart des chiffres "
            "ci-dessous décrivent ces {n} trades et ne doivent pas être lus comme "
-           "décrivant votre méthode — un taux de réussite sur une poignée de trades "
+           "décrivant votre méthode : un taux de réussite sur une poignée de trades "
            "bouge de dizaines de points sur un seul résultat."),
 }
 
@@ -137,14 +137,14 @@ def _summary(week, previous, lang, currency) -> str:
         _kpi(tr("net_pnl", lang), _money(metrics["net_pnl"], currency),
              f'{n} {tr("trades", lang).lower()}'),
         _kpi(tr("win_rate", lang),
-             _pct(metrics["win_rate"]) if metrics["win_rate"] is not None else "—",
+             _pct(metrics["win_rate"]) if metrics["win_rate"] is not None else na(lang),
              f'{metrics["n_wins"]}W / {metrics["n_losses"]}L'),
         _kpi(tr("profit_factor", lang),
              _num(metrics["profit_factor"]) if metrics["profit_factor"] is not None
              else tr("undefined", lang),
              tr("no_losses_yet", lang) if metrics["profit_factor"] is None else ""),
         _kpi(tr("total_r", lang),
-             f'{metrics["total_r"]:+.2f}R' if metrics["total_r"] is not None else "—",
+             f'{metrics["total_r"]:+.2f}R' if metrics["total_r"] is not None else na(lang),
              f'{_pct(metrics["r_coverage"], 0)} {tr("with_stop", lang)}'),
     ]
 
@@ -178,10 +178,10 @@ def _trades(week, lang, currency) -> str:
             trade.symbol,
             tr("long", lang) if trade.direction.value == "long" else tr("short", lang),
             _money(trade.pnl, currency),
-            f"{trade.r_multiple:+.2f}R" if trade.r_multiple is not None else "—",
+            f"{trade.r_multiple:+.2f}R" if trade.r_multiple is not None else na(lang),
             A.format_duration(trade.duration_minutes, lang),
             ", ".join(taxonomy.setup_label(s, lang)
-                      for s in taxonomy.canonical_setups(trade.setups)) or "—",
+                      for s in taxonomy.canonical_setups(trade.setups)) or na(lang),
         ])
     return _table(
         [tr("closed_at", lang), tr("symbol", lang), tr("direction_label", lang),
@@ -238,10 +238,10 @@ def _risk(week, lang, currency) -> str:
     consistency = profile.get("consistency")
     cards = [
         _kpi(tr("median_risk", lang), _money(profile["median_risk"], currency),
-             f'{_money(profile["min_risk"], currency)} – '
+             f'{_money(profile["min_risk"], currency)} {"to" if lang == "en" else "à"} '
              f'{_money(profile["max_risk"], currency)}'),
         _kpi(tr("risk_consistency", lang),
-             _num(consistency) if consistency is not None else "—",
+             _num(consistency) if consistency is not None else na(lang),
              tr("lower_is_steadier", lang) if consistency is not None
              else f'{tr("needs_n", lang)} {R.MIN_SAMPLE}'),
         _kpi(tr("stop_coverage", lang), _pct(profile["coverage"], 0),
@@ -260,7 +260,7 @@ def _risk(week, lang, currency) -> str:
         body.append(
             f'<p class="note">{_esc(tr("max_concurrent", lang))}: '
             f'<strong>{exposure["max_concurrent"]}</strong>'
-            f'{_esc(" — " + ", ".join(exposure.get("max_concurrent_symbols") or []))}'
+            f'{_esc(": " + ", ".join(exposure.get("max_concurrent_symbols") or []))}'
             f'</p>')
     body.append(f'<p class="note">{_esc(tr("stop_note", lang))}</p>')
     return "".join(body)
@@ -280,7 +280,7 @@ def _psychology(week, lang) -> str:
         return (f'<p class="note">{_esc(tr("review_no_patterns", lang))}</p>')
 
     items = "".join(
-        f'<li><strong>{_esc(tr("correlation_in_your_data", lang))}</strong> — '
+        f'<li><strong>{_esc(tr("correlation_in_your_data", lang))}</strong> · '
         f'{_esc(f[lang])} <span class="dim">(n = {f["n"]})</span></li>'
         for f in findings
     )
@@ -315,14 +315,14 @@ def _baseline(week, history, lang, currency) -> str:
         [tr("total_trades", lang), str(week_metrics.get("n", 0)),
          f"{per_week_trades:.1f}"],
         [tr("win_rate", lang),
-         _pct(week_metrics.get("win_rate")) if week_metrics.get("win_rate") is not None else "—",
-         _pct(base_metrics.get("win_rate")) if base_metrics.get("win_rate") is not None else "—"],
+         _pct(week_metrics.get("win_rate")) if week_metrics.get("win_rate") is not None else na(lang),
+         _pct(base_metrics.get("win_rate")) if base_metrics.get("win_rate") is not None else na(lang)],
         [tr("expectancy", lang),
          _money(week_metrics.get("expectancy"), currency),
          _money(base_metrics.get("expectancy"), currency)],
         [tr("average_r", lang),
-         f'{week_metrics["avg_r"]:+.2f}R' if week_metrics.get("avg_r") is not None else "—",
-         f'{base_metrics["avg_r"]:+.2f}R' if base_metrics.get("avg_r") is not None else "—"],
+         f'{week_metrics["avg_r"]:+.2f}R' if week_metrics.get("avg_r") is not None else na(lang),
+         f'{base_metrics["avg_r"]:+.2f}R' if base_metrics.get("avg_r") is not None else na(lang)],
     ]
 
     table = _table([tr("metric", lang), tr("review_this_week", lang),
@@ -396,7 +396,7 @@ def build_weekly_html(trades, *, week_of: datetime | None = None,
     return f"""<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{_esc(title)} — {window}</title>
+<title>{_esc(title)} · {window}</title>
 <style>{_STYLE}{_EXTRA_STYLE}</style></head>
 <body>
 <header>

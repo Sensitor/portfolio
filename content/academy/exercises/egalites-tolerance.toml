@@ -1,0 +1,54 @@
+id = "egalites-tolerance"
+title = "Repérer des equal highs"
+context = """
+Voici cinq sommets de swing consécutifs sur EURUSD en H1. La tolérance retenue est de **3 pips** : des sommets sont égaux quand ils se situent à 3 pips ou moins du premier du groupe.
+
+| Sommet | S1 | S2 | S3 | S4 | S5 |
+|---|---|---|---|---|---|
+| Niveau | 1,0942 | 1,0915 | 1,0944 | 1,0928 | 1,0941 |
+
+Série fictive, construite pour l'exercice.
+"""
+conclusion = """
+Trois sommets sur cinq forment un niveau unique, à 1,0944 : c'est au-delà de ce prix que les méthodes fondées sur la liquidité situent les ordres. La bougie qui monte à 1,0951 et clôture à 1,0938 est un sweep de ce niveau ; il rend plausible un retour dans le range, sans le garantir.
+"""
+
+[[step]]
+id = "nombre"
+prompt = "Combien de sommets forment le groupe d'equal highs ?"
+unit = "sommets"
+answer = 3
+tolerance = 0
+solution = "S1, S3 et S5 : **3 sommets**. S3 est à 2 pips de S1, S5 à 1 pip. S2 (27 pips sous S1) et S4 (14 pips sous S1) n'en font pas partie."
+
+[[step]]
+id = "reference"
+prompt = "Quel est le niveau de référence de ce groupe ?"
+unit = "prix"
+answer = 1.0944
+tolerance = 0.00001
+solution = "Le plus haut des trois : **1,0944** (S3). Les ordres se trouvent, par hypothèse, au-delà de ce prix."
+
+[[step]]
+id = "ecart"
+prompt = "Quel est l'écart entre le plus haut et le plus bas des sommets du groupe, en pips ?"
+unit = "pips"
+answer = 3
+tolerance = 0.01
+solution = "1,0944 − 1,0941 = 0,0003, soit **3 pips** : le groupe reste dans la tolérance."
+
+[[step]]
+id = "depassement"
+prompt = "Une bougie monte à 1,0951 et clôture à 1,0938. De combien de pips son plus haut dépasse-t-il le niveau ?"
+unit = "pips"
+answer = 7
+tolerance = 0.01
+solution = "1,0951 − 1,0944 = **7 pips**."
+
+[[step]]
+id = "retour"
+prompt = "De combien de pips sa clôture se trouve-t-elle sous le niveau ?"
+unit = "pips"
+answer = 6
+tolerance = 0.01
+solution = "1,0944 − 1,0938 = **6 pips**. Mèche au-delà, clôture en deçà : c'est un sweep selon la convention du parcours."

@@ -1,0 +1,40 @@
+id = "l-inflation"
+path = "monnaie-inflation"
+title = "L'inflation"
+summary = "Neuf leçons pour comprendre la hausse des prix : ce qu'elle est et comment on la mesure, ses causes (la demande, les coûts, la monnaie et le crédit, les anticipations), les grands épisodes depuis les années 1970, les écoles de pensée qui en débattent, puis ce qu'elle fait au pouvoir d'achat sur des décennies. Avec les données d'Eurostat, de la BCE et des États-Unis."
+level = "debutant"
+status = "published"
+version = 1
+objectives = [
+  "Définir l'inflation, la désinflation et la déflation, et lire un indice de prix.",
+  "Expliquer comment l'inflation est mesurée et pourquoi elle diffère selon les ménages.",
+  "Distinguer les causes par la demande, par les coûts, par la monnaie et par les anticipations, et les reconnaître dans un épisode réel.",
+  "Présenter les principales écoles de pensée, leurs hypothèses et leurs limites.",
+  "Calculer l'effet de l'inflation sur le pouvoir d'achat, sur un an comme sur trente.",
+]
+prerequisites = ["La monnaie"]
+final_quiz = "inflation-validation"
+
+[[module]]
+id = "mesurer"
+title = "Mesurer l'inflation"
+summary = "Ce qu'est l'inflation, et comment les statisticiens la mesurent."
+lessons = ["inflation-definition", "mesurer-les-prix"]
+
+[[module]]
+id = "causes"
+title = "Les causes"
+summary = "La demande et les coûts, la monnaie et le crédit, les anticipations et les salaires."
+lessons = ["demande-et-couts", "monnaie-credit-prix", "anticipations-salaires"]
+
+[[module]]
+id = "histoire-debats"
+title = "L'histoire et les débats"
+summary = "Les grands épisodes depuis les années 1970, puis les écoles de pensée qui les expliquent différemment."
+lessons = ["episodes-inflation", "ecoles-de-pensee"]
+
+[[module]]
+id = "bilan"
+title = "Faire le point"
+summary = "Le pouvoir d'achat sur des décennies, puis le quiz de validation."
+lessons = ["pouvoir-achat", "recap-inflation"]

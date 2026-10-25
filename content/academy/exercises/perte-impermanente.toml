@@ -1,0 +1,50 @@
+id = "perte-impermanente"
+title = "La perte impermanente d'une position de liquidité"
+context = """
+Une fournisseuse de liquidité dépose **10 000 dollars** dans un pool ETH-USDC à parts égales : 5 000 dollars d'ether et 5 000 USDC. Ensuite, le prix de l'ether **double** par rapport au dollar. *Chiffres construits pour l'exercice.*
+
+Rappel : perte impermanente = 2√r ÷ (1 + r) − 1 ; dans un pool à produit constant, la position vaut alors le dépôt × √r.
+"""
+conclusion = """
+Si elle avait simplement gardé ses deux actifs, elle aurait 15 000 dollars. Sa position dans le pool en vaut 14 142 : une perte impermanente de 5,7 %, soit 858 dollars. Il faut que les commissions perçues dépassent ce montant pour que la liquidité ait mieux rapporté que la simple détention.
+"""
+
+[[step]]
+id = "detention"
+prompt = "Que vaudraient les deux actifs simplement gardés, en dollars ?"
+unit = "$"
+answer = 15000
+tolerance = 0.5
+solution = "5 000 × 2 + 5 000 = **15 000 dollars**."
+
+[[step]]
+id = "position"
+prompt = "Que vaut la position dans le pool, en dollars ? (Arrondi à l'entier.)"
+unit = "$"
+answer = 14142
+tolerance = 1
+solution = "10 000 × √2 = **14 142 dollars**."
+
+[[step]]
+id = "perte"
+prompt = "Quelle est la perte impermanente, en % ? (Une décimale.)"
+unit = "%"
+answer = -5.7
+tolerance = 0.06
+solution = "2√2 ÷ 3 − 1 = **−5,7 %**."
+
+[[step]]
+id = "frais"
+prompt = "Combien de commissions faut-il percevoir pour compenser, en dollars ? (Arrondi à l'entier.)"
+unit = "$"
+answer = 858
+tolerance = 1
+solution = "15 000 − 14 142 = **858 dollars**."
+
+[[step]]
+id = "quatre"
+prompt = "Si le prix avait quadruplé, quelle aurait été la perte impermanente, en % ?"
+unit = "%"
+answer = -20
+tolerance = 0.06
+solution = "2 × 2 ÷ 5 − 1 = **−20 %**."

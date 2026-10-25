@@ -1,0 +1,73 @@
+id = "check-proprietes-comparees"
+title = "Contrôle : les propriétés comparées"
+course = "bitcoin-reserve-de-valeur"
+lesson = "proprietes-comparees"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "verif"
+prompt = "Sur quelle propriété Bitcoin se distingue-t-il de l'or et de l'euro ?"
+kind = "single"
+lesson = "proprietes-comparees"
+
+[[question.option]]
+id = "verif"
+text = "La rareté vérifiable : chacun peut contrôler l'offre avec un nœud."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "anciennete"
+text = "L'ancienneté."
+explanation = "L'or a des millénaires d'histoire, Bitcoin moins de vingt ans."
+
+[[question.option]]
+id = "stabilite"
+text = "La stabilité du pouvoir d'achat."
+explanation = "Bitcoin est très volatil."
+
+[[question]]
+id = "or"
+prompt = "Où l'or l'emporte-t-il ?"
+kind = "single"
+lesson = "proprietes-comparees"
+
+[[question.option]]
+id = "anciennete"
+text = "Sur l'ancienneté et la durabilité."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "transport"
+text = "Sur le transport."
+explanation = "L'or est lourd et coûteux à déplacer."
+
+[[question.option]]
+id = "division"
+text = "Sur la division."
+explanation = "Il est difficile à fractionner physiquement."
+
+[[question]]
+id = "vainqueur"
+prompt = "Que retenir du tableau comparatif ?"
+kind = "single"
+lesson = "proprietes-comparees"
+
+[[question.option]]
+id = "aucun"
+text = "Aucune réserve de valeur ne domine sur tous les critères."
+correct = true
+explanation = "Oui : le choix dépend de ce que l'on veut protéger."
+
+[[question.option]]
+id = "bitcoin"
+text = "Bitcoin domine sur tous les critères."
+explanation = "Il perd sur l'ancienneté et la stabilité."
+
+[[question.option]]
+id = "euro"
+text = "L'euro domine sur tous les critères."
+explanation = "Il s'érode avec l'inflation sur la durée."

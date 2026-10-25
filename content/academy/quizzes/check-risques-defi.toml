@@ -1,0 +1,73 @@
+id = "check-risques-defi"
+title = "Contrôle : les risques de la DeFi"
+course = "analyser-un-projet-crypto"
+lesson = "risques-defi"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "pont"
+prompt = "Pourquoi les ponts entre réseaux sont-ils des cibles de choix ?"
+kind = "single"
+lesson = "risques-defi"
+
+[[question.option]]
+id = "concentre"
+text = "Ils concentrent des sommes importantes dans un contrat ou entre quelques clés."
+correct = true
+explanation = "Oui : Ronin, Wormhole, Nomad."
+
+[[question.option]]
+id = "lents"
+text = "Parce qu'ils sont lents."
+explanation = "Ce n'est pas la raison."
+
+[[question.option]]
+id = "anonymes"
+text = "Parce qu'ils sont anonymes."
+explanation = "C'est la concentration des fonds qui attire."
+
+[[question]]
+id = "audit"
+prompt = "Un protocole audité est-il sans risque ?"
+kind = "single"
+lesson = "risques-defi"
+
+[[question.option]]
+id = "non"
+text = "Non : un audit réduit le risque sans le supprimer."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, l'audit le garantit."
+explanation = "Des protocoles audités ont été piratés."
+
+[[question.option]]
+id = "assure"
+text = "Oui, il est assuré."
+explanation = "Un audit n'est pas une assurance."
+
+[[question]]
+id = "dao"
+prompt = "Qu'a fait le réseau Ethereum après le piratage de The DAO en 2016 ?"
+kind = "single"
+lesson = "risques-defi"
+
+[[question.option]]
+id = "fork"
+text = "Il a changé ses règles pour annuler le vol ; l'ancienne chaîne a continué sous le nom d'Ethereum Classic."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rien"
+text = "Rien."
+explanation = "Les règles ont été modifiées en juillet 2016."
+
+[[question.option]]
+id = "ferme"
+text = "Il a fermé."
+explanation = "Il continue de fonctionner."

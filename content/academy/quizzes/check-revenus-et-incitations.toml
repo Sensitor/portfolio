@@ -1,0 +1,73 @@
+id = "check-revenus-et-incitations"
+title = "Contrôle : revenus et incitations"
+course = "analyser-un-projet-crypto"
+lesson = "revenus-et-incitations"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "net"
+prompt = "Frais aux détenteurs 12 M$, incitations émises 20 M$. Revenu net ?"
+kind = "single"
+lesson = "revenus-et-incitations"
+
+[[question.option]]
+id = "moins8"
+text = "−8 M$"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "32"
+text = "32 M$"
+explanation = "Les incitations se déduisent."
+
+[[question.option]]
+id = "12"
+text = "12 M$"
+explanation = "Il faut déduire les incitations."
+
+[[question]]
+id = "fournisseurs"
+prompt = "Des frais élevés qui reviennent tous aux fournisseurs de liquidité donnent-ils un revenu au jeton ?"
+kind = "single"
+lesson = "revenus-et-incitations"
+
+[[question.option]]
+id = "non"
+text = "Non : aucune part ne revient aux détenteurs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, des frais élevés suffisent."
+explanation = "Il faut qu'une part revienne au jeton."
+
+[[question.option]]
+id = "double"
+text = "Oui, le double."
+explanation = "Aucune part ne lui revient."
+
+[[question]]
+id = "volume"
+prompt = "Un volume d'échange très élevé prouve-t-il une activité réelle ?"
+kind = "single"
+lesson = "revenus-et-incitations"
+
+[[question.option]]
+id = "non"
+text = "Non : il peut être gonflé par des échanges fictifs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Les échanges fictifs existent, à grande échelle."
+
+[[question.option]]
+id = "chaine"
+text = "Oui, s'il est publié par la plateforme."
+explanation = "C'est justement ce qu'il faut vérifier."

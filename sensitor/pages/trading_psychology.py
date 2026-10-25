@@ -26,12 +26,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading.psychology import MIN_GROUP
 from ..ui import charts as C
 from ..ui.components import (
     alert, data_table, empty_state, metric_card, money, note, page_header, pct,
-    pill_html, section, spacer,
+    pill_html, reading, section, spacer,
 )
 from ..ui.themes import INK_2, INK_FAINT, INK_MUTED, PALETTE, PLOTLY_CONFIG, STATUS, html
 from ._trading_shared import (
@@ -80,7 +80,7 @@ def render_trading_psychology(ctx=None) -> None:
 
 def _findings_block(tctx, lang) -> None:
     findings = tctx.findings
-    section(tr("what_your_data_shows", lang).upper(), f"{len(findings)}")
+    section(tr("what_your_data_shows", lang), f"{len(findings)}")
 
     if not findings:
         alert("good", tr("no_patterns_title", lang), tr("no_patterns_body", lang))
@@ -107,7 +107,7 @@ def _behaviour_block(tctx, psych, lang) -> None:
     if not (after_losses or after_wins or activity):
         return
 
-    section(tr("behaviour_around_streaks", lang).upper(),
+    section(tr("behaviour_around_streaks", lang),
             tr("behaviour_around_streaks_sub", lang))
 
     columns = st.columns(3, gap="medium")
@@ -139,7 +139,7 @@ def _behaviour_block(tctx, psych, lang) -> None:
                 f'line-height:1.55;">{tr("activity_proxy_note", lang)}</div>'
             )
         else:
-            metric_card(tr("activity_after_losses", lang), "—",
+            metric_card(tr("activity_after_losses", lang), na(lang),
                         caption=f"{tr('needs_n', lang)} {MIN_GROUP}", compact=True)
 
 
@@ -151,7 +151,7 @@ def _streak_card(label, data, tctx, lang, tone) -> None:
     to know what a normal position is on this account to read 1.4x.
     """
     if not data or data.get("risk_ratio") is None:
-        metric_card(label, "—", caption=f"{tr('needs_n', lang)} {MIN_GROUP}",
+        metric_card(label, na(lang), caption=f"{tr('needs_n', lang)} {MIN_GROUP}",
                     compact=True)
         return
 
@@ -183,7 +183,7 @@ def _streak_card(label, data, tctx, lang, tone) -> None:
             f'<div style="margin-top:8px;font-size:0.72rem;color:{INK_MUTED};'
             f'line-height:1.55;">{tr("avg_result_in_group", lang)} '
             f'{money(avg_pnl, tctx.currency, decimals=2)} · '
-            f'{pct(outcome_after["win_rate"], 0) if outcome_after.get("win_rate") is not None else "—"} '
+            f'{pct(outcome_after["win_rate"], 0) if outcome_after.get("win_rate") is not None else na(lang)} '
             f'{tr("win_rate", lang).lower()}</div>'
         )
 
@@ -199,7 +199,7 @@ def _mistakes_block(tctx, psych, lang) -> None:
     if not (by_mistake or frequency):
         return
 
-    section(tr("by_mistake", lang).upper())
+    section(tr("by_mistake", lang))
     left, right = st.columns([1.4, 1], gap="large")
 
     with left:
@@ -220,6 +220,19 @@ def _mistakes_block(tctx, psych, lang) -> None:
                 [tr("mistake_frequency", lang), tr("trades", lang), tr("share", lang)],
                 rows, align="lrr", bars={1: (max_count, PALETTE[3])},
             )
+        compared = [r for r in by_mistake if r.get("group") and r.get("rest")]
+        worst = min(compared, key=lambda r: r["group"]["avg_pnl"]) if compared else None
+        common = frequency[0] if frequency else None
+        spacer(10)
+        reading(tr("reading", lang), [
+            tr("rd_tps_worst", lang).format(
+                label=worst.get("display", worst["label"]),
+                g=money(worst["group"]["avg_pnl"], tctx.currency, decimals=2),
+                o=money(worst["rest"]["avg_pnl"], tctx.currency, decimals=2),
+                n=worst["group"]["n"]) if worst else "",
+            tr("rd_tps_freq", lang).format(label=common["label"], c=common["count"],
+                                           s=pct(common["share"], 0)) if common else "",
+        ], foot=tr("reading_foot_small", lang))
 
     note(tr("mistake_flagging_note", lang))
 
@@ -233,13 +246,13 @@ def _self_reported_block(tctx, psych, lang) -> None:
     discipline = psych.get("discipline", [])
 
     if not (emotions or discipline):
-        section(tr("by_emotion", lang).upper())
+        section(tr("by_emotion", lang))
         empty_state(tr("nothing_recorded_title", lang),
                     tr("nothing_recorded_body", lang), icon="◌")
         return
 
     if emotions:
-        section(tr("by_emotion", lang).upper(),
+        section(tr("by_emotion", lang),
                 f"{sum(r['group']['n'] for r in emotions)} {tr('trades', lang).lower()}")
         st.plotly_chart(
             C.trading_comparison(emotions, lang=lang),
@@ -248,7 +261,7 @@ def _self_reported_block(tctx, psych, lang) -> None:
         _comparison_table(emotions, tr("emotion_before", lang), tctx, lang)
 
     if discipline:
-        section(tr("by_discipline", lang).upper())
+        section(tr("by_discipline", lang))
         rows = []
         for row in discipline:
             rows.append({**row, "display": row["labels"].get(lang, row["label"])})
@@ -271,13 +284,13 @@ def _comparison_table(rows, label, tctx, lang) -> None:
             f"{group['n']} / {rest['n']}",
             money(group["avg_pnl"], currency, decimals=2),
             money(rest["avg_pnl"], currency, decimals=2),
-            pct(group["win_rate"], 0) if group["win_rate"] is not None else "—",
+            pct(group["win_rate"], 0) if group["win_rate"] is not None else na(lang),
             r_text(row.get("avg_r_delta")),
         ])
     data_table(
         [label, f"{tr('flagged', lang)} / {tr('the_rest', lang)}",
-         f"{tr('avg', lang)} — {tr('flagged', lang)}",
-         f"{tr('avg', lang)} — {tr('the_rest', lang)}",
+         f"{tr('avg', lang)} · {tr('flagged', lang)}",
+         f"{tr('avg', lang)} · {tr('the_rest', lang)}",
          tr("win_rate", lang), f"Δ {tr('average_r', lang)}"],
         table, align="lrrrrr",
     )

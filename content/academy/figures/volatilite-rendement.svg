@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">La volatilité coûte du rendement</title>
+<desc id="d">100 euros gagnent 50 % puis perdent 50 % : ils deviennent 150 puis 75 euros. La moyenne des rendements est nulle, le résultat est une perte de 25 %.</desc>
+<line x1="70" y1="118.2" x2="580" y2="118.2" stroke="#d9d5cb" stroke-dasharray="4 4"/>
+<text x="574" y="112.2" text-anchor="end" font-size="11" fill="#5b646b">capital de départ</text>
+<polyline points="110,118.2 300,62.4 490,146.2" fill="none" stroke="#284764" stroke-width="2.4"/>
+<circle cx="110" cy="118.2" r="5" fill="#284764"/>
+<text x="110" y="104.2" text-anchor="middle" font-size="13" font-weight="700" fill="#284764">100 €</text>
+<text x="110" y="142.2" text-anchor="middle" font-size="11" fill="#5b646b">départ</text>
+<circle cx="300" cy="62.4" r="5" fill="#284764"/>
+<text x="300" y="48.4" text-anchor="middle" font-size="13" font-weight="700" fill="#284764">150 €</text>
+<text x="300" y="86.4" text-anchor="middle" font-size="11" fill="#5b646b">après +50 %</text>
+<circle cx="490" cy="146.2" r="5" fill="#8a4a40"/>
+<text x="490" y="132.2" text-anchor="middle" font-size="13" font-weight="700" fill="#8a4a40">75 €</text>
+<text x="490" y="170.2" text-anchor="middle" font-size="11" fill="#5b646b">après −50 %</text>
+<text x="70" y="30" font-size="12" fill="#1b2733">Moyenne des deux années : 0 %. Résultat : −25 %, soit −13,4 % par an.</text>
+<text x="30" y="282" font-size="11" fill="#7b8389">Une perte se rattrape plus difficilement qu'elle ne se fait : la volatilité réduit le rendement composé.</text>
+</svg>

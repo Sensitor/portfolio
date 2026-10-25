@@ -1,0 +1,73 @@
+id = "check-donnees-on-chain"
+title = "Contrôle : ce que la chaîne dit d'elle-même"
+course = "metriques-on-chain"
+lesson = "donnees-on-chain"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "famille"
+prompt = "Dans quelle famille range-t-on la puissance de calcul du réseau ?"
+kind = "single"
+lesson = "donnees-on-chain"
+
+[[question.option]]
+id = "estimee"
+text = "Estimée : déduite de la difficulté et du temps entre les blocs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "mesuree"
+text = "Mesurée : inscrite dans chaque bloc."
+explanation = "Aucun bloc n'inscrit la puissance du réseau."
+
+[[question.option]]
+id = "prix"
+text = "Dépendante du prix."
+explanation = "Elle ne dépend d'aucun prix."
+
+[[question]]
+id = "prix"
+prompt = "Quelle métrique demande un historique de prix ?"
+kind = "single"
+lesson = "donnees-on-chain"
+
+[[question.option]]
+id = "mvrv"
+text = "Le MVRV."
+correct = true
+explanation = "Oui : il croise la chaîne et le prix."
+
+[[question.option]]
+id = "tx"
+text = "Le nombre de transactions par bloc."
+explanation = "C'est un fait du registre."
+
+[[question.option]]
+id = "poids"
+text = "Le poids des blocs."
+explanation = "C'est un fait du registre."
+
+[[question]]
+id = "echantillon"
+prompt = "Que vaut un graphique construit sur un bloc par jour ?"
+kind = "single"
+lesson = "donnees-on-chain"
+
+[[question.option]]
+id = "tendance"
+text = "Une image fidèle des tendances mensuelles, pas la valeur exacte d'un jour."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "exact"
+text = "La valeur exacte de chaque jour."
+explanation = "Un bloc isolé peut être atypique."
+
+[[question.option]]
+id = "rien"
+text = "Rien, l'échantillon est trop petit."
+explanation = "Une trentaine de blocs par mois suffit pour une tendance."

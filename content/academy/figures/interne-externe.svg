@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Liquidité interne et externe</title>
+<desc id="d">Un range borné par un sommet et un creux, marqués comme liquidité externe ; à l'intérieur, des swings mineurs marqués comme liquidité interne.</desc>
+<line x1="100" y1="70.0" x2="610" y2="70.0" stroke="#8a4a40" stroke-width="1.4"/>
+<line x1="360" y1="180.0" x2="610" y2="180.0" stroke="#3f6553" stroke-width="1.4"/>
+<text x="610" y="62.0" text-anchor="end" font-size="12" font-weight="700" fill="#8a4a40">liquidité externe (haut du range)</text>
+<text x="610" y="198.0" text-anchor="end" font-size="12" font-weight="700" fill="#3f6553">liquidité externe (bas du range)</text>
+<polyline points="40,200.0 120,70.0 170,120.0 220,96.0 270,150.0 320,124.0 380,180.0 440,140.0 490,160.0 560,100.0" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="220" cy="96.0" r="3.5" fill="#fbfaf6" stroke="#284764" stroke-width="1.4"/><circle cx="320" cy="124.0" r="3.5" fill="#fbfaf6" stroke="#284764" stroke-width="1.4"/><circle cx="440" cy="140.0" r="3.5" fill="#fbfaf6" stroke="#284764" stroke-width="1.4"/>
+<text x="320" y="112.0" text-anchor="middle" font-size="11.5" fill="#284764">swings internes</text>
+<text x="40" y="282" font-size="11" fill="#7b8389">Terminologie de méthode : l'externe borne le range, l'interne se trouve à l'intérieur. Ni l'un ni l'autre n'oblige le prix.</text>
+</svg>

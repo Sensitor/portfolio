@@ -18,9 +18,11 @@ from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ..integrations.market_data import benchmark_label
-from ._shared import benchmark_selector, guard, load_benchmark, period_selector
+from ._shared import (
+    benchmark_selector, chart_with_reading, guard, load_benchmark, period_selector,
+)
 
 _MONTHS = {
     "en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -68,8 +70,8 @@ def render_performance(ctx) -> None:
                     caption=f"{stats['n_days']} {tr('days', lang)}")
 
     # ── Cumulative performance ───────────────────────────────────────────────
-    section(tr("cumulative_performance", lang).upper(),
-            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} — {ctx.period}")
+    section(tr("cumulative_performance", lang),
+            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} · {ctx.period}")
 
     series_map = {tr("portfolio", lang): values}
     if bench_aligned is not None:
@@ -80,7 +82,7 @@ def render_performance(ctx) -> None:
     )
 
     # ── Benchmark analysis ───────────────────────────────────────────────────
-    section(tr("benchmark_analysis", lang).upper(), bench_name)
+    section(tr("benchmark_analysis", lang), bench_name)
     if bench_aligned is None:
         note(tr("benchmark_unavailable", lang))
     else:
@@ -141,20 +143,32 @@ def render_performance(ctx) -> None:
         data_table(["", tr("portfolio", lang), bench_name, "Δ"], rows, align="lrrr")
 
     # ── Attribution ──────────────────────────────────────────────────────────
-    section(tr("attribution", lang).upper(), tr("attribution_sub", lang))
+    section(tr("attribution", lang), tr("attribution_sub", lang))
     attribution = ctx.attribution
     if attribution is not None and not attribution.empty:
-        st.plotly_chart(
+        top = attribution.loc[attribution["contribution"].idxmax()]
+        low = attribution.loc[attribution["contribution"].idxmin()]
+        negatives = int((attribution["contribution"] < 0).sum())
+        chart_with_reading(
             C.contribution_bars(attribution["ticker"].tolist(),
                                 attribution["contribution"].tolist()),
-            width='stretch', config=PLOTLY_CONFIG, key="perf_attr",
+            "perf_attr",
+            [
+                tr("rd_attr_top", lang).format(t=top["ticker"], c=pct(top["contribution"], 1, sign=True),
+                                               total=pct(stats["total_return"], 1, sign=True)),
+                tr("rd_attr_low", lang).format(t=low["ticker"], c=pct(low["contribution"], 1, sign=True))
+                if len(attribution) > 1 else "",
+                (tr("rd_attr_neg_one", lang) if negatives == 1 else
+                 tr("rd_attr_neg", lang).format(n=negatives) if negatives > 1 else ""),
+            ],
+            lang,
         )
         rows = [
             [row["ticker"], pct(row["weight"], 1), pct(row["asset_return"], 1),
              pct(row["contribution"], 2)]
             for _, row in attribution.iterrows()
         ]
-        rows.append(["Σ " + tr("portfolio", lang), "100.0%", "—", pct(stats["total_return"], 2)])
+        rows.append(["Σ " + tr("portfolio", lang), "100.0%", na(lang), pct(stats["total_return"], 2)])
         data_table(
             [tr("assets", lang), tr("weight", lang),
              "Asset return" if lang == "en" else "Rendement actif",
@@ -164,7 +178,7 @@ def render_performance(ctx) -> None:
         note(define("attribution", lang))
 
     # ── Rolling metrics ──────────────────────────────────────────────────────
-    section(tr("rolling_metrics", lang).upper(), "63-day window")
+    section(tr("rolling_metrics", lang), "63-day window")
     rolling = A.rolling_stats(ctx.portfolio_returns, window=63)
     if rolling.empty:
         note(tr("short_history_body", lang))
@@ -187,7 +201,7 @@ def render_performance(ctx) -> None:
     # ── Monthly returns ──────────────────────────────────────────────────────
     monthly = A.monthly_returns(ctx.portfolio_returns)
     if not monthly.empty:
-        section(tr("monthly_returns", lang).upper())
+        section(tr("monthly_returns", lang))
         months = _MONTHS.get(lang, _MONTHS["en"])
         headers = [""] + [months[m - 1] for m in monthly.columns] + ["Σ"]
         rows = []
@@ -195,7 +209,7 @@ def render_performance(ctx) -> None:
             cells = [str(year)]
             for month in monthly.columns:
                 value = row[month]
-                cells.append("—" if (value is None or np.isnan(value)) else f"{value * 100:+.1f}")
+                cells.append(na(lang) if (value is None or np.isnan(value)) else f"{value * 100:+.1f}")
             year_total = np.nanprod([1 + v for v in row.to_numpy() if not np.isnan(v)]) - 1
             cells.append(f"{year_total * 100:+.1f}")
             rows.append(cells)

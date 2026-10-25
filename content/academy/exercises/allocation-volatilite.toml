@@ -1,0 +1,42 @@
+id = "allocation-volatilite"
+title = "Ce qu'une part de crypto fait à un patrimoine"
+context = """
+Un patrimoine de **100 000 €**. Le reste du patrimoine a une volatilité de **10 %** par an, la crypto de **60 %**, et la corrélation entre les deux est de **0,2**. *Hypothèses construites pour l'exercice.*
+
+Rappel : volatilité = √(w₁²σ₁² + w₂²σ₂² + 2 w₁ w₂ ρ σ₁ σ₂).
+"""
+conclusion = """
+Avec 5 % de crypto, la volatilité du patrimoine passe de 10 % à 10,5 % ; avec 20 %, à 15,7 %. Une baisse de 75 % de la crypto coûte 3 750 €, soit 3,75 % du patrimoine, avec 5 % ; 15 000 €, soit 15 %, avec 20 %. La part décide de ce que la volatilité de la crypto fait à l'ensemble.
+"""
+
+[[step]]
+id = "vol-5"
+prompt = "Volatilité du patrimoine avec 5 % de crypto, en % ? (Une décimale.)"
+unit = "%"
+answer = 10.5
+tolerance = 0.06
+solution = "√(0,05² × 0,6² + 0,95² × 0,1² + 2 × 0,05 × 0,95 × 0,2 × 0,6 × 0,1) = **10,5 %**."
+
+[[step]]
+id = "vol-20"
+prompt = "Et avec 20 % de crypto ? (Une décimale.)"
+unit = "%"
+answer = 15.7
+tolerance = 0.06
+solution = "√(0,2² × 0,6² + 0,8² × 0,1² + 2 × 0,2 × 0,8 × 0,2 × 0,6 × 0,1) = **15,7 %**."
+
+[[step]]
+id = "baisse-5"
+prompt = "Avec 5 % de crypto, que coûte au patrimoine une baisse de 75 % de la crypto, en € ?"
+unit = "€"
+answer = 3750
+tolerance = 0.5
+solution = "100 000 × 5 % × 75 % = **3 750 €**, soit 3,75 % du patrimoine."
+
+[[step]]
+id = "baisse-20"
+prompt = "Et avec 20 % de crypto, en € ?"
+unit = "€"
+answer = 15000
+tolerance = 0.5
+solution = "100 000 × 20 % × 75 % = **15 000 €**, soit 15 % du patrimoine."

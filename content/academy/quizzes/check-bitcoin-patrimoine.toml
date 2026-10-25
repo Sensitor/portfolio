@@ -1,0 +1,74 @@
+id = "check-bitcoin-patrimoine"
+title = "Contrôle : Bitcoin dans un patrimoine"
+course = "inflation-et-patrimoine"
+lesson = "bitcoin-patrimoine"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "offre"
+prompt = "Combien de bitcoins existeront au plus ?"
+kind = "single"
+lesson = "bitcoin-patrimoine"
+
+[[question.option]]
+id = "21"
+text = "20 999 999,9769 BTC."
+correct = true
+explanation = "Selon les règles d'émission du protocole."
+
+[[question.option]]
+id = "illimite"
+text = "Une quantité illimitée."
+explanation = "L'émission est programmée et s'arrête."
+
+[[question.option]]
+id = "100"
+text = "100 millions."
+explanation = "Ce n'est pas le plafond."
+
+[[question]]
+id = "objections"
+prompt = "Lesquelles sont des objections à Bitcoin comme réserve de valeur ? Cochez toutes les bonnes réponses."
+kind = "multiple"
+lesson = "bitcoin-patrimoine"
+
+[[question.option]]
+id = "vol"
+text = "Sa volatilité."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "histo"
+text = "Son historique court."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "offre"
+text = "Une offre totale connue à l'avance."
+explanation = "C'est un argument en sa faveur."
+
+[[question]]
+id = "garantie"
+prompt = "Bitcoin protège-t-il de façon garantie contre l'inflation ?"
+kind = "single"
+lesson = "bitcoin-patrimoine"
+
+[[question.option]]
+id = "non"
+text = "Non : son prix a fortement baissé en 2022, l'année où l'inflation a culminé."
+correct = true
+explanation = "L'argument porte sur le long terme et reste discuté."
+
+[[question.option]]
+id = "oui"
+text = "Oui, puisque son offre est limitée."
+explanation = "Une offre limitée ne garantit pas le prix."
+
+[[question.option]]
+id = "toujours"
+text = "Oui, il monte toujours quand l'inflation monte."
+explanation = "Les données de 2022 le contredisent."

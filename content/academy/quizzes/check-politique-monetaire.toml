@@ -1,0 +1,73 @@
+id = "check-politique-monetaire"
+title = "Contrôle : la politique monétaire"
+course = "la-monnaie"
+lesson = "politique-monetaire"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "resserrer"
+prompt = "Une banque centrale qui monte ses taux pour freiner l'inflation :"
+kind = "single"
+lesson = "politique-monetaire"
+
+[[question.option]]
+id = "resserre"
+text = "resserre sa politique monétaire."
+correct = true
+explanation = "C'est la définition."
+
+[[question.option]]
+id = "assouplit"
+text = "assouplit sa politique monétaire."
+explanation = "Assouplir, c'est baisser les taux."
+
+[[question.option]]
+id = "monetise"
+text = "monétise la dette."
+explanation = "Rien à voir avec le financement de l'État."
+
+[[question]]
+id = "article"
+prompt = "Que défend l'article 123 du traité sur le fonctionnement de l'Union européenne ?"
+kind = "single"
+lesson = "politique-monetaire"
+
+[[question.option]]
+id = "direct"
+text = "Le financement direct des États par la BCE et les banques centrales nationales."
+correct = true
+explanation = "Crédits et achats de titres à l'émission sont interdits."
+
+[[question.option]]
+id = "achats"
+text = "Tout achat d'obligations publiques, même sur le marché."
+explanation = "Les achats sur le marché secondaire sont permis sous conditions."
+
+[[question.option]]
+id = "taux"
+text = "Les taux négatifs."
+explanation = "Il ne porte pas sur les taux."
+
+[[question]]
+id = "qe"
+prompt = "Pourquoi l'assouplissement quantitatif ne crée-t-il pas automatiquement autant de monnaie pour le public ?"
+kind = "single"
+lesson = "politique-monetaire"
+
+[[question.option]]
+id = "reserves"
+text = "Parce qu'il crée surtout des réserves, qui restent sur les comptes des banques auprès de la banque centrale."
+correct = true
+explanation = "Elles ne circulent que si les banques prêtent davantage."
+
+[[question.option]]
+id = "detruit"
+text = "Parce qu'il détruit de la monnaie."
+explanation = "Il en crée, sous forme de réserves."
+
+[[question.option]]
+id = "interdit"
+text = "Parce qu'il est interdit en zone euro."
+explanation = "Il a été pratiqué par la BCE."

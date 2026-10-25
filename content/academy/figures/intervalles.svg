@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 295" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Intervalle de l'espérance</title>
+<desc id="d">Quatre intervalles à 95 % autour d'une espérance mesurée de +0,20R : sur 40 et 100 trades ils contiennent zéro, sur 400 et 1 000 trades ils restent au-dessus.</desc>
+<line x1="267.8" y1="40" x2="267.8" y2="240" stroke="#8a4a40" stroke-dasharray="4 3"/>
+<text x="267.8" y="34" text-anchor="middle" font-size="11" fill="#8a4a40">0R, aucun avantage</text>
+<line x1="370.0" y1="48" x2="370.0" y2="240" stroke="#d9d5cb"/>
+<text x="165.6" y="256" text-anchor="middle" font-size="10.5" fill="#5b646b">−0,2R</text>
+<text x="267.8" y="256" text-anchor="middle" font-size="10.5" fill="#5b646b">0,0R</text>
+<text x="370.0" y="256" text-anchor="middle" font-size="10.5" fill="#5b646b">0,2R</text>
+<text x="472.2" y="256" text-anchor="middle" font-size="10.5" fill="#5b646b">0,4R</text>
+<text x="574.4" y="256" text-anchor="middle" font-size="10.5" fill="#5b646b">0,6R</text>
+<line x1="179.9" y1="72" x2="560.1" y2="72" stroke="#8a4a40" stroke-width="6" opacity=".75"/>
+<circle cx="370.0" cy="72" r="4.5" fill="#1b2733"/>
+<text x="128" y="76" text-anchor="end" font-size="12" fill="#1b2733">40 trades</text>
+<text x="568.1" y="76" font-size="11" fill="#8a4a40">−0,17 à 0,57</text>
+<line x1="249.8" y1="118" x2="490.2" y2="118" stroke="#8a4a40" stroke-width="6" opacity=".75"/>
+<circle cx="370.0" cy="118" r="4.5" fill="#1b2733"/>
+<text x="128" y="122" text-anchor="end" font-size="12" fill="#1b2733">100 trades</text>
+<text x="498.2" y="122" font-size="11" fill="#8a4a40">−0,04 à 0,44</text>
+<line x1="309.9" y1="164" x2="430.1" y2="164" stroke="#284764" stroke-width="6" opacity=".75"/>
+<circle cx="370.0" cy="164" r="4.5" fill="#1b2733"/>
+<text x="128" y="168" text-anchor="end" font-size="12" fill="#1b2733">400 trades</text>
+<text x="438.1" y="168" font-size="11" fill="#284764">0,08 à 0,32</text>
+<line x1="332.0" y1="210" x2="408.0" y2="210" stroke="#284764" stroke-width="6" opacity=".75"/>
+<circle cx="370.0" cy="210" r="4.5" fill="#1b2733"/>
+<text x="128" y="214" text-anchor="end" font-size="12" fill="#1b2733">1 000 trades</text>
+<text x="416.0" y="214" font-size="11" fill="#284764">0,13 à 0,27</text>
+<text x="30" y="282" font-size="11" fill="#7b8389">Même espérance mesurée, +0,20R, écart type 1,2R : seul l'échantillon change la largeur de l'intervalle à 95 %.</text>
+</svg>

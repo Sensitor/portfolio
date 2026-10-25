@@ -1,0 +1,73 @@
+id = "check-envoyer-recevoir"
+title = "Contrôle : envoyer et recevoir"
+course = "crypto-en-securite"
+lesson = "envoyer-recevoir"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "annuler"
+prompt = "Une transaction confirmée vers une mauvaise adresse peut-elle être annulée ?"
+kind = "single"
+lesson = "envoyer-recevoir"
+
+[[question.option]]
+id = "non"
+text = "Non : elle est définitive."
+correct = true
+explanation = "Oui : d'où la vérification avant l'envoi."
+
+[[question.option]]
+id = "banque"
+text = "Oui, par la banque."
+explanation = "Aucune banque n'intervient sur le registre."
+
+[[question.option]]
+id = "support"
+text = "Oui, par le support du portefeuille."
+explanation = "Le portefeuille ne peut rien annuler."
+
+[[question]]
+id = "poison"
+prompt = "Comment éviter l'empoisonnement d'adresse ?"
+kind = "single"
+lesson = "envoyer-recevoir"
+
+[[question.option]]
+id = "source"
+text = "Copier l'adresse depuis la source et vérifier début, milieu et fin."
+correct = true
+explanation = "Oui : jamais depuis l'historique."
+
+[[question.option]]
+id = "historique"
+text = "Copier l'adresse depuis son historique de transactions."
+explanation = "C'est précisément là que le fraudeur place sa fausse adresse."
+
+[[question.option]]
+id = "debut"
+text = "Vérifier les quatre premiers caractères."
+explanation = "Le fraudeur imite le début et la fin."
+
+[[question]]
+id = "gaz"
+prompt = "21 000 unités de gaz à 20 gwei. Combien d'ether ?"
+kind = "single"
+lesson = "envoyer-recevoir"
+
+[[question.option]]
+id = "000042"
+text = "0,00042 ETH"
+correct = true
+explanation = "Oui : 420 000 gwei."
+
+[[question.option]]
+id = "042"
+text = "0,42 ETH"
+explanation = "Un gwei vaut un milliardième d'ether."
+
+[[question.option]]
+id = "420000"
+text = "420 000 ETH"
+explanation = "C'est le nombre de gwei."

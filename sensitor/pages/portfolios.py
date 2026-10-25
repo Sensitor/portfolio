@@ -25,7 +25,7 @@ from ..ui.components import (
     pill_html, section, spacer,
 )
 from ..ui.themes import INK, INK_MUTED, PLOTLY_CONFIG, html
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 LOADED_KEY = "sensitor_loaded_portfolio"
@@ -55,7 +55,7 @@ def render_portfolios(ctx) -> None:
 # =============================================================================
 
 def _save_block(ctx, lang, store, email) -> None:
-    section(tr("save_current", lang).upper(),
+    section(tr("save_current", lang),
             f"{len(ctx.tickers)} {tr('assets', lang).lower()} · {ctx.period}")
 
     name_col, client_col, button_col = st.columns([2, 2, 1], gap="medium")
@@ -85,7 +85,7 @@ def _save_block(ctx, lang, store, email) -> None:
         # and the first snapshot is the only one the user cannot take later.
         store.add_snapshot(email, portfolio_id, total_value=ctx.end_value,
                            weights=ctx.weights, metrics=snapshot_metrics(ctx))
-        st.success(f"{tr('portfolio_saved', lang)} — {name}")
+        st.success(f"{tr('portfolio_saved', lang)} · {name}")
         st.rerun()
 
 
@@ -95,7 +95,7 @@ def _save_block(ctx, lang, store, email) -> None:
 
 def _list_block(ctx, lang, store, email) -> None:
     summaries = store.portfolio_summaries(email)
-    section(tr("saved_portfolios", lang).upper(), f"{len(summaries)}")
+    section(tr("saved_portfolios", lang), f"{len(summaries)}")
 
     if not summaries:
         empty_state(tr("no_saved_portfolios", lang), tr("no_saved_body", lang), icon="◌")
@@ -190,10 +190,10 @@ def _history(store, email, portfolio, lang) -> None:
     rows = [
         [s.taken_at[:16].replace("T", " "),
          money(s.total_value, portfolio.currency),
-         pct(s.metrics.get("total_return")) if s.metrics.get("total_return") is not None else "—",
-         pct(s.metrics.get("volatility")) if s.metrics.get("volatility") is not None else "—",
-         num(s.metrics.get("sharpe")) if s.metrics.get("sharpe") is not None else "—",
-         f"{s.metrics.get('health'):.0f}" if s.metrics.get("health") is not None else "—"]
+         pct(s.metrics.get("total_return")) if s.metrics.get("total_return") is not None else na(lang),
+         pct(s.metrics.get("volatility")) if s.metrics.get("volatility") is not None else na(lang),
+         num(s.metrics.get("sharpe")) if s.metrics.get("sharpe") is not None else na(lang),
+         f"{s.metrics.get('health'):.0f}" if s.metrics.get("health") is not None else na(lang)]
         for s in ordered
     ]
 

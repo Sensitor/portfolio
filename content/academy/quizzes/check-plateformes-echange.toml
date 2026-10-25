@@ -1,0 +1,73 @@
+id = "check-plateformes-echange"
+title = "Contrôle : plateformes et pools"
+course = "crypto-en-securite"
+lesson = "plateformes-echange"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "risque"
+prompt = "Quel est le risque principal d'une plateforme décentralisée ?"
+kind = "single"
+lesson = "plateformes-echange"
+
+[[question.option]]
+id = "contrat"
+text = "Le contrat : une erreur de programmation, ou un faux jeton."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "faillite"
+text = "La faillite de la plateforme qui garde vos fonds."
+explanation = "Sur une plateforme décentralisée, vous gardez vos fonds jusqu'à l'échange."
+
+[[question.option]]
+id = "aucun"
+text = "Aucun."
+explanation = "Le risque change de nature, il ne disparaît pas."
+
+[[question]]
+id = "impact"
+prompt = "Un dépôt représente 10 % de la réserve de USDC d'un pool. Impact sur le prix, sans commission ?"
+kind = "single"
+lesson = "plateformes-echange"
+
+[[question.option]]
+id = "dix"
+text = "Environ 10 %"
+correct = true
+explanation = "Oui : 3 300 au lieu de 3 000 dans l'exemple."
+
+[[question.option]]
+id = "zero"
+text = "Aucun"
+explanation = "Chaque unité achetée coûte plus cher que la précédente."
+
+[[question.option]]
+id = "un"
+text = "Environ 1 %"
+explanation = "C'est l'impact d'un dépôt de 1 % de la réserve."
+
+[[question]]
+id = "faux"
+prompt = "Comment identifier un jeton sur une plateforme décentralisée ?"
+kind = "single"
+lesson = "plateformes-echange"
+
+[[question.option]]
+id = "adresse"
+text = "Par l'adresse de son contrat, vérifiée sur le site officiel du projet."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "nom"
+text = "Par son nom."
+explanation = "Un faux jeton peut porter le même nom."
+
+[[question.option]]
+id = "prix"
+text = "Par son prix."
+explanation = "Un faux jeton peut afficher n'importe quel prix."

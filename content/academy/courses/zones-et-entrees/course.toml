@@ -1,0 +1,39 @@
+id = "zones-et-entrees"
+path = "fvg-ob-ote"
+title = "Zones d'intérêt et entrées"
+summary = "Sept leçons sur les zones que les méthodes de price action utilisent pour entrer : Fair Value Gaps, order blocks, retracements et zone OTE, la confluence et ses pièges, puis un cas complet sur GBPUSD, de la zone jusqu'à la taille de position."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Repérer un Fair Value Gap sur trois bougies et mesurer ce qu'il en reste.",
+  "Définir un order block avec une règle écrite, et dire ce qu'il ne garantit pas.",
+  "Calculer des niveaux de retracement et la zone OTE d'une jambe.",
+  "Combiner des zones sans compter deux fois la même information, et construire une entrée chiffrée.",
+]
+prerequisites = ["Lire la structure du marché", "Liquidité et scénarios"]
+final_quiz = "zones-validation"
+
+[[module]]
+id = "desequilibres"
+title = "Les déséquilibres"
+summary = "Le Fair Value Gap : sa définition sur trois bougies, puis les critères qui en font une zone exploitable ou non."
+lessons = ["fvg-definition", "fvg-criteres"]
+
+[[module]]
+id = "zones-origine"
+title = "Les zones d'origine"
+summary = "L'order block, la bougie d'où part une impulsion, et les retracements qui mesurent la profondeur d'un retour."
+lessons = ["order-blocks", "ote-retracements"]
+
+[[module]]
+id = "combiner"
+title = "Combiner sans se tromper"
+summary = "Ce qu'apporte une confluence de zones, et les erreurs d'analyse qui la font paraître plus solide qu'elle ne l'est."
+lessons = ["confluence"]
+
+[[module]]
+id = "entree"
+title = "Construire une entrée"
+summary = "Un cas complet sur GBPUSD, du sweep jusqu'à la taille de position, puis le quiz de validation."
+lessons = ["cas-entree", "recap-zones"]

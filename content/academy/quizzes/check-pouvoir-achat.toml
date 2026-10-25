@@ -1,0 +1,73 @@
+id = "check-pouvoir-achat"
+title = "Contrôle : le pouvoir d'achat"
+course = "l-inflation"
+lesson = "pouvoir-achat"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "compose"
+prompt = "Cinq années à 4 % d'inflation font :"
+kind = "single"
+lesson = "pouvoir-achat"
+
+[[question.option]]
+id = "217"
+text = "21,7 % de hausse des prix."
+correct = true
+explanation = "1,04^5 − 1 : les hausses se composent."
+
+[[question.option]]
+id = "20"
+text = "20 %."
+explanation = "On n'additionne pas les taux."
+
+[[question.option]]
+id = "4"
+text = "4 %."
+explanation = "C'est le taux d'une seule année."
+
+[[question]]
+id = "moitie"
+prompt = "Avec 2 % d'inflation par an, le pouvoir d'achat est divisé par deux en environ :"
+kind = "single"
+lesson = "pouvoir-achat"
+
+[[question.option]]
+id = "35"
+text = "35 ans."
+correct = true
+explanation = "ln 2 ÷ ln 1,02."
+
+[[question.option]]
+id = "50"
+text = "50 ans."
+explanation = "100 ÷ 2 ne tient pas compte de la composition."
+
+[[question.option]]
+id = "14"
+text = "14 ans."
+explanation = "C'est le cas à 5 %."
+
+[[question]]
+id = "nominal"
+prompt = "Un compte courant protège :"
+kind = "single"
+lesson = "pouvoir-achat"
+
+[[question.option]]
+id = "nominal"
+text = "de la perte nominale, pas de la perte réelle."
+correct = true
+explanation = "1 000 € restent 1 000 €, mais achètent moins."
+
+[[question.option]]
+id = "reel"
+text = "de la perte réelle."
+explanation = "Il perd en réel chaque année d'inflation."
+
+[[question.option]]
+id = "tout"
+text = "de toute perte."
+explanation = "L'inflation l'érode."

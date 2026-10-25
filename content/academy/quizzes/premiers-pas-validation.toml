@@ -1,0 +1,239 @@
+id = "premiers-pas-validation"
+title = "Quiz de validation : Premiers pas sur les marchés"
+course = "premiers-pas"
+lesson = "recapitulatif"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "vente-marche"
+prompt = "Vous vendez au marché. À quel prix êtes-vous exécuté, hors glissement ?"
+kind = "single"
+lesson = "fonctionnement-marche"
+
+[[question.option]]
+id = "bid"
+text = "Au bid."
+correct = true
+explanation = "Oui : le bid est le meilleur prix auquel un acheteur accepte de vous acheter l'actif."
+
+[[question.option]]
+id = "ask"
+text = "À l'ask."
+explanation = "L'ask est le prix auquel vous achetez, pas celui auquel vous vendez."
+
+[[question.option]]
+id = "graphique"
+text = "Au dernier prix affiché sur le graphique."
+explanation = "Le graphique montre un dernier prix ou le bid selon la plateforme ; l'exécution dépend du carnet au moment de l'ordre."
+
+[[question]]
+id = "liquidite"
+prompt = "Pourquoi un ordre important passé sur un marché peu liquide obtient-il souvent un prix moyen moins favorable que le prix affiché ?"
+kind = "single"
+lesson = "fonctionnement-marche"
+
+[[question.option]]
+id = "niveaux"
+text = "Parce qu'il consomme plusieurs niveaux de prix successifs dans le carnet."
+correct = true
+explanation = "Oui : la quantité disponible au meilleur prix ne suffit pas, le reste s'exécute à des prix moins bons."
+
+[[question.option]]
+id = "penalite"
+text = "Parce que le courtier applique une pénalité aux gros ordres."
+explanation = "L'effet vient de la profondeur du marché, pas d'une pénalité."
+
+[[question.option]]
+id = "fixe"
+text = "Parce que le spread est fixe et proportionnel à la taille."
+explanation = "Le spread varie avec la liquidité ; il n'est pas proportionnel à la taille de l'ordre."
+
+[[question]]
+id = "garantie-prix"
+prompt = "Quel ordre garantit le prix d'exécution, mais pas l'exécution elle-même ?"
+kind = "single"
+lesson = "ordres-et-couts"
+
+[[question.option]]
+id = "limite"
+text = "L'ordre limite."
+correct = true
+explanation = "Oui : il s'exécute à son prix ou mieux, mais seulement si le marché l'atteint."
+
+[[question.option]]
+id = "stop"
+text = "L'ordre stop."
+explanation = "L'ordre stop garantit le déclenchement, pas le prix : il devient un ordre au marché."
+
+[[question.option]]
+id = "marche"
+text = "L'ordre au marché."
+explanation = "L'ordre au marché garantit l'exécution immédiate, pas le prix."
+
+[[question]]
+id = "valeur-pip"
+prompt = "Sur EURUSD, coté en dollars, combien vaut un pip pour une position de 0,5 lot standard ?"
+kind = "single"
+lesson = "ordres-et-couts"
+explanation = "50 000 unités × 0,0001 = 5 $."
+
+[[question.option]]
+id = "cinq"
+text = "5 $"
+correct = true
+explanation = "Oui : 1 pip vaut 10 $ pour 1 lot, donc 5 $ pour 0,5 lot."
+
+[[question.option]]
+id = "dix"
+text = "10 $"
+explanation = "C'est la valeur pour 1 lot standard entier."
+
+[[question.option]]
+id = "cinquante"
+text = "50 $"
+explanation = "Ce serait la valeur pour 5 lots."
+
+[[question]]
+id = "couts"
+prompt = "Quels éléments font partie du coût d'une transaction ? Plusieurs réponses possibles."
+kind = "multiple"
+lesson = "ordres-et-couts"
+
+[[question.option]]
+id = "spread"
+text = "Le spread."
+correct = true
+explanation = "Oui : payé à chaque aller-retour."
+
+[[question.option]]
+id = "commission"
+text = "La commission."
+correct = true
+explanation = "Oui, sur les comptes qui en facturent une."
+
+[[question.option]]
+id = "swap"
+text = "Le swap d'une position gardée d'un jour sur l'autre."
+correct = true
+explanation = "Oui : c'est un coût, ou plus rarement un crédit, de financement."
+
+[[question.option]]
+id = "marge"
+text = "La marge immobilisée."
+explanation = "La marge est une garantie bloquée pendant la position et libérée à la clôture : ce n'est pas un coût."
+
+[[question]]
+id = "baissiere"
+prompt = "Qu'est-ce qui caractérise une tendance baissière ?"
+kind = "single"
+lesson = "structure-de-marche"
+
+[[question.option]]
+id = "plus-bas"
+text = "Des sommets et des creux de swing de plus en plus bas."
+correct = true
+explanation = "Oui, c'est la définition par les swings."
+
+[[question.option]]
+id = "contraction"
+text = "Des sommets de plus en plus bas et des creux de plus en plus hauts."
+explanation = "C'est une contraction des amplitudes, pas une tendance baissière."
+
+[[question.option]]
+id = "rouges"
+text = "Une majorité de bougies rouges sur l'écran."
+explanation = "La couleur des bougies ne décrit pas la structure : une tendance peut contenir beaucoup de bougies contraires."
+
+[[question]]
+id = "these"
+prompt = "Un trader écrit : « Le prix a cassé le dernier creux, donc il va baisser. » Que manque-t-il à cette analyse ?"
+kind = "single"
+lesson = "structure-de-marche"
+
+[[question.option]]
+id = "separer"
+text = "Séparer l'observation de l'hypothèse, et préciser ce qui invaliderait l'hypothèse."
+correct = true
+explanation = "Oui : la cassure est observable, la baisse est une hypothèse qui doit avoir son invalidation."
+
+[[question.option]]
+id = "rien"
+text = "Rien : la cassure confirme la baisse."
+explanation = "Une cassure décrit le passé ; elle ne garantit pas la suite."
+
+[[question.option]]
+id = "indicateur"
+text = "Un indicateur supplémentaire pour confirmer."
+explanation = "Ajouter un indicateur ne transforme pas une hypothèse en certitude."
+
+[[question]]
+id = "taille"
+prompt = "Capital de 15 000 $, risque de 1 %, stop à 25 pips sur EURUSD (10 $ par pip et par lot), pas de volume de 0,01. Quelle taille de position ?"
+kind = "single"
+lesson = "budget-de-risque"
+explanation = "Montant risqué : 150 $. Coût du stop par lot : 25 × 10 = 250 $. Taille : 150 ÷ 250 = 0,60 lot."
+
+[[question.option]]
+id = "soixante"
+text = "0,60 lot"
+correct = true
+explanation = "Oui : 150 $ ÷ 250 $ par lot."
+
+[[question.option]]
+id = "six-centiemes"
+text = "0,06 lot"
+explanation = "Dix fois trop petit : le risque ne serait que de 15 $."
+
+[[question.option]]
+id = "six"
+text = "6 lots"
+explanation = "Dix fois trop grand : le risque serait de 1 500 $, soit 10 % du capital."
+
+[[question]]
+id = "recuperation"
+prompt = "Après une baisse de 50 % du capital, quel gain faut-il pour revenir au niveau de départ ?"
+kind = "single"
+lesson = "budget-de-risque"
+explanation = "Le capital restant doit doubler : 1 ÷ (1 − 0,5) − 1 = 100 %."
+
+[[question.option]]
+id = "cent"
+text = "+100 %"
+correct = true
+explanation = "Oui : il faut doubler ce qui reste."
+
+[[question.option]]
+id = "cinquante"
+text = "+50 %"
+explanation = "Un gain de 50 % sur la moitié du capital ne ramène qu'à 75 % du départ."
+
+[[question.option]]
+id = "soixante-quinze"
+text = "+75 %"
+explanation = "Insuffisant : le capital restant doit doubler."
+
+[[question]]
+id = "ratio"
+prompt = "Achat à 1,2000, stop à 1,1960, objectif à 1,2100. Quel est le ratio gain / risque ?"
+kind = "single"
+lesson = "budget-de-risque"
+explanation = "Distance à l'objectif : 100 pips. Distance au stop : 40 pips. Ratio : 100 ÷ 40 = 2,5."
+
+[[question.option]]
+id = "deux-cinq"
+text = "2,5"
+correct = true
+explanation = "Oui : 100 pips de gain potentiel pour 40 pips de risque."
+
+[[question.option]]
+id = "deux"
+text = "2"
+explanation = "Vérifiez les distances : 100 pips d'un côté, 40 de l'autre."
+
+[[question.option]]
+id = "quatre"
+text = "4"
+explanation = "Ce serait le cas avec un stop à 25 pips."

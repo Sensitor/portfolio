@@ -1,0 +1,73 @@
+id = "check-espace-de-bloc"
+title = "Contrôle : l'espace de bloc"
+course = "metriques-on-chain"
+lesson = "espace-de-bloc"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "segwit"
+prompt = "Qu'a changé SegWit en 2017 ?"
+kind = "single"
+lesson = "espace-de-bloc"
+
+[[question.option]]
+id = "poids"
+text = "Il a remplacé la limite de taille d'un mégaoctet par une limite de poids de 4 millions d'unités."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "prix"
+text = "Il a fixé le prix des frais."
+explanation = "Les frais restent libres."
+
+[[question.option]]
+id = "offre"
+text = "Il a modifié l'offre de bitcoins."
+explanation = "L'émission n'a pas changé."
+
+[[question]]
+id = "depasse"
+prompt = "Pourquoi un bloc peut-il dépasser 1 Mo depuis SegWit ?"
+kind = "single"
+lesson = "espace-de-bloc"
+
+[[question.option]]
+id = "signatures"
+text = "Parce que les signatures pèsent quatre fois moins que le reste dans le poids."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "regle"
+text = "Parce que la limite est passée à 4 Mo."
+explanation = "La limite porte sur le poids, pas sur la taille."
+
+[[question.option]]
+id = "erreur"
+text = "C'est une erreur de mesure."
+explanation = "C'est permis par les règles."
+
+[[question]]
+id = "inscriptions"
+prompt = "Que sont les inscriptions apparues en 2023 ?"
+kind = "single"
+lesson = "espace-de-bloc"
+
+[[question.option]]
+id = "donnees"
+text = "Des données, images ou textes, inscrites dans la partie signature des transactions."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "paiements"
+text = "Des paiements plus rapides."
+explanation = "Ce sont des données."
+
+[[question.option]]
+id = "blocs"
+text = "De nouveaux types de blocs."
+explanation = "Elles utilisent des transactions ordinaires."

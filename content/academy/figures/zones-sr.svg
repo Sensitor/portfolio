@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-labelledby="t d" font-family="DM Sans, Helvetica, Arial, sans-serif">
+<title id="t">Une zone de résistance qui devient support</title>
+<desc id="d">Le prix bute deux fois sous une zone de résistance, la casse, puis revient sur la zone qui joue alors le rôle de support.</desc>
+<rect x="30" y="100.4" width="590" height="22.0" fill="#8a4a40" opacity=".12"/>
+<text x="38" y="92.4" font-size="12" fill="#8a4a40">Zone de résistance</text>
+<polyline points="40,195.0 95,113.6 140,162.0 200,104.8 245,151.0 300,52.0 345,96.0 390,111.4 440,60.8 500,87.2 560,38.8 610,56.4" fill="none" stroke="#284764" stroke-width="2.2" stroke-linejoin="round"/>
+<g fill="#284764"><circle cx="95" cy="113.6" r="4"/><circle cx="200" cy="104.8" r="4"/></g>
+<text x="148" y="74.0" text-anchor="middle" font-size="12" fill="#1b2733">deux réactions</text>
+<text x="300" y="36.6" text-anchor="middle" font-size="12" fill="#1b2733">cassure</text>
+<circle cx="390" cy="111.4" r="4.5" fill="#3f6553"/>
+<text x="390" y="144.4" text-anchor="middle" font-size="12" fill="#3f6553">retour sur la zone,</text>
+<text x="390" y="159.4" text-anchor="middle" font-size="12" fill="#3f6553">qui sert de support</text>
+<text x="30" y="285" font-size="11" fill="#7b8389">Une zone, pas une ligne : les réactions ne se font pas au pip près. L'inversion de rôle n'est jamais garantie.</text>
+</svg>

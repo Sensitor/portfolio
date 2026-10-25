@@ -1,0 +1,73 @@
+id = "check-ecoles-de-pensee"
+title = "Contrôle : les écoles de pensée"
+course = "l-inflation"
+lesson = "ecoles-de-pensee"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "monetarisme"
+prompt = "Que soutient le monétarisme ?"
+kind = "single"
+lesson = "ecoles-de-pensee"
+
+[[question.option]]
+id = "monnaie"
+text = "Qu'à long terme, une croissance de la monnaie plus rapide que la production fait monter les prix."
+correct = true
+explanation = "Avec une vitesse supposée assez stable."
+
+[[question.option]]
+id = "endogene"
+text = "Que la monnaie suit l'activité et ne cause rien."
+explanation = "C'est la lecture post-keynésienne."
+
+[[question.option]]
+id = "demande"
+text = "Que l'inflation vient seulement d'une demande excessive, quelle que soit la monnaie."
+explanation = "C'est une lecture keynésienne."
+
+[[question]]
+id = "autrichien"
+prompt = "Que reproche l'école autrichienne à la création monétaire par le crédit ?"
+kind = "single"
+lesson = "ecoles-de-pensee"
+
+[[question.option]]
+id = "distorsion"
+text = "Elle fausse les prix relatifs et les décisions d'investissement, et crée des cycles."
+correct = true
+explanation = "C'est la thèse de Mises et Hayek."
+
+[[question.option]]
+id = "rien"
+text = "Rien, elle la juge neutre."
+explanation = "Elle la juge au contraire perturbatrice."
+
+[[question.option]]
+id = "pas-assez"
+text = "De ne pas être assez abondante."
+explanation = "C'est l'inverse."
+
+[[question]]
+id = "juger"
+prompt = "Devant une explication de l'inflation, que propose la leçon ?"
+kind = "single"
+lesson = "ecoles-de-pensee"
+
+[[question.option]]
+id = "faits"
+text = "Examiner ses hypothèses, les faits qui la soutiennent et ceux qui la contrediraient."
+correct = true
+explanation = "On juge l'argument, pas l'école."
+
+[[question.option]]
+id = "ecole"
+text = "Choisir l'école la plus réputée et s'y tenir."
+explanation = "Chaque école explique certains épisodes mieux que d'autres."
+
+[[question.option]]
+id = "moyenne"
+text = "Faire la moyenne des explications."
+explanation = "Ce n'est pas une méthode."

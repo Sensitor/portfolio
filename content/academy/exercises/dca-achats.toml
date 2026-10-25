@@ -1,0 +1,50 @@
+id = "dca-achats"
+title = "Quatre achats réguliers"
+context = """
+Une investisseuse place **100 €** le premier de chaque mois pendant quatre mois. Le prix d'une unité est successivement de **40 €**, **50 €**, **25 €** et **50 €**. *Prix construits pour l'exercice.*
+
+Une autre investisseuse place les **400 €** en une fois le premier mois, à 40 €.
+"""
+conclusion = """
+L'investissement progressif achète 10,5 unités pour 400 €, au prix de revient de 38,10 €, sous la moyenne des prix de 41,25 €. À 50 € à la fin, sa position vaut 525 €, contre 500 € pour l'investissement en une fois : ici, la baisse du troisième mois a profité aux achats réguliers. Si le prix avait monté régulièrement, l'investissement en une fois l'aurait emporté.
+"""
+
+[[step]]
+id = "unites"
+prompt = "Combien d'unités l'investissement progressif achète-t-il au total ? (Une décimale.)"
+unit = "unités"
+answer = 10.5
+tolerance = 0.001
+solution = "100 ÷ 40 + 100 ÷ 50 + 100 ÷ 25 + 100 ÷ 50 = 2,5 + 2 + 4 + 2 = **10,5 unités**."
+
+[[step]]
+id = "revient"
+prompt = "Quel est son prix de revient, en € ? (Deux décimales.)"
+unit = "€"
+answer = 38.10
+tolerance = 0.006
+solution = "400 ÷ 10,5 = **38,10 €**."
+
+[[step]]
+id = "moyenne"
+prompt = "Quelle est la moyenne des quatre prix, en € ? (Deux décimales.)"
+unit = "€"
+answer = 41.25
+tolerance = 0.006
+solution = "(40 + 50 + 25 + 50) ÷ 4 = **41,25 €** : le prix de revient est plus bas."
+
+[[step]]
+id = "final-dca"
+prompt = "Que vaut la position progressive à 50 € à la fin, en € ?"
+unit = "€"
+answer = 525
+tolerance = 0.5
+solution = "10,5 × 50 = **525 €**."
+
+[[step]]
+id = "final-une-fois"
+prompt = "Et la position achetée en une fois à 40 €, en € ?"
+unit = "€"
+answer = 500
+tolerance = 0.5
+solution = "400 ÷ 40 = 10 unités ; 10 × 50 = **500 €**."

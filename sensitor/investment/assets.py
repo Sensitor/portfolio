@@ -25,8 +25,8 @@ ASSET_INFO = {
         "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Large-cap quality growth with expanding services moat",
         "utility_fr": "Croissance de qualité large-cap avec fort avantage concurrentiel services",
-        "typical_use": "Core growth holding. 5–15% in balanced/growth portfolios.",
-        "typical_use_fr": "Holding de croissance cœur. 5–15% dans les portefeuilles équilibrés/croissance.",
+        "typical_use": "Core growth holding. 5-15% in balanced/growth portfolios.",
+        "typical_use_fr": "Holding de croissance cœur. 5-15% dans les portefeuilles équilibrés/croissance.",
         "risk_level": "Medium-High", "liquidity": 100,
         "dividend_yield": "~0.5%", "market_cap": "~$3 billion",
     },
@@ -80,8 +80,8 @@ ASSET_INFO = {
     },
     "META": {
         "name": "Meta Platforms",
-        "description": "Operates Facebook, Instagram, WhatsApp, and Threads — reaching 3+ billion daily users. Heavy AI investment in recommendation algorithms and Reality Labs (Quest VR headsets).",
-        "description_fr": "Opère Facebook, Instagram, WhatsApp et Threads — atteignant 3 milliards+ d'utilisateurs quotidiens. Lourds investissements IA dans les algorithmes de recommandation et Reality Labs (casques VR Quest).",
+        "description": "Operates Facebook, Instagram, WhatsApp, and Threads: reaching 3+ billion daily users. Heavy AI investment in recommendation algorithms and Reality Labs (Quest VR headsets).",
+        "description_fr": "Opère Facebook, Instagram, WhatsApp et Threads : atteignant 3 milliards+ d'utilisateurs quotidiens. Lourds investissements IA dans les algorithmes de recommandation et Reality Labs (casques VR Quest).",
         "sector": "Technology", "geography": "USA", "asset_class": "Stock",
         "utility": "Social media advertising dominance + AI-driven monetization",
         "utility_fr": "Domination publicité réseaux sociaux + monétisation pilotée par l'IA",
@@ -140,8 +140,8 @@ ASSET_INFO = {
     },
     "V": {
         "name": "Visa Inc.",
-        "description": "The world's largest payment network. Processes billions of transactions globally. Asset-light, high-margin business model — earns a toll on every digital payment.",
-        "description_fr": "Le plus grand réseau de paiement mondial. Traite des milliards de transactions. Modèle économique léger en actifs et à forte marge — perçoit un péage sur chaque paiement numérique.",
+        "description": "The world's largest payment network. Processes billions of transactions globally. Asset-light, high-margin business model: earns a toll on every digital payment.",
+        "description_fr": "Le plus grand réseau de paiement mondial. Traite des milliards de transactions. Modèle économique léger en actifs et à forte marge : perçoit un péage sur chaque paiement numérique.",
         "sector": "Financials", "geography": "USA", "asset_class": "Stock",
         "utility": "Global payments infrastructure, digital economy exposure",
         "utility_fr": "Infrastructure paiements mondiale, exposition à l'économie numérique",
@@ -153,13 +153,13 @@ ASSET_INFO = {
     # ── US ETFs ──────────────────────────────────────────────────────────────
     "SPY": {
         "name": "SPDR S&P 500 ETF",
-        "description": "The world's most traded ETF. Tracks the S&P 500 index — 500 largest US companies by market cap. Provides instant, low-cost exposure to American large-cap equities.",
-        "description_fr": "L'ETF le plus échangé au monde. Réplique l'indice S&P 500 — les 500 plus grandes entreprises américaines. Offre une exposition instantanée et peu coûteuse aux actions américaines large-cap.",
+        "description": "The world's most traded ETF. Tracks the S&P 500 index: 500 largest US companies by market cap. Provides instant, low-cost exposure to American large-cap equities.",
+        "description_fr": "L'ETF le plus échangé au monde. Réplique l'indice S&P 500 : les 500 plus grandes entreprises américaines. Offre une exposition instantanée et peu coûteuse aux actions américaines large-cap.",
         "sector": "Diversified", "geography": "USA", "asset_class": "ETF",
         "utility": "Core US large-cap equity exposure",
         "utility_fr": "Exposition cœur aux actions américaines large-cap",
-        "typical_use": "Foundation of most diversified portfolios. 20–50% core holding.",
-        "typical_use_fr": "Socle de la plupart des portefeuilles diversifiés. Position cœur de 20–50%.",
+        "typical_use": "Foundation of most diversified portfolios. 20-50% core holding.",
+        "typical_use_fr": "Socle de la plupart des portefeuilles diversifiés. Position cœur de 20-50%.",
         "risk_level": "Medium", "liquidity": 100,
         "dividend_yield": "~1.3%", "market_cap": "~$500 billion AUM",
     },
@@ -177,8 +177,8 @@ ASSET_INFO = {
     },
     "VTI": {
         "name": "Vanguard Total Market ETF",
-        "description": "Broadest US equity ETF — tracks over 3,700 US stocks including small, mid, and large caps. More diversified than SPY. Ultra-low expense ratio (0.03%).",
-        "description_fr": "L'ETF actions américaines le plus large — réplique 3 700+ titres US incluant petites, moyennes et grandes capitalisations. Plus diversifié que SPY. Frais ultra-faibles (0,03%).",
+        "description": "Broadest US equity ETF: tracks over 3,700 US stocks including small, mid, and large caps. More diversified than SPY. Ultra-low expense ratio (0.03%).",
+        "description_fr": "L'ETF actions américaines le plus large : réplique 3 700+ titres US incluant petites, moyennes et grandes capitalisations. Plus diversifié que SPY. Frais ultra-faibles (0,03%).",
         "sector": "Diversified", "geography": "USA", "asset_class": "ETF",
         "utility": "Total US market exposure in one ticker",
         "utility_fr": "Exposition à l'ensemble du marché américain en un seul ticker",
@@ -201,13 +201,13 @@ ASSET_INFO = {
     },
     "VXUS": {
         "name": "Vanguard Total International ETF",
-        "description": "Tracks non-US stock markets — 7,000+ companies across developed (Europe, Japan, Canada) and emerging markets (China, India, Brazil). Essential for true global diversification.",
-        "description_fr": "Réplique les marchés actions hors USA — 7 000+ entreprises dans les marchés développés (Europe, Japon, Canada) et émergents (Chine, Inde, Brésil). Indispensable pour une diversification mondiale.",
+        "description": "Tracks non-US stock markets: 7,000+ companies across developed (Europe, Japan, Canada) and emerging markets (China, India, Brazil). Essential for true global diversification.",
+        "description_fr": "Réplique les marchés actions hors USA : 7 000+ entreprises dans les marchés développés (Europe, Japon, Canada) et émergents (Chine, Inde, Brésil). Indispensable pour une diversification mondiale.",
         "sector": "International Diversified", "geography": "Ex-US Global", "asset_class": "ETF",
         "utility": "Single-ticker access to all non-US equities",
         "utility_fr": "Accès en un seul ticker à toutes les actions hors USA",
-        "typical_use": "International diversification — 20–40% of equity allocation.",
-        "typical_use_fr": "Diversification internationale — 20–40% de l'allocation actions.",
+        "typical_use": "International diversification: 20-40% of equity allocation.",
+        "typical_use_fr": "Diversification internationale: 20-40% de l'allocation actions.",
         "risk_level": "Medium", "liquidity": 98,
         "dividend_yield": "~2.8%", "market_cap": "~$70 billion AUM",
     },
@@ -230,8 +230,8 @@ ASSET_INFO = {
         "sector": "Emerging Markets", "geography": "Emerging Markets", "asset_class": "ETF",
         "utility": "Emerging market growth exposure",
         "utility_fr": "Exposition à la croissance des marchés émergents",
-        "typical_use": "Satellite allocation (5–15%) for return enhancement.",
-        "typical_use_fr": "Allocation satellite (5–15%) pour améliorer les rendements.",
+        "typical_use": "Satellite allocation (5-15%) for return enhancement.",
+        "typical_use_fr": "Allocation satellite (5-15%) pour améliorer les rendements.",
         "risk_level": "High", "liquidity": 97,
         "dividend_yield": "~2.5%", "market_cap": "~$20 billion AUM",
     },
@@ -242,14 +242,14 @@ ASSET_INFO = {
         "sector": "Real Estate", "geography": "USA", "asset_class": "ETF",
         "utility": "Real estate income + inflation hedge",
         "utility_fr": "Revenus immobiliers + couverture contre l'inflation",
-        "typical_use": "Income and diversification. Often 5–10% in balanced portfolios.",
-        "typical_use_fr": "Revenus et diversification. Souvent 5–10% dans les portefeuilles équilibrés.",
+        "typical_use": "Income and diversification. Often 5-10% in balanced portfolios.",
+        "typical_use_fr": "Revenus et diversification. Souvent 5-10% dans les portefeuilles équilibrés.",
         "risk_level": "Medium", "liquidity": 95,
         "dividend_yield": "~3.8%", "market_cap": "~$35 billion AUM",
     },
     "TLT": {
         "name": "iShares 20+ Year Treasury Bond ETF",
-        "description": "Tracks long-duration US government bonds (20+ year maturities). High sensitivity to interest rate changes — falls when rates rise, surges when rates fall. Classic safe-haven and recession hedge.",
+        "description": "Tracks long-duration US government bonds (20+ year maturities). High sensitivity to interest rate changes: falls when rates rise, surges when rates fall. Classic safe-haven and recession hedge.",
         "description_fr": "Réplique les obligations d'État américaines à long terme (maturités 20+ ans). Très sensible aux taux : baisse quand les taux montent, monte quand ils baissent. Valeur refuge classique et couverture récession.",
         "sector": "Fixed Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Long-duration rate hedge and crisis buffer",
@@ -261,8 +261,8 @@ ASSET_INFO = {
     },
     "AGG": {
         "name": "iShares Core US Aggregate Bond ETF",
-        "description": "Broad US investment-grade bond market — government, corporate, and mortgage-backed securities. The benchmark fixed income ETF. Lower yield than TLT but much less rate sensitivity.",
-        "description_fr": "Marché obligataire américain investment-grade au sens large — obligations d'État, d'entreprises et titres adossés à des créances hypothécaires. L'ETF obligataire de référence. Rendement inférieur à TLT mais bien moins sensible aux taux.",
+        "description": "Broad US investment-grade bond market: government, corporate, and mortgage-backed securities. The benchmark fixed income ETF. Lower yield than TLT but much less rate sensitivity.",
+        "description_fr": "Marché obligataire américain investment-grade au sens large : obligations d'État, d'entreprises et titres adossés à des créances hypothécaires. L'ETF obligataire de référence. Rendement inférieur à TLT mais bien moins sensible aux taux.",
         "sector": "Fixed Income", "geography": "USA", "asset_class": "ETF",
         "utility": "Portfolio stability, income, capital preservation",
         "utility_fr": "Stabilité du portefeuille, revenus, préservation du capital",
@@ -302,8 +302,8 @@ ASSET_INFO = {
         "sector": "Commodities", "geography": "Global", "asset_class": "ETF",
         "utility": "Inflation hedge, safe haven, portfolio insurance",
         "utility_fr": "Couverture inflation, valeur refuge, assurance portefeuille",
-        "typical_use": "Crisis protection and inflation hedge — 5–15% allocation.",
-        "typical_use_fr": "Protection en crise et couverture inflation — allocation 5–15%.",
+        "typical_use": "Crisis protection and inflation hedge: 5-15% allocation.",
+        "typical_use_fr": "Protection en crise et couverture inflation: allocation 5-15%.",
         "risk_level": "Low-Medium", "liquidity": 100,
         "dividend_yield": "0%", "market_cap": "~$60 billion AUM",
     },
@@ -314,8 +314,8 @@ ASSET_INFO = {
         "sector": "Commodities", "geography": "Global", "asset_class": "ETF",
         "utility": "Industrial metal + precious metal speculation",
         "utility_fr": "Métal industriel + spéculation métal précieux",
-        "typical_use": "Small satellite (1–5%). More speculative than GLD.",
-        "typical_use_fr": "Petit satellite (1–5%). Plus spéculatif que GLD.",
+        "typical_use": "Small satellite (1-5%). More speculative than GLD.",
+        "typical_use_fr": "Petit satellite (1-5%). Plus spéculatif que GLD.",
         "risk_level": "Medium-High", "liquidity": 95,
         "dividend_yield": "0%", "market_cap": "~$12 billion AUM",
     },
@@ -363,8 +363,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Digital scarcity store-of-value, speculative return driver",
         "utility_fr": "Réserve de valeur par rareté numérique, moteur de rendement spéculatif",
-        "typical_use": "Small allocation (3–10%) as portfolio diversifier and return booster.",
-        "typical_use_fr": "Petite allocation (3–10%) comme diversificateur et booster de rendement.",
+        "typical_use": "Small allocation (3-10%) as portfolio diversifier and return booster.",
+        "typical_use_fr": "Petite allocation (3-10%) comme diversificateur et booster de rendement.",
         "risk_level": "Very High", "liquidity": 85,
         "dividend_yield": "0%", "market_cap": "~$1.5 trillion",
     },
@@ -375,8 +375,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Web3 infrastructure platform exposure",
         "utility_fr": "Exposition à la plateforme d'infrastructure Web3",
-        "typical_use": "Complement to Bitcoin. Typically smaller allocation (1–5%).",
-        "typical_use_fr": "Complément du Bitcoin. Allocation généralement plus petite (1–5%).",
+        "typical_use": "Complement to Bitcoin. Typically smaller allocation (1-5%).",
+        "typical_use_fr": "Complément du Bitcoin. Allocation généralement plus petite (1-5%).",
         "risk_level": "Very High", "liquidity": 82,
         "dividend_yield": "0% (staking ~4%)", "market_cap": "~$300 billion",
     },
@@ -387,20 +387,20 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "High-growth crypto ecosystem exposure",
         "utility_fr": "Exposition à l'écosystème crypto à forte croissance",
-        "typical_use": "Speculative satellite (1–3%). Very high volatility.",
-        "typical_use_fr": "Satellite spéculatif (1–3%). Volatilité très élevée.",
+        "typical_use": "Speculative satellite (1-3%). Very high volatility.",
+        "typical_use_fr": "Satellite spéculatif (1-3%). Volatilité très élevée.",
         "risk_level": "Very High", "liquidity": 70,
         "dividend_yield": "0% (staking ~7%)", "market_cap": "~$70 billion",
     },
     "BNB-USD": {
         "name": "Binance Coin (BNB)",
-        "description": "Native token of the Binance ecosystem — the world's largest crypto exchange. Used for trading fee discounts, BNB Chain transactions (DeFi/dApps), and token launches via Binance Launchpad.",
-        "description_fr": "Token natif de l'écosystème Binance — le plus grand exchange crypto au monde. Utilisé pour les réductions de frais de trading, les transactions BNB Chain (DeFi/dApps) et les lancements via Binance Launchpad.",
+        "description": "Native token of the Binance ecosystem: the world's largest crypto exchange. Used for trading fee discounts, BNB Chain transactions (DeFi/dApps), and token launches via Binance Launchpad.",
+        "description_fr": "Token natif de l'écosystème Binance : le plus grand exchange crypto au monde. Utilisé pour les réductions de frais de trading, les transactions BNB Chain (DeFi/dApps) et les lancements via Binance Launchpad.",
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Exchange utility token + BNB Chain ecosystem",
         "utility_fr": "Token utilitaire d'exchange + écosystème BNB Chain",
-        "typical_use": "Speculative satellite (1–2%). Tied to Binance exchange health.",
-        "typical_use_fr": "Satellite spéculatif (1–2%). Lié à la santé de l'exchange Binance.",
+        "typical_use": "Speculative satellite (1-2%). Tied to Binance exchange health.",
+        "typical_use_fr": "Satellite spéculatif (1-2%). Lié à la santé de l'exchange Binance.",
         "risk_level": "Very High", "liquidity": 78,
         "dividend_yield": "0%", "market_cap": "~$80 billion",
     },
@@ -411,8 +411,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Cross-border payments and banking infrastructure crypto",
         "utility_fr": "Crypto dédiée aux paiements transfrontaliers et à l'infrastructure bancaire",
-        "typical_use": "Speculative satellite (1–3%). High regulatory sensitivity.",
-        "typical_use_fr": "Satellite spéculatif (1–3%). Très sensible aux évolutions réglementaires.",
+        "typical_use": "Speculative satellite (1-3%). High regulatory sensitivity.",
+        "typical_use_fr": "Satellite spéculatif (1-3%). Très sensible aux évolutions réglementaires.",
         "risk_level": "Very High", "liquidity": 80,
         "dividend_yield": "0%", "market_cap": "~$120 billion",
     },
@@ -423,8 +423,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Proof-of-Stake smart contract platform, sustainable blockchain",
         "utility_fr": "Plateforme de contrats intelligents PoS, blockchain durable",
-        "typical_use": "Speculative alt-coin (0.5–2%). Higher risk than ETH.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Risque plus élevé qu'ETH.",
+        "typical_use": "Speculative alt-coin (0.5-2%). Higher risk than ETH.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-2%). Risque plus élevé qu'ETH.",
         "risk_level": "Very High", "liquidity": 72,
         "dividend_yield": "0% (staking ~4%)", "market_cap": "~$25 billion",
     },
@@ -435,8 +435,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "High-performance DeFi and institutional blockchain",
         "utility_fr": "Blockchain DeFi haute performance et institutionnelle",
-        "typical_use": "Speculative alt-coin (0.5–2%). Competitive with SOL.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). En compétition avec SOL.",
+        "typical_use": "Speculative alt-coin (0.5-2%). Competitive with SOL.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-2%). En compétition avec SOL.",
         "risk_level": "Very High", "liquidity": 68,
         "dividend_yield": "0% (staking ~8%)", "market_cap": "~$15 billion",
     },
@@ -447,20 +447,20 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Cross-chain interoperability protocol",
         "utility_fr": "Protocole d'interopérabilité multi-chaînes",
-        "typical_use": "Speculative alt-coin (0.5–1.5%). High technical complexity.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–1,5%). Complexité technique élevée.",
+        "typical_use": "Speculative alt-coin (0.5-1.5%). High technical complexity.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-1,5%). Complexité technique élevée.",
         "risk_level": "Very High", "liquidity": 65,
         "dividend_yield": "0% (staking ~15%)", "market_cap": "~$10 billion",
     },
     "LINK-USD": {
         "name": "Chainlink (LINK)",
-        "description": "Decentralised oracle network that connects smart contracts to real-world data (prices, weather, sports results). Critical DeFi infrastructure — used by 1,000+ blockchain protocols.",
-        "description_fr": "Réseau oracle décentralisé connectant les smart contracts aux données du monde réel (prix, météo, résultats sportifs). Infrastructure DeFi critique — utilisée par 1 000+ protocoles blockchain.",
+        "description": "Decentralised oracle network that connects smart contracts to real-world data (prices, weather, sports results). Critical DeFi infrastructure: used by 1,000+ blockchain protocols.",
+        "description_fr": "Réseau oracle décentralisé connectant les smart contracts aux données du monde réel (prix, météo, résultats sportifs). Infrastructure DeFi critique : utilisée par 1 000+ protocoles blockchain.",
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
-        "utility": "DeFi infrastructure — blockchain oracle network",
-        "utility_fr": "Infrastructure DeFi — réseau oracle blockchain",
-        "typical_use": "Speculative alt-coin (0.5–2%). Fundamental DeFi infrastructure bet.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Pari sur l'infrastructure DeFi fondamentale.",
+        "utility": "DeFi infrastructure: blockchain oracle network",
+        "utility_fr": "Infrastructure DeFi : réseau oracle blockchain",
+        "typical_use": "Speculative alt-coin (0.5-2%). Fundamental DeFi infrastructure bet.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-2%). Pari sur l'infrastructure DeFi fondamentale.",
         "risk_level": "Very High", "liquidity": 65,
         "dividend_yield": "0%", "market_cap": "~$8 billion",
     },
@@ -471,8 +471,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Ethereum Layer 2 scaling and multi-chain aggregation",
         "utility_fr": "Mise à l'échelle Layer 2 d'Ethereum et agrégation multi-chaînes",
-        "typical_use": "Speculative alt-coin (0.5–2%). Strong enterprise adoption.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–2%). Forte adoption entreprises.",
+        "typical_use": "Speculative alt-coin (0.5-2%). Strong enterprise adoption.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-2%). Forte adoption entreprises.",
         "risk_level": "Very High", "liquidity": 70,
         "dividend_yield": "0%", "market_cap": "~$5 billion",
     },
@@ -483,20 +483,20 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Meme coin / community-driven speculative asset",
         "utility_fr": "Meme coin / actif spéculatif piloté par la communauté",
-        "typical_use": "Pure speculation (0–1%). Very high sentiment sensitivity.",
-        "typical_use_fr": "Pure spéculation (0–1%). Très sensible au sentiment de marché.",
+        "typical_use": "Pure speculation (0-1%). Very high sentiment sensitivity.",
+        "typical_use_fr": "Pure spéculation (0-1%). Très sensible au sentiment de marché.",
         "risk_level": "Very High", "liquidity": 75,
         "dividend_yield": "0%", "market_cap": "~$25 billion",
     },
     "INJ-USD": {
         "name": "Injective (INJ)",
-        "description": "Layer 1 blockchain optimised for DeFi applications — particularly decentralised exchanges (DEX), derivatives, and prediction markets. Fast (10,000+ TPS), EVM-compatible, with a deflationary token burn mechanism.",
-        "description_fr": "Blockchain Layer 1 optimisée pour les applications DeFi — notamment les échanges décentralisés (DEX), les dérivés et les marchés prédictifs. Rapide (10 000+ TPS), compatible EVM, avec un mécanisme de burn déflationniste.",
+        "description": "Layer 1 blockchain optimised for DeFi applications: particularly decentralised exchanges (DEX), derivatives, and prediction markets. Fast (10,000+ TPS), EVM-compatible, with a deflationary token burn mechanism.",
+        "description_fr": "Blockchain Layer 1 optimisée pour les applications DeFi : notamment les échanges décentralisés (DEX), les dérivés et les marchés prédictifs. Rapide (10 000+ TPS), compatible EVM, avec un mécanisme de burn déflationniste.",
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "DeFi-native blockchain for derivatives and exchanges",
         "utility_fr": "Blockchain native DeFi pour dérivés et échanges décentralisés",
-        "typical_use": "High-risk alt-coin (0.5–1%). Emerging DeFi infrastructure.",
-        "typical_use_fr": "Alt-coin à haut risque (0,5–1%). Infrastructure DeFi émergente.",
+        "typical_use": "High-risk alt-coin (0.5-1%). Emerging DeFi infrastructure.",
+        "typical_use_fr": "Alt-coin à haut risque (0,5-1%). Infrastructure DeFi émergente.",
         "risk_level": "Very High", "liquidity": 55,
         "dividend_yield": "0% (staking ~10%)", "market_cap": "~$3 billion",
     },
@@ -507,8 +507,8 @@ ASSET_INFO = {
         "sector": "Cryptocurrency", "geography": "Global", "asset_class": "Crypto",
         "utility": "Telegram-integrated payments and Web3 gateway",
         "utility_fr": "Passerelle paiements et Web3 intégrée à Telegram",
-        "typical_use": "Speculative alt-coin (0.5–1.5%). Unique Telegram distribution advantage.",
-        "typical_use_fr": "Alt-coin spéculatif (0,5–1,5%). Avantage unique de distribution via Telegram.",
+        "typical_use": "Speculative alt-coin (0.5-1.5%). Unique Telegram distribution advantage.",
+        "typical_use_fr": "Alt-coin spéculatif (0,5-1,5%). Avantage unique de distribution via Telegram.",
         "risk_level": "Very High", "liquidity": 60,
         "dividend_yield": "0% (staking ~4%)", "market_cap": "~$20 billion",
     },
@@ -668,7 +668,7 @@ _PARIS_STOCKS = {
               "by Chinese demand, which is what makes the share cyclical despite the brands.",
         "fr": "Premier groupe de luxe mondial : Louis Vuitton, Dior, Moët & Chandon, "
               "Hennessy, Sephora et Tiffany. Les résultats dépendent de la maroquinerie "
-              "et de la demande chinoise — c'est ce qui rend le titre cyclique malgré les marques.",
+              "et de la demande chinoise, c'est ce qui rend le titre cyclique malgré les marques.",
         "use_en": "Core French holding. Pricing power, but a concentrated bet on luxury demand.",
         "use_fr": "Position cœur française. Pouvoir de fixation des prix, mais pari concentré sur le luxe.",
         "yield": "~2%", "cap": "large",
@@ -679,7 +679,7 @@ _PARIS_STOCKS = {
               "deliberately capped below demand, which is why its margins and its share "
               "price behave unlike the rest of luxury.",
         "fr": "Ultra-luxe, et la maison la plus rentable du secteur. La production est "
-              "volontairement maintenue sous la demande — d'où des marges et un cours "
+              "volontairement maintenue sous la demande, d'où des marges et un cours "
               "qui ne se comportent pas comme le reste du luxe.",
         "use_en": "Defensive luxury. Rarely cheap; the premium is the business model.",
         "use_fr": "Luxe défensif. Rarement bon marché ; la prime est le modèle économique.",
@@ -693,8 +693,8 @@ _PARIS_STOCKS = {
         "fr": "Gucci, Saint Laurent, Bottega Veneta, Balenciaga. Bien plus concentré sur "
               "Gucci que LVMH ne l'est sur une seule marque : c'est la façon la plus "
               "volatile de détenir du luxe européen.",
-        "use_en": "Satellite position. Correlates with LVMH — holding both is one bet, not two.",
-        "use_fr": "Position satellite. Corrèle avec LVMH — détenir les deux est un seul pari.",
+        "use_en": "Satellite position. Correlates with LVMH: holding both is one bet, not two.",
+        "use_fr": "Position satellite. Corrèle avec LVMH : détenir les deux est un seul pari.",
         "yield": "~4%", "cap": "large",
     },
     "OR.PA": {
@@ -720,9 +720,9 @@ _PARIS_STOCKS = {
     "BN.PA": {
         "name": "Danone", "sector": "Consumer", "risk": "Low-Medium", "liquidity": 72,
         "en": "Dairy, plant-based, bottled water and specialised nutrition. One of the more "
-              "defensive names on the index — slow growth, stable demand.",
+              "defensive names on the index: slow growth, stable demand.",
         "fr": "Produits laitiers, végétal, eaux et nutrition spécialisée. L'une des valeurs "
-              "les plus défensives de l'indice — croissance lente, demande stable.",
+              "les plus défensives de l'indice : croissance lente, demande stable.",
         "use_en": "Defensive ballast in a French equity sleeve.",
         "use_fr": "Lest défensif dans une poche actions françaises.",
         "yield": "~3%", "cap": "large",
@@ -739,9 +739,9 @@ _PARIS_STOCKS = {
     },
     "EL.PA": {
         "name": "EssilorLuxottica", "sector": "Healthcare", "risk": "Medium", "liquidity": 75,
-        "en": "Lenses and frames in one company — Varilux, Ray-Ban, Oakley — plus optical "
+        "en": "Lenses and frames in one company (Varilux, Ray-Ban, Oakley) plus optical "
               "retail. Sits between healthcare and consumer, and is the dominant player in both halves.",
-        "fr": "Verres et montures dans une seule entreprise — Varilux, Ray-Ban, Oakley — "
+        "fr": "Verres et montures dans une seule entreprise (Varilux, Ray-Ban, Oakley) "
               "plus la distribution optique. Entre santé et consommation, et dominant des deux côtés.",
         "use_en": "Quality compounder. Demographics do the work.",
         "use_fr": "Valeur de qualité. La démographie fait le travail.",
@@ -763,11 +763,11 @@ _PARIS_STOCKS = {
     "SAF.PA": {
         "name": "Safran", "sector": "Industrials", "risk": "Medium-High", "liquidity": 78,
         "en": "Aircraft engines through the CFM joint venture, landing gear and interiors. "
-              "Most of the profit is the aftermarket — servicing engines already flying — "
+              "Most of the profit is the aftermarket (servicing engines already flying) "
               "which makes it less cyclical than the order book suggests.",
         "fr": "Moteurs d'avions via la coentreprise CFM, trains d'atterrissage et intérieurs. "
-              "L'essentiel du bénéfice vient de l'après-vente — l'entretien des moteurs déjà "
-              "en vol — ce qui le rend moins cyclique que le carnet ne le laisse penser.",
+              "L'essentiel du bénéfice vient de l'après-vente : l'entretien des moteurs déjà "
+              "en vol, ce qui le rend moins cyclique que le carnet ne le laisse penser.",
         "use_en": "Aerospace with a recurring revenue base.",
         "use_fr": "Aéronautique avec une base de revenus récurrents.",
         "yield": "~1%", "cap": "large",
@@ -777,7 +777,7 @@ _PARIS_STOCKS = {
         "en": "Defence electronics, avionics, radar, secure communications and cyber. "
               "Revenue is largely governmental, which is what decouples it from the consumer cycle.",
         "fr": "Électronique de défense, avionique, radars, communications sécurisées et cyber. "
-              "Chiffre d'affaires largement étatique — c'est ce qui le découple du cycle de consommation.",
+              "Chiffre d'affaires largement étatique, c'est ce qui le découple du cycle de consommation.",
         "use_en": "Defence exposure. Moves on budgets and geopolitics, not on rates.",
         "use_fr": "Exposition défense. Bouge avec les budgets et la géopolitique, pas les taux.",
         "yield": "~2%", "cap": "large",
@@ -826,9 +826,9 @@ _PARIS_STOCKS = {
     },
     "ML.PA": {
         "name": "Michelin", "sector": "Industrials", "risk": "Medium", "liquidity": 70,
-        "en": "Tyres, where the replacement market — not new vehicles — is the bulk of "
+        "en": "Tyres, where the replacement market (not new vehicles) is the bulk of "
               "the profit. That makes it materially less cyclical than the car makers.",
-        "fr": "Pneumatiques, où le marché du remplacement — et non les véhicules neufs — "
+        "fr": "Pneumatiques, où le marché du remplacement (et non les véhicules neufs) "
               "fait l'essentiel du bénéfice. Nettement moins cyclique que les constructeurs.",
         "use_en": "Industrial with a consumable revenue base.",
         "use_fr": "Industriel avec une base de revenus consommables.",
@@ -836,9 +836,9 @@ _PARIS_STOCKS = {
     },
     "AI.PA": {
         "name": "Air Liquide", "sector": "Materials", "risk": "Low-Medium", "liquidity": 82,
-        "en": "Industrial gases — oxygen, nitrogen, hydrogen — sold on long contracts with "
+        "en": "Industrial gases (oxygen, nitrogen, hydrogen) sold on long contracts with "
               "on-site plants. Among the most predictable revenue streams on the index.",
-        "fr": "Gaz industriels — oxygène, azote, hydrogène — vendus sur contrats longs avec "
+        "fr": "Gaz industriels (oxygène, azote, hydrogène) vendus sur contrats longs avec "
               "des unités sur site. L'un des chiffres d'affaires les plus prévisibles de l'indice.",
         "use_en": "Defensive industrial. Low-beta ballast.",
         "use_fr": "Industriel défensif. Lest à faible bêta.",
@@ -872,7 +872,7 @@ _PARIS_STOCKS = {
         "en": "Water, waste and energy services, largely under long municipal contracts. "
               "Revenue is indexed, which is a real inflation pass-through rather than a claimed one.",
         "fr": "Eau, déchets et services énergétiques, largement sous contrats municipaux "
-              "longs. Le chiffre d'affaires est indexé — une vraie répercussion de l'inflation.",
+              "longs. Le chiffre d'affaires est indexé : une vraie répercussion de l'inflation.",
         "use_en": "Defensive utility with contractual inflation linkage.",
         "use_fr": "Service public défensif avec indexation contractuelle sur l'inflation.",
         "yield": "~4%", "cap": "large",
@@ -929,7 +929,7 @@ _PARIS_STOCKS = {
         "en": "Franco-Italian semiconductor maker: automotive chips, power and analogue, "
               "industrial microcontrollers. Deeply cyclical, and the cycle is inventory, not demand.",
         "fr": "Fabricant de semi-conducteurs franco-italien : puces automobiles, puissance "
-              "et analogique, microcontrôleurs industriels. Très cyclique — et le cycle "
+              "et analogique, microcontrôleurs industriels. Très cyclique, et le cycle "
               "porte sur les stocks, pas sur la demande.",
         "use_en": "European semiconductor exposure. Expect equity-like drawdowns, doubled.",
         "use_fr": "Exposition aux semi-conducteurs européens. Attendez-vous à des baisses doubles de celles des actions.",
@@ -938,9 +938,9 @@ _PARIS_STOCKS = {
     "CAP.PA": {
         "name": "Capgemini", "sector": "Technology", "risk": "Medium-High", "liquidity": 72,
         "en": "IT services and consulting. Revenue is headcount times day rate, so it tracks "
-              "corporate IT budgets — an early-cycle indicator rather than a growth story.",
+              "corporate IT budgets: an early-cycle indicator rather than a growth story.",
         "fr": "Services informatiques et conseil. Le chiffre d'affaires est un effectif "
-              "multiplié par un taux journalier : il suit les budgets IT des entreprises — "
+              "multiplié par un taux journalier : il suit les budgets IT des entreprises : "
               "un indicateur de début de cycle plus qu'une histoire de croissance.",
         "use_en": "Cyclical technology services.",
         "use_fr": "Services technologiques cycliques.",
@@ -948,10 +948,10 @@ _PARIS_STOCKS = {
     },
     "DSY.PA": {
         "name": "Dassault Systèmes", "sector": "Technology", "risk": "Medium", "liquidity": 74,
-        "en": "3D design and product lifecycle software — CATIA, SOLIDWORKS, Medidata. "
+        "en": "3D design and product lifecycle software: CATIA, SOLIDWORKS, Medidata. "
               "Licence and subscription revenue, so it behaves like a software company, "
               "not like the industrials it serves.",
-        "fr": "Logiciels de conception 3D et de cycle de vie produit — CATIA, SOLIDWORKS, "
+        "fr": "Logiciels de conception 3D et de cycle de vie produit: CATIA, SOLIDWORKS, "
               "Medidata. Revenus de licences et d'abonnements : se comporte comme un "
               "éditeur, pas comme les industriels qu'il sert.",
         "use_en": "European software. Rare on this index, and priced accordingly.",
@@ -965,7 +965,7 @@ _PARIS_STOCKS = {
         "fr": "Opérateur télécom historique français. Croissance faible, investissements "
               "lourds, détenu presque uniquement pour le dividende.",
         "use_en": "Bond proxy. Behaves like duration, and falls like it when rates rise.",
-        "use_fr": "Substitut obligataire. Se comporte comme de la duration — et baisse comme elle quand les taux montent.",
+        "use_fr": "Substitut obligataire. Se comporte comme de la duration, et baisse comme elle quand les taux montent.",
         "yield": "~7%", "cap": "large",
     },
 
@@ -973,10 +973,10 @@ _PARIS_STOCKS = {
     "STLAP.PA": {
         "name": "Stellantis", "sector": "Automotive", "risk": "High", "liquidity": 80,
         "en": "Peugeot, Citroën, Fiat, Jeep, Opel and ten more marques in one group. Listed "
-              "in Paris, Milan and New York — the Paris line is this one. Deeply cyclical, "
+              "in Paris, Milan and New York: the Paris line is this one. Deeply cyclical, "
               "and priced on a single year's margin.",
         "fr": "Peugeot, Citroën, Fiat, Jeep, Opel et dix autres marques dans un seul groupe. "
-              "Coté à Paris, Milan et New York — la ligne parisienne est celle-ci. Très "
+              "Coté à Paris, Milan et New York : la ligne parisienne est celle-ci. Très "
               "cyclique, et valorisé sur la marge d'une seule année.",
         "use_en": "Deep-cyclical value. Sized small, or not at all.",
         "use_fr": "Value très cyclique. À dimensionner petit, ou pas du tout.",
@@ -1001,13 +1001,13 @@ _PARIS_STOCKS = {
         "en": "A bitcoin treasury company listed on Euronext Growth Paris, formerly The "
               "Blockchain Group. The share is a leveraged claim on bitcoin: the balance "
               "sheet holds BTC, and issuance funds more of it. Expect the drawdowns of "
-              "bitcoin, amplified by the financing and by a small-cap order book — this "
+              "bitcoin, amplified by the financing and by a small-cap order book: this "
               "is not a CAC 40 share and it does not trade like one.",
         "fr": "Société de trésorerie bitcoin cotée sur Euronext Growth Paris, anciennement "
               "The Blockchain Group. Le titre est une créance à effet de levier sur le "
               "bitcoin : le bilan détient du BTC, et les émissions en financent davantage. "
               "Attendez-vous aux baisses du bitcoin, amplifiées par le financement et par "
-              "un carnet d'ordres de petite capitalisation — ce n'est pas une valeur du "
+              "un carnet d'ordres de petite capitalisation, ce n'est pas une valeur du "
               "CAC 40 et elle ne se négocie pas comme telle.",
         "use_en": "Speculative satellite only. Its liquidity score is low on purpose: a "
                   "position you cannot exit in a falling market is not the size you think it is.",
@@ -1029,22 +1029,22 @@ _PARIS_ETFS = {
         "fr": "Actions mondiales des marchés développés en une ligne, cotée en euros. "
               "La position cœur par défaut pour un investisseur français, éligible au PEA "
               "dans sa version synthétique.",
-        "use_en": "Portfolio core. 40–80% for most people.",
-        "use_fr": "Cœur de portefeuille. 40–80% pour la plupart des profils.",
-        "yield": "accumulating", "cap": "—",
+        "use_en": "Portfolio core. 40-80% for most people.",
+        "use_fr": "Cœur de portefeuille. 40-80% pour la plupart des profils.",
+        "yield": "accumulating", "cap": "none",
     },
     "ESE.PA": {
         "name": "BNP Paribas Easy S&P 500 UCITS ETF", "sector": "Diversified",
         "risk": "Medium", "liquidity": 84, "geography": "USA", "asset_class": "ETF",
         "en": "S&P 500 exposure quoted in euros. Note what that does and does not do: the "
               "price is in euros, the underlying earnings are in dollars, so the currency "
-              "risk is still there — it is unhedged, not absent.",
+              "risk is still there, it is unhedged, not absent.",
         "fr": "Exposition au S&P 500 cotée en euros. Attention à ce que cela fait et ne "
-              "fait pas : le prix est en euros, les bénéfices sous-jacents en dollars — "
+              "fait pas : le prix est en euros, les bénéfices sous-jacents en dollars : "
               "le risque de change est toujours là, il est non couvert, pas supprimé.",
         "use_en": "US equity sleeve without a dollar account.",
         "use_fr": "Poche actions américaines sans compte en dollars.",
-        "yield": "accumulating", "cap": "—",
+        "yield": "accumulating", "cap": "none",
     },
     "PAEEM.PA": {
         "name": "Amundi MSCI Emerging Markets UCITS ETF", "sector": "Emerging Markets",
@@ -1052,25 +1052,25 @@ _PARIS_ETFS = {
         "en": "Emerging-market equity in euros. Higher volatility and a different cycle "
               "from the developed world, which is the reason to hold it.",
         "fr": "Actions des marchés émergents en euros. Volatilité plus élevée et cycle "
-              "différent du monde développé — c'est la raison de la détenir.",
-        "use_en": "Diversifier. 5–15% alongside a world core.",
-        "use_fr": "Diversification. 5–15% à côté d'un cœur monde.",
-        "yield": "accumulating", "cap": "—",
+              "différent du monde développé, c'est la raison de la détenir.",
+        "use_en": "Diversifier. 5-15% alongside a world core.",
+        "use_fr": "Diversification. 5-15% à côté d'un cœur monde.",
+        "yield": "accumulating", "cap": "none",
     },
 }
 
 _CAP_LABEL = {
     "large": {"en": "Large cap", "fr": "Grande capitalisation"},
     "mid": {"en": "Mid cap", "fr": "Moyenne capitalisation"},
-    "small": {"en": "Small cap — Euronext Growth", "fr": "Petite capitalisation — Euronext Growth"},
-    "—": {"en": "—", "fr": "—"},
+    "small": {"en": "Small cap · Euronext Growth", "fr": "Petite capitalisation · Euronext Growth"},
+    "none": {"en": "n/a", "fr": "n.d."},
 }
 
 # The bucket the X-ray aggregates on, as opposed to the label a reader sees.
 # Separate because the look-through needs a closed vocabulary and the card needs
-# a sentence: parsing "Small cap — Euronext Growth" back into a bucket is how a
+# a sentence: parsing "Small cap · Euronext Growth" back into a bucket is how a
 # label edit silently becomes a misclassification.
-_CAP_BUCKET = {"large": "Large Cap", "mid": "Mid Cap", "small": "Small Cap", "—": None}
+_CAP_BUCKET = {"large": "Large Cap", "mid": "Mid Cap", "small": "Small Cap", "none": None}
 
 
 def _expand_paris(table: dict, *, default_geography: str, default_class: str) -> dict:
@@ -1091,8 +1091,8 @@ def _expand_paris(table: dict, *, default_geography: str, default_class: str) ->
             "risk_level": row["risk"],
             "liquidity": row["liquidity"],
             "dividend_yield": row["yield"],
-            "market_cap": _CAP_LABEL.get(row.get("cap", "—"), _CAP_LABEL["—"])["en"],
-            "cap_bucket": _CAP_BUCKET.get(row.get("cap", "—")),
+            "market_cap": _CAP_LABEL.get(row.get("cap", "none"), _CAP_LABEL["none"])["en"],
+            "cap_bucket": _CAP_BUCKET.get(row.get("cap", "none")),
             # Every line here is quoted in euros. Held explicitly rather than
             # inferred from the `.PA` suffix so a relisting cannot silently
             # change what currency the app thinks a position is in.
@@ -1116,12 +1116,12 @@ GEOGRAPHY_MAPPING.update({t: info["geography"] for t, info in EURONEXT_PARIS.ite
 # rest from the exchange suffix.
 QUOTE_CURRENCY = {ticker: info["currency"] for ticker, info in EURONEXT_PARIS.items()}
 
-POPULAR_ASSETS["Paris — CAC 40"] = {
+POPULAR_ASSETS["Paris · CAC 40"] = {
     info["name"].split(" (")[0]: ticker
     for ticker, info in EURONEXT_PARIS.items()
     if info["asset_class"] == "Stock" and ticker != "ALTBG.PA"
 }
-POPULAR_ASSETS["Paris — ETFs & Growth"] = {
+POPULAR_ASSETS["Paris · ETFs & Growth"] = {
     **{info["name"].split(" UCITS")[0]: ticker
        for ticker, info in EURONEXT_PARIS.items() if info["asset_class"] == "ETF"},
     "Capital B": "ALTBG.PA",

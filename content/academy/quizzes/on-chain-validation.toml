@@ -1,0 +1,228 @@
+id = "on-chain-validation"
+title = "Quiz de validation : Lire les métriques on-chain de Bitcoin"
+course = "metriques-on-chain"
+lesson = "recap-on-chain"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du cours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "famille"
+prompt = "Le nombre de transactions d'un bloc est une donnée :"
+kind = "single"
+lesson = "donnees-on-chain"
+
+[[question.option]]
+id = "mesuree"
+text = "mesurée, inscrite dans le registre."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "estimee"
+text = "estimée."
+explanation = "C'est un fait du registre."
+
+[[question.option]]
+id = "prix"
+text = "dépendante du prix."
+explanation = "Aucun prix n'intervient."
+
+[[question]]
+id = "echantillon"
+prompt = "Pourquoi les graphiques du cours sont-ils des moyennes mensuelles ?"
+kind = "single"
+lesson = "donnees-on-chain"
+
+[[question.option]]
+id = "isole"
+text = "Parce qu'un bloc isolé peut être atypique ; une trentaine par mois donne une tendance."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "joli"
+text = "Pour que les courbes soient plus jolies."
+explanation = "C'est une question de fiabilité."
+
+[[question.option]]
+id = "regle"
+text = "Parce que la chaîne ne garde que des moyennes."
+explanation = "La chaîne garde chaque bloc."
+
+[[question]]
+id = "activite"
+prompt = "Une baisse du nombre de transactions signifie-t-elle que le réseau est moins utilisé ?"
+kind = "single"
+lesson = "activite-reseau"
+
+[[question.option]]
+id = "pas"
+text = "Pas forcément : de plus grosses transactions peuvent remplir les blocs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, toujours."
+explanation = "Le remplissage peut rester élevé."
+
+[[question.option]]
+id = "prix"
+text = "Oui, et le prix va baisser."
+explanation = "Aucun lien mécanique."
+
+[[question]]
+id = "frais"
+prompt = "Coinbase de 7,29 BTC, récompense de 6,25 BTC. Frais ?"
+kind = "single"
+lesson = "frais-budget-securite"
+
+[[question.option]]
+id = "104"
+text = "Environ 1,04 BTC"
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "729"
+text = "7,29 BTC"
+explanation = "Il faut retirer la récompense."
+
+[[question.option]]
+id = "625"
+text = "6,25 BTC"
+explanation = "C'est la récompense."
+
+[[question]]
+id = "securite"
+prompt = "Pourquoi la part des frais compte-t-elle pour la sécurité à long terme ?"
+kind = "single"
+lesson = "frais-budget-securite"
+
+[[question.option]]
+id = "remplacer"
+text = "Parce que les frais devront remplacer une récompense qui diminue à chaque halving."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "rien"
+text = "Elle ne compte pas."
+explanation = "La récompense disparaîtra presque."
+
+[[question.option]]
+id = "prix"
+text = "Parce qu'elle fixe le prix."
+explanation = "Elle ne fixe aucun prix."
+
+[[question]]
+id = "poids"
+prompt = "Quelle est la limite d'un bloc depuis SegWit ?"
+kind = "single"
+lesson = "espace-de-bloc"
+
+[[question.option]]
+id = "4m"
+text = "4 millions d'unités de poids."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "1mo"
+text = "1 mégaoctet de taille."
+explanation = "C'était la règle avant 2017."
+
+[[question.option]]
+id = "aucune"
+text = "Aucune limite."
+explanation = "La limite existe."
+
+[[question]]
+id = "taproot"
+prompt = "En quelle année Taproot a-t-il été activé ?"
+kind = "single"
+lesson = "espace-de-bloc"
+
+[[question.option]]
+id = "2021"
+text = "2021, au bloc 709 632."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "2017"
+text = "2017."
+explanation = "C'est SegWit."
+
+[[question.option]]
+id = "2023"
+text = "2023."
+explanation = "C'est l'arrivée des inscriptions."
+
+[[question]]
+id = "pool"
+prompt = "Un pool qui produit 30 % des blocs contrôle-t-il 30 % des machines ?"
+kind = "single"
+lesson = "minage-et-pools"
+
+[[question.option]]
+id = "non"
+text = "Non : ses mineurs peuvent le quitter ; mais il choisit les transactions de 30 % des blocs."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "oui"
+text = "Oui, il les possède."
+explanation = "Un pool coordonne des mineurs indépendants."
+
+[[question.option]]
+id = "rien"
+text = "Il n'a aucun pouvoir."
+explanation = "Il choisit la composition de ses blocs."
+
+[[question]]
+id = "realise"
+prompt = "Le prix de marché passe sous le prix réalisé. Que signifie-t-il ?"
+kind = "single"
+lesson = "indicateurs-de-prix"
+
+[[question.option]]
+id = "perte"
+text = "Qu'en moyenne, les détenteurs sont en perte."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "achat"
+text = "Qu'il faut acheter."
+explanation = "Un indicateur ne donne pas d'ordre."
+
+[[question.option]]
+id = "fin"
+text = "Que le réseau va disparaître."
+explanation = "Aucun lien."
+
+[[question]]
+id = "licence"
+prompt = "Pourquoi les séries réelles du MVRV ne sont-elles pas encore publiées par Sensitor ?"
+kind = "single"
+lesson = "indicateurs-de-prix"
+
+[[question.option]]
+id = "licence"
+text = "Parce qu'elles demandent un historique de prix sous licence commerciale."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "secret"
+text = "Parce que la chaîne les cache."
+explanation = "La chaîne est publique ; c'est le prix qui manque."
+
+[[question.option]]
+id = "faux"
+text = "Parce que le MVRV n'existe pas."
+explanation = "Il existe et se calcule."

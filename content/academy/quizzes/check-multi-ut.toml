@@ -1,0 +1,73 @@
+id = "check-multi-ut"
+title = "Contrôle : plusieurs unités de temps"
+course = "lire-la-structure"
+lesson = "multi-unites-de-temps"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ordre"
+prompt = "Dans une lecture du haut vers le bas, à quoi sert l'unité de temps la plus longue ?"
+kind = "single"
+lesson = "multi-unites-de-temps"
+
+[[question.option]]
+id = "contexte"
+text = "À établir le contexte : la tendance de fond et les grandes zones."
+correct = true
+explanation = "Oui."
+
+[[question.option]]
+id = "entree"
+text = "À choisir le prix d'entrée précis."
+explanation = "C'est le rôle de l'unité la plus courte."
+
+[[question.option]]
+id = "decision"
+text = "À décider seule de l'achat ou de la vente."
+explanation = "Le contexte oriente la recherche ; il ne remplace pas le scénario ni l'invalidation."
+
+[[question]]
+id = "desaccord"
+prompt = "H4 haussier, H1 baissier. Quelle lecture est la plus juste ?"
+kind = "single"
+lesson = "multi-unites-de-temps"
+
+[[question.option]]
+id = "deux"
+text = "Une correction dans une tendance de fond, ou le début d'un retournement : deux hypothèses, et ce qui les départagerait."
+correct = true
+explanation = "Oui : le désaccord est une information."
+
+[[question.option]]
+id = "h4"
+text = "Le H4 a raison, il faut ignorer le H1."
+explanation = "Aucune unité de temps ne « gagne » ; elles décrivent des échelles différentes."
+
+[[question.option]]
+id = "h1"
+text = "Le H1 a raison, puisqu'il est plus récent."
+explanation = "Les deux lectures portent sur les mêmes données récentes, à des échelles différentes."
+
+[[question]]
+id = "rapport"
+prompt = "Un rapport de quatre à six entre unités de temps, par exemple H4, H1, M15, c'est :"
+kind = "single"
+lesson = "multi-unites-de-temps"
+
+[[question.option]]
+id = "habitude"
+text = "Une habitude de praticiens, pas une règle."
+correct = true
+explanation = "Oui : elle assure seulement assez de détail d'un niveau à l'autre."
+
+[[question.option]]
+id = "loi"
+text = "Une règle mathématique du marché."
+explanation = "Rien dans le marché n'impose ce rapport."
+
+[[question.option]]
+id = "interdit"
+text = "Un réglage déconseillé."
+explanation = "C'est au contraire un choix courant et raisonnable."
