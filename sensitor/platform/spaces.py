@@ -105,11 +105,17 @@ SPACES: tuple[Space, ...] = (
           related=(("Préparer sa séance", "lesson:processus-de-trading/preparer-seance"),
                    ("Construire un scénario de liquidité", "lesson:liquidite-et-scenarios/scenario-liquidite"),
                    ("Lire le calendrier économique", "lesson:trader-l-actualite/calendrier-economique"))),
-    Space("tools", "Portefeuille et risque", "investir", SEPARATE,
-          "Performance, allocation, exposition à Bitcoin et aux cryptomonnaies, risque, stress tests "
-          "et Monte Carlo.",
-          entry="tools", pages=("tools",), numeral="VIII",
-          planned=("Intégration au même espace membre",)),
+    Space("tools", "Portefeuille et risque", "investir", LIVE,
+          "Composer son portefeuille et le lire : performance, santé, radiographie, risque, stress tests, "
+          "optimisation, simulation et Monte Carlo, avec une marge « Lecture » sur chaque écran.",
+          entry="portfolio",
+          pages=("portfolio", "pf_overview", "pf_performance", "pf_health", "pf_xray", "pf_risk", "pf_stress",
+                 "pf_optimize", "pf_simulator", "pf_copilot", "pf_reports", "pf_portfolios"),
+          numeral="VIII",
+          planned=("Le portefeuille réel en quantités et les prix saisis à la main, aujourd'hui dans "
+                   "l'application complète",
+                   "Les portefeuilles modèles et la bibliothèque d'actifs"),
+          related=(("Investir dans la crypto avec méthode", "course:investir-avec-methode"),)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",
           entry="community", pages=("community",), numeral="IX",
@@ -119,7 +125,8 @@ SPACES: tuple[Space, ...] = (
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach")
-LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
+LEGACY_PAGES = {"paths": "academy",       # URLs from the first Academy release
+                "tools": "portfolio"}     # the link page of the analyzer, before it joined the space
 
 
 def all_pages() -> tuple[str, ...]:

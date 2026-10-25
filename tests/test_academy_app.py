@@ -639,8 +639,9 @@ def main() -> int:
         check("journal: MetaTrader 5 synchronisation opens the analytics app's journal",
               any(b.url == "https://outils.example/?page=trading_journal" for b in linked.get("link_button")))
         linked = run({"page": "tools"})
-        check("tools: opens the portfolio side of the analytics app",
-              any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))
+        check("tools: the old address opens the space, which still links to the full app",
+              "Analyser son portefeuille" in text(linked)
+              and any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))
     finally:
         os.environ.pop("SENSITOR_TOOLS_URL", None)
     shell = run({"page": "home"})
@@ -652,8 +653,8 @@ def main() -> int:
     check("the visitor's landing speaks of trading and of money",
           "Apprendre le <em>trading</em>." in text(run({"page": "home"})))
     tools = run({"page": "tools"})
-    check("tools: no link when the address is not configured",
-          "Lien non configuré" in text(tools))
+    check("tools: no link when the address is not configured, and it says so",
+          "pas renseignée" in text(tools) and not tools.get("link_button"))
     sidebar = [b.label for b in run({"page": "home"}).sidebar.button]
     from sensitor.platform import spaces
     check("the sidebar lists every space, in registry order",

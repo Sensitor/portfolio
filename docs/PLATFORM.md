@@ -70,7 +70,7 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, prop firm challenge simulator, exercises) |
 | VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
 | VII | Salle des marchés | Trader | live | `market`, `market_session`, `market_edit` (coaches) |
-| VIII | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
+| VIII | Portefeuille et risque | Investir | live | `portfolio` (build), `pf_overview`, `pf_performance`, `pf_health`, `pf_xray`, `pf_risk`, `pf_stress`, `pf_optimize`, `pf_simulator`, `pf_copilot`, `pf_reports`, `pf_portfolios`; the old `tools` address opens `portfolio` |
 | IX | Communauté | Échanger | preparing | `community` |
 
 The analytics app honours `?page=` only for `overview`, `trading_overview` and
@@ -162,8 +162,32 @@ session teaches, the replay and further lessons.
   outcomes, and the record of every reviewed scenario, then the lessons on
   preparing a session, building a liquidity scenario and reading the calendar.
 
-**The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
-set, and says the link is not configured otherwise.
+**Portefeuille et risque** is the portfolio analyzer inside the member space
+(`platform/ui/portfolio_space.py`). Nothing of the analysis is rewritten: the
+eleven pages are the `sensitor.pages` renderers, given the context the separate
+app builds (`investment.context.build_context`), in French, and styled by the
+analyzer's component stylesheet alone (`ui.themes.components_css`, injected by
+`inject_components`: headers, cards, alerts, tables, the « Lecture » margin, the
+risk hatch, with no page, sidebar or widget rule; the separate app's own
+stylesheet is byte for byte what it was).
+
+* **Building page** (`portfolio`): lines from the asset library, their weights
+  (brought back to 100 % in proportion), the currency and the risk profile, then
+  « Analyser le portefeuille », which prices the last two years as the separate
+  app does. A free account composes five lines, a premium one fifty; an
+  allocation built elsewhere with more lines stays whole and can be edited, not
+  grown.
+* **One working portfolio per member.** The allocation is the `workspace` row
+  of the verified email, restored and written by `pages._workspace` exactly as
+  in the separate app, so a portfolio built in one opens in the other. The
+  analyzer itself (the price history) stays in the session. A visitor can
+  analyse; nothing is kept.
+* **Navigation.** The separate app's page changes (the copilot sending a change
+  to the simulator, the portfolios page asking for a new analysis of a saved
+  allocation) become the platform's pages.
+* **Still in the separate app**, and said on the building page with a link when
+  `SENSITOR_TOOLS_URL` is set: the real portfolio in quantities, prices entered
+  by hand, model portfolios, the asset library and the MetaTrader 5 analytics.
 
 ### Adding a space
 

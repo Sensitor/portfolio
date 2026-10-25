@@ -1365,6 +1365,9 @@ __DA__ .sx-c-blank ol li b { margin-bottom: .2rem; }
   color: var(--c-plan) !important; fill: var(--c-plan) !important; }
 
 @media (max-width: 1000px) {
+  /* The analysis pages' help bubbles: anchored right on a phone, so a hidden one
+     near the edge never widens the page. */
+  __DA__ .snr-tip-body { left: auto; right: -8px; width: min(244px, 72vw); }
   __DA__ .sx-market-line { grid-template-columns: 1fr; }
   __DA__ .sx-market-scenario { padding: 1rem 1rem .8rem; }
   __DA__ [class*="st-key-tap_"] .sx-c-course.row { grid-template-columns: minmax(0, 1fr) auto; }

@@ -15,7 +15,8 @@ from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from .. import brand, spaces
-from . import account, home, market_room, psychology, spaces_view, theme, trade_reviews, trading_journal
+from . import (account, home, market_room, portfolio_space, psychology, spaces_view, theme, trade_reviews,
+               trading_journal)
 from . import runtime as rt
 from .components import edition, esc, html
 
@@ -37,7 +38,18 @@ RENDERERS = {
     "market_session": market_room.session_page,
     "market_edit": market_room.edit_page,
     "community": spaces_view.preparing,
-    "tools": spaces_view.tools,
+    "portfolio": portfolio_space.RENDERERS["portfolio"],
+    "pf_overview": portfolio_space.RENDERERS["pf_overview"],
+    "pf_performance": portfolio_space.RENDERERS["pf_performance"],
+    "pf_health": portfolio_space.RENDERERS["pf_health"],
+    "pf_xray": portfolio_space.RENDERERS["pf_xray"],
+    "pf_risk": portfolio_space.RENDERERS["pf_risk"],
+    "pf_stress": portfolio_space.RENDERERS["pf_stress"],
+    "pf_optimize": portfolio_space.RENDERERS["pf_optimize"],
+    "pf_simulator": portfolio_space.RENDERERS["pf_simulator"],
+    "pf_copilot": portfolio_space.RENDERERS["pf_copilot"],
+    "pf_reports": portfolio_space.RENDERERS["pf_reports"],
+    "pf_portfolios": portfolio_space.RENDERERS["pf_portfolios"],
     "journal": trading_journal.dashboard,
     "journal_trades": trading_journal.trades_page,
     "journal_trade": trading_journal.trade_page,
