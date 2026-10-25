@@ -67,9 +67,9 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | II | Bibliothèque | Apprendre | live | `library`, `resource` |
 | III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
 | IV | Progression | Apprendre | live | `progress` |
-| V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
+| V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, prop firm challenge simulator, exercises) |
 | VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
-| VII | Salle des marchés | Trader | preparing | `market` |
+| VII | Salle des marchés | Trader | live | `market`, `market_session`, `market_edit` (coaches) |
 | VIII | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
 | IX | Communauté | Échanger | preparing | `community` |
 
@@ -133,6 +133,34 @@ the analytics app, so trades synchronised from MetaTrader 5 there appear here.
   is about a closed trade only; the form says no recommendation belongs in it.
 * **Demonstration.** A visitor, or a member who asks, sees a constructed
   journal (`trading/demo.py`), labelled « Exemple synthétique » on every page.
+
+**Salle des marchés** is live (`platform/market.py` for the rules,
+`platform/ui/market_room.py` for the pages, table `market_sessions`, schema v11).
+A coach prepares a session before the open: the week's context, the day's
+calendar (one line per publication, « 14:30 | Emploi américain | forte », Paris
+time), up to four scenarios, each a condition, what to watch and its
+**invalidation, which is mandatory**, the lessons it uses, and optionally the
+address of a live (https YouTube or Vimeo only). After the close, the review
+gives each scenario its outcome (joué, invalidé, non déclenché), what the
+session teaches, the replay and further lessons.
+
+* **No signals.** `market.signal_phrases` flags instructions to buy or sell,
+  « signal d'achat / de vente », profit targets and promises of results, on
+  words, accents and case removed, without catching analysis vocabulary
+  (« les vendeurs », « un signal de faiblesse », « rien n'est garanti »). The
+  store refuses to publish a session that has any, and a review cannot be saved
+  with one. Every session page carries the same pedagogical notice.
+* **Who writes, who reads.** Writing, publishing, reviewing and deleting go
+  through store methods that check the coach role in their own query; a draft
+  and its author are returned to a coach only; a published session cannot be
+  deleted, only unpublished. Readers get each session at the access level its
+  author chose (public, member, premium), decided by `academy.access` like the
+  lessons. A departing coach's sessions stay, without the address.
+* **No invented content.** With nothing published, the room says so and shows
+  how a session is built; there is no sample session.
+* The room lists the latest session, the earlier ones with the print of their
+  outcomes, and the record of every reviewed scenario, then the lessons on
+  preparing a session, building a liquidity scenario and reading the calendar.
 
 **The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
 set, and says the link is not configured otherwise.

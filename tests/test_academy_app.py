@@ -621,12 +621,15 @@ def main() -> int:
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
           'comprendre la <em class="cu">monnaie</em>' in text(old))
-    for page in ("market", "community"):
+    for page in ("community",):
         app = run({"page": page})
         body = text(app)
         check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)
         check(f"{page}: offers no input of any kind",
               not app.text_input and not app.radio and not app.checkbox and not app.text_area)
+    room = run({"page": "market"})
+    check("market: the trading room is open, and offers a visitor no input",
+          "Préparer la séance" in text(room) and not room.exception and not room.text_input)
     journal = run({"page": "journal"})
     check("journal: open in the platform itself, no longer a link away",
           "Chaque trade" in text(journal) and "Lien non configuré" not in text(journal))

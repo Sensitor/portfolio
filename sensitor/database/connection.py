@@ -233,6 +233,9 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # the requests for a coach's review, and `users.role`. New tables and a
     # column with a default, applied above; no existing row is touched.
     #
+    # Version 11 adds `market_sessions`, the trading room's sessions and reviews.
+    # A new table only, so no existing row is touched.
+    #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

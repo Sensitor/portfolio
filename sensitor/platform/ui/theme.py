@@ -1028,7 +1028,7 @@ __DA__ {
 /* No tabular figures: Schibsted's tabular set widens the comma, which opens a gap
    in French decimals (« 12 ,5 »). Columns align on the right instead. */
 __DA__ :is([data-testid="stMarkdownContainer"] td, .sx-figures .v, .sx-stats .v, .sx-result .big,
-  .sx-figures-navy .v, .sx-j-facts dd, input) { font-variant-numeric: normal; }
+  .sx-figures-navy .v, .sx-j-facts dd, input, textarea) { font-variant-numeric: normal; }
 __DA__ [data-testid="stMarkdownContainer"] :is(td, th) { border-left: 0 !important; border-right: 0 !important; }
 __DA__ .sx-facts dd { font-variant-numeric: normal; }
 __DA__ .sx-calendar text { font-family: var(--c-text); font-size: 8.5px; fill: var(--c-graphite); }
@@ -1327,7 +1327,46 @@ __DA__ .sx-entry-body { font: italic 400 17.5px/1.6 var(--c-title); color: var(-
 __DA__ :is(.sx-routine-label, .sx-entry-routine b) { font: 600 11.5px var(--c-text); letter-spacing: .08em; color: var(--c-graphite); }
 __DA__ .sx-entry-routine { border-top-color: var(--c-rule-strong); }
 
+/* ── The trading room ─────────────────────────────────────────────────────
+   A scenario is a sheet: a condition, what to watch, and its invalidation, which
+   carries the 30° hatch of a risk zone. The review speaks in the annotation's ochre. */
+__DA__ .sx-market-scenario { background: var(--c-sheet); border-top: 2px solid var(--c-ink); padding: 1.2rem 1.4rem 1rem; margin: 1rem 0 .4rem; }
+__DA__ .sx-market-scenario .head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+__DA__ .sx-market-scenario .rub { font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+__DA__ .sx-market-scenario h3 { font: 600 1.4rem/1.25 var(--c-title); color: var(--c-ink); margin: .35rem 0 .8rem; }
+__DA__ .sx-market-line { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: .2rem 1rem; padding: .6rem 0;
+  border-top: 1px solid var(--c-rule); font: 400 15.5px/1.55 var(--c-text); color: var(--c-ink); }
+__DA__ .sx-market-line b { font: 600 13px var(--c-text); color: var(--c-graphite); padding-top: .15rem; }
+__DA__ .sx-market-line.inval { position: relative; }
+__DA__ .sx-market-line.inval::before { content: ""; position: absolute; left: -1.4rem; top: .45rem; bottom: .45rem; width: 7px;
+  background: repeating-linear-gradient(120deg, var(--c-down) 0 1.4px, transparent 1.4px 5px); }
+__DA__ .sx-market-line.inval b { color: var(--c-down); }
+__DA__ .sx-market-outcome { font: 600 12.5px var(--c-text); padding: .15rem .55rem; border: 1px solid currentColor; white-space: nowrap; }
+__DA__ .sx-market-outcome.o-joue { color: var(--c-ink); }
+__DA__ .sx-market-outcome.o-invalide { color: var(--c-down); }
+__DA__ .sx-market-outcome.o-non-declenche { color: var(--c-graphite); border-style: dashed; }
+__DA__ p.sx-market-comment { font: italic 400 15.5px/1.5 var(--c-title); color: var(--c-ink-2); margin: .6rem 0 0;
+  padding-left: .8rem; border-left: 2px solid var(--c-note); }
+__DA__ .sx-market-takeaway { border-left: 3px solid var(--c-note); margin: .6rem 0 1rem; }
+__DA__ .sx-market-takeaway p { font: italic 400 17px/1.6 var(--c-title); color: var(--c-ink); margin: .5rem 0 0; }
+__DA__ table.sx-market-cal { width: 100%; border-collapse: collapse; border-top: 2px solid var(--c-ink); }
+__DA__ table.sx-market-cal th { font: 600 12px var(--c-text); color: var(--c-graphite); text-align: left; padding: .5rem .8rem .5rem 0;
+  border-bottom: 1px solid var(--c-rule-strong); }
+__DA__ table.sx-market-cal td { font: 400 15px var(--c-text); padding: .55rem .8rem .55rem 0; border-bottom: 1px solid var(--c-rule); }
+__DA__ table.sx-market-cal td code { font: 400 14px var(--c-code) !important; color: var(--c-ink); background: none; padding: 0; }
+__DA__ table.sx-market-cal td.w-forte { color: var(--c-down); font-weight: 600; }
+__DA__ table.sx-market-cal td.w-faible { color: var(--c-graphite); }
+__DA__ .sx-c-blank ol li b { margin-bottom: .2rem; }
+/* Chosen items of a multiselect: the plan's blue, not Streamlit's red. Streamlit 1.64
+   draws each one as a span inside a role="group" span of the tags container. */
+.stApp.stApp :is([data-baseweb="tag"], [data-testid="stMultiSelectTagsContainer"] [role="group"] > span) {
+  background-color: var(--c-plan-soft) !important; color: var(--c-plan) !important; border-radius: 2px !important; }
+.stApp.stApp :is([data-baseweb="tag"], [data-testid="stMultiSelectTagsContainer"] [role="group"] > span) * {
+  color: var(--c-plan) !important; fill: var(--c-plan) !important; }
+
 @media (max-width: 1000px) {
+  __DA__ .sx-market-line { grid-template-columns: 1fr; }
+  __DA__ .sx-market-scenario { padding: 1rem 1rem .8rem; }
   __DA__ [class*="st-key-tap_"] .sx-c-course.row { grid-template-columns: minmax(0, 1fr) auto; }
   __DA__ .sx-c-course.row svg { grid-column: 1 / -1; grid-row: 2; }
   __DA__ .sx-c-course.row .n { grid-column: 2; }

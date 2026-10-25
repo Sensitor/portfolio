@@ -181,6 +181,8 @@ class Store:
             # A departing coach's address leaves the answers they gave, which stay with
             # the members who received them.
             conn.execute("UPDATE trade_reviews SET coach_email = NULL WHERE coach_email = ?", (email,))
+            # The same for the sessions a departing coach wrote: they stay with the room.
+            conn.execute("UPDATE market_sessions SET author_email = NULL WHERE author_email = ?", (email,))
             conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
@@ -472,6 +474,118 @@ class Store:
                 (coach_email, json.dumps(feedback, ensure_ascii=False), _now(), int(review_id),
                  coach_email))
             return cursor.rowcount > 0
+
+    # ── Trading room ─────────────────────────────────────────────────────────
+    #
+    # Sessions are written by coaches and read by everyone at the access level of
+    # each session; the access check itself is the page's (academy.access). Every
+    # write is gated on the coach role in SQL, like the review queue.
+
+    _COACH = "EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach')"
+
+    @staticmethod
+    def _market_row(row) -> dict:
+        item = dict(row)
+        for key in ("content", "review"):
+            if key in item:
+                item[key] = None if item[key] is None else json.loads(item[key])
+        return item
+
+    def save_market_session(self, email: str, session: dict, session_id: int | None = None) -> int | None:
+        """
+        Create a draft, or update a session, from `platform.market.clean_session()`.
+        None when `email` is not a coach or the session does not exist. Editing a
+        published session keeps it published.
+        """
+        coach = _email(email)
+        stamp = _now()
+        content = json.dumps(session["content"], ensure_ascii=False)
+        with self._write() as conn:
+            if session_id is None:
+                cursor = conn.execute(
+                    "INSERT INTO market_sessions (author_email, session_date, title, access, status, content, "
+                    f"created_at, updated_at) SELECT ?, ?, ?, ?, 'draft', ?, ?, ? WHERE {self._COACH} RETURNING id",
+                    (coach, session["session_date"], session["title"], session["access"], content, stamp, stamp, coach))
+                row = cursor.fetchone()
+                return int(row[0]) if row else None
+            cursor = conn.execute(
+                "UPDATE market_sessions SET session_date = ?, title = ?, access = ?, content = ?, updated_at = ? "
+                f"WHERE id = ? AND {self._COACH}",
+                (session["session_date"], session["title"], session["access"], content, stamp, int(session_id), coach))
+            return int(session_id) if cursor.rowcount else None
+
+    def publish_market_session(self, email: str, session_id: int) -> list[str] | None:
+        """
+        Publish a draft. Returns the reasons it cannot be published (empty on
+        success), or None when `email` is not a coach or there is no such draft.
+        The check is `platform.market.publishable`, applied to what is stored.
+        """
+        from ..platform import market as M
+
+        row = self.market_session(int(session_id), coach=email)
+        if row is None or row["status"] != "draft":
+            return None
+        problems = M.publishable({"title": row["title"], "content": row["content"]})
+        if problems:
+            return problems
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE market_sessions SET status = 'published', published_at = ?, updated_at = ? "
+                f"WHERE id = ? AND status = 'draft' AND {self._COACH}",
+                (_now(), _now(), int(session_id), _email(email)))
+            return [] if cursor.rowcount else None
+
+    def unpublish_market_session(self, email: str, session_id: int) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE market_sessions SET status = 'draft', updated_at = ? "
+                f"WHERE id = ? AND status = 'published' AND {self._COACH}",
+                (_now(), int(session_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def review_market_session(self, email: str, session_id: int, review: dict) -> bool:
+        """Record or replace the review of a published session, from `platform.market.clean_review()`."""
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE market_sessions SET review = ?, reviewed_at = ?, updated_at = ? "
+                f"WHERE id = ? AND status = 'published' AND {self._COACH}",
+                (json.dumps(review, ensure_ascii=False), _now(), _now(), int(session_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def delete_market_session(self, email: str, session_id: int) -> bool:
+        """A draft can be deleted; a published session is unpublished first."""
+        with self._write() as conn:
+            cursor = conn.execute(
+                f"DELETE FROM market_sessions WHERE id = ? AND status = 'draft' AND {self._COACH}",
+                (int(session_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def market_sessions(self, *, limit: int = 60) -> list[dict]:
+        """Published sessions, the most recent date first. Drafts never appear here."""
+        rows = self._read(
+            "SELECT id, session_date, title, access, status, content, review, published_at, reviewed_at "
+            "FROM market_sessions WHERE status = 'published' ORDER BY session_date DESC, id DESC LIMIT ?",
+            (int(limit),))
+        return [self._market_row(r) for r in rows]
+
+    def market_drafts(self, email: str) -> list[dict]:
+        """Drafts, for a coach; empty for anyone else."""
+        rows = self._read(
+            "SELECT id, session_date, title, access, status, content, review, updated_at FROM market_sessions "
+            f"WHERE status = 'draft' AND {self._COACH} ORDER BY session_date DESC, id DESC", (_email(email),))
+        return [self._market_row(r) for r in rows]
+
+    def market_session(self, session_id: int, *, coach: str | None = None) -> dict | None:
+        """
+        One session. A draft is returned only to a coach; the author's address is
+        returned to a coach only.
+        """
+        is_coach = bool(coach) and self.is_coach(coach)
+        columns = ("id, session_date, title, access, status, content, review, published_at, reviewed_at, "
+                   "updated_at" + (", author_email" if is_coach else ""))
+        status = "" if is_coach else " AND status = 'published'"
+        rows = self._read(f"SELECT {columns} FROM market_sessions WHERE id = ?{status}", (int(session_id),))
+        return self._market_row(rows[0]) if rows else None
 
     # ── Single-use account tokens ────────────────────────────────────────────
 
