@@ -25,7 +25,7 @@ from ..ui.components import (
 from ..ui.themes import INK, INK_2, INK_FAINT, INK_MUTED, PLOTLY_CONFIG, STATUS, html
 from ..core.i18n import tr
 from ..integrations.market_data import benchmark_label
-from ._shared import benchmark_selector, guard
+from ._shared import benchmark_selector, chart_with_reading, guard
 
 # Crisis windows reach back to 2000, well before any portfolio's own window.
 _HISTORY_START = "1999-01-01"
@@ -84,10 +84,25 @@ def _historical_block(ctx, lang: str) -> None:
         for r in results if r.get("reliable")
     ]
     if rows:
-        st.plotly_chart(
+        reliable = [r for r in results if r.get("reliable")]
+        worst = min(reliable, key=lambda r: r["portfolio_return"])
+        mildest = max(reliable, key=lambda r: r["portfolio_return"])
+        compared = [r for r in reliable if r.get("relative") is not None]
+        better = sum(1 for r in compared if r["relative"] > 0)
+        chart_with_reading(
             C.scenario_bars(rows, label_portfolio=tr("portfolio", lang),
                             label_benchmark=bench_name),
-            width="stretch", config=PLOTLY_CONFIG, key="stress_scenarios",
+            "stress_scenarios",
+            [
+                tr("rd_stress_worst", lang).format(label=S.scenario_label(worst["key"], lang),
+                                                   r=pct(worst["portfolio_return"], 1)),
+                tr("rd_stress_best", lang).format(label=S.scenario_label(mildest["key"], lang),
+                                                  r=pct(mildest["portfolio_return"], 1))
+                if len(reliable) > 1 else "",
+                tr("rd_stress_vs", lang).format(n=len(compared), b=bench_name, k=better)
+                if compared else "",
+            ],
+            lang, foot=tr("reading_foot_stress", lang),
         )
 
     # ── Detail table ─────────────────────────────────────────────────────────

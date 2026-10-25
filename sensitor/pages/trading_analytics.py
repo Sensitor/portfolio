@@ -27,6 +27,7 @@ from ..ui.components import (
     section, spacer, stat_card,
 )
 from ..ui.themes import INK_FAINT, INK_MUTED, PALETTE, PLOTLY_CONFIG, STATUS, html
+from ._shared import chart_with_reading
 from ._trading_shared import (
     account_selector, duration_text, filter_panel, guard, period_selector,
     pf_text, r_text, sample_pill, trading_context,
@@ -191,9 +192,11 @@ def _slicer_block(tctx, lang) -> None:
         note(tr("not_enough_data", lang))
         return
 
-    st.plotly_chart(
+    chart_with_reading(
         C.trading_breakdown(rows, metric=metric, currency=tctx.currency, lang=lang),
-        width="stretch", config=PLOTLY_CONFIG, key=f"tan_bd_{dimension}_{metric}",
+        f"tan_bd_{dimension}_{metric}",
+        _breakdown_reading(rows, metric, tctx.currency, lang),
+        lang, foot=tr("reading_foot_small", lang),
     )
 
     _breakdown_table(rows, dim_choice, tctx, lang)
@@ -293,3 +296,27 @@ def _comparison_block(tctx, lang) -> None:
             )
         else:
             note(tr("not_enough_data", lang))
+
+
+def _breakdown_reading(rows, metric: str, currency: str, lang: str) -> list[str]:
+    """The best and weakest group on the chosen measure, with their sample sizes."""
+    rows = [r for r in rows if r.get(metric) is not None]
+    if not rows:
+        return []
+
+    def fmt(value):
+        if metric in ("net_pnl", "expectancy", "avg_pnl"):
+            return money(value, currency, decimals=2)
+        if metric == "win_rate":
+            return pct(value, 0)
+        return f"{value:+.2f}"
+
+    best = max(rows, key=lambda r: r[metric])
+    worst = min(rows, key=lambda r: r[metric])
+    reliable = sum(1 for r in rows if r.get("reliable"))
+    return [
+        tr("rd_tan_best", lang).format(label=best["label"], v=fmt(best[metric]), n=best["n"]),
+        tr("rd_tan_worst", lang).format(label=worst["label"], v=fmt(worst[metric]), n=worst["n"])
+        if worst is not best else "",
+        tr("rd_tan_reliable", lang).format(k=reliable, n=len(rows)),
+    ]

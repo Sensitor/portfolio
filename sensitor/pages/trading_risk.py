@@ -27,9 +27,9 @@ from ..trading.risk import MIN_SAMPLE, risk_over_time
 from ..ui import charts as C
 from ..ui.components import (
     alert, data_table, metric_card, money, note, page_header, pct, pill_html,
-    section, spacer, stat_card,
+    reading, section, spacer, stat_card,
 )
-from ..ui.themes import ACCENT, INK_MUTED, PALETTE, PLOTLY_CONFIG, STATUS, html
+from ..ui.themes import ACCENT, PALETTE, PLOTLY_CONFIG, STATUS
 from ._trading_shared import (
     account_selector, filter_panel, guard, period_selector, r_text,
     trading_context,
@@ -178,10 +178,13 @@ def _drift_block(tctx, risk, lang) -> None:
                         f"{money(drift['end_median'], tctx.currency, decimals=2)}",
                 compact=True,
             )
-            html(
-                f'<div style="margin-top:8px;font-size:0.73rem;color:{INK_MUTED};'
-                f'line-height:1.55;">{tr(f"drift_{direction}", lang)}</div>'
-            )
+            spacer(10)
+            reading(tr("reading", lang), [
+                tr("rd_trk_drift", lang).format(
+                    a=money(drift["start_median"], tctx.currency, decimals=2),
+                    b=money(drift["end_median"], tctx.currency, decimals=2)),
+                tr(f"drift_{direction}", lang),
+            ], foot=tr("reading_foot_trades", lang))
         else:
             note(tr("not_enough_data", lang))
 

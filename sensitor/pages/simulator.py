@@ -28,7 +28,7 @@ from ..ui.components import (
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
 from ..core.i18n import define, tr
-from ._shared import guard, period_selector
+from ._shared import chart_with_reading, guard, period_selector
 
 SIM_KEY = "sensitor_sim_weights"
 
@@ -217,9 +217,19 @@ def _comparison_block(ctx, lang, before, after, bundle_kwargs) -> None:
         return
 
     curves = SI.equity_curves(bundles, base=ctx.start_value or 100_000)
-    st.plotly_chart(
+    ends = {name: float(curve.iloc[-1]) for name, curve in curves.items()
+            if curve is not None and len(curve)}
+    best = max(ends, key=ends.get) if ends else None
+    current = tr("current", lang)
+    chart_with_reading(
         C.cumulative_performance(curves, height=360, value_prefix=ctx.currency),
-        width="stretch", config=PLOTLY_CONFIG_ZOOM, key="sim_compare",
+        "sim_compare",
+        [
+            tr("rd_sim_best", lang).format(name=best, v=money(ends[best], ctx.currency)) if best else "",
+            tr("rd_sim_current", lang).format(v=money(ends[current], ctx.currency))
+            if best and best != current and current in ends else "",
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM,
     )
 
     labels = list(bundles)
@@ -316,9 +326,18 @@ def _monte_carlo_block(ctx, lang, bundle) -> None:
                             f"{'invested' if lang == 'en' else 'investi'}")
 
     spacer(10)
-    st.plotly_chart(
+    chart_with_reading(
         C.fan_chart(result, currency=ctx.currency, lang=lang),
-        width="stretch", config=PLOTLY_CONFIG_ZOOM, key="mc_fan",
+        "mc_fan",
+        [
+            tr("rd_mc_median", lang).format(n=f"{simulations:,}".replace(",", " "), y=years,
+                                            m=money(result["median"], ctx.currency)),
+            tr("rd_mc_tails", lang).format(lo=money(terminals[10], ctx.currency),
+                                           hi=money(terminals[90], ctx.currency)),
+            tr("rd_mc_loss", lang).format(p=pct(result["prob_loss"], 0),
+                                          inv=money(result["invested"], ctx.currency)),
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM, foot=tr("reading_foot_sim", lang),
     )
 
     dist_col, prob_col = st.columns([1.4, 1], gap="large")

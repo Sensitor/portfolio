@@ -13,8 +13,29 @@ import streamlit as st
 
 from ..integrations import market_data as market
 from ..investment import currency as FX
-from ..ui.components import empty_state, note
+from ..ui.components import empty_state, note, reading
+from ..ui.themes import PLOTLY_CONFIG
 from ..core.i18n import tr
+
+
+def chart_with_reading(fig, key: str, lines: list[str], lang: str, *,
+                       config=None, foot: str | None = None, ratio=(3.3, 1)) -> None:
+    """
+    A chart and its « Lecture » margin. `lines` are sentences built by the page
+    from computed figures; an empty list leaves the chart alone at full width.
+    `foot` defaults to the past-data caveat.
+    """
+    config = config or PLOTLY_CONFIG
+    lines = [line for line in lines if line]
+    if not lines:
+        st.plotly_chart(fig, width='stretch', config=config, key=key)
+        return
+    chart_col, read_col = st.columns(list(ratio), gap="large")
+    with chart_col:
+        st.plotly_chart(fig, width='stretch', config=config, key=key)
+    with read_col:
+        reading(tr("reading", lang), lines,
+                foot=tr("reading_foot", lang) if foot is None else foot)
 
 
 def guard(ctx, lang: str) -> bool:

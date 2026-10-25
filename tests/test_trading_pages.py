@@ -336,6 +336,24 @@ def main() -> int:
         else:
             print("  ok    journal     sync panel renders")
 
+    # ── The « Lecture » margin beside each synthesis chart ───────────────────
+    # Built from computed figures; a page that loses it, or raises building it,
+    # fails here rather than in review.
+    seed(make_book())
+    for page in ("trading_overview", "trading_analytics", "trading_risk", "trading_psychology"):
+        for lang, label in (("en", "Reading"), ("fr", "Lecture")):
+            checks += 1
+            app = run_page(page, lang=lang)
+            markup = " ".join(str(m.value or "") for m in app.markdown)
+            short = page.replace("trading_", "")
+            if app.exception or "snr-reading" not in markup or label not in markup:
+                failures.append(("reading margin", page,
+                                 str(app.exception[0].value)[:300] if app.exception
+                                 else "no reading margin"))
+                print(f"  FAIL  {short:11s} reading margin [{lang}]")
+            else:
+                print(f"  ok    {short:11s} reading margin [{lang}]")
+
     # ── Cross-user isolation, asserted through the rendered app ──────────────
     seed(make_book(n=30, seed=15, open_positions=0), email=EMAIL)
     seed(make_book(n=5, seed=16, open_positions=0), email=OTHER_EMAIL)

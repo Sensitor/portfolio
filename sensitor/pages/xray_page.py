@@ -18,7 +18,7 @@ import streamlit as st
 from ..ui import charts as C
 from ..investment import xray as X
 from ..ui.components import (
-    data_table, metric_card, note, page_header, pct, section, spacer,
+    data_table, metric_card, note, page_header, pct, reading, section, spacer,
 )
 from ..ui.themes import ACCENT, PLOTLY_CONFIG, STATUS, class_color
 from ..core.i18n import define, tr
@@ -26,6 +26,11 @@ from ._shared import guard
 
 STATUS_GOOD = STATUS["good"]
 STATUS_WARNING = STATUS["warning"]
+
+
+def _named(buckets: dict) -> dict:
+    """The buckets worth naming in a sentence: "Other" and "Unknown" are remainders."""
+    return {k: v for k, v in buckets.items() if k not in ("Other", "Unknown")}
 
 
 def render_xray(ctx) -> None:
@@ -65,7 +70,7 @@ def render_xray(ctx) -> None:
     # ── Direct holdings versus resolved exposure ─────────────────────────────
     section(tr("hidden_exposure", lang), tr("hidden_exposure_sub", lang))
 
-    col_direct, col_resolved = st.columns(2, gap="large")
+    col_direct, col_resolved, col_read = st.columns([1, 1, 0.78], gap="large")
     with col_direct:
         st.markdown(f"**{tr('direct_holdings', lang)}**")
         direct = dict(sorted(weights.items(), key=lambda kv: -kv[1]))
@@ -74,12 +79,26 @@ def render_xray(ctx) -> None:
             width='stretch', config=PLOTLY_CONFIG, key="xray_direct",
         )
     with col_resolved:
-        st.markdown(f"**{tr('lookthrough', lang)} — {X.DIMENSION_LABELS['sector'][lang]}**")
+        st.markdown(f"**{tr('lookthrough', lang)} · {X.DIMENSION_LABELS['sector'][lang]}**")
         st.plotly_chart(
             C.exposure_bars(xray.get("sector", {}), max_items=10,
                             height=max(180, 33 * min(len(xray.get("sector", {})), 10) + 34)),
             width='stretch', config=PLOTLY_CONFIG, key="xray_sector_compare",
         )
+    with col_read:
+        sectors = _named(xray.get("sector", {}))
+        regions = _named(xray.get("geography", {}))
+        top_holding = next(iter(direct.items()), None)
+        top_sector = max(sectors.items(), key=lambda kv: kv[1]) if sectors else None
+        top_region = max(regions.items(), key=lambda kv: kv[1]) if regions else None
+        reading(tr("reading", lang), [
+            tr("rd_xray_direct", lang).format(t=top_holding[0], w=pct(top_holding[1], 1))
+            if top_holding else "",
+            tr("rd_xray_sector", lang).format(s=top_sector[0], w=pct(top_sector[1], 1))
+            if top_sector else "",
+            tr("rd_xray_geo", lang).format(g=top_region[0], w=pct(top_region[1], 1))
+            if top_region else "",
+        ], foot=tr("reading_foot_xray", lang))
 
     # ── Every dimension ──────────────────────────────────────────────────────
     section(tr("lookthrough", lang))

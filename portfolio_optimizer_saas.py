@@ -70,6 +70,7 @@ from sensitor.investment.portfolio import UltimatePortfolioAnalyzer, latest_pric
 from sensitor.pages import _workspace
 from sensitor.ui import themes as sensitor_design
 from sensitor.investment.context import build_context
+from sensitor.platform.brand import mark_svg as _mark_svg
 from sensitor.core.i18n import tr as s_tr
 from sensitor.pages import (
     render_advisor, render_copilot, render_health, render_optimize, render_overview,
@@ -100,8 +101,8 @@ TIER_LIMITS = core_config.TIER_LIMITS
 # =============================================================================
 
 st.set_page_config(
-    page_title="Portfolio Health Pro",
-    page_icon=":chart_with_upwards_trend:",
+    page_title="Sensitor",
+    page_icon=_mark_svg(64, uid="favicon"),
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -1074,11 +1075,15 @@ def _currency_notice(analyzer, lang, *, verbose=False):
 def _sidebar(lang):
     """Render sidebar navigation and user info."""
     with st.sidebar:
+        # The same lockup as the platform's sidebar: the mark, the name, the space.
+        space_name = "Portfolio and risk" if lang == "en" else "Portefeuille et risque"
         st.markdown(
-            "<div style='font-family:Newsreader,Georgia,serif;font-size:1.3rem;font-weight:500;color:#FFFDF8;"
-            "letter-spacing:-0.01em;padding:0 0 4px 0;'>Portfolio Health Pro</div>"
-            "<div style='font-size:0.72rem;color:rgba(255,253,248,0.6);letter-spacing:0.05em;text-transform:uppercase;"
-            "margin-bottom:20px;'>Professional Analytics</div>",
+            "<div style='display:flex;align-items:center;gap:.8rem;margin:0 0 20px 0;'>"
+            f"{_mark_svg(38, uid='side')}<div>"
+            "<div style='font:700 16px \'Schibsted Grotesk\',sans-serif;letter-spacing:.24em;"
+            "color:#FFFDF8;'>SENSITOR</div>"
+            "<div style='font-size:0.62rem;color:rgba(255,253,248,0.6);letter-spacing:0.09em;"
+            f"text-transform:uppercase;margin-top:3px;'>{space_name}</div></div></div>",
             unsafe_allow_html=True
         )
 

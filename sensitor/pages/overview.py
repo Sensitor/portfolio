@@ -14,7 +14,7 @@ import streamlit as st
 from ..ui import charts as C
 from ..ui.components import (
     alert, data_table, metric_card, money, note, num, page_header, pct,
-    reading, section, spacer,
+    section, spacer,
 )
 from ..ui.themes import (
     ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS, class_color,
@@ -22,8 +22,8 @@ from ..ui.themes import (
 from ..core.i18n import define, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import (
-    benchmark_selector, currency_notice, guard, load_benchmark, period_selector,
-    single_asset_note,
+    benchmark_selector, chart_with_reading, currency_notice, guard, load_benchmark,
+    period_selector, single_asset_note,
 )
 
 
@@ -190,15 +190,10 @@ def render_overview(ctx) -> None:
         bench_curve = A.cumulative(bench_aligned) * ctx.start_value
         series_map[bench_name] = bench_curve
 
-    chart_col, read_col = st.columns([3.3, 1], gap="large")
-    with chart_col:
-        st.plotly_chart(
-            C.cumulative_performance(series_map, height=390, value_prefix=ctx.currency),
-            width='stretch', config=PLOTLY_CONFIG_ZOOM,
-            key="ov_cumulative",
-        )
-    with read_col:
-        lines = [
+    chart_with_reading(
+        C.cumulative_performance(series_map, height=390, value_prefix=ctx.currency),
+        "ov_cumulative",
+        [
             tr("reading_value", lang).format(
                 start=money(ctx.start_value, ctx.currency),
                 end=money(ctx.end_value, ctx.currency),
@@ -207,8 +202,9 @@ def render_overview(ctx) -> None:
                 bench=bench_name, ret=pct(bench_stats["total_return"], 1, sign=True),
             ) if bench_stats else "",
             tr("reading_drawdown", lang).format(dd=pct(stats["max_drawdown"], 1)),
-        ]
-        reading(tr("reading", lang), lines, foot=tr("reading_foot", lang))
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM,
+    )
 
     # ── Signals + composition ────────────────────────────────────────────────
     spacer(8)

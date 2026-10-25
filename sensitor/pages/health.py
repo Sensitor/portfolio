@@ -13,7 +13,7 @@ import streamlit as st
 
 from ..ui import charts as C
 from ..ui.components import (
-    metric_card, note, num, page_header, pct, score_bar, section, spacer, stat_card,
+    metric_card, note, num, page_header, pct, reading, score_bar, section, spacer, stat_card,
 )
 from ..ui.themes import INK_2, INK_MUTED, PLOTLY_CONFIG, STATUS, html
 from ..investment.health import WEIGHTS
@@ -57,6 +57,25 @@ def render_health(ctx) -> None:
             f'{tr("weakest", lang)}: '
             f'<b style="color:{INK_2};">{weakest_label}</b></div></div>'
         )
+        spacer(18)
+        best_key = max(_COMPONENT_ORDER, key=lambda k: components[k]["contribution"])
+        weak_key = health["weakest"]
+        dna = ctx.dna
+        dna_axes = ["growth", "risk", "diversification", "liquidity", "income", "defensive"]
+        top_axis = max(dna_axes, key=lambda a: dna[a])
+        low_axis = min(dna_axes, key=lambda a: dna[a])
+        reading(tr("reading", lang), [
+            tr("rd_health_best", lang).format(
+                total=f"{health['total']:.0f}", name=tr("c_" + best_key, lang),
+                pts=f"{components[best_key]['contribution']:.1f}", max=WEIGHTS[best_key]),
+            tr("rd_health_weak", lang).format(
+                name=tr("c_" + weak_key, lang),
+                pts=f"{components[weak_key]['contribution']:.1f}", max=WEIGHTS[weak_key])
+            if weak_key != best_key and weak_key in components else "",
+            tr("rd_health_dna", lang).format(
+                top=tr(f"dna_{top_axis}", lang), tv=f"{dna[top_axis]:.0f}",
+                low=tr(f"dna_{low_axis}", lang), lv=f"{dna[low_axis]:.0f}"),
+        ])
 
     with col_break:
         section(tr("score_breakdown", lang), tr("why_this_score", lang))

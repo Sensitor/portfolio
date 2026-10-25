@@ -24,6 +24,7 @@ from ..ui.components import (
 )
 from ..ui.themes import ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
 from ..core.i18n import tr
+from ._shared import chart_with_reading
 from ._trading_shared import (
     account_selector, duration_text, filtered_badge, guard, period_selector,
     pf_text, r_text, trading_context,
@@ -239,9 +240,24 @@ def _equity_block(tctx, metrics, lang, currency) -> None:
     section(tr("equity_curve", lang),
             f"{metrics['n']} {tr('trades', lang).lower()} · {tctx.period}")
 
-    st.plotly_chart(
+    depth = metrics["max_drawdown"]
+    payoff = metrics["payoff_ratio"]
+    chart_with_reading(
         C.trading_equity(tctx.equity_curve, height=380, currency=currency, lang=lang),
-        width="stretch", config=PLOTLY_CONFIG_ZOOM, key="tov_equity",
+        "tov_equity",
+        [
+            tr("rd_tov_net", lang).format(
+                n=metrics["n"], net=money(metrics["net_pnl"], currency, decimals=2),
+                e=money(metrics["expectancy"], currency, decimals=2))
+            if metrics["expectancy"] is not None else "",
+            tr("rd_tov_dd", lang).format(
+                dd=money(depth, currency, decimals=2)
+                + (f" ({r_text(metrics['max_drawdown_r'])})" if metrics["max_drawdown_r"] is not None else ""))
+            if depth is not None else "",
+            tr("rd_tov_wr", lang).format(w=metrics["n_wins"], l=metrics["n_losses"], p=f"{payoff:.2f}x")
+            if payoff else "",
+        ],
+        lang, config=PLOTLY_CONFIG_ZOOM, foot=tr("reading_foot_trades", lang),
     )
 
     spacer(6)

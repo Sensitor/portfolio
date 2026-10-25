@@ -31,7 +31,7 @@ from ..trading.psychology import MIN_GROUP
 from ..ui import charts as C
 from ..ui.components import (
     alert, data_table, empty_state, metric_card, money, note, page_header, pct,
-    pill_html, section, spacer,
+    pill_html, reading, section, spacer,
 )
 from ..ui.themes import INK_2, INK_FAINT, INK_MUTED, PALETTE, PLOTLY_CONFIG, STATUS, html
 from ._trading_shared import (
@@ -220,6 +220,19 @@ def _mistakes_block(tctx, psych, lang) -> None:
                 [tr("mistake_frequency", lang), tr("trades", lang), tr("share", lang)],
                 rows, align="lrr", bars={1: (max_count, PALETTE[3])},
             )
+        compared = [r for r in by_mistake if r.get("group") and r.get("rest")]
+        worst = min(compared, key=lambda r: r["group"]["avg_pnl"]) if compared else None
+        common = frequency[0] if frequency else None
+        spacer(10)
+        reading(tr("reading", lang), [
+            tr("rd_tps_worst", lang).format(
+                label=worst.get("display", worst["label"]),
+                g=money(worst["group"]["avg_pnl"], tctx.currency, decimals=2),
+                o=money(worst["rest"]["avg_pnl"], tctx.currency, decimals=2),
+                n=worst["group"]["n"]) if worst else "",
+            tr("rd_tps_freq", lang).format(label=common["label"], c=common["count"],
+                                           s=pct(common["share"], 0)) if common else "",
+        ], foot=tr("reading_foot_small", lang))
 
     note(tr("mistake_flagging_note", lang))
 

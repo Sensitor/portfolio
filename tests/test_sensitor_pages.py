@@ -446,6 +446,35 @@ def _carnet_flow(failures) -> int:
               and label in markup and word in markup)
         check(f"overview carries the reading margin [{lang}]", ok,
               str(app.exception[0].value)[:300] if app.exception else "")
+
+    # Every synthesis screen has its margin; the risk page has one per question.
+    expected = {"performance": 1, "health": 1, "xray": 1, "risk": 3, "optimize": 1, "simulator": 2}
+    for page, count in expected.items():
+        for lang in ("fr", "en"):
+            app = run_page(page, analyzer, lang=lang)
+            markup = " ".join(m.value for m in app.markdown)
+            found = markup.count('class="snr-reading"')
+            check(f"{page} carries {count} reading margin(s) [{lang}]",
+                  not app.exception and found == count,
+                  str(app.exception[0].value)[:300] if app.exception else f"found {found}")
+
+    # The figures in a margin are the page's own: the risk page names the
+    # largest risk contributor that the table lists first.
+    app = run_page("risk", analyzer, lang="fr")
+    markup = " ".join(m.value for m in app.markdown)
+    quoted = re.search(r"<p>([A-Z][A-Z0-9.-]*) porte (\d+\.\d)% du risque", markup)
+    shares = [float(v) for v in re.findall(r"<span>(\d+\.\d)%</span>", markup)]
+    check("risk margin quotes the largest contributor",
+          bool(quoted) and bool(shares) and float(quoted.group(2)) == max(shares)
+          and f'<td class="k">{quoted.group(1)}</td>' in markup,
+          quoted.group(0) if quoted else "no sentence")
+
+    # The analyzer carries the Sensitor name.
+    app = run_page("overview", analyzer, lang="fr")
+    sidebar = " ".join(m.value for m in app.sidebar.markdown)
+    check("sidebar carries the Sensitor lockup",
+          "SENSITOR" in sidebar and "Portefeuille et risque" in sidebar
+          and "Portfolio Health Pro" not in sidebar)
     return checks
 
 

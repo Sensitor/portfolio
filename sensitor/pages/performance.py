@@ -20,7 +20,9 @@ from ..ui.components import (
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
 from ..core.i18n import define, tr
 from ..integrations.market_data import benchmark_label
-from ._shared import benchmark_selector, guard, load_benchmark, period_selector
+from ._shared import (
+    benchmark_selector, chart_with_reading, guard, load_benchmark, period_selector,
+)
 
 _MONTHS = {
     "en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -69,7 +71,7 @@ def render_performance(ctx) -> None:
 
     # ── Cumulative performance ───────────────────────────────────────────────
     section(tr("cumulative_performance", lang),
-            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} — {ctx.period}")
+            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} · {ctx.period}")
 
     series_map = {tr("portfolio", lang): values}
     if bench_aligned is not None:
@@ -144,10 +146,22 @@ def render_performance(ctx) -> None:
     section(tr("attribution", lang), tr("attribution_sub", lang))
     attribution = ctx.attribution
     if attribution is not None and not attribution.empty:
-        st.plotly_chart(
+        top = attribution.loc[attribution["contribution"].idxmax()]
+        low = attribution.loc[attribution["contribution"].idxmin()]
+        negatives = int((attribution["contribution"] < 0).sum())
+        chart_with_reading(
             C.contribution_bars(attribution["ticker"].tolist(),
                                 attribution["contribution"].tolist()),
-            width='stretch', config=PLOTLY_CONFIG, key="perf_attr",
+            "perf_attr",
+            [
+                tr("rd_attr_top", lang).format(t=top["ticker"], c=pct(top["contribution"], 1, sign=True),
+                                               total=pct(stats["total_return"], 1, sign=True)),
+                tr("rd_attr_low", lang).format(t=low["ticker"], c=pct(low["contribution"], 1, sign=True))
+                if len(attribution) > 1 else "",
+                (tr("rd_attr_neg_one", lang) if negatives == 1 else
+                 tr("rd_attr_neg", lang).format(n=negatives) if negatives > 1 else ""),
+            ],
+            lang,
         )
         rows = [
             [row["ticker"], pct(row["weight"], 1), pct(row["asset_return"], 1),
