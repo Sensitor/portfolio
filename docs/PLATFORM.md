@@ -206,15 +206,23 @@ stylesheet is byte for byte what it was).
   « Étudier cette allocation » analyses it and makes it the working portfolio.
 * **Actifs** (`pf_assets`, a sheet with `asset=`): the asset library, searched
   by symbol, name or sector and filtered by class. A sheet gives the asset's
-  description, class, sector and geography in French, its risk level and its
-  liquidity in words, and the role usually given to it, marked as a reading and
-  not a sizing advice; a crypto sheet points to the course « Bitcoin, une
-  réserve de valeur ? ». Market cap, dividend yield and allocation ranges are
-  left out, and so is any sentence of the catalogue's prose that carries a
-  figure (`plain`): none of them is sourced. « Ajouter » puts the asset in the
-  working portfolio (an equal share, the other lines keeping their proportions,
-  within the free account's five lines) or, in real mode, in the holdings with
-  its quantity.
+  class, sector and geography in French, its risk level and its liquidity in
+  words, and the platform's own text, written in `content/portfolio/fiches.toml`
+  and loaded by `platform.asset_sheets`: what the asset is, the role usually
+  given to it, and the limit of that role, marked as a reading and not advice.
+  The catalogue's prose is not shown: it carries unsourced figures (fees, market
+  shares, user counts), allocation ranges and sizing advice. A crypto sheet, or a
+  bitcoin treasury company's, points to the course « Bitcoin, une réserve de
+  valeur ? ». « Ajouter » puts the asset in the working portfolio (an equal
+  share, the other lines keeping their proportions, within the free account's
+  five lines) or, in real mode, in the holdings with its quantity.
+* **Writing a sheet.** One entry per symbol of `investment.assets.ASSET_INFO`,
+  with `description`, `role` and `limite`, each a sentence ending with a full
+  stop. `asset_sheets.problems()` checks, and the tests enforce, that every asset
+  has a sheet and no sheet is orphaned, and that no text carries a figure (a name
+  such as S&P 500 or CAC 40 is allowed), advice or a promise (« il faut »,
+  « par défaut », « garanti »…) or a long dash. A new asset in the analyzer's
+  library therefore needs its sheet before the tests pass.
 * **Still in the separate app**, and said on the building page with a link when
   `SENSITOR_TOOLS_URL` is set: the MetaTrader 5 analytics.
 

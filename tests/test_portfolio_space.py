@@ -111,6 +111,7 @@ def offline_prices(tickers, base="USD", *, manual=None, on_error=None, **_):
 
 def main() -> int:
     from sensitor.platform import spaces
+    from sensitor.platform import asset_sheets as SH
     from sensitor.platform.ui import portfolio_space as PS
 
     # AppTest runs the app in this process: the space prices portfolios offline.
@@ -255,7 +256,7 @@ def main() -> int:
               key in PS.MODEL_NAMES and key in PS.MODEL_TEXTS and abs(sum(v for _k, v in mix) - 1) < 1e-9
               and all(t in assets.ASSET_INFO for t in model["allocation"]))
     check("the platform's texts carry no figure and no long dash",
-          not any(PS._has_figure(x) or "\u2014" in x or "\u2013" in x
+          not any(SH.has_figure(x) or "\u2014" in x or "\u2013" in x
                   for x in [*PS.MODEL_TEXTS.values(), *PS.MODEL_NAMES.values()]))
     check("the classic 60/40 is computed as 60 % shares",
           dict(PS.composition(assets.MODEL_PORTFOLIOS["Classic 60/40"]["allocation"]))["actions"] == 0.6)
@@ -286,7 +287,21 @@ def main() -> int:
     other = run({"page": "portfolio"}, token("hugo@example.com"))
     check("another member does not get it", all(not (m.value or []) for m in other.multiselect))
 
-    print("\nThe asset library: what the asset is, without unsourced figures or sizing")
+    print("\nThe asset library: the platform's own sheets, without unsourced figures or sizing")
+    check("every asset of the library has a sheet, and every sheet keeps the rules",
+          not SH.problems(assets.ASSET_INFO), "; ".join(SH.problems(assets.ASSET_INFO)[:6]))
+    import tempfile as _tf
+    from pathlib import Path as _P
+    bad = _P(_tf.mkdtemp()) / "fiches.toml"
+    bad.write_text('[SPY]\ndescription = "Frais de 0,03 %."\nrole = "Une base, il faut en détenir."\n'
+                   'limite = "Un risque \u2014 de change."\n[NOPE]\ndescription = "x."\nrole = "y."\nlimite = "z."\n',
+                   encoding="utf-8")
+    found = SH.problems(["SPY", "QQQ"], bad)
+    check("the rules catch a figure, advice, a long dash, a missing sheet and a stray one",
+          {"SPY.description: un chiffre", "SPY.role: « il faut »", "SPY.limite: un tiret long", "QQQ: pas de fiche",
+           "NOPE: fiche sans actif dans la bibliothèque"} <= set(found), str(found))
+    check("the Bitcoin sheet sends to the debate and calls it no assured hedge",
+          "débattue" in SH.load()["BTC-USD"].role and "pas une couverture assurée" in SH.load()["BTC-USD"].limite)
     check("the search finds by symbol, name and sector, and filters by class",
           [t for t, _i in PS.search("cw8")] == ["CW8.PA"]
           and {t for t, _i in PS.search("", "Crypto")} == {t for t, i in assets.ASSET_INFO.items()
@@ -294,26 +309,31 @@ def main() -> int:
           and all(i["sector"] == "Fixed Income" for _t, i in PS.search("fixed income"))
           and len(PS.search("")) == len(assets.ASSET_INFO))
     check("a figure leaves the prose, a name with digits stays",
-          PS.plain("Frais faibles (0,03%). Réplique 3 700 titres. Le Web3 aussi.") == "Frais faibles. Le Web3 aussi."
-          and PS.plain("Exposition S&P 500 à faible coût") == "Exposition S&P 500 à faible coût")
-    check("every asset keeps a description once its figures are gone",
-          all(PS.plain(i["description_fr"]) for i in assets.ASSET_INFO.values()))
+          SH.plain("Frais faibles (0,03%). Réplique 3 700 titres. Le Web3 aussi.") == "Frais faibles. Le Web3 aussi."
+          and SH.plain("Exposition S&P 500 à faible coût") == "Exposition S&P 500 à faible coût")
     library = run({"page": "pf_assets"}, gina)
     check("the library lists every asset", not library.exception
           and f"{len(assets.ASSET_INFO)} actifs" in text(library), error(library))
     library.text_input(key="pf_asset_q").set_value("lvmh").run()
     check("a search narrows the list", "1 actif</b> sur" in text(library) and "LVMH" in page_text(library))
     sheet = run({"page": "pf_assets", "asset": "CW8.PA"}, gina)
-    body = text(sheet)
-    check("an asset sheet: what it is, its risk and liquidity, the role it is given, framed",
-          not sheet.exception and "Amundi" in body and "Niveau de risque" in body and "Liquidité" in body
-          and "Le rôle qu'on lui prête" in body and "ni un conseil de taille de position" in body, error(sheet))
-    check("no allocation range, yield or market cap on the sheet",
-          "40-80" not in body and "%" not in body.split("fiche de la bibliothèque", 1)[1].split("</div>", 1)[0]
-          and "capitalisation" not in body.lower())
+    body = page_text(sheet)
+    cw8 = SH.load()["CW8.PA"]
+    check("an asset sheet: the platform's text, its risk and liquidity, the role it is given and its limit",
+          not sheet.exception and cw8.description in body and cw8.role in body and cw8.limite in body
+          and "Niveau de risque" in body and "Liquidité" in body and "Le rôle qu'on lui prête" in body
+          and "Sa limite" in body and "ni une certitude, ni un conseil" in body, error(sheet))
+    sheet_part = body.split("fiche de la bibliothèque", 1)[1].split("ni un conseil", 1)[0]
+    check("none of the catalogue's prose: no allocation range, no « par défaut », no figure",
+          "40-80" not in body and "par défaut" not in sheet_part and not SH.has_figure(sheet_part)
+          and assets.ASSET_INFO["CW8.PA"]["description_fr"] not in body)
     btc = run({"page": "pf_assets", "asset": "BTC-USD"}, gina)
-    check("a crypto sheet points to the course that debates the store of value",
-          any(b.key == "pf_asset_course_BTC_USD" for b in btc.button))
+    altbg = run({"page": "pf_assets", "asset": "ALTBG.PA"}, gina)
+    check("a crypto sheet, and a bitcoin treasury company's, point to the course that debates the store of value",
+          any(b.key == "pf_asset_course_BTC_USD" for b in btc.button)
+          and any(b.key == "pf_asset_course_ALTBG_PA" for b in altbg.button))
+    check("the sheet's facts say a kind once", "Cryptomonnaie · Monde." in page_text(btc)
+          and "Cryptomonnaie · Cryptomonnaie" not in page_text(btc))
     before = list(store().load_workspace("gina@example.com").holdings)
     [b for b in sheet.button if b.key == "pf_asset_add_CW8_PA"][0].click().run()
     ws = store().load_workspace("gina@example.com")

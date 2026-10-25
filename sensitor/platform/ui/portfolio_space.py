@@ -17,10 +17,12 @@ MetaTrader 5 analytics.
 The model allocations and the asset library read the analyzer's catalogue
 (`investment.assets`) but not all of it. A model's hand-written expected return
 and volatility are left out, as are an asset's market cap, dividend yield and
-allocation ranges, and any sentence of the catalogue's prose that carries a
-figure: none of them is sourced, and a figure the platform shows is sourced or
-computed. A model's composition by kind of asset is computed from its weights,
-and its figures come from the analysis, once it is loaded.
+allocation ranges: none of them is sourced, and a figure the platform shows is
+sourced or computed. A model's composition by kind of asset is computed from its
+weights, and its figures come from the analysis, once it is loaded. An asset's
+prose is the platform's own sheet (`platform.asset_sheets`, from
+`content/portfolio/fiches.toml`): what it is, the role usually given to it, and
+the limit of that role.
 
 The analyzer itself is kept in session state, as in the separate app: it belongs
 to this browser session only, and only the allocation is written to the store,
@@ -48,7 +50,7 @@ from ...pages import (render_copilot, render_health, render_optimize, render_ove
 from ...pages import _workspace
 from ...pages._shared import get_store as analysis_store
 from ...ui import themes as analysis_theme
-from .. import spaces
+from .. import asset_sheets, spaces
 from . import runtime as rt
 from .components import crumbs, esc, footer, html, icon, note, notice, page_header, section, tap
 
@@ -646,23 +648,6 @@ def _reset_form(state) -> None:
 # The asset library
 # =============================================================================
 
-NAMED = ("S&P 500", "CAC 40", "Layer 2", "60/40")                   # names that carry digits and no figure
-FIGURE = re.compile(r"(?<![A-Za-z])\d")              # a digit that is not part of a word, as in Web3
-
-
-def _has_figure(text: str) -> bool:
-    for name in NAMED:
-        text = text.replace(name, "")
-    return bool(FIGURE.search(text))
-
-
-def plain(text: str | None) -> str:
-    """The catalogue's prose without its figures: a bracket holding one goes, then any sentence still holding one."""
-    text = re.sub(r"\s*\([^)]*\)", lambda m: "" if _has_figure(m.group()) else m.group(), str(text or ""))
-    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
-    return " ".join(x for x in sentences if x and not _has_figure(x))
-
-
 def _liquidity(score) -> str:
     try:
         value = float(score)
@@ -732,18 +717,21 @@ def assets_page(catalog, email, route) -> None:
 
 def _asset_sheet(ticker: str, info: dict, email) -> None:
     state = st.session_state
-    facts = [f"{CLASSES.get(info.get('asset_class'), info.get('asset_class', ''))} · {where(info)}.",
+    kind = CLASSES.get(info.get("asset_class"), info.get("asset_class", ""))
+    facts = [" · ".join(dict.fromkeys(x for x in [kind, *where(info).split(" · ")] if x)) + ".",
              f"Niveau de risque : {RISKS.get(info.get('risk_level'), 'non renseigné')}.",
              f"Liquidité : {_liquidity(info.get('liquidity')) or 'non renseignée'}."]
-    role = plain(info.get("utility_fr"))
+    sheet = asset_sheets.load().get(ticker)
+    description = sheet.description if sheet else asset_sheets.plain(info.get("description_fr"))
+    reading = ""
+    if sheet:
+        reading = (f'<div class="sx-kicker">Le rôle qu\'on lui prête</div><p>{esc(sheet.role)}</p>'
+                   f'<div class="sx-kicker">Sa limite</div><p>{esc(sheet.limite)}</p>'
+                   '<p class="sx-note">Une lecture, à confronter aux cours : ni une certitude, ni un conseil.</p>')
     html(f'<div class="sx-c-blank"><div class="rub">{esc(ticker)} · fiche de la bibliothèque</div>'
-         f'<h3>{esc(info.get("name", ticker))}</h3><p>{esc(plain(info.get("description_fr")))}</p>'
-         f'<ul class="sx-c-facts">{"".join(f"<li>{esc(x)}</li>" for x in facts)}</ul>'
-         + (f'<div class="sx-kicker">Le rôle qu\'on lui prête</div><p>{esc(role)}</p>'
-            '<p class="sx-note">Une lecture courante, à confronter aux cours : ni une certitude, ni un conseil de '
-            'taille de position.</p>' if role else "")
-         + '</div>')
-    if info.get("asset_class") in ("Crypto",) or info.get("sector") == "Cryptocurrency":
+         f'<h3>{esc(info.get("name", ticker))}</h3><p>{esc(description)}</p>'
+         f'<ul class="sx-c-facts">{"".join(f"<li>{esc(x)}</li>" for x in facts)}</ul>{reading}</div>')
+    if info.get("asset_class") == "Crypto" or info.get("sector") in ("Crypto", "Cryptocurrency"):
         rt.link("Bitcoin, une réserve de valeur ? Le cours", "course", key=f"pf_asset_course_{_slug(ticker)}",
                 course="bitcoin-reserve-de-valeur")
     real = state.get("analysis_mode") == "real"
