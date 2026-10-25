@@ -413,3 +413,29 @@ retrieved = 2026-10-21
 unit = "%"
 columns = ["annee", "echantillon", "foundry_usa", "antpool", "btc_guild", "btc_com", "f2pool", "btc_top", "viabtc", "binance_pool", "btcc", "poolin", "autres", "non_identifie", "coefficient_nakamoto"]
 notes = "Environ 365 blocs par an : chaque part est une estimation, à quelques points près. Les blocs sans étiquette connue sont comptés comme non identifiés."
+
+[[dataset]]
+id = "prop-seuils-exemple"
+title = "Un compte de challenge sur douze journées, jugé par trois seuils de perte maximale"
+kind = "computed"
+generator = "prop-floors"
+source = "douze journées construites pour la leçon, compte de 50 000 $, perte maximale de 2 000 $ ; seuils fixe, suiveur sur le plus haut solde de fin de journée, et suiveur verrouillé au solde initial ; calcul Sensitor"
+license = "calcul Sensitor, aucune donnée tierce"
+retrieved = 2026-10-25
+synthetic = true
+unit = "$"
+columns = ["jour", "solde", "fixe", "suiveur", "verrouille"]
+notes = "Journées construites pour la leçon ; les trois façons de placer le seuil sont celles de FTMO 2-Step, FTMO 1-Step et Topstep."
+
+[[dataset]]
+id = "prop-chances"
+title = "Probabilité de réussir la première phase de FTMO 2-Step selon le risque par trade"
+kind = "computed"
+generator = "prop-odds"
+source = "règles de FTMO 2-Step publiées sur ftmo.com (objectif 10 %, perte journalière 5 %, perte maximale fixe de 10 %), consultées le 25 octobre 2026 ; probabilité exacte calculée par Sensitor pour deux profils : 45 % et 40 % de réussite, gain moyen de 1,5 R, perte de 1 R, risque constant en part du solde initial, deux trades par jour, 400 trades au plus"
+url = "https://ftmo.com/en/trading-objectives/"
+license = "calcul Sensitor ; règles citées depuis la page publique de FTMO"
+retrieved = 2026-10-25
+unit = "%"
+columns = ["risque", "p45", "p40"]
+notes = "Trades indépendants à taux de réussite constant, jugés sur les positions fermées ; la règle de jours minimum est supposée remplie et aucune règle de régularité ne s'applique à ce challenge."

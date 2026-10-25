@@ -127,7 +127,7 @@ database stores only what members do with the content.
    :::
    ::: exercise cas-eurusd             id from content/academy/exercises/
    :::
-   ::: tool risk-calculator           also ruin-simulator, savings-simulator, hash-demo
+   ::: tool risk-calculator           also ruin-simulator, savings-simulator, hash-demo, prop-simulator
    :::
    ::: chart emission-bitcoin          id from content/academy/charts.toml
    Légende.
@@ -188,6 +188,19 @@ a missing observation, drawn as a gap and never as a zero. Another one is
 Bitcoin's issuance, computed from the protocol rules in
 `sensitor/academy/bitcoin.py` (20 999 999,9769 BTC in total; past halving dates
 recorded, future ones estimated and flagged).
+
+**Prop firm challenges (Trading, path 11).** `sensitor/academy/propfirm.py` holds
+the rules of FTMO 2-Step, FTMO 1-Step and Topstep's Trading Combine 50K, as
+published on the firms' pages (each ruleset carries its addresses, their update
+dates and the date they were read), the thresholds (static, end-of-day trailing,
+trailing locked at the initial balance), the daily limit, both consistency
+rules, and `pass_odds`: the exact probability of reaching the target before the
+limits, computed as a Markov chain over every sequence of wins and losses, with
+its assumptions stated in the module and on screen. The `prop-simulator` tool
+(lesson and Trading Lab) can use a signed-in member's own journal: win rate and
+average R of their closed trades with a stop, read for the session's verified
+email, never cached, with the 95 % range of the win rate carried to the odds.
+Rules change: the course says to read the firm's current page before buying.
 
 **Not built:** an in-app editor. Until there is one, the workflow above is the
 CMS. Nothing in the UI pretends otherwise.

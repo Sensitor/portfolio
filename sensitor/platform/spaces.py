@@ -80,7 +80,8 @@ SPACES: tuple[Space, ...] = (
           entry="progress", pages=("progress",), numeral="IV",
           edition="bulletin"),
     Space("lab", "Trading Lab", "trader", LIVE,
-          "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
+          "Le calculateur de risque, le simulateur de ruine, le simulateur de challenge prop firm et les "
+          "exercices, sans capital réel.",
           entry="lab", pages=("lab",), numeral="V",
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
     Space("journal", "Journal de trading", "trader", LIVE,
@@ -94,6 +95,7 @@ SPACES: tuple[Space, ...] = (
                    "d'analyse, sur le même compte)",
                    "Captures de graphique jointes à un trade"),
           related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
+                   ("Parcours 11 : Réussir un challenge prop firm", "course:reussir-un-challenge"),
                    ("Le modèle de plan de trading", "resource:modele-plan-de-trading"))),
     Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",

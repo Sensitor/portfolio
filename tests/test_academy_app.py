@@ -177,7 +177,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 9 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 2 sur 2"))
+              body.index("Trading · 10 sur 11") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 2 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -399,6 +399,32 @@ def test_journal_edge_cases() -> None:
     check("an empty queue says so plainly", "Aucune demande" in body and "La file est vide" in body)
 
 
+def test_prop_simulator() -> None:
+    print("\nThe challenge simulator reads only the member's own journal")
+    from sensitor.trading import demo
+
+    dan, erin = token("dan@example.com"), token("erin@example.com")
+    store().save_trades("dan@example.com", demo.trades())
+    closed = sum(1 for t in demo.trades() if t.is_closed and t.r_multiple is not None)
+
+    visitor = run({"page": "lab"})
+    check("the lab shows the challenge simulator", "Ses chances de réussir un challenge" in text(visitor),
+          error(visitor))
+    check("a visitor is offered no journal figures", not visitor.toggle)
+    mine = run({"page": "lab"}, dan)
+    labels = [t.label for t in mine.toggle]
+    check("a member with a journal is offered their own figures",
+          f"Utiliser les chiffres de mon journal ({closed} trades fermés)" in labels, str(labels))
+    other = run({"page": "lab"}, erin)
+    check("another member is not offered them", not other.toggle and str(closed) + " trades fermés" not in text(other))
+    mine.toggle[0].set_value(True).run()
+    body = text(mine)
+    check("switched on, the simulator states the sample and its range",
+          not mine.exception and f"Sur {closed} trades, votre taux de réussite se situe" in body, error(mine))
+    lesson = run({"page": "lesson", "course": "reussir-un-challenge", "lesson": "probabilite-de-reussite"}, dan)
+    check("the lesson embeds the same simulator", "Ses chances de réussir un challenge" in text(lesson), error(lesson))
+
+
 def test_direction_prototype(tok: str) -> None:
     print("\nEvery page is in the « Carnet de bord »; only the pages one reads carry an edition")
     import re
@@ -585,6 +611,7 @@ def main() -> int:
     test_hash_demo(alice)
     test_no_secret_asked(alice)
     test_journal_space(alice)
+    test_prop_simulator()
     test_direction_prototype(alice)
     test_journal_edge_cases()
 

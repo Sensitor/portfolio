@@ -734,3 +734,45 @@ title = "Combien de pools faut-il pour dépasser la moitié des blocs ?"
 [[chart.series]]
 column = "coefficient_nakamoto"
 label = "Coefficient de Nakamoto du minage"
+
+[[chart]]
+id = "prop-seuils"
+dataset = "prop-seuils-exemple"
+kind = "line"
+x = "jour"
+x_label = "Journée"
+y_label = "Solde et seuils, en $"
+title = "Le même compte, trois seuils : la marge n'est pas la même"
+
+[[chart.series]]
+column = "solde"
+label = "Solde de fin de journée"
+
+[[chart.series]]
+column = "fixe"
+label = "Seuil fixe"
+
+[[chart.series]]
+column = "suiveur"
+label = "Seuil suiveur"
+
+[[chart.series]]
+column = "verrouille"
+label = "Seuil verrouillé au solde initial"
+
+[[chart]]
+id = "prop-chances"
+dataset = "prop-chances"
+kind = "line"
+x = "risque"
+x_label = "Risque par trade, en % du solde initial"
+y_label = "Probabilité de réussir, en %"
+title = "Le risque par trade décide des chances, avec ou sans avantage"
+
+[[chart.series]]
+column = "p45"
+label = "45 % de réussite, 1,5 R par gain (+0,125 R)"
+
+[[chart.series]]
+column = "p40"
+label = "40 % de réussite, 1,5 R par gain (aucun avantage)"

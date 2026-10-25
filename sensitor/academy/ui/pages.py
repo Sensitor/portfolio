@@ -22,7 +22,7 @@ from ...platform.ui.components import (crumbs, date_fr, duration, esc, footer, h
 from .. import access, progress as P
 from .. import quiz as Q
 from ..content import UNIVERSES, Catalog, Course, Lesson
-from . import lesson_view, quiz_view, risk_view, universes
+from . import lesson_view, prop_view, quiz_view, risk_view, universes
 from .library import book_row
 
 FORMATS = (
@@ -479,7 +479,12 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
             "donnée avant que son avantage ait le temps de jouer.")
     risk_view.render_ruin(scope="lab")
 
-    section(3, "Exercices pratiques",
+    section(3, "Simulateur de challenge prop firm",
+            "Les chances d'atteindre l'objectif avant les limites de perte, sous les règles publiées par "
+            "FTMO et Topstep, pour vos statistiques ou celles de votre journal.")
+    prop_view.render(scope="lab")
+
+    section(4, "Exercices pratiques",
             "Des cas chiffrés, résolus étape par étape, avec un corrigé pour chaque étape.")
     shown = 0
     for course in catalog.available_courses():
@@ -499,7 +504,7 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
     if not shown:
         note("Aucun exercice publié pour l'instant.")
 
-    section(4, "En préparation", "Annoncé pour le Trading Lab, pas encore disponible.")
+    section(5, "En préparation", "Annoncé pour le Trading Lab, pas encore disponible.")
     rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(p)}</span>'
                    f'{pill("Prévu", "soon")}</li>'
                    for i, p in enumerate(spaces.space("lab").planned, start=1))

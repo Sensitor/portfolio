@@ -204,3 +204,13 @@ summary = "Plan personnel, préparation, revue de session, journal, limites de r
 status = "published"
 courses = ["processus-de-trading"]
 topics = ["Plan de trading", "Revue", "Amélioration continue"]
+
+[[path]]
+track = "trading"
+id = "prop-firm"
+number = 11
+title = "Réussir un challenge prop firm"
+summary = "Ce que l'on achète vraiment, les règles lues mot à mot, le seuil suiveur, la perte journalière, la régularité, et ses chances de réussite calculées à partir de ses propres chiffres."
+status = "published"
+courses = ["reussir-un-challenge"]
+topics = ["Règles de challenge", "Seuil suiveur", "Probabilité de réussite"]

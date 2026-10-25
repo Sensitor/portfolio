@@ -1,0 +1,42 @@
+id = "regularite-challenge"
+title = "La règle de régularité sur deux challenges"
+context = """
+Un trader passe deux challenges. Sur un **FTMO 1-Step**, ses journées gagnantes ont rapporté **4 500 $**, **1 500 $** et **2 000 $** ; il n'a pas eu de journée perdante. Sur un **Trading Combine 50K de Topstep**, l'objectif est de **3 000 $** et son meilleur jour a rapporté **2 000 $**.
+
+Les règles sont celles publiées par les deux sociétés en octobre 2026 ; les journées sont construites pour l'exercice.
+"""
+conclusion = """
+Un seul grand jour allonge les deux challenges : il faut 1 000 $ de plus chez FTMO pour que ce jour pèse au plus la moitié du profit, et l'objectif de Topstep passe de 3 000 $ à 3 636 $. Répartir ses gains, avec une limite de gain journalière, évite de courir après un objectif qui s'éloigne.
+"""
+
+[[step]]
+id = "part-ftmo"
+prompt = "Sur le FTMO 1-Step, quelle part du profit total le meilleur jour représente-t-il ?"
+unit = "%"
+answer = 56.25
+tolerance = 0.01
+solution = "4 500 ÷ (4 500 + 1 500 + 2 000) = 4 500 ÷ 8 000 = **56,25 %**, au-dessus de la limite de 50 %."
+
+[[step]]
+id = "total-ftmo"
+prompt = "Si ce jour reste le meilleur, quel profit total faut-il atteindre pour respecter la règle ?"
+unit = "$"
+answer = 9000
+tolerance = 0.01
+solution = "4 500 ÷ 50 % = **9 000 $**, soit 1 000 $ de plus que les 8 000 $ déjà gagnés."
+
+[[step]]
+id = "limite-topstep"
+prompt = "Sur le Trading Combine 50K, sous quel montant le meilleur jour doit-il rester pour ne pas relever l'objectif ?"
+unit = "$"
+answer = 1650
+tolerance = 0.01
+solution = "55 % de 3 000 $ : **1 650 $**."
+
+[[step]]
+id = "objectif-topstep"
+prompt = "Avec un meilleur jour de 2 000 $, quel devient l'objectif ?"
+unit = "$"
+answer = 3636.36
+tolerance = 0.01
+solution = "2 000 ÷ 0,55 = **3 636,36 $**, au lieu de 3 000 $."

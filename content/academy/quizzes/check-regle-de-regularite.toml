@@ -1,0 +1,73 @@
+id = "check-regle-de-regularite"
+title = "Contrôle : la règle de régularité"
+course = "reussir-un-challenge"
+lesson = "regle-de-regularite"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ftmo"
+prompt = "FTMO 1-Step : meilleur jour de 6 000 $, profit total de 10 000 $. Que faut-il faire ?"
+kind = "single"
+lesson = "regle-de-regularite"
+
+[[question.option]]
+id = "continuer"
+text = "Continuer jusqu'à 12 000 $ de profit total si ce jour reste le meilleur."
+correct = true
+explanation = "6 000 ÷ 50 % = 12 000 $."
+
+[[question.option]]
+id = "perdu"
+text = "Rien, le compte est perdu."
+explanation = "La règle de régularité n'élimine pas."
+
+[[question.option]]
+id = "passe"
+text = "Rien, l'objectif de 10 000 $ est atteint."
+explanation = "Le meilleur jour pèse 60 % du profit : la règle n'est pas respectée."
+
+[[question]]
+id = "topstep"
+prompt = "Trading Combine 50K, objectif 3 000 $, meilleur jour 1 800 $. Quel devient l'objectif ?"
+kind = "single"
+lesson = "regle-de-regularite"
+
+[[question.option]]
+id = "3273"
+text = "Environ 3 273 $."
+correct = true
+explanation = "1 800 ÷ 0,55 = 3 272,73 $."
+
+[[question.option]]
+id = "3000"
+text = "Il reste à 3 000 $."
+explanation = "1 800 $ dépasse 55 % de 3 000 $, soit 1 650 $."
+
+[[question.option]]
+id = "3600"
+text = "3 600 $."
+explanation = "Ce serait avec une règle de 50 %."
+
+[[question]]
+id = "eviter"
+prompt = "Quelle habitude respecte la règle sans y penser ?"
+kind = "single"
+lesson = "regle-de-regularite"
+
+[[question.option]]
+id = "constant"
+text = "Un risque constant et une limite de gain journalière."
+correct = true
+explanation = "Oui : aucun jour ne peut alors peser trop lourd."
+
+[[question.option]]
+id = "forcer"
+text = "Augmenter la taille un jour où tout marche."
+explanation = "C'est la meilleure façon de violer la règle."
+
+[[question.option]]
+id = "un-jour"
+text = "Viser l'objectif en un seul jour."
+explanation = "Le meilleur jour pèserait alors tout le profit."

@@ -1,0 +1,50 @@
+id = "seuil-suiveur"
+title = "Le seuil d'un compte, jour après jour"
+context = """
+Un compte de challenge de **50 000 $** a une perte maximale de **2 000 $**. Ses quatre premières journées finissent à **+600 $**, **+900 $**, **−400 $** et **+1 200 $**.
+
+Calculez le seuil d'élimination selon les trois règles du cours. Journées construites pour l'exercice : lisez toujours les règles de votre propre compte.
+"""
+conclusion = """
+Après quatre jours, le compte est en gain de 2 300 $. Avec un seuil fixe, sa marge est de 4 300 $ ; avec un seuil suiveur, de 2 000 $ seulement ; avec un seuil verrouillé, de 2 300 $, et elle ne rétrécira plus. Les mêmes journées donnent trois marges différentes : la règle compte autant que le résultat.
+"""
+
+[[step]]
+id = "solde-j4"
+prompt = "Quel est le solde à la fin du jour 4 ?"
+unit = "$"
+answer = 52300
+tolerance = 0.01
+solution = "50 000 + 600 + 900 − 400 + 1 200 = **52 300 $**."
+
+[[step]]
+id = "fixe-j4"
+prompt = "Avec un seuil fixe, où se trouve le seuil d'élimination à la fin du jour 4 ?"
+unit = "$"
+answer = 48000
+tolerance = 0.01
+solution = "Le seuil fixe ne bouge pas : 50 000 − 2 000 = **48 000 $**."
+
+[[step]]
+id = "suiveur-j3"
+prompt = "Avec un seuil suiveur sur le plus haut solde de fin de journée, où se trouve le seuil pendant le jour 4, avant que le jour se termine ?"
+unit = "$"
+answer = 49500
+tolerance = 0.01
+solution = "Le plus haut solde de fin de journée est celui du jour 2, 51 500 $ ; le jour 3 n'a pas fait mieux. Seuil : 51 500 − 2 000 = **49 500 $**."
+
+[[step]]
+id = "suiveur-j4"
+prompt = "Et après la clôture du jour 4 ?"
+unit = "$"
+answer = 50300
+tolerance = 0.01
+solution = "Nouveau plus haut de 52 300 $ : 52 300 − 2 000 = **50 300 $**. Le compte est en gain de 2 300 $ mais n'a plus que 2 000 $ de marge."
+
+[[step]]
+id = "verrouille-j4"
+prompt = "Avec un seuil qui suit puis se verrouille au solde initial, où se trouve-t-il après le jour 4 ?"
+unit = "$"
+answer = 50000
+tolerance = 0.01
+solution = "Le seuil suiveur vaudrait 50 300 $, mais il s'arrête au solde initial : **50 000 $**, et il n'en bougera plus."

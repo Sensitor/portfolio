@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import bitcoin, crypto, discipline, invest, money, onchain
+from . import bitcoin, crypto, discipline, invest, money, onchain, propfirm
 
 FILE = "file"
 COMPUTED = "computed"
@@ -53,6 +53,8 @@ GENERATORS: dict[str, Callable[[], list[dict]]] = {
     "seed-strength": crypto.seed_strength_rows,
     "gas-costs": crypto.gas_rows,
     "pool-impact": crypto.impact_rows,
+    "prop-floors": propfirm.floors_rows,
+    "prop-odds": propfirm.odds_rows,
 }
 
 

@@ -1,0 +1,73 @@
+id = "check-ce-que-vous-achetez"
+title = "Contrôle : ce que vous achetez"
+course = "reussir-un-challenge"
+lesson = "ce-que-vous-achetez"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "achat"
+prompt = "Qu'achète-t-on avec un challenge de prop firm ?"
+kind = "single"
+lesson = "ce-que-vous-achetez"
+
+[[question.option]]
+id = "eval"
+text = "Le droit de passer une évaluation, sur un compte simulé, jugée sur des règles écrites."
+correct = true
+explanation = "Oui : FTMO exprime d'ailleurs ses règles en capital simulé initial."
+
+[[question.option]]
+id = "capital"
+text = "Un capital réel confié dès l'inscription."
+explanation = "Le compte d'évaluation n'est pas un capital confié : il faut d'abord réussir."
+
+[[question.option]]
+id = "formation"
+text = "Une formation garantissant un compte financé."
+explanation = "Rien n'est garanti : le compte dépend du respect des règles."
+
+[[question]]
+id = "cout"
+prompt = "Une tentative coûte 500 $ et a une chance sur deux de réussir. Que coûte une réussite en moyenne ?"
+kind = "single"
+lesson = "ce-que-vous-achetez"
+
+[[question.option]]
+id = "mille"
+text = "1 000 $"
+correct = true
+explanation = "500 ÷ 0,5 = 1 000 $ : il faut en moyenne deux tentatives."
+
+[[question.option]]
+id = "cinq"
+text = "500 $"
+explanation = "Ce serait le cas avec une réussite certaine."
+
+[[question.option]]
+id = "deux-cent"
+text = "250 $"
+explanation = "Il faut diviser les frais par la probabilité, pas les multiplier."
+
+[[question]]
+id = "taille"
+prompt = "Qu'est-ce qui décide le plus de vos chances ?"
+kind = "single"
+lesson = "ce-que-vous-achetez"
+
+[[question.option]]
+id = "regles"
+text = "Les règles, surtout la perte maximale et sa façon de suivre le solde, avec vos propres statistiques."
+correct = true
+explanation = "Oui : la taille du compte affichée ne dit rien de vos chances."
+
+[[question.option]]
+id = "taille"
+text = "La taille du compte."
+explanation = "Un grand compte avec des règles serrées peut être plus difficile qu'un petit."
+
+[[question.option]]
+id = "partage"
+text = "La part des gains reversée."
+explanation = "Elle ne compte qu'une fois le challenge réussi."
