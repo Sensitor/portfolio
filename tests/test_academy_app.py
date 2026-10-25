@@ -400,24 +400,31 @@ def test_journal_edge_cases() -> None:
 
 
 def test_direction_prototype(tok: str) -> None:
-    print("\nThe « Carnet de bord » direction stays on its pages, with its edition")
+    print("\nEvery page is in the « Carnet de bord »; only the pages one reads carry an edition")
     import re
 
     def marker(route):
-        found = re.search(r'class="sx-da( [a-z]+)?" hidden', text(run(route, tok)))
-        return None if not found else (found.group(1) or "").strip()
+        body = text(run(route, tok))
+        found = re.search(r'class="sx-edition ([a-z]+)" hidden', body)
+        return found.group(1) if found else ""
+
+    def retired(route):
+        return re.search(r'class="sx-da[ "]', text(run(route, tok))) is None
 
     working = {r["page"]: marker(r) for r in ({"page": "journal"}, {"page": "journal_trade", "trade": "demo-005"},
-                                               {"page": "journal_reviews"}, {"page": "coach"})}
-    check("the journal, a trade, the reviews and the coach queue: working edition", set(working.values()) == {""},
-          str(working))
+                                               {"page": "journal_reviews"}, {"page": "coach"}, {"page": "home"},
+                                               {"page": "psychology"}, {"page": "lab"}, {"page": "market"},
+                                               {"page": "tools"}, {"page": "community"}, {"page": "account"})}
+    check("the working pages carry no edition marker", set(working.values()) == {""}, str(working))
     reading = {r["page"]: marker(r) for r in ({"page": "academy"}, {"page": "course", "course": "premiers-pas"},
                {"page": "lesson", "course": "premiers-pas", "lesson": "fonctionnement-marche"},
                {"page": "library"}, {"page": "resource", "resource": "checklist-avant-trade"}, {"page": "progress"})}
     check("the Academy, the library and the progress: Bulletin edition", set(reading.values()) == {"bulletin"}, str(reading))
-    others = {r["page"]: marker(r) for r in ({"page": "home"}, {"page": "psychology"}, {"page": "lab"},
-                                              {"page": "market"}, {"page": "tools"})}
-    check("the rest of the platform is unchanged until its step", set(others.values()) == {None}, str(others))
+    check("the opt-in marker of the prototype is retired",
+          all(retired(r) for r in ({"page": "home"}, {"page": "journal"}, {"page": "academy"})))
+    home = text(run({"page": "home"}, tok))
+    check("the home page shows the spaces as a register, the courses as records",
+          "sx-c-space" in home and "sx-space navy" not in home)
 
 
 def test_no_secret_asked(tok: str) -> None:

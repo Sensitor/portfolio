@@ -33,16 +33,14 @@ def main() -> int:
     pages = spaces.all_pages()
     check("page ids are unique across spaces", len(pages) == len(set(pages)), str(pages))
     check("every entry page belongs to its space", all(s.entry in s.pages for s in spaces.SPACES))
-    carnet = [p for p in pages if spaces.uses_carnet(p)]
-    expected = set(spaces.space("journal").pages) | {"coach"}
-    for sid in ("academy", "library", "progress"):
-        expected |= set(spaces.space(sid).pages)
-    check("the « Carnet de bord » direction is decided in one place: journal, coaching, Academy, library, progress",
-          set(carnet) == expected, str(carnet))
-    check("the pages one reads take the Bulletin edition, the working pages none",
-          all(spaces.edition_of(p) == "bulletin" for s in ("academy", "library", "progress") for p in spaces.space(s).pages)
-          and all(spaces.edition_of(p) == "" for p in spaces.space("journal").pages)
-          and spaces.edition_of("coach") == "" and spaces.edition_of("lab") == "")
+    check("the opt-in to the « Carnet de bord » is retired: every page is in it",
+          not hasattr(spaces, "uses_carnet") and not hasattr(spaces, "CARNET_PAGES")
+          and not any(hasattr(s, "carnet") for s in spaces.SPACES))
+    reading = {p for s in ("academy", "library", "progress") for p in spaces.space(s).pages}
+    check("the pages one reads take the Bulletin edition, every other page none",
+          all(spaces.edition_of(p) == "bulletin" for p in reading)
+          and all(spaces.edition_of(p) == "" for p in pages if p not in reading),
+          str({p: spaces.edition_of(p) for p in pages}))
     check("every group is known", all(s.group in dict(spaces.GROUPS) for s in spaces.SPACES))
     check("the Academy is live", spaces.space("academy").is_live)
     for space in spaces.SPACES:

@@ -1,31 +1,30 @@
 """
 The Sensitor design system: tokens and stylesheet for every space.
 
-Signature
----------
-* **Editorial numerals.** Chapters are numbered I, II, III in a large serif;
-  sections carry « § 01 » on a strong ink rule with a short blue lead-in.
-* **Hexagonal markers**, taken from the mark, give each lesson its state:
-  outlined to read, ink for the current one, blue once finished.
-* **An isometric grid**, barely visible, textures the navy panels — the same
-  30° geometry the monogram is drawn on.
+Every page is drawn in the « Carnet de bord » direction (docs/DIRECTION_ARTISTIQUE.md):
+navy and ivory, paper, sheet and margin; Newsreader for titles and, in italic, for
+the voice of interpretation; Schibsted Grotesk for the interface and every figure;
+DM Mono only for code, hashes, times and identifiers. Roles, not shades: plan
+blue, gain green, loss brick, ochre for annotation. The signatures are the
+record (one mark per trade or per lesson), the « Lecture » margin, the print of
+the rules, the hook of the S, the coach's visa and the 30° hatch of risk zones.
 
-Surfaces alternate on purpose: ivory for the page, white for what is read or
-filled in, navy for the few moments that must stand out (a starting point, a
-result, a recap). One blue accent; green and red only for right and wrong.
+The pages one reads (Academy, Library, Progress) take the Bulletin edition:
+numbered sections and figures, the lesson body in Newsreader, the callouts as
+the lesson's margin. The shell marks them with `components.edition()`.
 
-Type contrast does the hierarchy: Playfair Display for titles (italic for the
-accent word), DM Sans for reading, DM Mono for every label and figure — so a
-title, a chapter, a lesson and its metadata can never be confused.
+Two universes share the system. Trading keeps the blue accent; Monnaie et
+crypto takes a copper accent and Space Grotesk titles. A page of that universe
+swaps the accent tokens of its main column, so every numeral, rule, marker and
+bar follows without a rule of its own.
 
-Two universes share the system. Trading keeps the blue accent and Playfair
-titles; Monnaie et crypto takes a copper accent and Space Grotesk titles. A
-page of that universe swaps the accent tokens of its main column, so every
-numeral, rule, marker and bar follows without a rule of its own.
-
-Streamlit's theme colours are overridden everywhere a widget is used, so the
-pages look the same whether the visitor's system is light or dark. Muted text
-keeps at least 4.5:1 contrast on its surface.
+The stylesheet is built in layers: the base (CSS, JOURNAL_CSS), whose shared
+components read their roles with the base look as default; the direction
+(CARNET_CSS), which sets those roles and its own components on every page; the
+Bulletin edition (BULLETIN_CSS). The isometric grid lives on the binding (the
+sidebar) only. Streamlit's theme colours are overridden everywhere a widget is
+used, so the pages look the same whether the visitor's system is light or dark.
+Muted text keeps at least 4.5:1 contrast on its surface.
 """
 
 from __future__ import annotations
@@ -521,22 +520,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 .stApp .sx-index .t { font: 600 1.12rem/1.3 var(--serif); color: var(--text); margin: .45rem 0 .55rem; }
 .stApp .sx-index .x { font-size: 13.5px; line-height: 1.55; color: var(--muted); margin-bottom: .7rem; }
 
-.stApp .sx-space { height: 100%; display: flex; flex-direction: column; gap: .3rem; padding: 1.5rem 1.4rem 1.3rem;
-  background: var(--white); border: 1px solid var(--line); border-radius: 4px; transition: border-color .2s, transform .22s var(--ease); min-height: 13.5rem; }
-.stApp [class*="st-key-tap_"]:hover .sx-space { border-color: var(--ink); transform: translateY(-2px); }
-.stApp .sx-space.navy { background-color: var(--ink); background-image: var(--iso); border-color: var(--ink); }
-.stApp .sx-space .top { display: flex; justify-content: space-between; align-items: center; }
-.stApp .sx-space .numeral { font: italic 500 1.9rem/1 var(--serif); color: var(--blue-2); }
-.stApp .sx-space.navy .numeral { color: var(--on-navy-accent); }
-.stApp .sx-space .ic svg { width: 22px; height: 22px; color: var(--muted); }
-.stApp .sx-space .t { font: 600 1.35rem/1.2 var(--serif); color: var(--ink); margin-top: 1.1rem; }
-.stApp .sx-space.navy .t { color: #f6f3ec; }
-.stApp .sx-space .s { font-size: 14px; line-height: 1.55; color: var(--muted); flex: 1; }
-.stApp .sx-space.navy .s { color: var(--on-navy-muted); }
-.stApp .sx-space .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
-.stApp .sx-space .foot svg { width: 18px; height: 18px; color: var(--faint); transition: transform .2s var(--ease); }
-.stApp [class*="st-key-tap_"]:hover .sx-space .foot svg { transform: translateX(3px); color: var(--ink); }
-.stApp .sx-space.navy .foot svg { color: var(--on-navy-muted); }
 
 /* Process (learning loop) */
 .stApp .sx-process { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: step; }
@@ -882,7 +865,7 @@ JOURNAL_CSS = """
 .stApp .sx-j-legend em { font-style: normal; color: var(--faint); margin-left: .8rem; }
 .stApp .sx-calendar, .stApp .sx-ladder { display: block; }
 .stApp .sx-calendar { max-width: 560px; }
-.stApp:has(.sx-da) .sx-calendar { max-width: 400px; }
+.stApp.stApp .sx-calendar { max-width: 400px; }
 .stApp table.sx-j-table th:first-child, .stApp table.sx-j-table td:first-child { width: 44%; }
 .stApp table.sx-j-table td:not(:first-child), .stApp table.sx-j-table th:not(:first-child) { white-space: nowrap; text-align: right; }
 .stApp table.sx-j-table td small { display: block; font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-top: .15rem; }
@@ -976,13 +959,15 @@ JOURNAL_CSS = """
 
 
 # =============================================================================
-# DIRECTION « CARNET DE BORD » (prototype, see docs/DIRECTION_ARTISTIQUE.md)
+# DIRECTION « CARNET DE BORD » (see docs/DIRECTION_ARTISTIQUE.md)
 # =============================================================================
 #
-# A page opts in with `components.carnet()`, which writes the `sx-da` marker;
-# everything below applies only under it, so the rest of the platform is
-# untouched until the direction is validated. Roles, not shades: each token
-# says what it is for, and nothing else uses it.
+# Validated on 22 October 2026 and applied to every page in four steps; since
+# the fourth there is no opt-in marker any more. The rules above are the base
+# the direction was built on: the shared components read their roles with that
+# base as default, and the block below sets the roles and the components of the
+# direction on top. Roles, not shades: each token says what it is for, and
+# nothing else uses it.
 #
 #   paper / sheet / margin     the page, the working surface, the annotation zone
 #   ink / ink-2 / graphite     text, secondary text, labels and axes (5.1:1 at worst)
@@ -1266,6 +1251,91 @@ __DA__ [class*="st-key-chart_"] { background: var(--c-sheet); border: 0; border-
 __DA__ .sx-chart-foot b { font: 600 12.5px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-note); }
 __DA__ .sx-chart-foot span { font: italic 400 15px/1.5 var(--c-title); color: var(--c-ink-2); }
 
+/* ── Step 4: every page is a Carnet page ─────────────────────────────────
+   The components that name a face (var(--serif), var(--sans), var(--mono)) get the
+   direction's: Newsreader, Schibsted Grotesk, and Schibsted for labels. Monospace is
+   kept for code, hashes, times and identifiers, which name var(--c-code). */
+__DA__ { --serif: var(--c-title); --sans: var(--c-text); --mono: var(--c-text); }
+__DA__ :is(code, .sx-hash) { font-family: var(--c-code) !important; }
+__DA__ :is(.sx-j-trade .meta, .sx-j-fbhead span) { font-family: var(--c-code); }
+/* The binding keeps its grid; its labels become grotesque rubrics. */
+.stApp.stApp [data-testid="stSidebar"] { --mono: var(--c-text); --sans: var(--c-text); }
+.stApp.stApp [data-testid="stSidebar"] .stButton > button p { font-family: var(--c-text); }
+/* No grid outside the binding, no repeated navy: one strong block per page at most. */
+__DA__ :is(.sx-start, .sx-figures > div.emph, .sx-result) { background-image: none; }
+__DA__ .sx-hero-art text { font-family: var(--c-text); letter-spacing: .06em; }
+__DA__ .sx-start { border-radius: 0; }
+__DA__ [class*="st-key-tap_"]:hover .sx-start { transform: none; box-shadow: none; }
+
+/* Figures of a tool: a ledger line, the result marked by its rule rather than navy. */
+__DA__ .sx-figures { border: 0; border-top: 2px solid var(--c-ink); background: var(--c-sheet); border-radius: 0; }
+__DA__ .sx-figures > div { border-color: var(--c-rule); }
+__DA__ .sx-figures .l { font: 500 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
+__DA__ .sx-figures .v { font: 600 1.5rem var(--c-text); letter-spacing: -.02em; color: var(--c-ink); }
+__DA__ .sx-figures .d { font: 400 13px var(--c-text); color: var(--c-graphite); }
+__DA__ .sx-figures > div.emph { background-color: var(--c-margin); box-shadow: inset 0 3px var(--c-plan); }
+__DA__ .sx-figures > div.emph .l, __DA__ .sx-figures > div.emph .d { color: var(--c-ink-2); }
+__DA__ .sx-figures > div.emph .v { color: var(--c-ink); }
+__DA__ .sx-stats .l { font: 500 13px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
+
+/* A featured course: a line of the register, not a framed card (as in the Academy). */
+__DA__ .sx-feature { background: transparent; border: 0; border-top: 1px solid var(--c-rule-strong); border-radius: 0;
+  grid-template-columns: 7rem minmax(0, 1fr) auto; padding: 1.4rem .4rem 1.3rem 0; }
+__DA__ [class*="st-key-tap_"]:hover .sx-feature { background: var(--c-sheet); box-shadow: none; border-color: var(--c-rule-strong); }
+__DA__ .sx-feature .numeral { font-size: 3.8rem; }
+__DA__ .sx-feature .t { font-size: 1.55rem; }
+__DA__ .sx-feature .go { width: 40px; height: 40px; border-color: var(--c-rule-strong); }
+__DA__ .sx-feature .go svg { width: 17px; height: 17px; }
+
+/* The spaces: one register, each line a link, the status in words. */
+__DA__ .sx-c-space { display: grid; grid-template-columns: 2.6rem minmax(0, 15rem) minmax(0, 1fr) auto 1.2rem; gap: 0 1.2rem;
+  align-items: baseline; padding: .85rem .2rem; border-top: 1px solid var(--c-rule); transition: background .15s; }
+__DA__ [class*="st-key-tap_"]:last-child .sx-c-space { border-bottom: 1px solid var(--c-rule); }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-space { background: var(--c-sheet); }
+__DA__ .sx-c-space .n { font: italic 500 1.25rem var(--c-title); color: var(--r-accent, var(--c-plan)); }
+__DA__ .sx-c-space .t { font: 600 1.12rem var(--c-title); color: var(--c-ink); }
+__DA__ .sx-c-space .s { font: 400 14px/1.5 var(--c-text); color: var(--c-ink-2); }
+__DA__ .sx-c-space .st { font: 500 12.5px var(--c-text); color: var(--c-up); white-space: nowrap; }
+__DA__ .sx-c-space .st.soon { color: var(--c-note); } __DA__ .sx-c-space .st.sep { color: var(--c-graphite); }
+__DA__ .sx-c-space .go { color: var(--c-rule-strong); align-self: center; } __DA__ .sx-c-space .go svg { width: 16px; height: 16px; }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-space .go { color: var(--c-plan); }
+
+/* A course and its record: one mark per lesson. */
+__DA__ .sx-c-course { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1.2rem; align-items: end;
+  padding: 1rem 0 .6rem; border-top: 1px solid var(--c-rule-strong); margin-top: 1.4rem; }
+__DA__ .sx-c-course .t { font: 600 1.2rem/1.3 var(--c-title); color: var(--c-ink); }
+__DA__ .sx-c-course .n { font: 600 15px var(--c-text); color: var(--c-ink); white-space: nowrap; }
+__DA__ .sx-c-course .n small { font-weight: 500; color: var(--c-graphite); }
+__DA__ .sx-c-course svg { grid-column: 1 / -1; }
+/* On the home page a course is one line: where and what, its record, its count. */
+__DA__ [class*="st-key-tap_"] .sx-c-course.row { margin-top: 0; padding: .8rem .2rem .7rem; transition: background .15s;
+  grid-template-columns: minmax(0, 1fr) auto 3.6rem; align-items: center; }
+__DA__ .sx-c-course.row svg { grid-column: 2; grid-row: 1; }
+__DA__ .sx-c-course.row .n { grid-column: 3; grid-row: 1; text-align: right; }
+__DA__ [class*="st-key-tap_"]:last-child .sx-c-course.row { border-bottom: 1px solid var(--c-rule-strong); }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-course.row { background: var(--c-sheet); }
+__DA__ [class*="st-key-tap_"]:hover .sx-c-course.row .t { color: var(--c-plan); }
+__DA__ .sx-c-course .k { display: block; font: 600 11.5px var(--c-text); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--r-accent, var(--c-plan)); margin-bottom: .2rem; }
+__DA__ .sx-c-course.uni-monnaie .k { color: var(--copper-2); }
+
+/* The reflection journal: the member's own voice, in the margin and in italic. */
+__DA__ [class*="st-key-panel_entry_"] { background: var(--c-margin); border-top: 0; border-left: 3px solid var(--c-plan); }
+__DA__ .sx-entry-head { font: 500 12.5px var(--c-text); letter-spacing: 0; text-transform: none; color: var(--c-graphite); }
+__DA__ .sx-entry-q { font: 600 1rem/1.45 var(--c-text); font-style: normal; color: var(--c-ink-2); }
+__DA__ .sx-entry-body { font: italic 400 17.5px/1.6 var(--c-title); color: var(--c-ink); }
+__DA__ :is(.sx-routine-label, .sx-entry-routine b) { font: 600 11.5px var(--c-text); letter-spacing: .08em; color: var(--c-graphite); }
+__DA__ .sx-entry-routine { border-top-color: var(--c-rule-strong); }
+
+@media (max-width: 1000px) {
+  __DA__ [class*="st-key-tap_"] .sx-c-course.row { grid-template-columns: minmax(0, 1fr) auto; }
+  __DA__ .sx-c-course.row svg { grid-column: 1 / -1; grid-row: 2; }
+  __DA__ .sx-c-course.row .n { grid-column: 2; }
+  __DA__ .sx-c-space { grid-template-columns: 2.2rem minmax(0, 1fr) auto; }
+  __DA__ .sx-c-space .s { grid-column: 2 / -1; grid-row: 2; }
+  __DA__ .sx-c-space .go { display: none; }
+}
+
 @media (max-width: 1000px) {
   __DA__ .sx-c-record, __DA__ .sx-c-copy { grid-template-columns: 1fr; }
   __DA__ .sx-c-record .body, __DA__ .sx-c-copy .body { padding-right: 0; }
@@ -1312,14 +1382,14 @@ __DA__ .sx-chart-foot span { font: italic 400 15px/1.5 var(--c-title); color: va
 
 MONNAIE_TITLES = "grotesk"
 MONNAIE_GROTESK = """
-.stApp:has(.sx-da.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --serif: var(--grotesk); --r-title: var(--grotesk); }
+.stApp:has(.sx-edition.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --serif: var(--grotesk); --r-title: var(--grotesk); }
 """
 
 BULLETIN_CSS = """
 __BU__ { --serif: var(--c-title); --sans: var(--c-text); --mono: var(--c-text);
   --r-num-display: inline; --r-num-track: 0; --r-marker: var(--c-note); }
 __BU__ code, __BU__ code.sx-hash, __BU__ .sx-hash { font-family: var(--c-code) !important; }
-.stApp:has(.sx-da.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --r-accent: var(--copper-2); }
+.stApp:has(.sx-edition.bulletin):has(.sx-scope.uni-monnaie) [data-testid="stMain"] { --r-accent: var(--copper-2); }
 
 /* Labels that were spaced monospace capitals become rubrics: one case, one tracking. */
 __BU__ :is(.sx-callout-title, .sx-chapter .k, .sx-outline-head, .sx-qhead .k, .sx-feedback .status,
@@ -1374,15 +1444,8 @@ __BU__ [class*="st-key-panel_ex_"] [data-testid="stMarkdownContainer"] :is(p, li
 
 __BU__ .sx-section .num { margin: 0 .6rem 0 0; }
 
-/* The list of paths: a register with rules, not a stack of framed cards. */
-__BU__ .sx-feature { background: transparent; border: 0; border-top: 1px solid var(--c-rule-strong); border-radius: 0;
-  grid-template-columns: 7rem minmax(0, 1fr) auto; padding: 1.4rem .4rem 1.3rem 0; }
+/* The list of paths is the register of every Carnet page (CARNET_CSS, step 4). */
 __BU__ [class*="st-key-tap_"]:last-child .sx-feature { border-bottom: 1px solid var(--c-rule-strong); }
-__BU__ [class*="st-key-tap_"]:hover .sx-feature { background: var(--c-sheet); box-shadow: none; border-color: var(--c-rule-strong); }
-__BU__ .sx-feature .numeral { font-size: 3.8rem; }
-__BU__ .sx-feature .t { font-size: 1.55rem; }
-__BU__ .sx-feature .go { width: 40px; height: 40px; border-color: var(--c-rule-strong); }
-__BU__ .sx-feature .go svg { width: 17px; height: 17px; }
 
 /* The end of a lesson is an action, not a second verdict: a sheet with its rule. */
 __BU__ [class*="st-key-navy_done_"] { background-color: var(--c-paper); border-top: 2px solid var(--c-ink); }
@@ -1394,14 +1457,6 @@ __BU__ [class*="st-key-navy_done_"] .stButton > button[data-testid="stBaseButton
 __BU__ [class*="st-key-navy_done_"] button[data-testid="stBaseButton-tertiary"] { color: var(--c-plan) !important; }
 __BU__ .sx-cover .ct { font-size: .8rem; overflow-wrap: anywhere; }
 __BU__ .sx-cover.big .ct { font-size: 1.3rem; }
-
-/* Progress: one mark per lesson. */
-__BU__ .sx-c-course { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1.2rem; align-items: end;
-  padding: 1rem 0 .6rem; border-top: 1px solid var(--c-rule-strong); margin-top: 1.4rem; }
-__BU__ .sx-c-course .t { font: 600 1.2rem/1.3 var(--c-title); color: var(--c-ink); }
-__BU__ .sx-c-course .n { font: 600 15px var(--c-text); color: var(--c-ink); white-space: nowrap; }
-__BU__ .sx-c-course .n small { font-weight: 500; color: var(--c-graphite); }
-__BU__ .sx-c-course svg { grid-column: 1 / -1; }
 
 /* A wide table or formula scrolls inside its own frame, never the page. */
 __BU__ [data-testid="stMarkdownContainer"]:has(> table) { overflow-x: auto; }
@@ -1415,12 +1470,18 @@ __BU__ .katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: .2
 """
 
 
+DA_SCOPE = '.stApp.stApp [data-testid="stMain"]'
+BU_SCOPE = '.stApp:has(.sx-edition.bulletin) [data-testid="stMain"]'
+
+
 def stylesheet() -> str:
     tokens = "".join(f"--{k}:{v};" for k, v in TOKENS.items())
     carnet = ("".join(f"--c-{k}:{v};" for k, v in CARNET_TOKENS.items())
               + "".join(f"--c-{k}:{v};" for k, v in CARNET_FONTS.items()))
-    da = CARNET_CSS.replace("__CTOKENS__", carnet).replace("__DA__", '.stApp:has(.sx-da) [data-testid="stMain"]')
-    bu = BULLETIN_CSS.replace("__BU__", '.stApp:has(.sx-da.bulletin) [data-testid="stMain"]')
+    # `.stApp.stApp` weighs what the retired `.stApp:has(.sx-da)` marker weighed, so
+    # every rule keeps the precedence it was validated with.
+    da = CARNET_CSS.replace("__CTOKENS__", carnet).replace("__DA__", DA_SCOPE)
+    bu = BULLETIN_CSS.replace("__BU__", BU_SCOPE)
     if MONNAIE_TITLES == "grotesk":
         bu += MONNAIE_GROTESK
     return ((CSS + JOURNAL_CSS + da + bu).replace("__FONTS__", FONTS).replace("__TOKENS__", tokens)

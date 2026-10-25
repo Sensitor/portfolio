@@ -13,9 +13,11 @@ import streamlit as st
 from ...academy import progress as P
 from .. import brand
 from . import runtime as rt
+from . import trade_visuals as V
 from .components import (crumbs, date_fr, duration, esc, footer, hexmark, html, icon,
-                         note, page_header, progress_bar, section, tap)
+                         note, page_header, section, tap)
 from .spaces_view import space_cards
+from ...academy.content import UNIVERSES
 from ...academy.ui import universes
 
 # Two panels, one per universe: a market structure above (Trading, blue), the
@@ -141,6 +143,22 @@ def _feature(catalog, course, *, key: str) -> None:
         f"Ouvrir le parcours {course.title}", "course", course=course.id)
 
 
+def _course_record(catalog, course, done_ids: set, passed: set, *, key: str) -> None:
+    """A course as a line of the register: where it sits, its title, and its record."""
+    progress = P.course_progress(course, done_ids, passed_quizzes=passed)
+    path = catalog.path(course.path_id)
+    universe = catalog.universe_of(course)
+    marks = [("in" if lesson.id in done_ids else "todo", f"Leçon {lesson.number} : {lesson.title}")
+             for lesson in course.lessons]
+    where = path.label if path else UNIVERSES.get(universe, "")
+    tap(key,
+        f'<div class="sx-c-course row uni-{universe}"><div class="t"><span class="k">{esc(where)}</span>'
+        f'{esc(course.title)}</div><div class="n">{progress.done}<small> / {progress.total}</small></div>'
+        f'{V.record(marks, max_width=360)}</div>',
+        f"Ouvrir le parcours {course.title}, {progress.done} leçons terminées sur {progress.total}",
+        "course", course=course.id)
+
+
 def _lesson_row(lesson, state: str, *, flush: bool = False) -> str:
     access = ('<span class="sx-pill free">Libre</span>' if lesson.is_public
               else f'<span class="sx-pill member">{icon("lock")}Membres</span>')
@@ -214,11 +232,10 @@ def _dashboard(catalog, email: str) -> None:
              '</div>')
         rt.link("Voir ma progression détaillée", "progress", key="dash_progress", kind="tertiary")
 
-    section(1, "Vos parcours", "Votre avancement dans chaque parcours ouvert.")
+    section(1, "Vos parcours", "Votre avancement dans chaque parcours ouvert : une marque par leçon terminée.")
     for course in catalog.available_courses():
-        progress = P.course_progress(course, completed.get(course.id, set()), passed_quizzes=passed)
-        _feature(catalog, course, key=f"dash_feature_{course.id}")
-        html(f'<div style="margin:.8rem 0 0 0">{progress_bar(progress.fraction, f"{progress.done} / {progress.total} leçons terminées")}</div>')
+        _course_record(catalog, course, completed.get(course.id, set()), passed,
+                       key=f"dash_course_{course.id}")
 
     section(2, "Vos espaces", "Tous les espaces Sensitor, avec leur état réel.")
     space_cards(key="dash_space")

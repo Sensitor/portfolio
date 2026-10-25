@@ -134,9 +134,6 @@ _ICONS = {
 
 UNIVERSE_ICONS = {"trading": "candle", "monnaie": "coin"}
 
-SPACE_ICONS = {"academy": "book", "library": "library", "psychology": "mind", "lab": "lab",
-               "market": "market", "community": "people", "progress": "progress", "tools": "tools",
-               "journal": "file"}
 
 
 def icon(name: str) -> str:
@@ -186,13 +183,14 @@ def crumbs(*parts: str, universe: str = "") -> None:
     html(f'<nav class="sx-crumbs" aria-label="Fil d\'Ariane">{items}{scope}</nav>')
 
 
-def carnet(edition: str = "") -> None:
+def edition(name: str) -> None:
     """
-    Draw the page in the « Carnet de bord » direction. The shell calls it for the
-    pages `spaces.uses_carnet` names; the marker is invisible and the stylesheet
-    sets the direction's roles on the page under it.
+    Mark the page with its edition of the « Carnet de bord » (« bulletin » where one
+    reads). Every page is drawn in the direction; only an edition needs a marker,
+    which is invisible and read by the stylesheet. The shell calls it.
     """
-    html(f'<span class="sx-da{" " + esc(edition) if edition else ""}" hidden></span>')
+    if name:
+        html(f'<span class="sx-edition {esc(name)}" hidden></span>')
 
 
 def page_header(kicker: str, title_html: str, lead: str = "", meta: list[str] | None = None,

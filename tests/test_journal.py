@@ -341,10 +341,17 @@ def test_theme_roles() -> None:
     check("shared components read roles, with the current look as their default",
           all(r in css for r in ("var(--r-label, var(--mono))", "var(--r-title, var(--serif))",
                                  "var(--r-rubric-color, var(--blue-2))", "var(--r-section-display, grid)")))
-    scope = '.stApp:has(.sx-da) [data-testid="stMain"] {'
+    scope = theme.DA_SCOPE + " {"
     block = css[css.index(scope):css.index("}", css.index(scope))]
-    check("the direction switches a page by setting those roles under its marker",
+    check("the direction sets those roles on every page",
           all(f"--r-{r}:" in block for r in ("title", "label", "label-case", "rubric-color", "section-display", "voice")))
+    check("the retired marker's weight is kept: .stApp.stApp scope, no opt-in marker left",
+          theme.DA_SCOPE.startswith(".stApp.stApp ") and ":has(.sx-da" not in css)
+    check("every page names the direction's faces; monospace only for code, hashes and times",
+          "--serif: var(--c-title); --sans: var(--c-text); --mono: var(--c-text);" in css
+          and ":is(code, .sx-hash) { font-family: var(--c-code) !important; }" in css)
+    check("no grid outside the binding: start cards, emphasised figures and results lose it",
+          ":is(.sx-start, .sx-figures > div.emph, .sx-result) { background-image: none; }" in css)
     check("no long dash in the stylesheet", "\u2014" not in css and "\u2013" not in css)
 
 

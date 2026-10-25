@@ -43,7 +43,6 @@ class Space:
     planned: tuple[str, ...] = ()               # what is announced, for preparing spaces
     related: tuple[tuple[str, str], ...] = ()   # (label, page) of real features related to it
     numeral: str = ""
-    carnet: bool = False                        # drawn in the « Carnet de bord » direction
     edition: str = ""                           # "" (working pages) or "bulletin" (pages that are read)
 
     @property
@@ -64,11 +63,11 @@ SPACES: tuple[Space, ...] = (
           planned=("La méthode Sensitor et la méthode du fondateur, rédigées par le fondateur",
                    "Les cycles et les indicateurs de Bitcoin, dès qu'une licence de prix sera obtenue",
                    "Vidéos intégrées aux leçons", "Ebooks"),
-          carnet=True, edition="bulletin"),
+          edition="bulletin"),
     Space("library", "Bibliothèque", "apprendre", LIVE,
           "Fiches de révision et checklists, liées aux leçons qui les utilisent.",
           entry="library", pages=("library", "resource"), numeral="II",
-          carnet=True, edition="bulletin"),
+          edition="bulletin"),
     Space("psychology", "Psychologie et discipline", "apprendre", LIVE,
           "Un journal de réflexion privé avec sa routine de séance, et le parcours 6 sur les biais "
           "et les routines.",
@@ -79,7 +78,7 @@ SPACES: tuple[Space, ...] = (
     Space("progress", "Progression", "apprendre", LIVE,
           "Leçons terminées, historique des quiz et notions à revoir.",
           entry="progress", pages=("progress",), numeral="IV",
-          carnet=True, edition="bulletin"),
+          edition="bulletin"),
     Space("lab", "Trading Lab", "trader", LIVE,
           "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
           entry="lab", pages=("lab",), numeral="V",
@@ -95,8 +94,7 @@ SPACES: tuple[Space, ...] = (
                    "d'analyse, sur le même compte)",
                    "Captures de graphique jointes à un trade"),
           related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
-                   ("Le modèle de plan de trading", "resource:modele-plan-de-trading")),
-          carnet=True),
+                   ("Le modèle de plan de trading", "resource:modele-plan-de-trading"))),
     Space("market", "Salle des marchés", "trader", PREPARING,
           "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
           entry="market", pages=("market",), numeral="VII",
@@ -118,8 +116,6 @@ SPACES: tuple[Space, ...] = (
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach")
-# Platform pages outside any space that are drawn in the « Carnet de bord » direction.
-CARNET_PAGES = ("coach",)
 LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
 
 
@@ -140,20 +136,14 @@ def space_of(page: str) -> Space | None:
     return next((s for s in SPACES if page in s.pages), None)
 
 
-def uses_carnet(page: str) -> bool:
-    """
-    Whether a page is drawn in the « Carnet de bord » direction. The one place
-    that decides it: a space switches by setting `carnet=True`, a platform page
-    by joining CARNET_PAGES. See docs/DIRECTION_ARTISTIQUE.md.
-    """
-    space_ = space_of(page)
-    return page in CARNET_PAGES or bool(space_ and space_.carnet)
-
-
 def edition_of(page: str) -> str:
-    """The « Carnet de bord » edition of a page: "bulletin" where one reads, "" where one works."""
+    """
+    The « Carnet de bord » edition of a page: "bulletin" where one reads, "" where
+    one works. Every page is drawn in the direction (docs/DIRECTION_ARTISTIQUE.md);
+    a space chooses its edition here, and nothing else has to change.
+    """
     space_ = space_of(page)
-    return space_.edition if space_ and space_.carnet else ""
+    return space_.edition if space_ else ""
 
 
 def by_group() -> list[tuple[str, list[Space]]]:

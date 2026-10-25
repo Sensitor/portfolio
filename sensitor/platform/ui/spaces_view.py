@@ -12,7 +12,7 @@ import streamlit as st
 
 from .. import spaces
 from . import runtime as rt
-from .components import (SPACE_ICONS, crumbs, esc, footer, hexmark, html, icon, notice,
+from .components import (crumbs, esc, footer, hexmark, html, icon, notice,
                          page_header, pill, section, tap)
 
 
@@ -81,18 +81,16 @@ def tools(catalog, email, route) -> None:
 
 
 def space_cards(*, key: str, exclude: tuple[str, ...] = ()) -> None:
-    """The map of spaces, three per row, each one a link."""
+    """
+    The map of spaces: one register, a line per space, each line a link. The
+    status is said in words, in its role colour; no space is singled out.
+    """
     shown = [s for s in spaces.SPACES if s.id not in exclude]
-    for start in range(0, len(shown), 3):
-        cols = st.columns(3)
-        for col, space in zip(cols, shown[start:start + 3]):
-            kind = {"live": "live", "preparing": "soon", "separate": "sep"}[space.status]
-            navy = " navy" if space.id == "academy" else ""
-            with col:
-                tap(f"{key}_{space.id}",
-                    f'<div class="sx-space{navy}"><div class="top"><span class="numeral">'
-                    f'{space.numeral}</span><span class="ic">{icon(SPACE_ICONS[space.id])}</span>'
-                    f'</div><div class="t">{esc(space.label)}</div><div class="s">'
-                    f'{esc(space.summary)}</div><div class="foot">'
-                    f'{pill(space.status_label, "on-navy" if navy else kind)}{icon("arrow")}</div></div>',
-                    f"{space.label}, {space.status_label.lower()}", space.entry)
+    for space in shown:
+        kind = {"live": "live", "preparing": "soon", "separate": "sep"}[space.status]
+        tap(f"{key}_{space.id}",
+            f'<div class="sx-c-space"><span class="n">{space.numeral}</span>'
+            f'<span class="t">{esc(space.label)}</span><span class="s">{esc(space.summary)}</span>'
+            f'<span class="st {kind}">{esc(space.status_label)}</span>'
+            f'<span class="go">{icon("arrow")}</span></div>',
+            f"{space.label}, {space.status_label.lower()}", space.entry)

@@ -322,7 +322,9 @@ rôles sous son marqueur. Les tokens `--c-*` sont déclarés à la racine.
 
 **Basculer un espace** se fait à un seul endroit : `carnet=True` sur l'espace
 dans `sensitor/platform/spaces.py` (ou le nom de la page dans `CARNET_PAGES`).
-Le shell pose le marqueur ; aucune page n'a à l'appeler.
+Le shell pose le marqueur ; aucune page n'a à l'appeler. (Jusqu'à l'étape 4 :
+depuis, toutes les pages sont en Carnet et le marqueur est retiré ; seule
+l'édition se choisit par espace, avec `edition="bulletin"`.)
 
 **Vérifié au pixel** : 38 captures pleine page (19 pages, bureau et téléphone),
 avant et après. Les 30 captures hors journal sont identiques au pixel près.
@@ -450,11 +452,44 @@ tests avant comme après (limite de ce portefeuille, pas de l'étape). Comparais
 `analyseur-risque-avant-apres.png`, `analyseur-compte-avant-apres.png`,
 `analyseur-mobile.png`.
 
-Reste proposé, à valider : la marge « Lecture » sur les écrans risque,
-corrélations et stress tests ; l'allocation en registre plutôt qu'en barres ;
-le nom de la marque dans la barre latérale (« Portfolio Health Pro » ou
-Sensitor) ; les tirets longs qui restent dans des textes de l'application
-d'analyse (contenu, hors de cette étape).
+Décidé le 25 octobre 2026 : « Lecture partout » et le nom Sensitor.
+
+- **Marque** : la barre latérale de l'analyseur porte le même ensemble que la
+  plateforme (le monogramme, SENSITOR, puis « Portefeuille et risque ») ;
+  l'onglet du navigateur s'appelle Sensitor, avec le monogramme pour icône.
+- **Marge « Lecture »** sur chaque écran de synthèse, à côté de son graphique
+  principal, par un composant commun (`chart_with_reading` dans
+  `sensitor/pages/_shared.py`). Chaque phrase est construite à partir d'un
+  chiffre que la page calcule déjà, et chaque marge dit d'où viennent ses
+  chiffres (données passées, estimations, simulation, données de référence,
+  petits échantillons) :
+  - vue d'ensemble : départ, arrivée, indice de référence, pire baisse ;
+  - performance : la position qui apporte le plus, celle qui apporte le moins,
+    les positions qui retirent du rendement ;
+  - santé : d'où vient le score, la composante la plus faible, le trait le plus
+    et le moins marqué ;
+  - radiographie : la plus grosse position directe, le premier secteur et la
+    première zone une fois les fonds décomposés ;
+  - risque : trois marges, contribution au risque, corrélations (paire la plus
+    et la moins liée, moyenne), drawdown (pire baisse, rattrapage, temps sous
+    le sommet) ;
+  - stress tests : la pire et la plus douce des fenêtres, le nombre de crises
+    où le portefeuille a fait mieux que l'indice ;
+  - optimiseur : le portefeuille actuel, le Sharpe maximal, la volatilité
+    minimale, présentés comme des estimations ;
+  - simulateur : la comparaison des allocations et le Monte Carlo (médiane,
+    une trajectoire sur dix de chaque côté, part des trajectoires sous la
+    somme investie) ;
+  - trading : vue d'ensemble, analytique, dérive du risque et erreurs, avec le
+    seuil d'échantillon rappelé.
+- Vérifié : 22 contrôles ajoutés (`test_sensitor_pages`, `test_trading_pages`),
+  dont le nombre de marges par page dans les deux langues et la concordance
+  entre la phrase et le tableau de la page ; captures à 1440 et 390 px.
+  Planche : `docs/assets/analyseur-lecture.png`.
+
+Reste, hors de la direction : les tirets longs dans des textes de
+l'application d'analyse (une tâche séparée est proposée) et l'allocation en
+registre plutôt qu'en barres (non demandée).
 
 Plan d'origine :
 
@@ -474,12 +509,51 @@ C'est l'écart le plus grand : l'application d'analyse a un thème sombre
   (`test_sensitor_pages`, `test_trading_pages`) ; la refonte se fait page par
   page, en commençant par la vue d'ensemble.
 
-### Étape 4 · Composants communs et autres espaces
+### Étape 4 · Composants communs et autres espaces (faite le 25 octobre 2026)
 
-- Accueil, compte, Psychologie et discipline, Trading Lab, espaces en
-  préparation : application des composants du socle, retrait des cartes
-  marine répétées et du quadrillage hors de la barre latérale.
-- Barre latérale : libellés en grotesque, quadrillage conservé (la reliure).
-- Psychologie : le journal de réflexion prend la marge et l'italique pour la
-  voix du membre ; pas de relevé (rien n'y est mesuré au trade).
-- Retrait du marqueur `sx-da` une fois toutes les pages passées.
+**Fait.** Toutes les pages de la plateforme sont en Carnet de bord : accueil
+(visiteur et membre), compte, Psychologie et discipline, Trading Lab, espaces
+en préparation et application séparée, réinitialisation et vérification.
+
+- **Polices** : sur toutes les pages, les composants qui nommaient une police
+  (`--serif`, `--sans`, `--mono`) reçoivent celles de la direction ; le
+  monospace ne reste que pour le code, les empreintes, les heures et les
+  identifiants. Le dernier titre en Playfair (l'appel à se connecter du
+  journal) passe en Newsreader.
+- **Barre latérale** : la reliure garde son quadrillage ; ses rubriques et ses
+  pastilles passent en grotesque.
+- **Un seul bloc fort par page, sans quadrillage** : la présentation de
+  l'accueil visiteur et la carte « Reprendre » de l'accueil membre restent
+  marine, sans grille ; la tuile Academy n'est plus distinguée en marine.
+- **Accueil membre** : « Vos parcours » devient un registre, une ligne par
+  cours avec son **relevé** (une marque par leçon terminée) et son compte, au
+  lieu de dix-neuf grandes cartes et barres de progression. Les espaces
+  deviennent un registre (numéro, nom, résumé, état en toutes lettres dans sa
+  couleur de rôle), sur l'accueil visiteur comme membre.
+- **Trading Lab** : les chiffres des calculateurs forment une ligne de
+  registre ; le résultat principal est marqué par un filet bleu du plan sur
+  fond de marge, et non plus par une tuile marine. Le même composant sert dans
+  les leçons qui contiennent un calculateur.
+- **Psychologie** : chaque note du journal de réflexion est posée dans la
+  marge, avec un filet bleu du plan, et le texte du membre est en italique
+  Newsreader : c'est sa voix. Pas de relevé, rien n'y est mesuré au trade.
+- **Retrait du marqueur** : `sx-da`, `uses_carnet`, `CARNET_PAGES` et le champ
+  `carnet` des espaces disparaissent. La direction s'applique par la portée
+  `.stApp.stApp [data-testid="stMain"]`, qui pèse exactement ce que pesait
+  l'ancienne portée : chaque règle garde la priorité avec laquelle elle a été
+  validée. Seule l'édition Bulletin garde un marqueur (`sx-edition bulletin`).
+  Vérifié au pixel : avant et après le retrait, les 38 captures de référence
+  sont identiques, à un décalage de 16 px près (le conteneur du marqueur
+  retiré).
+
+Vérifié : captures avant et après des pages concernées à 1440 et 390 px,
+aucun défilement horizontal ; pages déjà passées comparées au pixel (seuls
+changent la barre latérale, les numéros des règles du plan, le titre en
+Playfair du journal et les coins de la carte « Commencer ») ; suite de tests
+complète, dont les contrôles du registre des espaces, de l'édition par page et
+du retrait du marqueur. Comparaisons : `docs/assets/accueil-membre-avant-apres.png`,
+`accueil-visiteur-avant-apres.png`, `trading-lab-avant-apres.png`,
+`psychologie-avant-apres.png`, `etape4-mobile.png`.
+
+La généralisation est terminée : la direction n'est plus un prototype, c'est
+l'identité de toute la plateforme et de l'analyseur.
