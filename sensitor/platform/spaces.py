@@ -86,13 +86,13 @@ SPACES: tuple[Space, ...] = (
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
     Space("journal", "Journal de trading", "trader", LIVE,
           "Chaque trade jugé sur votre propre plan : revue automatique règle par règle, coût des "
-          "écarts en R, calendrier de régularité, et revue d'un trade par un coach.",
+          "écarts en R, calendrier de régularité, performance, analyse, risque et comportement, "
+          "synchronisation MetaTrader 5, et revue d'un trade par un coach.",
           entry="journal",
-          pages=("journal", "journal_trades", "journal_trade", "journal_add", "journal_plan",
-                 "journal_reviews"),
+          pages=("journal", "journal_trades", "journal_trade", "journal_performance", "journal_analysis",
+                 "journal_risk", "journal_behaviour", "journal_add", "journal_plan", "journal_reviews"),
           numeral="VI",
-          planned=("Synchronisation MetaTrader 5 dans cet espace (aujourd'hui dans l'application "
-                   "d'analyse, sur le même compte)",
+          planned=("Import du rapport d'historique MetaTrader 5, sans terminal",
                    "Captures de graphique jointes à un trade"),
           related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
                    ("Parcours 11 : Réussir un challenge prop firm", "course:reussir-un-challenge"),

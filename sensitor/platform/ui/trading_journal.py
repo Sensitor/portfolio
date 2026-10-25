@@ -1,8 +1,10 @@
 """
 The « Journal de trading » space: every trade judged against the member's plan.
 
-Pages: the dashboard, the list of trades, one trade, entering or importing
-trades, the plan, and (in `trade_reviews`) the requests sent to a coach.
+Pages: the dashboard, the list of trades, one trade, entering, importing or
+synchronising trades from MetaTrader 5, the plan, (in `trade_reviews`) the
+requests sent to a coach, and (in `journal_analysis`) the trading analytics:
+performance, analysis, risk and behaviour.
 
 Whose data is shown is decided once per run by `_book`: the signed-in member's
 own trades, read through the store's user-scoped methods with the address from
@@ -26,7 +28,7 @@ import streamlit as st
 from ...academy.ui.chart_view import style as chart_style
 from ...trading import demo, entry as E, performance, review as R
 from ...trading.analytics import compute_metrics
-from ...trading.models import Trade
+from ...trading.models import Trade, on_utc_clock
 from ...trading.setups import EMOTIONS, MISTAKES, SETUPS, mistake_label, setup_label
 from .. import spaces
 from . import runtime as rt
@@ -37,8 +39,9 @@ from .components import (crumbs, date_fr, esc, footer, html, icon, note, notice,
 
 DEMO_KEY = "jr_demo"
 PERIODS = {"30": ("30 jours", 30), "90": ("90 jours", 90), "all": ("Tout", None)}
-NAV = (("journal", "Tableau de bord"), ("journal_trades", "Trades"), ("journal_add", "Saisir"),
-       ("journal_plan", "Mon plan"), ("journal_reviews", "Revues"))
+NAV = (("journal", "Tableau de bord"), ("journal_trades", "Trades"), ("journal_performance", "Performance"),
+       ("journal_analysis", "Analyse"), ("journal_risk", "Risque"), ("journal_behaviour", "Comportement"),
+       ("journal_add", "Saisir"), ("journal_plan", "Mon plan"), ("journal_reviews", "Revues"))
 PAGE_SIZE = 30
 SETUP_KEYS = tuple(SETUPS)
 MISTAKE_KEYS = tuple(MISTAKES)
@@ -72,7 +75,7 @@ def _book(email: str | None) -> Book:
     else:
         saved = store.get_trading_plan(email)
         plan = R.TradingPlan.from_dict(saved) if saved else R.DEFAULT_PLAN
-        book = Book(store.list_trades(email), plan, saved is not None, False)
+        book = Book(on_utc_clock(store.list_trades(email), aware=True), plan, saved is not None, False)
     book.reviews = R.review_journal(book.trades, book.plan)
     return book
 
@@ -99,14 +102,11 @@ def nav(page: str, email: str | None) -> None:
     current = "journal_trades" if page == "journal_trade" else page
     store = rt.get_store()
     unseen = store.unseen_reviews(email) if email and store is not None else 0
-    with st.container(key="jnav"):
-        cols = st.columns(len(NAV))
-        for col, (target, label) in zip(cols, NAV):
+    with st.container(key="jnav", horizontal=True):
+        for target, label in NAV:
             if target == "journal_reviews" and unseen:
                 label = f"{label} · {unseen} nouvelle{'s' if unseen > 1 else ''}"
-            with col:
-                rt.link(label, target, key=f"jnav_{target}",
-                        kind="primary" if current == target else "secondary")
+            rt.link(label, target, key=f"jnav_{target}", kind="primary" if current == target else "secondary")
     show_flash()
 
 
@@ -267,8 +267,8 @@ def _empty_state(email: str | None) -> None:
         if st.button("Explorer l'exemple", key="empty_demo", width="stretch"):
             st.session_state[DEMO_KEY] = True
             st.rerun()
-    note("Vos trades MetaTrader 5 synchronisés dans l'application d'analyse apparaissent ici "
-         "automatiquement : c'est le même compte et le même journal.")
+    note("Vos trades MetaTrader 5 se synchronisent depuis « Saisir », et ceux déjà synchronisés dans "
+         "l'application d'analyse apparaissent ici : c'est le même compte et le même journal.")
 
 
 def _streaks(trades: list[Trade], reviews: dict) -> tuple[int, int]:
@@ -779,14 +779,10 @@ def add_page(catalog, email, route) -> None:
     section(2, "Importer un fichier", "Un tableur au format du modèle : une ligne par trade. Séparateur "
             "« ; » ou « , », virgule décimale acceptée.")
     _import(store, email)
-    section(3, "Synchroniser MetaTrader 5", "La synchronisation se fait dans l'application d'analyse, avec le "
-            "même compte : les trades synchronisés apparaissent ici sans rien ressaisir.")
-    url = rt.tools_url()
-    if url:
-        st.link_button("Ouvrir la synchronisation MetaTrader 5", f"{url.rstrip('/')}/?page=trading_journal")
-    else:
-        note("L'adresse de l'application d'analyse n'est pas renseignée pour ce déploiement "
-             "(variable SENSITOR_TOOLS_URL).")
+    section(3, "Synchroniser MetaTrader 5", "Votre historique lu directement dans le terminal : chaque trade "
+            "arrive avec ses prix, son stop et son résultat, prêt pour la revue.")
+    from . import journal_analysis
+    journal_analysis.sync_section(store, email)
     footer()
 
 

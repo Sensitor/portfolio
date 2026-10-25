@@ -74,8 +74,7 @@ def _landing(catalog) -> None:
         with left:
             html('<div class="sx-kicker on-navy">L\'écosystème Sensitor</div>'
                  '<h1 class="sx-display on-navy sx-eco">Apprendre le <em>trading</em>.<br>'
-                 'Comprendre la <em class="cu">monnaie</em>.<br>Diversifier avec la '
-                 '<em class="cu">crypto</em>.</h1><p class="sx-lead on-navy">Deux '
+                 'Diversifier avec la <em class="cu">crypto</em>.</h1><p class="sx-lead on-navy">Deux '
                  'univers qui se complètent, sur un seul compte : le trading, pour lire un marché, '
                  'mesurer son risque et décider avec méthode ; la monnaie, Bitcoin et la crypto, pour '
                  'comprendre ce qui fait la valeur de l\'argent et diversifier ses investissements dans '

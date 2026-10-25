@@ -11,9 +11,6 @@ build and analyse a portfolio, the space's navigation, and the bridge to the
 working portfolio stored per member (`pages._workspace`), so a portfolio built
 here is the one the separate app opens, and the other way round.
 
-What stays in the separate app for now, and says so on the building page: the
-MetaTrader 5 analytics.
-
 The model allocations and the asset library read the analyzer's catalogue
 (`investment.assets`) but not all of it. A model's hand-written expected return
 and volatility are left out, as are an asset's market cap, dividend yield and
@@ -72,8 +69,6 @@ MODELS, ASSETS = "pf_models", "pf_assets"
 PAGES = (BUILD, MODELS, ASSETS) + tuple(page for page, _label, _render in TABS)
 PROFILES = {"safe": "Prudent", "balanced": "Équilibré", "aggressive": "Dynamique"}
 HISTORY_DAYS = 730
-ELSEWHERE = ("l'analytique des trades synchronisés depuis MetaTrader 5, que le Journal de trading de la plateforme "
-             "ne remplace pas encore",)
 MODEL_NAMES = {"Capital Preservation": "Préservation du capital", "Defensive Income": "Revenu défensif",
                "Classic 60/40": "Le classique 60/40", "Global Growth": "Croissance mondiale",
                "Tech Leaders": "Leaders de la tech", "Crypto & Innovation": "Crypto et innovation",
@@ -282,13 +277,6 @@ def build_page(catalog, email, route) -> None:
         _real_form(state)
     else:
         _form(state)
-    section(2, "Dans l'application complète", "Ce qui n'a pas encore rejoint l'espace membre.")
-    html('<ul class="sx-c-facts">' + "".join(f"<li>{esc(x[:1].upper() + x[1:])}.</li>" for x in ELSEWHERE) + "</ul>")
-    url = rt.tools_url()
-    if url:
-        st.link_button("Ouvrir l'application complète", f"{url.rstrip('/')}/?page=overview")
-    else:
-        note("L'adresse de l'application complète n'est pas renseignée pour ce déploiement (variable SENSITOR_TOOLS_URL).")
     _persist(email)
     footer()
 

@@ -15,8 +15,8 @@ from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from .. import brand, spaces
-from . import (account, home, market_room, portfolio_space, psychology, spaces_view, theme, trade_reviews,
-               trading_journal)
+from . import (account, home, journal_analysis, market_room, portfolio_space, psychology, spaces_view, theme,
+               trade_reviews, trading_journal)
 from . import runtime as rt
 from .components import edition, esc, html
 
@@ -55,6 +55,10 @@ RENDERERS = {
     "journal": trading_journal.dashboard,
     "journal_trades": trading_journal.trades_page,
     "journal_trade": trading_journal.trade_page,
+    "journal_performance": journal_analysis.RENDERERS["journal_performance"],
+    "journal_analysis": journal_analysis.RENDERERS["journal_analysis"],
+    "journal_risk": journal_analysis.RENDERERS["journal_risk"],
+    "journal_behaviour": journal_analysis.RENDERERS["journal_behaviour"],
     "journal_add": trading_journal.add_page,
     "journal_plan": trading_journal.plan_page,
     "journal_reviews": trade_reviews.reviews_page,

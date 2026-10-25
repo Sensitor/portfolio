@@ -141,7 +141,7 @@ def academy_home(catalog: Catalog, email: str | None, route: dict) -> None:
     left, right = st.columns([1.35, 1], gap="large", vertical_alignment="bottom")
     with left:
         page_header(f"Espace {spaces.space('academy').numeral} · Academy",
-                    'Apprendre le <em>trading</em>, comprendre la <em class="cu">monnaie</em>.',
+                    'Apprendre le <em>trading</em>, diversifier avec la <em class="cu">crypto</em>.',
                     "Apprendre le trading pour lire un marché et décider avec méthode ; comprendre la "
                     "monnaie, l'inflation, Bitcoin et la crypto pour diversifier ses investissements avec "
                     "recul. Chaque parcours ouvre lorsque son contenu est rédigé, sourcé, relu et testé.",

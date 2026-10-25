@@ -26,7 +26,7 @@ place, and each one is reused as it was:
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
-| `portfolio_optimizer_saas.py` | kept as it is; linked as the « Portefeuille et risque » space, and for MetaTrader 5 synchronisation from the journal |
+| `portfolio_optimizer_saas.py` | kept as it is; its portfolio pages are the « Portefeuille et risque » space and its trading pages the journal's analytics, on the same account and tables |
 
 What moved:
 
@@ -68,7 +68,7 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
 | IV | Progression | Apprendre | live | `progress` |
 | V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, prop firm challenge simulator, exercises) |
-| VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
+| VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_performance`, `journal_analysis`, `journal_risk`, `journal_behaviour`, `journal_add`, `journal_plan`, `journal_reviews` |
 | VII | Salle des marchés | Trader | live | `market`, `market_session`, `market_edit` (coaches) |
 | VIII | Portefeuille et risque | Investir | live | `portfolio` (build), `pf_models`, `pf_assets`, `pf_overview`, `pf_performance`, `pf_health`, `pf_xray`, `pf_risk`, `pf_stress`, `pf_optimize`, `pf_simulator`, `pf_copilot`, `pf_reports`, `pf_portfolios`; the old `tools` address opens `portfolio` |
 | IX | Communauté | Échanger | preparing | `community` |
@@ -102,7 +102,8 @@ written before v9 stay out of the routine counts).
   checklist. Nothing in it is announced as planned any more.
 
 **Journal de trading** is live, in this app and on the same `trades` table as
-the analytics app, so trades synchronised from MetaTrader 5 there appear here.
+the analytics app: a trade synchronised, entered or imported in one is in the
+other.
 
 * **The plan and the automatic review** (`trading/review.py`). A member writes
   their rules once (stop, maximum risk, minimum reward-to-risk, sessions,
@@ -133,6 +134,27 @@ the analytics app, so trades synchronised from MetaTrader 5 there appear here.
   is about a closed trade only; the form says no recommendation belongs in it.
 * **Demonstration.** A visitor, or a member who asks, sees a constructed
   journal (`trading/demo.py`), labelled « Exemple synthétique » on every page.
+* **Analytics** (`platform/ui/journal_analysis.py`): Performance, Analyse,
+  Risque and Comportement are the separate app's trading pages
+  (`sensitor.pages.trading_*`), in French and styled by the analyzer's
+  component stylesheet, as the portfolio space does. They read the member's own
+  book through the verified email, never the demonstration (the page says so
+  when the dashboard shows it); a visitor is asked to sign in, an empty journal
+  gets the journal's empty state.
+* **MetaTrader 5 synchronisation**, section 3 of « Saisir ». The form calls the
+  connector (`integrations/mt5.py`) and the merge rule that keeps setups,
+  notes, emotions and ratings across syncs (`integrations/sync.py`); trades are
+  matched on the broker's position number, so a second sync adds nothing twice.
+  It asks for the investor password, which only reads, drops it from the session
+  on submit and remembers only the account number, server, UTC offset and
+  window. The package `MetaTrader5` ships for Windows only: on a server without
+  it, the section says so and shows no form.
+* **One clock** (`trading.models.on_utc_clock`). MT5 and the separate app store
+  naive UTC times, the platform aware UTC; Python cannot compare the two, and a
+  book holding both made the dashboard's period filter and the separate app's
+  pages raise. Each reader now puts the book on its own clock as it loads it:
+  aware for the platform, naive for the separate app and the API. A naive time
+  is read as UTC, which is what every writer means.
 
 **Salle des marchés** is live (`platform/market.py` for the rules,
 `platform/ui/market_room.py` for the pages, table `market_sessions`, schema v11).
@@ -223,8 +245,6 @@ stylesheet is byte for byte what it was).
   such as S&P 500 or CAC 40 is allowed), advice or a promise (« il faut »,
   « par défaut », « garanti »…) or a long dash. A new asset in the analyzer's
   library therefore needs its sheet before the tests pass.
-* **Still in the separate app**, and said on the building page with a link when
-  `SENSITOR_TOOLS_URL` is set: the MetaTrader 5 analytics.
 
 ### Adding a space
 

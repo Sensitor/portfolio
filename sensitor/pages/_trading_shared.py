@@ -29,7 +29,7 @@ from ..trading import setups as taxonomy
 from ..trading.analytics import format_duration
 from ..trading.context import build_context
 from ..trading.journal import TradeFilter, TradeJournal
-from ..trading.models import Direction, Session, session_label
+from ..trading.models import Direction, Session, on_utc_clock, session_label
 from ..ui.components import empty_state, money, note, num, pct, pill_html, spacer
 from ..ui.themes import INK_FAINT, INK_MUTED, STATUS, html
 from ._shared import current_user_email, get_store
@@ -65,7 +65,7 @@ def trading_context(lang: str):
         empty_state(tr("sign_in_trading", lang), tr("sign_in_trading_body", lang), icon="◔")
         return None
 
-    journal = TradeJournal(store.list_trades(email))
+    journal = TradeJournal(on_utc_clock(store.list_trades(email), aware=False))
 
     return build_context(
         journal,

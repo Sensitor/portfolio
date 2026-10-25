@@ -169,8 +169,8 @@ def main() -> int:
     build = run({"page": "portfolio"})
     check("the building page renders for a visitor, and says nothing is kept",
           "Composer le portefeuille" in text(build) and "Sans compte" in text(build) and not build.exception, error(build))
-    check("it says what stays in the full app, and that its address is not configured",
-          "MetaTrader 5" in text(build) and "portefeuilles modèles" not in text(build) and "pas renseignée" in text(build))
+    check("nothing is left to open in the full app", "Dans l'application complète" not in text(build)
+          and not build.get("link_button"))
     built = run({"page": "portfolio"}, alice, analyzer=analyzer)
     check("with an analysis, the building page shows it and offers to read it",
           "Portefeuille analysé" in text(built) and any(b.label == "Lire la vue d'ensemble" for b in built.button))

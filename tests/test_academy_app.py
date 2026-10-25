@@ -212,8 +212,8 @@ def test_universes() -> None:
     landing = text(run({"page": "home"}))
     check("the landing presents one ecosystem", "L'écosystème Sensitor" in landing
           and "Apprendre le <em>trading</em>." in landing
-          and 'Comprendre la <em class="cu">monnaie</em>.' in landing
-          and 'Diversifier avec la <em class="cu">crypto</em>.' in landing)
+          and 'Diversifier avec la <em class="cu">crypto</em>.' in landing
+          and 'Comprendre la <em class="cu">monnaie</em>' not in landing)
     check("…with both universes side by side, trading not placed above money",
           'sx-ucard uni-trading' in landing and 'sx-ucard uni-monnaie' in landing)
     check("…and the first course of each universe to start with",
@@ -221,7 +221,7 @@ def test_universes() -> None:
           and 'sx-feature uni-monnaie' in landing)
     academy = text(run({"page": "academy"}))
     check("the Academy opens on its two universes", "Deux univers, un seul programme" in academy
-          and 'comprendre la <em class="cu">monnaie</em>' in academy)
+          and 'diversifier avec la <em class="cu">crypto</em>' in academy)
     check("open courses are listed under the head of their universe",
           academy.index('sx-uhead uni-trading') < academy.index('sx-feature uni-trading')
           < academy.index('sx-uhead uni-monnaie') < academy.index('sx-feature uni-monnaie'))
@@ -620,7 +620,7 @@ def main() -> int:
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
-          'comprendre la <em class="cu">monnaie</em>' in text(old))
+          'diversifier avec la <em class="cu">crypto</em>' in text(old))
     for page in ("community",):
         app = run({"page": page})
         body = text(app)
@@ -636,12 +636,11 @@ def main() -> int:
     os.environ["SENSITOR_TOOLS_URL"] = "https://outils.example"
     try:
         linked = run({"page": "journal_add"}, token("linked@example.com"))
-        check("journal: MetaTrader 5 synchronisation opens the analytics app's journal",
-              any(b.url == "https://outils.example/?page=trading_journal" for b in linked.get("link_button")))
+        check("journal: MetaTrader 5 synchronisation is in the space now, not a link to the analytics app",
+              "Synchroniser MetaTrader 5" in text(linked) and not linked.get("link_button"))
         linked = run({"page": "tools"})
-        check("tools: the old address opens the space, which still links to the full app",
-              "Analyser son portefeuille" in text(linked)
-              and any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))
+        check("tools: the old address opens the space, with nothing left to open in the full app",
+              "Analyser son portefeuille" in text(linked) and not linked.get("link_button"))
     finally:
         os.environ.pop("SENSITOR_TOOLS_URL", None)
     shell = run({"page": "home"})
@@ -653,8 +652,9 @@ def main() -> int:
     check("the visitor's landing speaks of trading and of money",
           "Apprendre le <em>trading</em>." in text(run({"page": "home"})))
     tools = run({"page": "tools"})
-    check("tools: no link when the address is not configured, and it says so",
-          "pas renseignée" in text(tools) and not tools.get("link_button"))
+    check("tools: the space opens, with no link out and no address to configure",
+          "Analyser son portefeuille" in text(tools) and "pas renseignée" not in text(tools)
+          and not tools.get("link_button"))
     sidebar = [b.label for b in run({"page": "home"}).sidebar.button]
     from sensitor.platform import spaces
     check("the sidebar lists every space, in registry order",
