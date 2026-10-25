@@ -177,6 +177,16 @@ stylesheet is byte for byte what it was).
   app does. A free account composes five lines, a premium one fifty; an
   allocation built elsewhere with more lines stays whole and can be edited, not
   grown.
+* **The real portfolio**, in quantities: lines from the library or outside it
+  (a short name, « APPARTEMENT », « ASSURANCE-VIE »), a price typed by hand with
+  its currency for whatever no provider covers (used only when no quote exists,
+  and marked as the member's estimate with its date), then « Valoriser et
+  analyser ». The valuation is `investment.holdings`, the one rule both apps
+  use: quantity × today's price in the base currency, a total, weights, and the
+  lines without any price named rather than valued at zero. A line priced by
+  hand has no history, so the analysis leaves it out with its money; the
+  building page shows the whole wealth, line by line with the source of each
+  price, and every analysis page says which lines are valued but not analysed.
 * **One working portfolio per member.** The allocation is the `workspace` row
   of the verified email, restored and written by `pages._workspace` exactly as
   in the separate app, so a portfolio built in one opens in the other. The
@@ -186,8 +196,8 @@ stylesheet is byte for byte what it was).
   to the simulator, the portfolios page asking for a new analysis of a saved
   allocation) become the platform's pages.
 * **Still in the separate app**, and said on the building page with a link when
-  `SENSITOR_TOOLS_URL` is set: the real portfolio in quantities, prices entered
-  by hand, model portfolios, the asset library and the MetaTrader 5 analytics.
+  `SENSITOR_TOOLS_URL` is set: model portfolios, the asset library and the
+  MetaTrader 5 analytics.
 
 ### Adding a space
 

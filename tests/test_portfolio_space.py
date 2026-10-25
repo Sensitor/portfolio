@@ -72,11 +72,34 @@ def error(app: AppTest) -> str:
 
 
 def offline(tickers, weights, start, **kwargs):
-    """The analyzer, without the network: the synthetic portfolio, already « fetched »."""
-    analyzer = make_portfolio(dict(weights), base_currency=kwargs.get("base_currency", "USD"))
+    """
+    The analyzer, without the network: the synthetic portfolio, already « fetched ».
+    Like the real one, it keeps only the lines with a price history (here, the
+    asset library's) and spreads the weight of the others over them.
+    """
+    from sensitor.investment import assets
+    known = {t: w for t, w in dict(weights).items() if t in assets.ASSET_INFO}
+    total = sum(known.values()) or 1.0
+    analyzer = make_portfolio({t: w / total for t, w in known.items()}, base_currency=kwargs.get("base_currency", "USD"))
     analyzer.user_profile = kwargs.get("user_profile", "balanced")
-    analyzer.fetch_data = lambda **_: True
+    analyzer.fetch_data = lambda **_: bool(known)
     return analyzer
+
+
+def offline_prices(tickers, base="USD", *, manual=None, on_error=None, **_):
+    """Today's prices, without the network: 500 for a library line, the typed price otherwise."""
+    from sensitor.investment import assets
+    report = {"base": base, "converted": {}, "dropped": {}, "missing": [], "manual": {}, "previous": {}}
+    prices = {}
+    for t in tickers:
+        if t in assets.ASSET_INFO:
+            prices[t] = 500.0
+        elif (manual or {}).get(t, {}).get("price"):
+            prices[t] = float(manual[t]["price"])
+            report["manual"][t] = manual[t].get("at")
+        else:
+            report["missing"].append(t)
+    return prices, report
 
 
 def main() -> int:
@@ -85,6 +108,19 @@ def main() -> int:
 
     # AppTest runs the app in this process: the space prices portfolios offline.
     PS.UltimatePortfolioAnalyzer = offline
+    PS.latest_prices = offline_prices
+
+    print("\nValuing holdings: the one rule both apps use")
+    from sensitor.investment import holdings as H
+    v = H.value({"SPY": 10, "FLAT": 1, "NONE": 3}, {"SPY": 500.0, "FLAT": 250_000.0})
+    check("quantity times price, a total and weights; a line without price is named, not zero",
+          v.values == {"SPY": 5000.0, "FLAT": 250000.0} and v.total == 255000.0
+          and abs(v.weights["SPY"] - 5000 / 255000) < 1e-12 and v.unpriced == ("NONE",))
+    covered, excluded = H.split_analysed(v.values, ["SPY"])
+    check("a line the analyzer leaves out takes its money with it",
+          covered == 5000.0 and excluded == {"FLAT": 250000.0})
+    check("an empty portfolio is worth nothing and has no weights",
+          H.value({}, {}).total == 0 and H.value({"SPY": 1}, {}).weights == {})
 
     print("\nThe space in the registry")
     space = spaces.space("tools")
@@ -126,7 +162,7 @@ def main() -> int:
     check("the building page renders for a visitor, and says nothing is kept",
           "Composer le portefeuille" in text(build) and "Sans compte" in text(build) and not build.exception, error(build))
     check("it says what stays in the full app, and that its address is not configured",
-          "portefeuille réel en quantités" in text(build) and "pas renseignée" in text(build))
+          "portefeuilles modèles" in text(build) and "pas renseignée" in text(build))
     built = run({"page": "portfolio"}, alice, analyzer=analyzer)
     check("with an analysis, the building page shows it and offers to read it",
           "Portefeuille analysé" in text(built) and any(b.label == "Lire la vue d'ensemble" for b in built.button))
@@ -165,6 +201,44 @@ def main() -> int:
     check("the allocation is written as the member's working portfolio, in its currency",
           ws is not None and ws.holdings == {"SPY": 0.7, "GLD": 0.3} and ws.base_currency == "EUR",
           str(ws))
+
+    print("\nA real portfolio, in quantities, with a price typed by hand")
+    erin = token("erin@example.com")
+    app = run({"page": "portfolio"}, erin)
+    app.radio(key="pf_mode").set_value("real").run()
+    app.selectbox(key="pf_add_pick").set_value("SPY").run()
+    app.number_input(key="pf_add_qty").set_value(10.0).run()
+    [b for b in app.button if b.key == "pf_add"][0].click().run()
+    app.text_input(key="pf_add_custom").set_value("Appartement Lyon").run()
+    [b for b in app.button if b.key == "pf_add_custom_btn"][0].click().run()
+    check("a library line and a line outside it are added",
+          app.session_state["real_portfolio_holdings"] == {"SPY": 10.0, "APPARTEMENT-LYON": 1.0},
+          str(app.session_state["real_portfolio_holdings"]))
+    app.number_input(key="pf_mp_APPARTEMENT-LYON").set_value(250000.0).run()
+    [b for b in app.button if b.label == "Valoriser et analyser"][0].click().run()
+    state = app.session_state
+    check("valued and analysed: the overview opens in real mode", not app.exception
+          and state["ac_route"]["page"] == "pf_overview" and state["analysis_mode"] == "real", error(app))
+    check("the hand-priced line is valued, named, and left out of the analysis with its money",
+          state["unanalysed_holdings"] == {"APPARTEMENT-LYON": 250000.0} and state["real_portfolio_total_value"] == 5000.0)
+    ws = store().load_workspace("erin@example.com")
+    check("quantities and the typed price are the member's working portfolio",
+          ws is not None and ws.mode == "real" and ws.quantities == {"SPY": 10.0, "APPARTEMENT-LYON": 1.0}
+          and ws.manual_prices.get("APPARTEMENT-LYON", {}).get("price") == 250000.0, str(ws))
+    page = run({"page": "pf_overview"}, erin)
+    check("a new session restores the real portfolio, values it again and analyses it",
+          page.session_state["analysis_mode"] == "real" and page.session_state["current_portfolio"] is not None
+          and page.session_state["real_portfolio_total_value"] == 5000.0)
+    check("the analysis pages say which lines are valued but not analysed",
+          "Lignes valorisées, non analysées" in text(page) and "APPARTEMENT-LYON" in text(page) and not page.exception,
+          error(page))
+    back = run({"page": "portfolio"}, erin)
+    body = text(back)
+    check("back on the building page, the member's wealth: each line, its source, the total",
+          "Portefeuille réel" in body and "saisi le" in body and "cours du marché" in body
+          and "255\u202f000" in body, body[-600:] if "Portefeuille réel" not in body else "")
+    other = run({"page": "portfolio"}, token("frank@example.com"))
+    check("another member sees none of it", "APPARTEMENT" not in text(other) and "255\u202f000" not in text(other))
 
     print("\nThe separate app's navigation, translated")
     hop = run({"page": "pf_copilot"}, alice, analyzer=analyzer, state={"page": "simulator"})
