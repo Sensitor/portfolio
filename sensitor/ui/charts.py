@@ -221,7 +221,7 @@ def weight_vs_risk(rc_df, height: int | None = None,
         x=rc_df["weight"] * 100, y=tickers, orientation="h",
         name=label_weight,
         marker=_bar_marker(PALETTE[0], opacity=0.55),
-        hovertemplate="<b>%{y}</b> — " + label_weight + " %{x:.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_weight + " %{x:.1f}%<extra></extra>",
         width=0.34, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -230,7 +230,7 @@ def weight_vs_risk(rc_df, height: int | None = None,
         marker=_bar_marker(PALETTE[1]),
         text=[f"{v * 100:.0f}%" for v in rc_df["pct_contribution"]],
         textposition="outside", textfont=dict(size=11, color=INK_2),
-        hovertemplate="<b>%{y}</b> — " + label_risk + " %{x:.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_risk + " %{x:.1f}%<extra></extra>",
         width=0.34, offset=0.0,
     ))
 
@@ -606,7 +606,7 @@ def scenario_bars(rows, height: int | None = None,
         marker=_bar_marker([NEG if r["portfolio"] < 0 else POS for r in rows]),
         text=[f"{r['portfolio'] * 100:+.1f}%" for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK_2),
-        hovertemplate="<b>%{y}</b> — " + label_portfolio + " %{x:+.1f}%<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_portfolio + " %{x:+.1f}%<extra></extra>",
         width=0.34, offset=-0.34,
     ))
     has_bench = any(r.get("benchmark") is not None for r in rows)
@@ -615,7 +615,7 @@ def scenario_bars(rows, height: int | None = None,
             x=[(r.get("benchmark") or 0) * 100 for r in rows], y=labels, orientation="h",
             name=label_benchmark,
             marker=_bar_marker(fade(NEUTRAL, 0.42)),
-            hovertemplate="<b>%{y}</b> — " + label_benchmark + " %{x:+.1f}%<extra></extra>",
+            hovertemplate="<b>%{y}</b> · " + label_benchmark + " %{x:+.1f}%<extra></extra>",
             width=0.34, offset=0.0,
         ))
 
@@ -665,7 +665,7 @@ def before_after_bars(rows, height: int | None = None,
         marker=_bar_marker(fade(NEUTRAL, 0.40)),
         text=[r["before_text"] for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK_MUTED),
-        hovertemplate="<b>%{y}</b> — " + label_before + " %{text}<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_before + " %{text}<extra></extra>",
         width=0.32, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -674,7 +674,7 @@ def before_after_bars(rows, height: int | None = None,
         marker=_bar_marker([STATUS[r.get("tone", "warning")] for r in rows]),
         text=[r["after_text"] for r in rows],
         textposition="outside", textfont=dict(size=11, color=INK),
-        hovertemplate="<b>%{y}</b> — " + label_after + " %{text}<extra></extra>",
+        hovertemplate="<b>%{y}</b> · " + label_after + " %{text}<extra></extra>",
         width=0.32, offset=0.02,
     ))
     fig.update_layout(**plotly_layout(
@@ -840,7 +840,7 @@ def fan_chart(result: dict, height: int = 420, currency: str = "$",
             y=np.concatenate([percentiles[upper], percentiles[lower][::-1]]),
             fill="toself", fillcolor=fade(ACCENT, opacity),
             line=dict(width=0), hoverinfo="skip",
-            name=f"{lower}–{upper}% {band_label}",
+            name=f"{lower}-{upper}% {band_label}",
         ))
 
     for p, width, dash in ((10, 1, "dot"), (90, 1, "dot")):
@@ -1204,7 +1204,7 @@ def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.
         name="Rest" if lang == "en" else "Les autres",
         marker=_bar_marker(fade(NEUTRAL, 0.42)),
         customdata=[[r["rest"]["n"]] for r in rows],
-        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        hovertemplate="<b>%{y}</b> · %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
         width=0.32, offset=-0.34,
     ))
     fig.add_trace(go.Bar(
@@ -1214,7 +1214,7 @@ def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.
         text=[f"{v:+.2f}  n={r['group']['n']}" for v, r in zip(inside, rows)],
         textposition="outside", textfont=dict(size=11, color=INK_2),
         customdata=[[r["group"]["n"]] for r in rows],
-        hovertemplate="<b>%{y}</b> — %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
+        hovertemplate="<b>%{y}</b> · %{x:,.2f} (%{customdata[0]} trades)<extra></extra>",
         width=0.32, offset=0.02,
     ))
 

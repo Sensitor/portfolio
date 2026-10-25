@@ -23,7 +23,7 @@ from ..ui.components import (
     section, spacer,
 )
 from ..ui.themes import INK, INK_2, INK_FAINT, INK_MUTED, PLOTLY_CONFIG, STATUS, html
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import benchmark_selector, chart_with_reading, guard
 
@@ -113,10 +113,10 @@ def _historical_block(ctx, lang: str) -> None:
             S.scenario_label(result["key"], lang),
             f"{result['start']} → {result['end']}",
             pct(result["portfolio_return"], 1),
-            pct(bench, 1) if bench is not None else "—",
-            pct(result["relative"], 1) if result.get("relative") is not None else "—",
+            pct(bench, 1) if bench is not None else na(lang),
+            pct(result["relative"], 1) if result.get("relative") is not None else na(lang),
             f"{result['coverage'] * 100:.0f}%",
-            result.get("worst_asset") or "—",
+            result.get("worst_asset") or na(lang),
         ])
     data_table(
         [tr("historical_scenarios", lang), tr("period", lang), tr("portfolio", lang),
@@ -165,7 +165,7 @@ def _scenario_card(result: dict, lang: str) -> None:
     )
 
     if not reliable:
-        missing = ", ".join(result.get("missing", [])[:4]) or "—"
+        missing = ", ".join(result.get("missing", [])[:4]) or na(lang)
         alert("warning", tr("coverage_warning", lang).split(".")[0],
               f"{tr('missing_holdings', lang)}: {missing}",
               footnote=f"{tr('coverage', lang)} {coverage * 100:.0f}% "

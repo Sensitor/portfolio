@@ -33,6 +33,7 @@ No Streamlit import, and no engine import: this module is only ever a renderer.
 from __future__ import annotations
 
 import html as _html
+from .i18n import na
 
 # Light-document palette. Hues match the app's series colours so the two read as
 # one product; the surfaces are inverted for print.
@@ -55,17 +56,17 @@ def _esc(value) -> str:
 
 def _pct(value, decimals=1, sign=False) -> str:
     if value is None:
-        return "—"
+        return na()
     return f"{value * 100:{'+' if sign else ''}.{decimals}f}%"
 
 
 def _num(value, decimals=2) -> str:
-    return "—" if value is None else f"{value:.{decimals}f}"
+    return na() if value is None else f"{value:.{decimals}f}"
 
 
 def _money(value, currency="$") -> str:
     if value is None:
-        return "—"
+        return na()
     if abs(value) >= 1_000_000:
         return f"{currency}{value / 1_000_000:.2f}M"
     return f"{currency}{value:,.0f}"

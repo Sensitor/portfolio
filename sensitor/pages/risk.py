@@ -22,7 +22,7 @@ from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
 from ..ui.themes import INK_MUTED, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ._shared import chart_with_reading, guard, period_selector, single_asset_note
 
 
@@ -244,7 +244,7 @@ def render_risk(ctx) -> None:
         with d4:
             recovery = dd.get("avg_recovery_days")
             metric_card(tr("avg_recovery", lang),
-                        f"{recovery:.0f} {tr('days', lang)}" if recovery else "—",
+                        f"{recovery:.0f} {tr('days', lang)}" if recovery else na(lang),
                         bar=min((recovery or 0) / 365, 1), higher_is_better=False,
                         caption=f"{dd['n_episodes']} episodes" if lang == "en"
                                 else f"{dd['n_episodes']} épisodes")

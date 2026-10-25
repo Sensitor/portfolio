@@ -24,6 +24,7 @@ from __future__ import annotations
 import numpy as np
 
 from . import analytics as A
+from ..core.i18n import na
 
 # Component weights — must sum to 100.
 WEIGHTS = {
@@ -145,7 +146,7 @@ def _concentration_component(conc: dict) -> dict:
     """
     if not conc:
         return {"score": 50.0, "metric": 0, "metric_label": "Effective assets",
-                "metric_text": "—", "reference": "—"}
+                "metric_text": na(), "reference": na()}
 
     eff = conc["effective_assets"]
     top1 = conc["top1"]

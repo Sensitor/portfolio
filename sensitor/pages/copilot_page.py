@@ -23,7 +23,7 @@ from ..ui.components import (
     data_table, empty_state, note, num, page_header, pct, pill_html, section, spacer,
 )
 from ..ui.themes import BORDER, INK, INK_2, INK_FAINT, NEUTRAL, STATUS, fade, html
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ._shared import guard, period_selector
 
 DISMISSED_KEY = "sensitor_copilot_dismissed"
@@ -167,7 +167,7 @@ def _render_impact(ctx, lang, item, index, before, bundle_kwargs) -> None:
             before_text, after_text = num(row["before"], 2), num(row["after"], 2)
 
         if row["improved"] is None:
-            verdict = "—"
+            verdict = na(lang)
         else:
             verdict = tr("improves" if row["improved"] else "worsens", lang)
 

@@ -21,7 +21,7 @@ from ..ui.components import (
     data_table, metric_card, note, page_header, pct, reading, section, spacer,
 )
 from ..ui.themes import ACCENT, PLOTLY_CONFIG, STATUS, class_color
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ._shared import guard
 
 STATUS_GOOD = STATUS["good"]
@@ -161,7 +161,7 @@ def _top_bucket(profile: dict, dimension: str) -> str:
     """Largest bucket of a dimension, annotated when the holding is a blend."""
     buckets = profile.get(dimension) or {}
     if not buckets:
-        return "—"
+        return na()
     bucket, share = max(buckets.items(), key=lambda kv: kv[1])
     return bucket if share > 0.95 else f"{bucket} ({share * 100:.0f}%)"
 
@@ -224,7 +224,7 @@ def _factor_block(ctx, lang: str) -> None:
         top = significant[0] if significant else None
         metric_card(
             "Dominant factor" if lang == "en" else "Facteur dominant",
-            FA.factor_label(top["factor"], lang) if top else "—",
+            FA.factor_label(top["factor"], lang) if top else na(lang),
             bar=min(abs(top["loading"]) / 1.2, 1) if top else 0,
             caption=(f"{tr('factor_loading', lang)} {top['loading']:+.2f}" if top
                      else tr("not_significant", lang)),
@@ -245,7 +245,7 @@ def _factor_block(ctx, lang: str) -> None:
             [FA.factor_label(item["factor"], lang),
              num(item["loading"], 2),
              num(item["t_stat"], 1),
-             "✓" if item["significant"] else "—"]
+             "✓" if item["significant"] else na(lang)]
             for item in result["loadings"]
         ]
         data_table(

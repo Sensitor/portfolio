@@ -26,7 +26,7 @@ from datetime import date, datetime, time, timedelta, timezone
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading import setups as taxonomy
 from ..trading.models import Direction, Trade, session_label, validate
 from ..ui.components import (
@@ -154,7 +154,7 @@ def _form_body(lang, store, email, existing) -> None:
             # so the control lines up with the date beside it, and a screen
             # reader gets "Opened — time" instead of a space.
             open_time = st.time_input(
-                f"{tr('opened_at', lang)} — {tr('time_label', lang)}",
+                f"{tr('opened_at', lang)} · {tr('time_label', lang)}",
                 value=existing.opened_at.time() if existing else time(9, 0),
                 key=f"{prefix}_otime", label_visibility="hidden")
         with t3:
@@ -164,7 +164,7 @@ def _form_body(lang, store, email, existing) -> None:
                 else today, key=f"{prefix}_cdate")
         with t4:
             close_time = st.time_input(
-                f"{tr('closed_at', lang)} — {tr('time_label', lang)}",
+                f"{tr('closed_at', lang)} · {tr('time_label', lang)}",
                 value=existing.closed_at.time() if existing and existing.closed_at
                 else time(11, 0),
                 key=f"{prefix}_ctime", label_visibility="hidden")
@@ -401,7 +401,7 @@ def _run_sync(lang, store, email, *, login, password, server, path,
             st.error(f"{tr('sync_failed', lang)}: {exc}")
             return
 
-    st.success(f"{tr('sync_done', lang)} — {result.summary(lang)}")
+    st.success(f"{tr('sync_done', lang)} · {result.summary(lang)}")
     if result.annotations_kept:
         st.info(f"{result.annotations_kept} {tr('annotations_kept', lang)}")
     st.rerun()
@@ -423,7 +423,7 @@ def _open_positions(tctx, lang) -> None:
             trade.symbol,
             tr("long", lang) if trade.direction is Direction.LONG else tr("short", lang),
             f"{trade.entry_price:g}",
-            f"{trade.stop_loss:g}" if trade.stop_loss else "—",
+            f"{trade.stop_loss:g}" if trade.stop_loss else na(lang),
             f"{trade.size:g}",
             trade.opened_at.strftime("%Y-%m-%d %H:%M"),
         ])
@@ -470,7 +470,7 @@ def _trade_list(tctx, lang, store, email) -> None:
         # over the list rather than a position in it.
         picker, _ = st.columns([1, 4])
         with picker:
-            page = st.number_input(f"{tr('page', lang)} (1–{pages})", min_value=1,
+            page = st.number_input(f"{tr('page', lang)} (1-{pages})", min_value=1,
                                    max_value=pages, value=1, step=1, key="tjr_page")
     start = (int(page) - 1) * PAGE_SIZE
     for trade in trades[start:start + PAGE_SIZE]:
@@ -498,15 +498,15 @@ def _trade_card(trade, tctx, lang, store, email) -> None:
         f'{trade_flags(trade, lang)}</div>'
         f'<div style="text-align:right;">'
         f'<span class="snr-num" style="font-size:1.05rem;font-weight:700;color:{colour};">'
-        f'{money(pnl, currency, decimals=2) if pnl is not None else "—"}</span>'
+        f'{money(pnl, currency, decimals=2) if pnl is not None else na(lang)}</span>'
         f'<span style="font-size:0.78rem;color:{INK_2};margin-left:10px;">'
         f'{r_text(trade.r_multiple)}</span></div></div>'
     )
 
     facts = [
         (tr("entry_price", lang), f"{trade.entry_price:g}"),
-        (tr("exit_price", lang), f"{trade.exit_price:g}" if trade.exit_price else "—"),
-        (tr("stop_loss", lang), f"{trade.stop_loss:g}" if trade.stop_loss else "—"),
+        (tr("exit_price", lang), f"{trade.exit_price:g}" if trade.exit_price else na(lang)),
+        (tr("stop_loss", lang), f"{trade.stop_loss:g}" if trade.stop_loss else na(lang)),
         (tr("position_size", lang), f"{trade.size:g}"),
         (tr("duration", lang), duration_text(trade.duration_minutes, lang)),
         (tr("costs", lang), money(trade.costs, currency, decimals=2)),

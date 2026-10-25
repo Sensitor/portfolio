@@ -19,7 +19,7 @@ from ..ui.components import (
 from ..ui.themes import (
     ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS, class_color,
 )
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import (
     benchmark_selector, chart_with_reading, currency_notice, guard, load_benchmark,
@@ -178,7 +178,7 @@ def render_overview(ctx) -> None:
                 compact=True,
             )
         else:
-            metric_card(tr("top_risk_driver", lang), "—", caption=tr("assets", lang))
+            metric_card(tr("top_risk_driver", lang), na(lang), caption=tr("assets", lang))
 
     # ── Hero chart ───────────────────────────────────────────────────────────
     section(tr("growth_of_capital", lang),

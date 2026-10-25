@@ -23,7 +23,7 @@ from ..ui.components import (
     section, spacer,
 )
 from ..ui.themes import ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ._shared import chart_with_reading
 from ._trading_shared import (
     account_selector, duration_text, filtered_badge, guard, period_selector,
@@ -94,7 +94,7 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         # is the figure that decides it, not the win rate on its own.
         metric_card(
             tr("win_rate", lang),
-            pct(win_rate, 1) if win_rate is not None else "—",
+            pct(win_rate, 1) if win_rate is not None else na(lang),
             bar=win_rate if win_rate is not None else None,
             bar_color=(STATUS["good"] if metrics["expectancy"] and metrics["expectancy"] > 0
                        else STATUS["warning"]),
@@ -121,7 +121,7 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         span = max(abs(avg_win or 0), abs(avg_loss or 0)) or 1
         metric_card(
             tr("expectancy", lang),
-            money(expectancy, currency, decimals=2) if expectancy is not None else "—",
+            money(expectancy, currency, decimals=2) if expectancy is not None else na(lang),
             bar=min(max((expectancy or 0) / span, -1), 1) * 0.5 + 0.5,
             bar_color=STATUS["good"] if (expectancy or 0) >= 0 else STATUS["critical"],
             caption=f"{tr('per_trade', lang)}",
@@ -160,7 +160,7 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         # drawdown needs an account balance, which the journal does not hold.
         metric_card(
             tr("max_drawdown", lang),
-            money(depth, currency, decimals=2) if depth is not None else "—",
+            money(depth, currency, decimals=2) if depth is not None else na(lang),
             spark=peaks,
             spark_color=STATUS["critical"],
             caption=(r_text(metrics["max_drawdown_r"])
@@ -172,7 +172,7 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         payoff = metrics["payoff_ratio"]
         metric_card(
             tr("payoff_ratio", lang),
-            f"{payoff:.2f}x" if payoff else "—",
+            f"{payoff:.2f}x" if payoff else na(lang),
             bar=min(payoff / 3.0, 1.0) if payoff else None,
             bar_color=(STATUS["good"] if payoff and payoff >= 1.5 else
                        STATUS["warning"] if payoff and payoff >= 1 else STATUS["critical"]),
@@ -188,7 +188,7 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         peak = f"max {metrics['max_win_streak']}W / {metrics['max_loss_streak']}L"
         metric_card(
             tr("current_streak", lang),
-            f"{abs(streak)}" if streak else "—",
+            f"{abs(streak)}" if streak else na(lang),
             status="good" if kind == "win" else ("critical" if kind == "loss" else None),
             caption=(f"{tr('win_streak', lang) if kind == 'win' else tr('loss_streak', lang)}"
                      f" · {peak}" if kind else peak),
@@ -314,7 +314,7 @@ def _breakdown_block(tctx, lang, currency) -> None:
             table_rows.append([
                 row["label"],
                 (str(row["n"]), float(row["n"])),
-                pct(row["win_rate"], 0) if row["win_rate"] is not None else "—",
+                pct(row["win_rate"], 0) if row["win_rate"] is not None else na(lang),
                 money(row["net_pnl"], currency),
                 r_text(row["avg_r"]),
             ])
@@ -337,8 +337,8 @@ def _breakdown_block(tctx, lang, currency) -> None:
             f"{tr('best_bucket', lang)}: {best['label']}",
             f"{tr('expectancy', lang)} {money(best['expectancy'], currency, decimals=2)} "
             f"{tr('per_trade', lang)} · {tr('win_rate', lang).lower()} "
-            f"{pct(best['win_rate'], 0) if best['win_rate'] is not None else '—'}",
-            footnote=f"{best['n']} {tr('trades', lang).lower()} — "
+            f"{pct(best['win_rate'], 0) if best['win_rate'] is not None else na(lang)}",
+            footnote=f"{best['n']} {tr('trades', lang).lower()} · "
                      f"{tr('above_threshold', lang)}",
         )
         alert(
@@ -346,8 +346,8 @@ def _breakdown_block(tctx, lang, currency) -> None:
             f"{tr('weakest_bucket', lang)}: {worst['label']}",
             f"{tr('expectancy', lang)} {money(worst['expectancy'], currency, decimals=2)} "
             f"{tr('per_trade', lang)} · {tr('win_rate', lang).lower()} "
-            f"{pct(worst['win_rate'], 0) if worst['win_rate'] is not None else '—'}",
-            footnote=f"{worst['n']} {tr('trades', lang).lower()} — "
+            f"{pct(worst['win_rate'], 0) if worst['win_rate'] is not None else na(lang)}",
+            footnote=f"{worst['n']} {tr('trades', lang).lower()} · "
                      f"{tr('above_threshold', lang)}",
         )
 
@@ -365,7 +365,7 @@ def _recent_block(tctx, lang, currency) -> None:
     rows = []
     for trade in recent:
         rows.append([
-            trade.closed_at.strftime("%Y-%m-%d %H:%M") if trade.closed_at else "—",
+            trade.closed_at.strftime("%Y-%m-%d %H:%M") if trade.closed_at else na(lang),
             trade.symbol,
             tr("long", lang) if trade.direction.value == "long" else tr("short", lang),
             money(trade.pnl, currency, decimals=2),

@@ -487,9 +487,17 @@ Décidé le 25 octobre 2026 : « Lecture partout » et le nom Sensitor.
   entre la phrase et le tableau de la page ; captures à 1440 et 390 px.
   Planche : `docs/assets/analyseur-lecture.png`.
 
-Reste, hors de la direction : les tirets longs dans des textes de
-l'application d'analyse (une tâche séparée est proposée) et l'allocation en
-registre plutôt qu'en barres (non demandée).
+Tirets longs (25 octobre 2026) : retirés de toutes les chaînes que
+l'analyseur, l'API et les modules partagés peuvent afficher, environ 340. Une
+incise encadrée devient une parenthèse, un tiret seul une virgule ou un
+deux-points selon la phrase, un séparateur entre deux libellés « · », une
+plage de valeurs « 5-15 % » ou « 2 à 5 $ ». Une valeur absente s'écrit
+« n.d. » en français et « n/a » en anglais (`na()` dans `sensitor/core/i18n.py`),
+comme dans le journal de la plateforme. Un test parcourt chaque chaîne du code
+et chaque page rendue dans les deux langues.
+
+Reste, hors de la direction : l'allocation en registre plutôt qu'en barres
+(non demandée).
 
 Plan d'origine :
 

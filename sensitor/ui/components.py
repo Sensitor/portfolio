@@ -24,6 +24,7 @@ from .themes import (
     ACCENT, BORDER, FLAT, INK, INK_2, INK_FAINT, INK_MUTED, NEG, NEUTRAL, POS,
     RADIUS_SM, STATUS, STATUS_ICON, fade, html,
 )
+from ..core.i18n import na
 
 # =============================================================================
 # FORMATTERS
@@ -31,19 +32,19 @@ from .themes import (
 
 def pct(x, decimals: int = 1, sign: bool = False) -> str:
     if x is None:
-        return "—"
+        return na()
     return f"{x * 100:{'+' if sign else ''}.{decimals}f}%"
 
 
 def num(x, decimals: int = 2, sign: bool = False) -> str:
     if x is None:
-        return "—"
+        return na()
     return f"{x:{'+' if sign else ''}.{decimals}f}"
 
 
 def money(x, currency: str = "$", decimals: int = 0) -> str:
     if x is None:
-        return "—"
+        return na()
     if abs(x) >= 1_000_000:
         return f"{currency}{x / 1_000_000:.2f}M"
     if abs(x) >= 10_000:
@@ -156,7 +157,7 @@ def delta_html(value, label: str = "", as_pct: bool = True, decimals: int = 1,
                higher_is_better: bool = True) -> str:
     """Signed delta with an arrow glyph, so direction never rests on colour alone."""
     if value is None:
-        return f'<span style="color:{INK_FAINT};">—</span>'
+        return f'<span style="color:{INK_FAINT};">{na()}</span>'
     good = (value > 0) if higher_is_better else (value < 0)
     color = FLAT if abs(value) < 1e-12 else (POS if good else NEG)
     arrow = "▲" if value > 0 else ("▼" if value < 0 else "■")

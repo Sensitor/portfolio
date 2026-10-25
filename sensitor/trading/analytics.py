@@ -29,6 +29,7 @@ from collections import Counter
 from datetime import timedelta
 
 from .models import Trade
+from ..core.i18n import na
 
 # A breakdown bucket below this many trades is reported but flagged: the
 # statistics are real, they are just not yet evidence of anything.
@@ -390,7 +391,7 @@ def holding_time_summary(trades) -> dict:
 def format_duration(minutes: float | None, lang: str = "en") -> str:
     """Minutes as the largest sensible unit."""
     if minutes is None:
-        return "—"
+        return na(lang)
     if minutes < 60:
         return f"{minutes:.0f} min"
     if minutes < 60 * 24:

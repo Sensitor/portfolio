@@ -300,7 +300,7 @@ class MobileOverview(BaseModel):
 class TradeDelta(BaseModel):
     etag: str
     server_time: str = Field(
-        description="Store this as the next cursor — the server's clock, not "
+        description="Store this as the next cursor: the server's clock, not "
                     "the device's.")
     since: str | None = None
     trades: list[TradeOut]

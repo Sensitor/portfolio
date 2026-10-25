@@ -94,9 +94,9 @@ def benchmark_selector(ctx, key: str, default: str = market.DEFAULT_BENCHMARK) -
     base = (getattr(ctx.analyzer, "base_currency", None) or "USD").upper()
     if FX.settlement_currency(FX.quote_currency(ticker))[0].upper() != base:
         st.caption(
-            f"Converted to {base} — compared like for like with the portfolio."
+            f"Converted to {base}, compared like for like with the portfolio."
             if ctx.lang == "en" else
-            f"Converti en {base} — comparé à la même échelle que le portefeuille."
+            f"Converti en {base}, comparé à la même échelle que le portefeuille."
         )
     return ticker
 
@@ -310,11 +310,11 @@ def currency_notice(analyzer, lang: str) -> None:
         except Exception:                               # noqa: BLE001
             since = str(start)[:10]
         st.caption(
-            f"Measured from {since} — the first date every holding traded. "
+            f"Measured from {since}, the first date every holding traded. "
             f"{limited_by} has the shortest history, and a correlation over a period "
             f"when an asset did not exist is not a weaker figure, it is not a figure."
             if lang == "en" else
-            f"Mesuré depuis le {since} — la première date où toutes les lignes cotaient. "
+            f"Mesuré depuis le {since}, la première date où toutes les lignes cotaient. "
             f"{limited_by} a l'historique le plus court, et une corrélation sur une "
             f"période où un actif n'existait pas n'est pas un chiffre moins fiable, "
             f"ce n'est pas un chiffre."

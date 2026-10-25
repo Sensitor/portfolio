@@ -18,6 +18,7 @@ Levels map to the design system's status roles: critical, serious, warning, good
 from __future__ import annotations
 
 from ..investment import analytics as A
+from ..core.i18n import na
 
 # =============================================================================
 # CONFIGURABLE THRESHOLDS
@@ -93,7 +94,7 @@ def _concentration_signals(conc, weights, out, asset_info=None, sector_map=None,
     if not conc:
         return
     top1 = conc["top1"]
-    top_ticker = max(weights, key=weights.get) if weights else "—"
+    top_ticker = max(weights, key=weights.get) if weights else na()
     t = THRESHOLDS
 
     critical_limit, serious_limit = position_thresholds(
@@ -168,9 +169,9 @@ def _risk_signals(rc_df, out):
             "Weight understates risk",
             "Le poids sous-estime le risque",
             f"{row['ticker']} is {row['weight'] * 100:.1f}% of capital but "
-            f"{row['pct_contribution'] * 100:.0f}% of risk — {row['risk_ratio']:.1f}x its weight.",
+            f"{row['pct_contribution'] * 100:.0f}% of risk, {row['risk_ratio']:.1f}x its weight.",
             f"{row['ticker']} pèse {row['weight'] * 100:.1f}% du capital mais "
-            f"{row['pct_contribution'] * 100:.0f}% du risque — soit {row['risk_ratio']:.1f}x son poids.",
+            f"{row['pct_contribution'] * 100:.0f}% du risque, soit {row['risk_ratio']:.1f}x son poids.",
             f"Threshold: risk share at least {t['risk_ratio_flag']}x capital weight.",
             f"Seuil : part de risque au moins {t['risk_ratio_flag']}x le poids en capital.",
         ))
@@ -210,9 +211,9 @@ def _correlation_signals(avg_corr, div_ratio, n_assets, out):
             "Holdings are genuinely diversifying",
             "Les positions se diversifient réellement",
             f"Average pairwise correlation is {avg_corr:.2f} and the diversification ratio is "
-            f"{div_ratio:.2f} — the mix is measurably damping portfolio volatility.",
+            f"{div_ratio:.2f}: the mix is measurably damping portfolio volatility.",
             f"La corrélation moyenne est de {avg_corr:.2f} et le ratio de diversification de "
-            f"{div_ratio:.2f} — le mélange réduit effectivement la volatilité du portefeuille.",
+            f"{div_ratio:.2f} : le mélange réduit effectivement la volatilité du portefeuille.",
             f"Threshold: correlation below {t['correlation_good']:.2f} and diversification ratio above {t['div_ratio_good']:.2f}.",
             f"Seuil : corrélation sous {t['correlation_good']:.2f} et ratio de diversification au-dessus de {t['div_ratio_good']:.2f}.",
         ))
@@ -241,9 +242,9 @@ def _exposure_signals(xray, out):
             f"Concentrated {label_en} exposure",
             f"Exposition {label_fr} concentrée",
             f"Looking through funds to their underlying holdings, {share * 100:.0f}% of the "
-            f"portfolio sits in {bucket} — more than the ticker list alone suggests.",
+            f"portfolio sits in {bucket}, more than the ticker list alone suggests.",
             f"En analysant les fonds jusqu'à leurs sous-jacents, {share * 100:.0f}% du "
-            f"portefeuille se trouve en {bucket} — davantage que ne le suggère la liste des tickers.",
+            f"portefeuille se trouve en {bucket}, davantage que ne le suggère la liste des tickers.",
             f"Threshold: {limit * 100:.0f}% in one {label_en} bucket. Look-through data is indicative.",
             f"Seuil : {limit * 100:.0f}% dans un seul bucket {label_fr}. Données de transparisation indicatives.",
         ))

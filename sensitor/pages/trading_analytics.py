@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading import performance as P
 from ..trading.analytics import MIN_MEANINGFUL_SAMPLE
 from ..ui import charts as C
@@ -83,11 +83,11 @@ def _dna_block(tctx, lang) -> None:
         total = sum(r["n"] for r in symbols) or 1
         metric_card(
             tr("most_traded", lang),
-            most["label"] if most else "—",
+            most["label"] if most else na(lang),
             bar=(most["n"] / total) if most else None,
             bar_color=PALETTE[0],
             caption=(f"{most['n']} {tr('trades', lang).lower()} · "
-                     f"{pct(most['n'] / total, 0)}" if most else "—"),
+                     f"{pct(most['n'] / total, 0)}" if most else na(lang)),
             compact=True,
         )
 
@@ -107,7 +107,7 @@ def _dna_block(tctx, lang) -> None:
         median_risk = risk.get("median_risk")
         metric_card(
             tr("typical_risk", lang),
-            money(median_risk, currency, decimals=2) if median_risk is not None else "—",
+            money(median_risk, currency, decimals=2) if median_risk is not None else na(lang),
             bar=risk.get("coverage"),
             bar_color=STATUS["good"] if (risk.get("coverage") or 0) >= 0.9
             else STATUS["warning"],
@@ -152,7 +152,7 @@ def _best_card(label, rows, currency, lang) -> None:
     """
     winner = P.best(rows, "expectancy")
     if not winner:
-        metric_card(label, "—", caption=tr("not_enough_data", lang), compact=True)
+        metric_card(label, na(lang), caption=tr("not_enough_data", lang), compact=True)
         return
 
     span = max(abs(r["expectancy"]) for r in rows if r["expectancy"] is not None) or 1
@@ -216,10 +216,10 @@ def _breakdown_table(rows, dim_label, tctx, lang) -> None:
         table.append([
             row["label"],
             (str(row["n"]), float(row["n"])),
-            pct(row["win_rate"], 0) if row["win_rate"] is not None else "—",
+            pct(row["win_rate"], 0) if row["win_rate"] is not None else na(lang),
             money(row["net_pnl"], currency),
             money(row["expectancy"], currency, decimals=2)
-            if row["expectancy"] is not None else "—",
+            if row["expectancy"] is not None else na(lang),
             pf_text(row["profit_factor"], lang),
             r_text(row["avg_r"]),
         ])
@@ -253,11 +253,11 @@ def _comparison_block(tctx, lang) -> None:
     with c1:
         metric_card(
             tr("top_contributor_share", lang),
-            pct(profit_share, 0) if profit_share is not None else "—",
+            pct(profit_share, 0) if profit_share is not None else na(lang),
             bar=min(max(profit_share or 0, 0), 1),
             bar_color=(STATUS["warning"] if (profit_share or 0) >= 0.6
                        else STATUS["neutral"]),
-            caption=(f"{concentration.get('most_profitable', '—')} · "
+            caption=(f"{concentration.get('most_profitable', na(lang))} · "
                      f"{concentration.get('reliable_buckets', 0)}/"
                      f"{concentration.get('n_buckets', 0)} "
                      f"{tr('reliable_buckets', lang)}"),
@@ -266,11 +266,11 @@ def _comparison_block(tctx, lang) -> None:
         spacer(10)
         metric_card(
             tr("busiest_instrument", lang),
-            concentration.get("busiest", "—"),
+            concentration.get("busiest", na(lang)),
             bar=min(max(busiest_share or 0, 0), 1),
             bar_color=PALETTE[0],
             caption=(f"{pct(busiest_share, 0)} {tr('of_trades_share', lang)}"
-                     if busiest_share is not None else "—"),
+                     if busiest_share is not None else na(lang)),
             compact=True,
         )
         # Concentration is stated, never judged. One instrument carrying most of
@@ -282,7 +282,7 @@ def _comparison_block(tctx, lang) -> None:
                 "warning",
                 tr("concentrated_result", lang),
                 tr("concentrated_result_body", lang).format(
-                    label=concentration.get("most_profitable", "—"),
+                    label=concentration.get("most_profitable", na(lang)),
                     share=f"{profit_share * 100:.0f}%"),
                 footnote=tr("concentrated_footnote", lang),
             )

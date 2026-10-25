@@ -24,7 +24,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading import setups as taxonomy
 from ..trading.analytics import format_duration
 from ..trading.context import build_context
@@ -186,7 +186,7 @@ def filter_panel(ctx, key: str) -> TradeFilter:
 
     title = tr("filters", lang)
     if active:
-        title = f"{title} — {len(ctx.scoped)} {tr('of_trades', lang)} {len(ctx.journal)}"
+        title = f"{title} · {len(ctx.scoped)} {tr('of_trades', lang)} {len(ctx.journal)}"
 
     with st.expander(title, expanded=False):
         c1, c2, c3 = st.columns(3, gap="medium")
@@ -281,7 +281,7 @@ def filtered_badge(ctx) -> None:
 
 def r_text(value, decimals: int = 2) -> str:
     """An R multiple, or the em dash that means "no stop, so no R"."""
-    return "—" if value is None else f"{value:+.{decimals}f}R"
+    return na() if value is None else f"{value:+.{decimals}f}R"
 
 
 def pf_text(value, lang: str) -> str:
@@ -295,7 +295,7 @@ def pf_text(value, lang: str) -> str:
 
 
 def duration_text(minutes, lang: str) -> str:
-    return format_duration(minutes, lang) if minutes is not None else "—"
+    return format_duration(minutes, lang) if minutes is not None else na(lang)
 
 
 def outcome_tone(value) -> str:

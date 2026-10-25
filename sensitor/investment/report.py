@@ -19,7 +19,7 @@ import html as _html
 from datetime import datetime
 
 from . import xray as X
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 # The palette, the formatters, the SVG charts and the stylesheet live in
 # `core.document`, shared with the weekly trading review. Imported by name
 # rather than with a star so what this module uses stays readable.
@@ -166,13 +166,13 @@ def _risk(ctx, lang) -> str:
         [tr("downside_volatility", lang), _pct(stats["downside_vol"])],
         [tr("sortino_ratio", lang), _num(stats["sortino"])],
         [tr("calmar_ratio", lang), _num(stats["calmar"])],
-        [tr("var_95", lang), _pct(var.get("historical_var"), 2) if var else "—"],
-        [tr("cvar_95", lang), _pct(var.get("historical_cvar"), 2) if var else "—"],
+        [tr("var_95", lang), _pct(var.get("historical_var"), 2) if var else na(lang)],
+        [tr("cvar_95", lang), _pct(var.get("historical_cvar"), 2) if var else na(lang)],
         [tr("max_drawdown", lang), _pct(stats["max_drawdown"])],
         [tr("current_drawdown", lang),
-         _pct(drawdown.get("current_drawdown")) if drawdown else "—"],
+         _pct(drawdown.get("current_drawdown")) if drawdown else na(lang)],
         [tr("time_underwater", lang),
-         _pct(drawdown.get("time_underwater_pct"), 0) if drawdown else "—"],
+         _pct(drawdown.get("time_underwater_pct"), 0) if drawdown else na(lang)],
     ]
 
     rc = ctx.risk_contribution
@@ -245,7 +245,7 @@ def _stress(ctx, lang, stress_results, currency) -> str:
         rows.append([
             label,
             _pct(result["portfolio_return"]),
-            _pct(result.get("benchmark_return")) if result.get("benchmark_return") is not None else "—",
+            _pct(result.get("benchmark_return")) if result.get("benchmark_return") is not None else na(lang),
             f"{result['coverage'] * 100:.0f}%",
         ])
         items.append((label, result["portfolio_return"]))

@@ -63,7 +63,7 @@ warnings.filterwarnings('ignore')
 # Engine, design system, visual components and the twelve Intelligence and
 # Workspace pages. Nothing below this line computes anything the package cannot.
 from sensitor.core import config as core_config
-from sensitor.core.i18n import LEGACY_STRINGS
+from sensitor.core.i18n import LEGACY_STRINGS, na
 from sensitor.investment import assets
 from sensitor.investment.currency import BASE_CURRENCIES, currency_symbol, mixed_currencies
 from sensitor.investment.portfolio import UltimatePortfolioAnalyzer, latest_prices
@@ -178,7 +178,7 @@ def init_session_state():
         # together. See sensitor/investment/currency.py.
         'base_currency': "USD",
         'real_portfolio_holdings': {},        # {ticker: quantity}
-        'real_portfolio_total_value': None,   # float — computed after price fetch
+        'real_portfolio_total_value': None,   # float: computed after price fetch
         'real_portfolio_prices': {},          # {ticker: current_price}
     }
     for key, value in defaults.items():
@@ -277,7 +277,7 @@ def render_kpi_cards(metrics, lang="en"):
             ("📈", "Ratio de Sharpe",  f"{sharpe:.2f}",        "> 1.0 = excellent",           sharpe_cls),
             ("💰", "Rendement Annuel", f"{ret*100:+.1f}%",     "Annualisé, depuis le début",  ret_cls),
             ("〰️", "Volatilité",       f"{vol*100:.1f}%",      "< 15% = faible risque",       vol_cls),
-            ("📉", "Max Drawdown",     f"{dd*100:.1f}%",       "Perte maximale crête–creux",  dd_cls),
+            ("📉", "Max Drawdown",     f"{dd*100:.1f}%",       "Perte maximale crête-creux",  dd_cls),
         ]
 
     cols = st.columns(4)
@@ -351,7 +351,7 @@ def render_metric_tooltips(lang="en"):
         if lang == 'en':
             tips = [
                 ("📈 Sharpe Ratio",  "Measures return per unit of risk. Above 1 is good, above 2 is excellent. Below 0 means the portfolio loses money after adjusting for risk."),
-                ("〰️ Volatility",    "Annualised standard deviation of daily returns. < 10% = very stable, 10–20% = moderate, > 25% = high risk."),
+                ("〰️ Volatility",    "Annualised standard deviation of daily returns. < 10% = very stable, 10-20% = moderate, > 25% = high risk."),
                 ("📉 Max Drawdown",  "The largest percentage drop from a portfolio peak to a trough. Lower is better. E.g. −30% means the portfolio once lost 30% of its value."),
                 ("🔀 Diversification", "Spreading assets across sectors, geographies and asset classes to reduce concentration risk. More uncorrelated assets = better diversification."),
                 ("🔗 Correlation",   "A value between −1 and +1. Assets close to +1 move together (less diversification). Assets near −1 move oppositely (good hedge)."),
@@ -359,7 +359,7 @@ def render_metric_tooltips(lang="en"):
         else:
             tips = [
                 ("📈 Ratio de Sharpe", "Mesure le rendement par unité de risque. > 1 = bon, > 2 = excellent. < 0 = le portefeuille perd de l'argent après ajustement du risque."),
-                ("〰️ Volatilité",      "Écart-type annualisé des rendements quotidiens. < 10% = très stable, 10–20% = modéré, > 25% = risque élevé."),
+                ("〰️ Volatilité",      "Écart-type annualisé des rendements quotidiens. < 10% = très stable, 10-20% = modéré, > 25% = risque élevé."),
                 ("📉 Max Drawdown",    "La plus grande baisse entre un sommet et un creux. Plus c'est proche de 0, mieux c'est. Ex: −30% = perte temporaire de 30% de la valeur."),
                 ("🔀 Diversification", "Répartir les actifs par secteur, zone géographique et classe d'actifs pour réduire la concentration. Plus les actifs sont décorrélés, mieux c'est."),
                 ("🔗 Corrélation",     "Valeur entre −1 et +1. Proche de +1 = actifs évoluent ensemble (moins de diversification). Proche de −1 = actifs opposés (bonne couverture)."),
@@ -579,7 +579,7 @@ def render_asset_card(ticker, lang="en", show_weight=None):
     if show_weight is not None:
         weight_html = f"<span style='font-size:0.78rem;font-weight:600;color:#1F4A72;margin-left:8px;'>{show_weight*100:.1f}%</span>"
 
-    with st.expander(f"{ticker}  —  {info['name']}"):
+    with st.expander(f"{ticker} · {info['name']}"):
         role_label = "Portfolio role" if lang == 'en' else "Rôle dans le portefeuille"
         use_label = "Typical use" if lang == 'en' else "Utilisation typique"
         liq_label = "Liquidity" if lang == 'en' else "Liquidité"
@@ -942,10 +942,10 @@ def _manual_price_editor(tickers, lang) -> None:
 
     label = ("Prices entered by hand" if lang == "en"
              else "Prix saisis à la main")
-    hint = ("For holdings no provider covers — an unlisted share, a flat, a "
+    hint = ("For holdings no provider covers: an unlisted share, a flat, a "
             "contract. Leave a price at zero to remove it."
             if lang == "en" else
-            "Pour les lignes qu'aucun fournisseur ne couvre — action non cotée, "
+            "Pour les lignes qu'aucun fournisseur ne couvre : action non cotée, "
             "bien immobilier, contrat. Laissez un prix à zéro pour le retirer.")
 
     with st.expander(label, expanded=bool(unpriced)):
@@ -1031,7 +1031,7 @@ def _unanalysed_notice(lang) -> None:
     names = ", ".join(sorted(excluded))
     st.info(
         f"The figures below cover your traded holdings only. {names} "
-        f"({symbol}{total:,.0f}) is valued but not analysed — a hand-entered "
+        f"({symbol}{total:,.0f}) is valued but not analysed: a hand-entered "
         f"price has no history, so it has no volatility, correlation or "
         f"drawdown to report. Your total wealth is on the Real Portfolio page."
         if lang == "en" else
@@ -1062,11 +1062,11 @@ def _currency_notice(analyzer, lang, *, verbose=False):
 
     names = ", ".join(sorted(dropped))
     st.error(
-        f"Removed from the portfolio — no exchange rate against {base} could be "
+        f"Removed from the portfolio: no exchange rate against {base} could be "
         f"loaded for {names}. They are excluded rather than added in their own "
         f"currency, which would make every figure below meaningless."
         if lang == "en" else
-        f"Retiré du portefeuille — aucun taux de change contre {base} n'a pu être "
+        f"Retiré du portefeuille : aucun taux de change contre {base} n'a pu être "
         f"chargé pour {names}. Ces lignes sont exclues plutôt qu'ajoutées dans leur "
         f"propre devise, ce qui rendrait tous les chiffres ci-dessous dénués de sens."
     )
@@ -1344,7 +1344,7 @@ def _account_page(lang, tier):
     st.info(s_tr(mode["key"], lang))
 
     if email:
-        st.success(f"{s_tr('signed_in_as', lang)} **{email}** — "
+        st.success(f"{s_tr('signed_in_as', lang)} **{email}** · "
                    f"{TIER_LIMITS[tier]['label']}")
         cols = st.columns([1, 1, 3])
         with cols[0]:
@@ -1407,17 +1407,17 @@ def _storage_location(lang):
                 "**This data will be lost.** You are running on a host with no "
                 "persistent disk, so this SQLite file is deleted on every restart, "
                 "redeploy and sleep. Create a free PostgreSQL database and put its "
-                "URL in `SENSITOR_DB_URL` — see docs/DEPLOY.md."
+                "URL in `SENSITOR_DB_URL`: see docs/DEPLOY.md."
                 if lang == "en" else
                 "**Ces données seront perdues.** Vous tournez sur un hébergeur sans "
                 "disque persistant: ce fichier SQLite est supprimé à chaque "
                 "redémarrage, redéploiement et mise en veille. Créez une base "
-                "PostgreSQL gratuite et mettez son URL dans `SENSITOR_DB_URL` — "
+                "PostgreSQL gratuite et mettez son URL dans `SENSITOR_DB_URL` : "
                 "voir docs/DEPLOY.md."
             )
         else:
             size = (f"{os.path.getsize(where) / 1024:.0f} KB"
-                    if os.path.exists(where) else "—")
+                    if os.path.exists(where) else na(lang))
             st.caption(f"{size}")
             if not os.getenv("SENSITOR_DB_PATH") and not os.getenv("SENSITOR_DB_URL"):
                 st.warning(
@@ -1643,7 +1643,7 @@ def main():
                 f'<a href="{link}" target="_blank" style="display:block;margin-top:14px;'
                 f'padding:10px 0;background:#FFFDF8;color:#0F1B26;'
                 f'border-radius:3px;font-weight:600;font-size:0.88rem;text-decoration:none;'
-                f'text-align:center;">Subscribe — ${price}/mo</a>'
+                f'text-align:center;">Subscribe · ${price}/mo</a>'
             ) if link else (
                 f'<div style="margin-top:14px;font-size:0.82rem;color:rgba(255,253,248,0.7);">'
                 f'Set STRIPE_PAYMENT_LINK env var to activate.</div>'
@@ -1666,22 +1666,22 @@ def main():
         with st.expander(how_label):
             st.markdown(
                 """
-**Step 1 — Subscribe** via the button above (Stripe secure checkout).
+**Step 1: Subscribe** via the button above (Stripe secure checkout).
 
-**Step 2 — Send your email** to the app administrator so your email is added to the Pro list
+**Step 2: Send your email** to the app administrator so your email is added to the Pro list
 (or configure the `PRO_EMAILS` environment variable on Streamlit Cloud with your email).
 
-**Step 3 — Log in** here with that email and your Pro features will unlock immediately.
+**Step 3: Log in** here with that email and your Pro features will unlock immediately.
 
 > For automated activation, set up a Stripe webhook pointing to your backend and write the
 > paying customer's email into the `PRO_EMAILS` environment variable.
                 """ if lang == 'en' else """
-**Étape 1 — Abonnez-vous** via le bouton ci-dessus (paiement sécurisé Stripe).
+**Étape 1 : Abonnez-vous** via le bouton ci-dessus (paiement sécurisé Stripe).
 
-**Étape 2 — Envoyez votre email** à l'administrateur pour être ajouté à la liste Pro
+**Étape 2 : Envoyez votre email** à l'administrateur pour être ajouté à la liste Pro
 (ou configurez la variable d'environnement `PRO_EMAILS` sur Streamlit Cloud avec votre email).
 
-**Étape 3 — Connectez-vous** ici avec cet email et vos fonctionnalités Pro s'activeront.
+**Étape 3 : Connectez-vous** ici avec cet email et vos fonctionnalités Pro s'activeront.
 
 > Pour une activation automatique, configurez un webhook Stripe vers votre backend
 > qui écrit l'email de l'abonné dans la variable `PRO_EMAILS`.
@@ -1747,7 +1747,7 @@ def main():
                 f"{n_assets} actifs · {tickers_preview}"
             )
             dash_title = (
-                ("Real Portfolio Dashboard" if lang == 'en' else "Tableau de Bord — Portefeuille Réel")
+                ("Real Portfolio Dashboard" if lang == 'en' else "Tableau de Bord · Portefeuille Réel")
                 if is_real_mode else
                 ("Portfolio Dashboard" if lang == 'en' else "Tableau de Bord")
             )
@@ -1781,7 +1781,7 @@ def main():
                 total_val = sum(asset_values.values()) or total_val
 
                 # Find top asset
-                top_ticker = max(asset_values, key=asset_values.get) if asset_values else "—"
+                top_ticker = max(asset_values, key=asset_values.get) if asset_values else na(lang)
                 top_info = ASSET_INFO.get(top_ticker, {})
                 top_name = top_info.get("name", top_ticker)
                 top_pct = (asset_values.get(top_ticker, 0) / total_val * 100) if total_val > 0 else 0
@@ -1874,7 +1874,7 @@ def main():
                     val = asset_values[tk]
                     wt = (val / total_val * 100) if total_val > 0 else 0
                     name = ASSET_INFO.get(tk, {}).get("name", tk)
-                    label = f"{tk} — {name}" if name != tk else tk
+                    label = f"{tk} · {name}" if name != tk else tk
                     if tk in manual_lines:
                         label += ("  · manual" if lang == 'en' else "  · saisi")
                     if tk not in analysed_only:
@@ -1886,7 +1886,7 @@ def main():
                         label,
                         f"{qty:,.4f}",
                         _money(price, symbol, 2),
-                        _pct(move, 1, sign=True) if move is not None else "—",
+                        _pct(move, 1, sign=True) if move is not None else na(lang),
                         _money(val, symbol, 2),
                         f"{wt:.1f}%",
                     ])
@@ -2288,11 +2288,11 @@ def main():
             st.session_state.weights = new_weights
             total_w = sum(new_weights.values())
             if total_w <= 0:
-                st.warning("All weights are 0 — please adjust the sliders." if lang == 'en'
-                           else "Tous les poids sont à 0 — ajustez les curseurs.")
+                st.warning("All weights are 0: please adjust the sliders." if lang == 'en'
+                           else "Tous les poids sont à 0 : ajustez les curseurs.")
             elif abs(total_w - 1.0) > 0.01:
                 st.session_state.weights = {k: v / total_w for k, v in new_weights.items()}
-                st.warning(f"{t('total_weight', lang)}: {total_w*100:.1f}% — {t('normalised', lang)}")
+                st.warning(f"{t('total_weight', lang)}: {total_w*100:.1f}% · {t('normalised', lang)}")
             else:
                 st.success(f"{t('total_weight', lang)}: {total_w*100:.1f}%")
 
@@ -2332,10 +2332,10 @@ def main():
         if tier == 'free':
             preview_note = (
                 "Model portfolios are available on the **Pro** plan. "
-                "Here is a preview — upgrade to use them."
+                "Here is a preview: upgrade to use them."
                 if lang == 'en' else
                 "Les portefeuilles modèles sont disponibles sur le plan **Pro**. "
-                "Voici un aperçu — passez à Pro pour les utiliser."
+                "Voici un aperçu : passez à Pro pour les utiliser."
             )
             st.info(preview_note)
 
@@ -2359,7 +2359,7 @@ def main():
                     f"<span style='display:inline-block;background:rgba(31,74,114,0.08);border-radius:8px;"
                     f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#59636B;"
                     f"margin:3px;border:1px solid rgba(31,74,114,0.15);filter:blur(0px);'>"
-                    f"🔒 {n} {locked_label} — Pro</span>"
+                    f"🔒 {n} {locked_label} · Pro</span>"
                 )
             ret_label = t("expected_return", lang)
             vol_label = t("volatility", lang)
@@ -2508,7 +2508,7 @@ def main():
                 with rc1:
                     info = ASSET_INFO.get(ticker, {})
                     name = info.get("name", ticker)
-                    st.markdown(f"**{ticker}** — {name}" if name != ticker else f"**{ticker}**")
+                    st.markdown(f"**{ticker}** · {name}" if name != ticker else f"**{ticker}**")
                 with rc2:
                     new_qty = st.number_input(
                         t("quantity", lang),
@@ -2567,11 +2567,11 @@ def main():
                 if price_report.get("dropped"):
                     names = ", ".join(sorted(price_report["dropped"]))
                     st.error(
-                        f"Left out of the valuation — no exchange rate against {base} "
+                        f"Left out of the valuation: no exchange rate against {base} "
                         f"could be loaded for {names}. Including them would add one "
                         f"currency to another and give a total that is not money."
                         if lang == 'en' else
-                        f"Exclu de la valorisation — aucun taux de change contre {base} "
+                        f"Exclu de la valorisation : aucun taux de change contre {base} "
                         f"n'a pu être chargé pour {names}. Les inclure reviendrait à "
                         f"additionner deux devises et à donner un total qui n'est pas "
                         f"une somme d'argent."

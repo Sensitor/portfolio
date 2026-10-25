@@ -212,8 +212,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "rolling_return": {"en": "Rolling Return", "fr": "Rendement Glissant"},
     "attribution": {"en": "Performance Attribution", "fr": "Attribution de Performance"},
     "attribution_sub": {
-        "en": "Contribution of each holding to the portfolio's total return — the bars sum to the headline figure.",
-        "fr": "Contribution de chaque position au rendement total — la somme des barres égale le chiffre principal.",
+        "en": "Contribution of each holding to the portfolio's total return: the bars sum to the headline figure.",
+        "fr": "Contribution de chaque position au rendement total : la somme des barres égale le chiffre principal.",
     },
     "benchmark_analysis": {"en": "Benchmark Analysis", "fr": "Analyse Comparative"},
     "beta": {"en": "Beta", "fr": "Bêta"},
@@ -249,8 +249,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "weakest": {"en": "Weakest component", "fr": "Composante la plus faible"},
     "portfolio_dna": {"en": "Portfolio DNA", "fr": "ADN du Portefeuille"},
     "dna_sub": {
-        "en": "The shape of this portfolio's character — a profile, not a grade.",
-        "fr": "La forme du caractère de ce portefeuille — un profil, pas une note.",
+        "en": "The shape of this portfolio's character: a profile, not a grade.",
+        "fr": "La forme du caractère de ce portefeuille : un profil, pas une note.",
     },
     "dna_growth": {"en": "Growth", "fr": "Croissance"},
     "dna_risk": {"en": "Risk Taken", "fr": "Risque Pris"},
@@ -266,8 +266,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "measured": {"en": "Measured", "fr": "Mesuré"},
     "reference": {"en": "Reference", "fr": "Référence"},
     "health_method": {
-        "en": "The score weights Performance 25, Risk 25, Diversification 20, Concentration 20 and Liquidity 10. Risk is scored against your stated profile's tolerance, so an aggressive profile is not penalised for holding volatile assets. These weights are a reasoned editorial choice, not an industry standard — the score describes the portfolio's structure over the analysed period and is not a forecast or a recommendation.",
-        "fr": "Le score pondère Performance 25, Risque 25, Diversification 20, Concentration 20 et Liquidité 10. Le risque est évalué selon la tolérance de votre profil déclaré : un profil agressif n'est donc pas pénalisé pour détenir des actifs volatils. Ces pondérations sont un choix éditorial raisonné, pas un standard de marché — le score décrit la structure du portefeuille sur la période analysée ; ce n'est ni une prévision ni une recommandation.",
+        "en": "The score weights Performance 25, Risk 25, Diversification 20, Concentration 20 and Liquidity 10. Risk is scored against your stated profile's tolerance, so an aggressive profile is not penalised for holding volatile assets. These weights are a reasoned editorial choice, not an industry standard: the score describes the portfolio's structure over the analysed period and is not a forecast or a recommendation.",
+        "fr": "Le score pondère Performance 25, Risque 25, Diversification 20, Concentration 20 et Liquidité 10. Le risque est évalué selon la tolérance de votre profil déclaré : un profil agressif n'est donc pas pénalisé pour détenir des actifs volatils. Ces pondérations sont un choix éditorial raisonné, pas un standard de marché : le score décrit la structure du portefeuille sur la période analysée ; ce n'est ni une prévision ni une recommandation.",
     },
 
     # ── Risk Lab ─────────────────────────────────────────────────────────────
@@ -325,8 +325,8 @@ STRINGS: dict[str, dict[str, str]] = {
 
     # ── X-Ray ────────────────────────────────────────────────────────────────
     "xray_sub": {
-        "en": "Funds unpacked into their underlying holdings — what you own, not which tickers you hold.",
-        "fr": "Les fonds décomposés en leurs sous-jacents — ce que vous possédez, pas les tickers que vous détenez.",
+        "en": "Funds unpacked into their underlying holdings: what you own, not which tickers you hold.",
+        "fr": "Les fonds décomposés en leurs sous-jacents : ce que vous possédez, pas les tickers que vous détenez.",
     },
     "lookthrough": {"en": "Look-Through Exposure", "fr": "Exposition par Transparence"},
     "direct_holdings": {"en": "Direct Holdings", "fr": "Positions Directes"},
@@ -348,8 +348,8 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "historical_scenarios": {"en": "Historical Scenarios", "fr": "Scénarios Historiques"},
     "historical_sub": {
-        "en": "Real prices over real crisis windows — arithmetic on history, not a model.",
-        "fr": "Prix réels sur de vraies fenêtres de crise — de l'arithmétique sur l'historique, pas un modèle.",
+        "en": "Real prices over real crisis windows: arithmetic on history, not a model.",
+        "fr": "Prix réels sur de vraies fenêtres de crise : de l'arithmétique sur l'historique, pas un modèle.",
     },
     "custom_stress": {"en": "Custom Stress Test", "fr": "Test de Stress Personnalisé"},
     "custom_stress_sub": {
@@ -399,8 +399,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "target_allocation": {"en": "Target", "fr": "Cible"},
     "max_position": {"en": "Max position size", "fr": "Taille max par position"},
     "frontier_note": {
-        "en": "Expected returns and covariances are estimated from the selected window. Mean-variance optimisation is highly sensitive to the expected-return estimates — small input changes move the optimal weights a lot — and a position cap is applied by default because unconstrained solutions pile into whichever asset happened to perform best. This shows the geometry of a set of assets over one past period; it is not a recommendation and past performance does not predict future returns.",
-        "fr": "Les rendements attendus et les covariances sont estimés sur la fenêtre sélectionnée. L'optimisation moyenne-variance est très sensible aux estimations de rendement attendu — de petits changements d'entrée déplacent beaucoup les poids optimaux — et un plafond par position est appliqué par défaut, car les solutions sans contrainte se concentrent sur l'actif qui a le mieux performé. Ceci montre la géométrie d'un ensemble d'actifs sur une période passée ; ce n'est pas une recommandation et les performances passées ne préjugent pas des performances futures.",
+        "en": "Expected returns and covariances are estimated from the selected window. Mean-variance optimisation is highly sensitive to the expected-return estimates (small input changes move the optimal weights a lot) and a position cap is applied by default because unconstrained solutions pile into whichever asset happened to perform best. This shows the geometry of a set of assets over one past period; it is not a recommendation and past performance does not predict future returns.",
+        "fr": "Les rendements attendus et les covariances sont estimés sur la fenêtre sélectionnée. L'optimisation moyenne-variance est très sensible aux estimations de rendement attendu : de petits changements d'entrée déplacent beaucoup les poids optimaux, et un plafond par position est appliqué par défaut, car les solutions sans contrainte se concentrent sur l'actif qui a le mieux performé. Ceci montre la géométrie d'un ensemble d'actifs sur une période passée ; ce n'est pas une recommandation et les performances passées ne préjugent pas des performances futures.",
     },
     "frontier_unavailable": {
         "en": "At least two holdings and 60 trading days of shared history are needed to build a frontier.",
@@ -444,8 +444,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Déplacez un curseur pour voir l'effet. Tout ce qui suit correspond actuellement à votre portefeuille.",
     },
     "simulation_note": {
-        "en": "Every figure restates the same historical window under different weights, rebalanced daily. It shows how this allocation would have behaved over the period analysed — it is not a projection, and an allocation that looked better in the past is not thereby better.",
-        "fr": "Chaque chiffre reformule la même fenêtre historique sous des poids différents, avec rééquilibrage quotidien. Cela montre comment cette allocation se serait comportée sur la période analysée — ce n'est pas une projection, et une allocation qui paraissait meilleure par le passé ne l'est pas pour autant.",
+        "en": "Every figure restates the same historical window under different weights, rebalanced daily. It shows how this allocation would have behaved over the period analysed, it is not a projection, and an allocation that looked better in the past is not thereby better.",
+        "fr": "Chaque chiffre reformule la même fenêtre historique sous des poids différents, avec rééquilibrage quotidien. Cela montre comment cette allocation se serait comportée sur la période analysée, ce n'est pas une projection, et une allocation qui paraissait meilleure par le passé ne l'est pas pour autant.",
     },
     "comparison": {"en": "Allocation Comparison", "fr": "Comparaison d'Allocations"},
     "comparison_sub": {
@@ -476,8 +476,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "terminal_values": {"en": "Terminal Values", "fr": "Valeurs Finales"},
     "years_label": {"en": "years", "fr": "ans"},
     "mc_note": {
-        "en": "Bootstrap resamples this portfolio's actual daily returns, inheriting their real fat tails; the parametric method draws from a fitted normal distribution and systematically understates extreme outcomes. Both assume the future return distribution resembles the window sampled — no regime change, no structural break, no valuation anchor. A long horizon projected from a short history is an extrapolation of that window, not a forecast.",
-        "fr": "Le bootstrap rééchantillonne les rendements quotidiens réels de ce portefeuille, en héritant de leurs vraies queues épaisses ; la méthode paramétrique tire d'une loi normale ajustée et sous-estime systématiquement les résultats extrêmes. Les deux supposent que la distribution future des rendements ressemble à la fenêtre échantillonnée — sans changement de régime, ni rupture structurelle, ni ancrage de valorisation. Un horizon long projeté depuis un historique court est une extrapolation de cette fenêtre, pas une prévision.",
+        "en": "Bootstrap resamples this portfolio's actual daily returns, inheriting their real fat tails; the parametric method draws from a fitted normal distribution and systematically understates extreme outcomes. Both assume the future return distribution resembles the window sampled: no regime change, no structural break, no valuation anchor. A long horizon projected from a short history is an extrapolation of that window, not a forecast.",
+        "fr": "Le bootstrap rééchantillonne les rendements quotidiens réels de ce portefeuille, en héritant de leurs vraies queues épaisses ; la méthode paramétrique tire d'une loi normale ajustée et sous-estime systématiquement les résultats extrêmes. Les deux supposent que la distribution future des rendements ressemble à la fenêtre échantillonnée : sans changement de régime, ni rupture structurelle, ni ancrage de valorisation. Un horizon long projeté depuis un historique court est une extrapolation de cette fenêtre, pas une prévision.",
     },
     "mc_history_warning": {
         "en": "The projection horizon is much longer than the history it was drawn from, which makes the spread of outcomes less meaningful.",
@@ -504,8 +504,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "proposed_change": {"en": "Change to simulate", "fr": "Changement à simuler"},
     "evidence": {"en": "Evidence", "fr": "Constat"},
     "copilot_note": {
-        "en": "These are observations against documented thresholds, not advice. Each proposed change exists so you can see its trade-off: trimming a volatile holding usually lowers both risk and past return, and the impact table shows both. No item claims the change would improve future outcomes — the simulation can only restate the past under different weights.",
-        "fr": "Ce sont des observations mesurées contre des seuils documentés, pas des conseils. Chaque changement proposé existe pour que vous en voyiez l'arbitrage : réduire une position volatile diminue généralement à la fois le risque et le rendement passé, et le tableau d'impact montre les deux. Aucun élément ne prétend que le changement améliorerait les résultats futurs — la simulation ne fait que reformuler le passé sous d'autres poids.",
+        "en": "These are observations against documented thresholds, not advice. Each proposed change exists so you can see its trade-off: trimming a volatile holding usually lowers both risk and past return, and the impact table shows both. No item claims the change would improve future outcomes: the simulation can only restate the past under different weights.",
+        "fr": "Ce sont des observations mesurées contre des seuils documentés, pas des conseils. Chaque changement proposé existe pour que vous en voyiez l'arbitrage : réduire une position volatile diminue généralement à la fois le risque et le rendement passé, et le tableau d'impact montre les deux. Aucun élément ne prétend que le changement améliorerait les résultats futurs : la simulation ne fait que reformuler le passé sous d'autres poids.",
     },
     "apply_to_simulator": {"en": "Open in Simulator", "fr": "Ouvrir dans le Simulateur"},
     "improves": {"en": "improves", "fr": "améliore"},
@@ -539,8 +539,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "last_updated": {"en": "Updated", "fr": "Mis à jour"},
     "taken_at": {"en": "Date", "fr": "Date"},
     "no_snapshots": {
-        "en": "No snapshots yet. A snapshot records the allocation and its metrics at a moment in time — the app can always recompute today's figures, but it cannot recover what the allocation was last month unless it was written down.",
-        "fr": "Aucun instantané. Un instantané enregistre l'allocation et ses métriques à un instant donné — l'application peut toujours recalculer les chiffres du jour, mais elle ne peut pas retrouver ce qu'était l'allocation le mois dernier si cela n'a pas été consigné.",
+        "en": "No snapshots yet. A snapshot records the allocation and its metrics at a moment in time: the app can always recompute today's figures, but it cannot recover what the allocation was last month unless it was written down.",
+        "fr": "Aucun instantané. Un instantané enregistre l'allocation et ses métriques à un instant donné : l'application peut toujours recalculer les chiffres du jour, mais elle ne peut pas retrouver ce qu'était l'allocation le mois dernier si cela n'a pas été consigné.",
     },
     "storage_note": {
         "en": "Data is stored in a local SQLite file on whatever machine runs this app, and is never sent anywhere. On Streamlit Cloud that filesystem is ephemeral: saved portfolios are wiped whenever the app restarts, redeploys or sleeps. For durable storage, point SENSITOR_DB_PATH at a persistent volume or connect an external database.",
@@ -566,8 +566,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "report_ready": {"en": "Report ready", "fr": "Rapport prêt"},
     "report_preview": {"en": "Preview", "fr": "Aperçu"},
     "report_format_note": {
-        "en": "The report is a single self-contained HTML file: no scripts, no external requests, every chart drawn as inline SVG. It opens anywhere and works offline. To get a PDF, open it and print to PDF from your browser — the page breaks and margins are already set up for A4.",
-        "fr": "Le rapport est un fichier HTML unique et autonome : aucun script, aucune requête externe, chaque graphique dessiné en SVG. Il s'ouvre partout et fonctionne hors ligne. Pour obtenir un PDF, ouvrez-le et imprimez en PDF depuis votre navigateur — les sauts de page et les marges sont déjà réglés pour l'A4.",
+        "en": "The report is a single self-contained HTML file: no scripts, no external requests, every chart drawn as inline SVG. It opens anywhere and works offline. To get a PDF, open it and print to PDF from your browser: the page breaks and margins are already set up for A4.",
+        "fr": "Le rapport est un fichier HTML unique et autonome : aucun script, aucune requête externe, chaque graphique dessiné en SVG. Il s'ouvre partout et fonctionne hors ligne. Pour obtenir un PDF, ouvrez-le et imprimez en PDF depuis votre navigateur : les sauts de page et les marges sont déjà réglés pour l'A4.",
     },
     "s_overview": {"en": "Portfolio Overview", "fr": "Vue d'Ensemble"},
     "s_performance": {"en": "Performance", "fr": "Performance"},
@@ -622,7 +622,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Ajoutez un trade dans le Journal, ou importez un historique, pour débloquer l'analytique de trading.",
     },
     "no_closed_trades": {
-        "en": "Only open positions so far. Metrics need closed trades — an open position has no result to measure.",
+        "en": "Only open positions so far. Metrics need closed trades: an open position has no result to measure.",
         "fr": "Uniquement des positions ouvertes pour l'instant. Les métriques exigent des trades clôturés : une position ouverte n'a pas de résultat à mesurer.",
     },
     "filtered_notice": {"en": "Filtered view", "fr": "Vue filtrée"},
@@ -667,8 +667,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Aucun chiffre de cette vue n'est hors de la plage que le produit signale, et aucune comparaison comportementale n'a deux groupes assez grands pour être rapportée. C'est un constat sur ces données, pas un verdict sur votre trading.",
     },
     "copilot_scope_note": {
-        "en": "Each item is a figure crossing a stated threshold, or a comparison between two groups of your own trades. Unlike the portfolio Copilot, none proposes a change: a portfolio can be replayed under different weights, a trading book cannot — the trades taken under a different rule would have been different trades.",
-        "fr": "Chaque élément est un chiffre franchissant un seuil indiqué, ou une comparaison entre deux groupes de vos propres trades. Contrairement au Copilote de portefeuille, aucun ne propose de changement : un portefeuille peut être rejoué sous d'autres pondérations, un carnet de trading non — les trades pris sous une autre règle auraient été d'autres trades.",
+        "en": "Each item is a figure crossing a stated threshold, or a comparison between two groups of your own trades. Unlike the portfolio Copilot, none proposes a change: a portfolio can be replayed under different weights, a trading book cannot: the trades taken under a different rule would have been different trades.",
+        "fr": "Chaque élément est un chiffre franchissant un seuil indiqué, ou une comparaison entre deux groupes de vos propres trades. Contrairement au Copilote de portefeuille, aucun ne propose de changement : un portefeuille peut être rejoué sous d'autres pondérations, un carnet de trading non : les trades pris sous une autre règle auraient été d'autres trades.",
     },
     "generate_review": {"en": "Generate the review", "fr": "Générer le bilan"},
     "review_week": {"en": "Week", "fr": "Semaine"},
@@ -679,16 +679,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Votre bilan est prêt. Ouvrez-le et appuyez sur Ctrl+P (Cmd+P) pour l'enregistrer en PDF.",
     },
     "review_no_trades": {
-        "en": "No trades closed in this week. Nothing to review — which is itself a fact worth recording.",
-        "fr": "Aucun trade clôturé cette semaine. Rien à analyser — ce qui est en soi un fait à consigner.",
+        "en": "No trades closed in this week. Nothing to review, which is itself a fact worth recording.",
+        "fr": "Aucun trade clôturé cette semaine. Rien à analyser, ce qui est en soi un fait à consigner.",
     },
     "review_daily_note": {
         "en": "Net profit and loss per trading day, after commission and swap. Days with no closed trade are absent rather than drawn at zero.",
         "fr": "Profit et perte nets par jour de trading, après commission et swap. Les jours sans trade clôturé sont absents plutôt que tracés à zéro.",
     },
     "review_sample_note": {
-        "en": "Each bar carries the number of trades behind it. Over one week most groups hold very few, and a group of two says nothing about a setup — it says what those two trades did.",
-        "fr": "Chaque barre porte le nombre de trades qui la compose. Sur une semaine, la plupart des groupes en contiennent très peu, et un groupe de deux ne dit rien d'un setup — il dit ce qu'ont fait ces deux trades.",
+        "en": "Each bar carries the number of trades behind it. Over one week most groups hold very few, and a group of two says nothing about a setup, it says what those two trades did.",
+        "fr": "Chaque barre porte le nombre de trades qui la compose. Sur une semaine, la plupart des groupes en contiennent très peu, et un groupe de deux ne dit rien d'un setup, il dit ce qu'ont fait ces deux trades.",
     },
     "review_no_patterns": {
         "en": "No comparison this week has two groups large enough to be worth reporting. That is a statement about the sample, not a clean bill of health.",
@@ -724,8 +724,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Saisissez votre email pour ouvrir vos données. Si vous avez un abonnement Pro, ses fonctionnalités se débloquent automatiquement.",
     },
     "auth_mode_single": {
-        "en": "Single-user mode. Your email is a label for your data, not a login — anyone who can reach this app can open any of it. That is the right setup on your own machine. Before putting this somewhere other people can reach, set SENSITOR_AUTH=multi, which requires a password and expires sessions.",
-        "fr": "Mode mono-utilisateur. Votre email est une étiquette pour vos données, pas un identifiant — quiconque atteint cette application peut ouvrir n'importe quelles données. C'est la bonne configuration sur votre propre machine. Avant de la déployer là où d'autres peuvent y accéder, définissez SENSITOR_AUTH=multi, qui exige un mot de passe et fait expirer les sessions.",
+        "en": "Single-user mode. Your email is a label for your data, not a login: anyone who can reach this app can open any of it. That is the right setup on your own machine. Before putting this somewhere other people can reach, set SENSITOR_AUTH=multi, which requires a password and expires sessions.",
+        "fr": "Mode mono-utilisateur. Votre email est une étiquette pour vos données, pas un identifiant : quiconque atteint cette application peut ouvrir n'importe quelles données. C'est la bonne configuration sur votre propre machine. Avant de la déployer là où d'autres peuvent y accéder, définissez SENSITOR_AUTH=multi, qui exige un mot de passe et fait expirer les sessions.",
     },
     "auth_mode_multi": {
         "en": "Multi-user mode. Accounts are protected by a password, sessions expire, and no account can reach another's data.",
@@ -775,8 +775,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "mt5_offset": {"en": "Server UTC offset (hours)", "fr": "Décalage UTC du serveur (heures)"},
     "mt5_days": {"en": "History to fetch (days)", "fr": "Historique à récupérer (jours)"},
     "mt5_platform_note": {
-        "en": "Requires MetaTrader 5 running on the same machine as this app, with the MetaTrader5 Python package installed. That package is published for Windows only. Leave the credentials blank to use the account already signed in to the terminal. Re-syncing is safe: trades are matched on the broker's own position number, and anything you have written — setups, notes, emotions, ratings — is kept.",
-        "fr": "Nécessite MetaTrader 5 en fonctionnement sur la même machine que cette application, avec le paquet Python MetaTrader5 installé. Ce paquet n'est publié que pour Windows. Laissez les identifiants vides pour utiliser le compte déjà connecté dans le terminal. Resynchroniser est sans risque : les trades sont appariés sur le numéro de position du courtier, et tout ce que vous avez écrit — setups, notes, émotions, évaluations — est conservé.",
+        "en": "Requires MetaTrader 5 running on the same machine as this app, with the MetaTrader5 Python package installed. That package is published for Windows only. Leave the credentials blank to use the account already signed in to the terminal. Re-syncing is safe: trades are matched on the broker's own position number, and anything you have written (setups, notes, emotions, ratings) is kept.",
+        "fr": "Nécessite MetaTrader 5 en fonctionnement sur la même machine que cette application, avec le paquet Python MetaTrader5 installé. Ce paquet n'est publié que pour Windows. Laissez les identifiants vides pour utiliser le compte déjà connecté dans le terminal. Resynchroniser est sans risque : les trades sont appariés sur le numéro de position du courtier, et tout ce que vous avez écrit (setups, notes, émotions, évaluations) est conservé.",
     },
     "mt5_offset_note": {
         "en": "MetaTrader timestamps are the broker's server clock, and most brokers run on UTC+2 or UTC+3 rather than UTC. Enter the offset your terminal's Market Watch clock shows against UTC. Left at zero on a UTC+3 server, every trade lands three hours late and a third of them are attributed to the wrong session.",
@@ -837,8 +837,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "La pire série dépasse ce que le hasard seul explique",
     },
     "run_beyond_expectation_body": {
-        "en": "Your longest losing run is {observed}, against about {expected} expected by chance. That is a reason to look at the trades in the run, not a conclusion about them — trades are not perfectly independent, and a trader's state carries over.",
-        "fr": "Votre plus longue série perdante est de {observed}, contre environ {expected} attendus par hasard. C'est une raison de regarder les trades de la série, pas une conclusion à leur sujet — les trades ne sont pas parfaitement indépendants, et l'état du trader se reporte d'un trade à l'autre.",
+        "en": "Your longest losing run is {observed}, against about {expected} expected by chance. That is a reason to look at the trades in the run, not a conclusion about them: trades are not perfectly independent, and a trader's state carries over.",
+        "fr": "Votre plus longue série perdante est de {observed}, contre environ {expected} attendus par hasard. C'est une raison de regarder les trades de la série, pas une conclusion à leur sujet : les trades ne sont pas parfaitement indépendants, et l'état du trader se reporte d'un trade à l'autre.",
     },
     "median_word": {"en": "median", "fr": "médiane"},
     "median_holding": {"en": "Median Holding", "fr": "Durée Médiane"},
@@ -869,8 +869,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "{label} représente {share} du profit brut. Retirez-le et il reste le reste du carnet.",
     },
     "concentrated_footnote": {
-        "en": "Threshold: 60% of gross profit in one bucket. This is a description, not a verdict — a specialist's book looks like this, and so does one carried by a single lucky run. Only a longer history separates them.",
-        "fr": "Seuil : 60% du profit brut dans un seul groupe. C'est une description, pas un verdict — le carnet d'un spécialiste ressemble à cela, celui porté par une seule série chanceuse aussi. Seul un historique plus long les distingue.",
+        "en": "Threshold: 60% of gross profit in one bucket. This is a description, not a verdict: a specialist's book looks like this, and so does one carried by a single lucky run. Only a longer history separates them.",
+        "fr": "Seuil : 60% du profit brut dans un seul groupe. C'est une description, pas un verdict : le carnet d'un spécialiste ressemble à cela, celui porté par une seule série chanceuse aussi. Seul un historique plus long les distingue.",
     },
     "page": {"en": "Page", "fr": "Page"},
     "trade_required_fields": {
@@ -920,8 +920,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "undefined": {"en": "undefined", "fr": "indéfini"},
     "no_losses_yet": {"en": "no losing trades yet", "fr": "aucune perte pour l'instant"},
     "r_coverage_note": {
-        "en": "R statistics cover only trades that had a stop loss. Without a stop there is no amount risked, so R has no denominator — those trades are excluded rather than counted as zero.",
-        "fr": "Les statistiques en R ne couvrent que les trades ayant eu un stop. Sans stop, il n'y a pas de montant risqué, donc pas de dénominateur — ces trades sont exclus plutôt que comptés comme zéro.",
+        "en": "R statistics cover only trades that had a stop loss. Without a stop there is no amount risked, so R has no denominator: those trades are excluded rather than counted as zero.",
+        "fr": "Les statistiques en R ne couvrent que les trades ayant eu un stop. Sans stop, il n'y a pas de montant risqué, donc pas de dénominateur : ces trades sont exclus plutôt que comptés comme zéro.",
     },
     "profit_factor_note": {
         "en": "Profit factor is gross profit divided by gross loss. With no losing trades it has no denominator and is reported as undefined rather than infinite.",
@@ -998,8 +998,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Ces trades ont des valeurs qui fausseraient leurs statistiques. Ils sont conservés et affichés plutôt que rejetés, pour que vous puissiez les corriger.",
     },
     "no_stop_warning": {
-        "en": "No stop loss recorded — this trade is excluded from every R statistic.",
-        "fr": "Aucun stop enregistré — ce trade est exclu de toutes les statistiques en R.",
+        "en": "No stop loss recorded: this trade is excluded from every R statistic.",
+        "fr": "Aucun stop enregistré : ce trade est exclu de toutes les statistiques en R.",
     },
 
     # ── Trading: analytics ──────────────────────────────────────────────────
@@ -1056,8 +1056,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Mesuré sur le seul mouvement de prix, avant commission et swap. Un trade stoppé exactement à -1R passe sous -1R une fois les frais ajoutés : juger la discipline de stop sur le chiffre net signalerait presque toutes les pertes.",
     },
     "streak_note": {
-        "en": "The expected run is what a win rate like yours produces by chance alone, assuming independent trades. It is an order of magnitude, not a limit — the most common reason a trader abandons a working method is a losing run that was statistically unremarkable.",
-        "fr": "La série attendue est ce qu'un taux de réussite comme le vôtre produit par simple hasard, en supposant des trades indépendants. C'est un ordre de grandeur, pas une limite — la raison la plus fréquente d'abandonner une méthode qui marche est une série perdante statistiquement banale.",
+        "en": "The expected run is what a win rate like yours produces by chance alone, assuming independent trades. It is an order of magnitude, not a limit: the most common reason a trader abandons a working method is a losing run that was statistically unremarkable.",
+        "fr": "La série attendue est ce qu'un taux de réussite comme le vôtre produit par simple hasard, en supposant des trades indépendants. C'est un ordre de grandeur, pas une limite : la raison la plus fréquente d'abandonner une méthode qui marche est une série perdante statistiquement banale.",
     },
 
     # ── Trading: psychology ─────────────────────────────────────────────────
@@ -1100,8 +1100,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "fr": "Comportement autour des séries",
     },
     "behaviour_around_streaks_sub": {
-        "en": "The comparisons neither side self-reported — the broker recorded both the run and the size.",
-        "fr": "Les comparaisons qu'aucune des deux parties n'a auto-déclarées — le courtier a enregistré la série comme la taille.",
+        "en": "The comparisons neither side self-reported: the broker recorded both the run and the size.",
+        "fr": "Les comparaisons qu'aucune des deux parties n'a auto-déclarées : le courtier a enregistré la série comme la taille.",
     },
     "activity_after_losses": {
         "en": "Trades After a Bad Open",
@@ -1131,8 +1131,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "flagged": {"en": "Flagged", "fr": "Marqués"},
     "the_rest": {"en": "The rest", "fr": "Les autres"},
     "psychology_note": {
-        "en": "Every comparison here is between two groups of your own trades, with both sample sizes shown. None of it establishes cause. Two reasons: the direction of the arrow is unknown — anxiety may cause bad trades, or bad trades may cause anxiety — and self-reported fields are usually recorded after the outcome is known, which creates a correlation on its own.",
-        "fr": "Chaque comparaison ici oppose deux groupes de vos propres trades, avec les deux tailles d'échantillon affichées. Rien de tout cela n'établit de cause. Deux raisons : le sens de la flèche est inconnu — l'anxiété peut causer de mauvais trades, ou de mauvais trades peuvent causer l'anxiété — et les champs auto-déclarés sont généralement renseignés une fois le résultat connu, ce qui crée une corrélation à soi seul.",
+        "en": "Every comparison here is between two groups of your own trades, with both sample sizes shown. None of it establishes cause. Two reasons: the direction of the arrow is unknown (anxiety may cause bad trades, or bad trades may cause anxiety) and self-reported fields are usually recorded after the outcome is known, which creates a correlation on its own.",
+        "fr": "Chaque comparaison ici oppose deux groupes de vos propres trades, avec les deux tailles d'échantillon affichées. Rien de tout cela n'établit de cause. Deux raisons : le sens de la flèche est inconnu : l'anxiété peut causer de mauvais trades, ou de mauvais trades peuvent causer l'anxiété, et les champs auto-déclarés sont généralement renseignés une fois le résultat connu, ce qui crée une corrélation à soi seul.",
     },
 
     "factor_note": {
@@ -1160,8 +1160,8 @@ DEFS: dict[str, dict[str, str]] = {
         "fr": "Rendement annualisé divisé par la profondeur de la pire baisse pic-creux. Récompense les rendements obtenus sans drawdown profond.",
     },
     "volatility": {
-        "en": "Annualised standard deviation of daily returns (252 trading days). A measure of dispersion, not of loss — it counts upward moves too.",
-        "fr": "Écart-type annualisé des rendements quotidiens (252 jours de bourse). Une mesure de dispersion, pas de perte — elle compte aussi les mouvements haussiers.",
+        "en": "Annualised standard deviation of daily returns (252 trading days). A measure of dispersion, not of loss: it counts upward moves too.",
+        "fr": "Écart-type annualisé des rendements quotidiens (252 jours de bourse). Une mesure de dispersion, pas de perte, elle compte aussi les mouvements haussiers.",
     },
     "downside_vol": {
         "en": "Annualised standard deviation computed on negative days only. Isolates the volatility that actually costs money.",
@@ -1180,8 +1180,8 @@ DEFS: dict[str, dict[str, str]] = {
         "fr": "Seuil de perte estimé sur un horizon d'un jour au niveau de confiance indiqué : lors des 5% de jours les plus défavorables, les pertes ont dépassé ce chiffre. Il ne dit rien de l'ampleur au-delà.",
     },
     "cvar": {
-        "en": "Average loss on the days that breached VaR — the expected size of a bad day, not just its threshold.",
-        "fr": "Perte moyenne les jours qui ont dépassé la VaR — l'ampleur attendue d'une mauvaise journée, pas seulement son seuil.",
+        "en": "Average loss on the days that breached VaR: the expected size of a bad day, not just its threshold.",
+        "fr": "Perte moyenne les jours qui ont dépassé la VaR : l'ampleur attendue d'une mauvaise journée, pas seulement son seuil.",
     },
     "beta": {
         "en": "Sensitivity to the benchmark from an OLS fit on excess daily returns. 1.0 moves with the index; above 1.0 amplifies it; below 1.0 damps it.",
@@ -1200,8 +1200,8 @@ DEFS: dict[str, dict[str, str]] = {
         "fr": "Volatilité annualisée de l'écart entre les rendements du portefeuille et ceux de l'indice. À quel point le portefeuille s'écarte de l'indice.",
     },
     "information_ratio": {
-        "en": "Active return divided by tracking error — excess return earned per unit of deviation from the benchmark.",
-        "fr": "Rendement actif divisé par la tracking error — rendement excédentaire obtenu par unité d'écart à l'indice.",
+        "en": "Active return divided by tracking error: excess return earned per unit of deviation from the benchmark.",
+        "fr": "Rendement actif divisé par la tracking error : rendement excédentaire obtenu par unité d'écart à l'indice.",
     },
     "capture": {
         "en": "Share of the benchmark's move captured on its up days and its down days, computed separately. Up above 100% with down below 100% is the favourable pattern.",
@@ -1228,28 +1228,28 @@ DEFS: dict[str, dict[str, str]] = {
         "fr": "1 divisé par l'indice de Herfindahl (somme des poids au carré) : la taille d'un portefeuille équipondéré qui serait aussi concentré. Dix lignes avec 4,8 actifs effectifs sont concentrées comme un portefeuille équipondéré de cinq.",
     },
     "hhi": {
-        "en": "Herfindahl-Hirschman Index — the sum of squared weights. 1/n for an equal-weight portfolio, 1.0 for a single position.",
-        "fr": "Indice de Herfindahl-Hirschman — la somme des poids au carré. 1/n pour un portefeuille équipondéré, 1,0 pour une position unique.",
+        "en": "Herfindahl-Hirschman Index: the sum of squared weights. 1/n for an equal-weight portfolio, 1.0 for a single position.",
+        "fr": "Indice de Herfindahl-Hirschman : la somme des poids au carré. 1/n pour un portefeuille équipondéré, 1,0 pour une position unique.",
     },
     "diversification_ratio": {
         "en": "Weighted average of individual asset volatilities divided by portfolio volatility. 1.00 means correlations delivered no risk reduction at all; higher means the mix genuinely damps risk.",
         "fr": "Moyenne pondérée des volatilités individuelles divisée par la volatilité du portefeuille. 1,00 signifie que les corrélations n'ont apporté aucune réduction de risque ; plus haut, le mélange atténue réellement le risque.",
     },
     "skewness": {
-        "en": "Asymmetry of the return distribution. Negative means the left tail is longer — occasional large losses against more frequent small gains.",
-        "fr": "Asymétrie de la distribution des rendements. Négative, la queue gauche est plus longue — des pertes importantes occasionnelles face à des gains plus fréquents mais petits.",
+        "en": "Asymmetry of the return distribution. Negative means the left tail is longer: occasional large losses against more frequent small gains.",
+        "fr": "Asymétrie de la distribution des rendements. Négative, la queue gauche est plus longue : des pertes importantes occasionnelles face à des gains plus fréquents mais petits.",
     },
     "kurtosis": {
-        "en": "Excess kurtosis of daily returns; 0 matches a normal distribution. Positive means fatter tails — extreme days happen more often than a normal model predicts.",
-        "fr": "Kurtosis excédentaire des rendements quotidiens ; 0 correspond à une distribution normale. Positive, les queues sont plus épaisses — les journées extrêmes surviennent plus souvent que ne le prédit un modèle normal.",
+        "en": "Excess kurtosis of daily returns; 0 matches a normal distribution. Positive means fatter tails: extreme days happen more often than a normal model predicts.",
+        "fr": "Kurtosis excédentaire des rendements quotidiens ; 0 correspond à une distribution normale. Positive, les queues sont plus épaisses : les journées extrêmes surviennent plus souvent que ne le prédit un modèle normal.",
     },
     "time_underwater": {
         "en": "Share of days the portfolio spent below a previous peak over the selected period.",
         "fr": "Part des jours passés sous un sommet précédent sur la période sélectionnée.",
     },
     "health_score": {
-        "en": "Composite 0-100 score from five weighted components. It describes the portfolio's structure over the analysed period — not a forecast, not a rating, not advice.",
-        "fr": "Score composite 0-100 issu de cinq composantes pondérées. Il décrit la structure du portefeuille sur la période analysée — ni prévision, ni notation, ni conseil.",
+        "en": "Composite 0-100 score from five weighted components. It describes the portfolio's structure over the analysed period: not a forecast, not a rating, not advice.",
+        "fr": "Score composite 0-100 issu de cinq composantes pondérées. Il décrit la structure du portefeuille sur la période analysée : ni prévision, ni notation, ni conseil.",
     },
     "attribution": {
         "en": "Each holding's contribution to total portfolio return, compounded forward day by day. Under the daily-rebalanced constant-weight assumption the contributions sum exactly to the portfolio's total return.",
@@ -1260,6 +1260,28 @@ DEFS: dict[str, dict[str, str]] = {
         "fr": "Positions en fonds résolues en leurs expositions sous-jacentes puis agrégées par poids : un portefeuille détenant des fonds indiciels révèle ainsi ses véritables biais sectoriels, géographiques, de capitalisation et de style.",
     },
 }
+
+
+def na(lang: str | None = None) -> str:
+    """
+    The mark for a value that is not available: « n.d. » in French, « n/a » in
+    English, never a long dash. Without `lang`, the language of the current
+    Streamlit session, and English outside one.
+    """
+    if lang is None:
+        lang = _session_language()
+    return "n.d." if lang == "fr" else "n/a"
+
+
+def _session_language() -> str:
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if get_script_run_ctx() is not None:
+            import streamlit as st
+            return st.session_state.get("language", "en")
+    except Exception:
+        pass
+    return "en"
 
 
 def tr(key: str, lang: str = "en") -> str:

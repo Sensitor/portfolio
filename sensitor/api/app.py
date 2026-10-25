@@ -49,7 +49,7 @@ verification path.
 takes a user as a parameter, so none can be asked for somebody else's data.
 
 **Undefined is not zero.** A profit factor with no losing trades, an R multiple
-on a trade that had no stop, a percentage drawdown from a peak at zero — each
+on a trade that had no stop, a percentage drawdown from a peak at zero: each
 comes back `null`. Rendering those as `0` produces a confident wrong number.
 Sample sizes travel with every grouped figure for the same reason.
 """
@@ -64,7 +64,7 @@ def create_app() -> FastAPI:
             {"name": "auth", "description": "Sessions and identity."},
             {"name": "trading", "description": "The journal and its analytics."},
             {"name": "portfolios", "description": "Saved allocations and their history."},
-            {"name": "mobile", "description": "Aggregated, thinned and cacheable — "
+            {"name": "mobile", "description": "Aggregated, thinned and cacheable, "
                                               "shaped for a handset on a mobile network."},
             {"name": "academy", "description": "Sensitor Academy: courses, lessons, "
                                                "quizzes, progress and the risk lab."},

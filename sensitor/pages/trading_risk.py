@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading.risk import MIN_SAMPLE, risk_over_time
 from ..ui import charts as C
 from ..ui.components import (
@@ -94,7 +94,8 @@ def _sizing_block(tctx, risk, lang) -> None:
             bar=position,
             bar_style="track",
             bar_color=ACCENT,
-            caption=(f"{money(profile['min_risk'], currency, decimals=2)} – "
+            caption=(f"{money(profile['min_risk'], currency, decimals=2)} "
+                     f"{'to' if lang == 'en' else 'à'} "
                      f"{money(profile['max_risk'], currency, decimals=2)}"),
         )
 
@@ -105,7 +106,7 @@ def _sizing_block(tctx, risk, lang) -> None:
         # than shown with a caveat nobody reads.
         metric_card(
             tr("risk_consistency", lang),
-            f"{consistency:.2f}" if consistency is not None else "—",
+            f"{consistency:.2f}" if consistency is not None else na(lang),
             bar=min(consistency / 1.0, 1.0) if consistency is not None else None,
             bar_color=(STATUS["good"] if consistency is not None and consistency < 0.25
                        else STATUS["warning"] if consistency is not None and consistency < 0.6
@@ -129,7 +130,7 @@ def _sizing_block(tctx, risk, lang) -> None:
         largest = profile.get("largest_vs_median")
         metric_card(
             tr("largest_vs_median", lang),
-            f"{largest:.1f}x" if largest else "—",
+            f"{largest:.1f}x" if largest else na(lang),
             bar=min((largest or 1) / 5.0, 1.0),
             bar_color=(STATUS["good"] if largest and largest < 2 else
                        STATUS["warning"] if largest and largest < 4 else STATUS["critical"]),
@@ -260,11 +261,11 @@ def _exposure_block(tctx, risk, lang) -> None:
         symbols = exposure.get("max_concurrent_symbols") or []
         metric_card(
             tr("max_concurrent", lang),
-            f"{count}" if count else "—",
+            f"{count}" if count else na(lang),
             bar=min((count or 0) / 8.0, 1.0),
             bar_color=(STATUS["good"] if (count or 0) <= 2 else
                        STATUS["warning"] if (count or 0) <= 5 else STATUS["critical"]),
-            caption=", ".join(symbols[:4]) if symbols else "—",
+            caption=", ".join(symbols[:4]) if symbols else na(lang),
             compact=True,
         )
     with c2:
@@ -272,18 +273,18 @@ def _exposure_block(tctx, risk, lang) -> None:
         median_risk = risk.get("profile", {}).get("median_risk")
         metric_card(
             tr("simultaneous_risk", lang),
-            money(peak, tctx.currency, decimals=2) if peak else "—",
+            money(peak, tctx.currency, decimals=2) if peak else na(lang),
             caption=(f"{peak / median_risk:.1f}x {tr('usual_risk', lang)}"
-                     if peak and median_risk else "—"),
+                     if peak and median_risk else na(lang)),
             compact=True,
         )
     with c3:
         metric_card(
             tr("trades_per_day", lang),
-            f"{activity.get('median_per_day', 0):.0f}" if activity else "—",
+            f"{activity.get('median_per_day', 0):.0f}" if activity else na(lang),
             caption=(f"{tr('max_word', lang)} {activity.get('max_per_day', 0)} · "
                      f"{activity.get('n_days', 0)} {tr('days', lang)}"
-                     if activity else "—"),
+                     if activity else na(lang)),
             compact=True,
         )
 

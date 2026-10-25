@@ -78,7 +78,7 @@ def _cursor(since: str | None) -> str | None:
     except ValueError:
         raise HTTPException(
             status_code=UNPROCESSABLE,
-            detail=("`since` must be an ISO timestamp — pass back the "
+            detail=("`since` must be an ISO timestamp: pass back the "
                     "`server_time` from the previous response, URL-encoded."),
         ) from None
     return candidate

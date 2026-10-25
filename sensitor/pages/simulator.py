@@ -27,7 +27,7 @@ from ..ui.components import (
     spacer,
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ._shared import chart_with_reading, guard, period_selector
 
 SIM_KEY = "sensitor_sim_weights"
@@ -240,7 +240,7 @@ def _comparison_block(ctx, lang, before, after, bundle_kwargs) -> None:
         for label in labels:
             value = row["values"].get(label)
             if value is None:
-                cells.append("—")
+                cells.append(na(lang))
                 continue
             if row["is_pct"]:
                 text = pct(value, 1)

@@ -18,7 +18,7 @@ from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
+from ..core.i18n import define, na, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import (
     benchmark_selector, chart_with_reading, guard, load_benchmark, period_selector,
@@ -168,7 +168,7 @@ def render_performance(ctx) -> None:
              pct(row["contribution"], 2)]
             for _, row in attribution.iterrows()
         ]
-        rows.append(["Σ " + tr("portfolio", lang), "100.0%", "—", pct(stats["total_return"], 2)])
+        rows.append(["Σ " + tr("portfolio", lang), "100.0%", na(lang), pct(stats["total_return"], 2)])
         data_table(
             [tr("assets", lang), tr("weight", lang),
              "Asset return" if lang == "en" else "Rendement actif",
@@ -209,7 +209,7 @@ def render_performance(ctx) -> None:
             cells = [str(year)]
             for month in monthly.columns:
                 value = row[month]
-                cells.append("—" if (value is None or np.isnan(value)) else f"{value * 100:+.1f}")
+                cells.append(na(lang) if (value is None or np.isnan(value)) else f"{value * 100:+.1f}")
             year_total = np.nanprod([1 + v for v in row.to_numpy() if not np.isnan(v)]) - 1
             cells.append(f"{year_total * 100:+.1f}")
             rows.append(cells)

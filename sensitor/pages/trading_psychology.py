@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ..core.i18n import tr
+from ..core.i18n import na, tr
 from ..trading.psychology import MIN_GROUP
 from ..ui import charts as C
 from ..ui.components import (
@@ -139,7 +139,7 @@ def _behaviour_block(tctx, psych, lang) -> None:
                 f'line-height:1.55;">{tr("activity_proxy_note", lang)}</div>'
             )
         else:
-            metric_card(tr("activity_after_losses", lang), "—",
+            metric_card(tr("activity_after_losses", lang), na(lang),
                         caption=f"{tr('needs_n', lang)} {MIN_GROUP}", compact=True)
 
 
@@ -151,7 +151,7 @@ def _streak_card(label, data, tctx, lang, tone) -> None:
     to know what a normal position is on this account to read 1.4x.
     """
     if not data or data.get("risk_ratio") is None:
-        metric_card(label, "—", caption=f"{tr('needs_n', lang)} {MIN_GROUP}",
+        metric_card(label, na(lang), caption=f"{tr('needs_n', lang)} {MIN_GROUP}",
                     compact=True)
         return
 
@@ -183,7 +183,7 @@ def _streak_card(label, data, tctx, lang, tone) -> None:
             f'<div style="margin-top:8px;font-size:0.72rem;color:{INK_MUTED};'
             f'line-height:1.55;">{tr("avg_result_in_group", lang)} '
             f'{money(avg_pnl, tctx.currency, decimals=2)} · '
-            f'{pct(outcome_after["win_rate"], 0) if outcome_after.get("win_rate") is not None else "—"} '
+            f'{pct(outcome_after["win_rate"], 0) if outcome_after.get("win_rate") is not None else na(lang)} '
             f'{tr("win_rate", lang).lower()}</div>'
         )
 
@@ -284,13 +284,13 @@ def _comparison_table(rows, label, tctx, lang) -> None:
             f"{group['n']} / {rest['n']}",
             money(group["avg_pnl"], currency, decimals=2),
             money(rest["avg_pnl"], currency, decimals=2),
-            pct(group["win_rate"], 0) if group["win_rate"] is not None else "—",
+            pct(group["win_rate"], 0) if group["win_rate"] is not None else na(lang),
             r_text(row.get("avg_r_delta")),
         ])
     data_table(
         [label, f"{tr('flagged', lang)} / {tr('the_rest', lang)}",
-         f"{tr('avg', lang)} — {tr('flagged', lang)}",
-         f"{tr('avg', lang)} — {tr('the_rest', lang)}",
+         f"{tr('avg', lang)} · {tr('flagged', lang)}",
+         f"{tr('avg', lang)} · {tr('the_rest', lang)}",
          tr("win_rate", lang), f"Δ {tr('average_r', lang)}"],
         table, align="lrrrrr",
     )

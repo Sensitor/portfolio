@@ -363,12 +363,12 @@ def findings(trades, lang: str = "en", limit: int | None = None) -> list[dict]:
             "key": "risk_after_losses",
             "level": "warning" if ratio > 1.25 else "neutral",
             "en": (f"After {after['streak_length']} consecutive losses your median "
-                   f"position risk is {ratio:.2f}x your usual — {direction_en}. "
+                   f"position risk is {ratio:.2f}x your usual: {direction_en}. "
                    f"Based on {after['n_after_with_risk']} trades after a losing run "
                    f"against {after['n_other_with_risk']} others. This is a "
                    f"correlation in your data, not a demonstrated cause."),
             "fr": (f"Après {after['streak_length']} pertes consécutives, votre risque "
-                   f"médian par position vaut {ratio:.2f}x votre habitude — "
+                   f"médian par position vaut {ratio:.2f}x votre habitude : "
                    f"{direction_fr}. Sur {after['n_after_with_risk']} trades après "
                    f"une série perdante contre {after['n_other_with_risk']} autres. "
                    f"C'est une corrélation dans vos données, pas une cause démontrée."),

@@ -202,6 +202,7 @@ def main() -> int:
     checks += _simulation_flow(failures)
     checks += _deep_link_flow(failures)
     checks += _carnet_flow(failures)
+    checks += _no_long_dash(failures)
 
     print(f"\n{checks} render checks, {len(failures)} failures")
     for scenario, page, error in failures:
@@ -475,6 +476,59 @@ def _carnet_flow(failures) -> int:
     check("sidebar carries the Sensitor lockup",
           "SENSITOR" in sidebar and "Portefeuille et risque" in sidebar
           and "Portfolio Health Pro" not in sidebar)
+    return checks
+
+
+def _no_long_dash(failures) -> int:
+    """
+    The house rule: no em dash (U+2014) or en dash (U+2013) in the interface. Checked
+    twice: on every string literal of the code that feeds a screen (docstrings and
+    comments aside), and on what the pages actually render, in both languages.
+    """
+    import ast
+    from sensitor.core.i18n import na
+
+    checks = 0
+
+    def check(label, ok, detail=""):
+        nonlocal checks
+        checks += 1
+        print(f"  {'ok  ' if ok else 'FAIL'}  dashes       {label}")
+        if not ok:
+            failures.append(("long dash", label, detail or "failed"))
+
+    root = os.path.dirname(APP)
+    found = []
+    paths = [APP] + [os.path.join(dirpath, name)
+                     for dirpath, _, names in os.walk(os.path.join(root, "sensitor"))
+                     if "__pycache__" not in dirpath for name in names if name.endswith(".py")]
+    for path in paths:
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read())
+        docs = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.body:
+                first = node.body[0]
+                if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+                    docs.add(id(first.value))
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in docs
+                    and ("\u2014" in node.value or "\u2013" in node.value)):
+                found.append(f"{os.path.relpath(path, root)}:{node.lineno}")
+    check("no long dash in any string the code can show", not found, ", ".join(found[:10]))
+
+    check("a missing value reads n.d. in French and n/a in English",
+          na("fr") == "n.d." and na("en") == "n/a")
+
+    analyzer = make_portfolio(SCENARIOS["diversified (7 assets)"])
+    for lang in ("fr", "en"):
+        dashed = []
+        for page in PAGES:
+            app = run_page(page, analyzer, lang=lang)
+            text = " ".join(str(m.value) for m in list(app.markdown) + list(app.sidebar.markdown))
+            if "\u2014" in text or "\u2013" in text:
+                dashed.append(page)
+        check(f"no long dash on any rendered page [{lang}]", not dashed, ", ".join(dashed))
     return checks
 
 
