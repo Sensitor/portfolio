@@ -134,6 +134,14 @@ other.
   is about a closed trade only; the form says no recommendation belongs in it.
 * **Demonstration.** A visitor, or a member who asks, sees a constructed
   journal (`trading/demo.py`), labelled « Exemple synthétique » on every page.
+* **French figures** (`core/numbers.py`). The analysis pages, the journal's
+  and the portfolio's, are read in French, so their figures are in French
+  typography: « 1 709,00 € », « 35,5 % », « +0,18 R ». The analyzer's own
+  `ui.themes.html` passes its text through `french_html` when the page language
+  is French, and every chart factory through `french_figure` (decimal comma,
+  narrow spaces, the currency after the value); tags, attributes, styles and
+  drawings are never touched. Periods read « 7 j, 30 j, Tout » and « 1 mois …
+  Max ». The separate app read in English keeps English typography.
 * **Analytics** (`platform/ui/journal_analysis.py`): Performance, Analyse,
   Risque and Comportement are the separate app's trading pages
   (`sensitor.pages.trading_*`), in French and styled by the analyzer's
@@ -141,7 +149,26 @@ other.
   book through the verified email, never the demonstration (the page says so
   when the dashboard shows it); a visitor is asked to sign in, an empty journal
   gets the journal's empty state.
-* **MetaTrader 5 synchronisation**, section 3 of « Saisir ». The form calls the
+* **The MetaTrader 5 history report**, section 1 of « Saisir », the quickest
+  way in and the one that needs no terminal on the server
+  (`integrations/mt5_report.py`). The page gives the four steps: in MT5 on a
+  computer, Toolbox (Ctrl+T), « Historique » tab, right click, the period,
+  « Rapport », « HTML » or « Open XML ». The file is read with the standard
+  library, HTML in UTF-16 as MT5 writes it or XLSX, in any terminal language:
+  the « Positions » table is found by its shape (thirteen columns, « S / L »
+  and « T / P » in seventh and eighth place). Each line becomes the two deals
+  the terminal would have returned and goes through `mt5.build_trade`, so the
+  ids are the live sync's (`mt5-<account>-<position>`), and through the sync's
+  merge, so re-importing, or syncing later, adds nothing twice and keeps the
+  member's annotations. The broker's clock defaults to New York + 7 (UTC+2 in
+  winter, UTC+3 in summer, on the American dates), the convention of most forex
+  brokers; a fixed offset can be chosen. The page says what it found before
+  anything is written, and names the lines it skipped.
+* **Setups** (`trading/setups.py`) carry the shorthand traders use: OTE, BOS,
+  CHoCH, FVG, iFVG, Expansion 50 %, Order Block, prise de liquidité, Breaker,
+  SMT, News, then the classical ones. The long names, English and French, stay
+  as aliases, accents folded, so every trade already saved keeps its setup.
+* **MetaTrader 5 synchronisation**, section 4 of « Saisir ». The form calls the
   connector (`integrations/mt5.py`) and the merge rule that keeps setups,
   notes, emotions and ratings across syncs (`integrations/sync.py`); trades are
   matched on the broker's position number, so a second sync adds nothing twice.

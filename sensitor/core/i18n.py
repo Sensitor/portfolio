@@ -1262,6 +1262,16 @@ DEFS: dict[str, dict[str, str]] = {
 }
 
 
+# Period codes as the controls show them. The codes stay the keys everywhere;
+# only the label changes, and only in French.
+PERIOD_LABELS_FR = {"7D": "7 j", "30D": "30 j", "90D": "90 j", "6M": "6 mois", "1Y": "1 an", "ALL": "Tout",
+                    "1M": "1 mois", "3M": "3 mois", "YTD": "Depuis janvier", "MAX": "Max"}
+
+
+def period_label(code: str, lang: str = "en") -> str:
+    return PERIOD_LABELS_FR.get(code, code) if lang == "fr" else code
+
+
 def na(lang: str | None = None) -> str:
     """
     The mark for a value that is not available: « n.d. » in French, « n/a » in

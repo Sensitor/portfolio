@@ -463,10 +463,11 @@ def _carnet_flow(failures) -> int:
     # largest risk contributor that the table lists first.
     app = run_page("risk", analyzer, lang="fr")
     markup = " ".join(m.value for m in app.markdown)
-    quoted = re.search(r"<p>([A-Z][A-Z0-9.-]*) porte (\d+\.\d)% du risque", markup)
-    shares = [float(v) for v in re.findall(r"<span>(\d+\.\d)%</span>", markup)]
+    # Read in French, the figures are in French typography: « 23,4 % » (core.numbers).
+    quoted = re.search(r"<p>([A-Z][A-Z0-9.-]*) porte (\d+,\d)\u202f% du risque", markup)
+    shares = [float(v.replace(",", ".")) for v in re.findall(r"<span>(\d+,\d)\u202f%</span>", markup)]
     check("risk margin quotes the largest contributor",
-          bool(quoted) and bool(shares) and float(quoted.group(2)) == max(shares)
+          bool(quoted) and bool(shares) and float(quoted.group(2).replace(",", ".")) == max(shares)
           and f'<td class="k">{quoted.group(1)}</td>' in markup,
           quoted.group(0) if quoted else "no sentence")
 

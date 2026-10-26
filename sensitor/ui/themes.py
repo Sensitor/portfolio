@@ -34,6 +34,8 @@ into "Other" rather than generating a 9th hue.
 import re
 import streamlit as st
 
+from ..core.numbers import french_html
+
 # =============================================================================
 # TOKENS
 # =============================================================================
@@ -204,7 +206,17 @@ def html(markup: str) -> None:
     """
     compact = _TAG_GAP.sub("><", markup.strip())
     compact = _WS.sub(" ", compact)
+    if in_french():
+        compact = french_html(compact)
     st.markdown(compact, unsafe_allow_html=True)
+
+
+def in_french() -> bool:
+    """Whether the page is read in French, so its figures take French typography (`core.numbers`)."""
+    try:
+        return st.session_state.get("language") == "fr"
+    except Exception:                                   # noqa: BLE001 - no session outside a run
+        return False
 
 
 # =============================================================================

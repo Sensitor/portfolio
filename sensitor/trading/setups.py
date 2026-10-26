@@ -18,34 +18,47 @@ first-class everywhere the built-ins are.
 from __future__ import annotations
 
 import re
+import unicodedata
 
 # ── Setups ───────────────────────────────────────────────────────────────────
 # key -> (english label, french label, family, aliases)
 
+# The order is the order of the pickers: the entries traders tag most come first.
+# The usual shorthand is the label (« BOS », not « Break of Structure »); the long
+# names, English and French, stay as aliases, so a tag written either way, and
+# every trade already saved, folds onto the same key.
+
 SETUPS = {
-    "bos": ("Break of Structure", "Rupture de Structure", "smc",
-            ("break of structure", "breakofstructure", "structure break")),
-    "choch": ("Change of Character", "Changement de Caractère", "smc",
-              ("change of character", "chuch", "ch och")),
-    "fvg": ("Fair Value Gap", "Fair Value Gap", "smc",
-            ("fair value gap", "imbalance", "gap")),
+    "ote": ("OTE", "OTE", "smc",
+            ("optimal trade entry", "entree optimale", "golden pocket")),
+    "bos": ("BOS", "BOS", "smc",
+            ("break of structure", "breakofstructure", "structure break", "rupture de structure")),
+    "choch": ("CHoCH", "CHoCH", "smc",
+              ("change of character", "changement de caractere", "chuch", "ch och", "mss",
+               "market structure shift")),
+    "fvg": ("FVG", "FVG", "smc",
+            ("fair value gap", "imbalance", "gap", "desequilibre")),
+    "ifvg": ("iFVG", "iFVG", "smc",
+             ("inverse fvg", "inversion fvg", "inverse fair value gap", "inversion fair value gap")),
+    "expansion_50": ("50% expansion", "Expansion 50 %", "smc",
+                     ("50%", "50 expansion", "expansion 50", "50 de l expansion", "50 percent", "equilibrium",
+                      "milieu de l expansion")),
     "order_block": ("Order Block", "Order Block", "smc",
                     ("ob", "orderblock", "order block")),
-    "ote": ("Optimal Trade Entry", "Entrée Optimale", "smc",
-            ("optimal trade entry", "golden pocket")),
-    "liquidity_sweep": ("Liquidity Sweep", "Balayage de Liquidité", "smc",
-                        ("sweep", "liquidity grab", "stop hunt", "raid")),
+    "liquidity_sweep": ("Liquidity sweep", "Prise de liquidité", "smc",
+                        ("sweep", "liquidity grab", "stop hunt", "raid", "balayage de liquidite")),
     "breaker": ("Breaker Block", "Breaker Block", "smc", ("breaker",)),
+    "smt": ("SMT", "SMT", "smc", ("smt divergence", "divergence smt")),
+    "news": ("News", "News", "event", ("event", "data release", "nfp", "actualite", "annonce")),
     "breakout": ("Breakout", "Cassure", "classical",
                  ("break out", "range break")),
     "reversal": ("Reversal", "Retournement", "classical",
                  ("mean reversal", "turn")),
-    "trend_following": ("Trend Following", "Suivi de Tendance", "classical",
+    "trend_following": ("Trend Following", "Suivi de tendance", "classical",
                         ("trend", "with trend", "continuation")),
-    "mean_reversion": ("Mean Reversion", "Retour à la Moyenne", "classical",
+    "mean_reversion": ("Mean Reversion", "Retour à la moyenne", "classical",
                        ("mean revert", "fade")),
     "range": ("Range", "Range", "classical", ("range trade", "consolidation")),
-    "news": ("News", "Actualité", "event", ("event", "data release", "nfp")),
 }
 
 SETUP_FAMILIES = {
@@ -118,7 +131,9 @@ def _alias_index(catalogue: dict) -> dict:
 
 
 def _slug(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "", str(text).lower())
+    """Lower case, accents folded (« Caractère » and « caractere » are one spelling), letters and digits only."""
+    plain = unicodedata.normalize("NFKD", str(text).lower()).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]+", "", plain)
 
 
 _SETUP_INDEX = _alias_index(SETUPS)

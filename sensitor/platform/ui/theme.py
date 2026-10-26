@@ -1222,6 +1222,17 @@ __DA__ .sx-j-checks .why { font: 400 14.5px/1.45 var(--c-text); color: var(--c-i
 __DA__ .sx-c-ledger .cost.ok { font: 500 13px var(--c-text); color: var(--c-up); }
 __DA__ .sx-c-done li span:last-child { font: 400 13.5px var(--c-text); color: var(--c-graphite); }
 __DA__ .sx-c-facts { list-style: none; margin: .6rem 0 0; padding: 0; }
+/* The four steps of the MetaTrader 5 report export, numbered in the margin. */
+__DA__ .sx-j-steps { list-style: none; counter-reset: step; margin: .4rem 0 1.1rem; padding: 0; display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.2rem; }
+__DA__ .sx-j-steps li { counter-increment: step; border-top: 2px solid var(--c-ink); padding-top: .6rem; margin: 0 !important; }
+__DA__ .sx-j-steps li::before { content: counter(step, decimal-leading-zero); display: block; font: 400 1.6rem/1 var(--c-title);
+  color: var(--c-plan); margin-bottom: .35rem; }
+__DA__ .sx-j-steps li > b { display: block; font: 600 15px/1.35 var(--c-text); color: var(--c-ink); margin-bottom: .2rem; }
+__DA__ .sx-j-steps li > span { display: block; font: 400 14px/1.5 var(--c-text); color: var(--c-ink-2); }
+__DA__ .sx-j-steps li > span b { font-weight: 600; color: var(--c-ink); }
+@media (max-width: 1000px) { __DA__ .sx-j-steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { __DA__ .sx-j-steps { grid-template-columns: 1fr; gap: .9rem; } }
 __DA__ .sx-c-facts li { font: 400 14px/1.45 var(--c-text) !important; color: var(--c-ink-2) !important; margin: 0 !important;
   padding: .45rem 0; border-bottom: 1px solid var(--c-rule); }
 __DA__ .sx-c-facts li:last-child { border-bottom: 0; }

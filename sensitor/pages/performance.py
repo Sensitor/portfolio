@@ -18,7 +18,7 @@ from ..ui.components import (
     data_table, metric_card, note, num, page_header, pct, section, spacer, stat_card,
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, na, tr
+from ..core.i18n import define, na, period_label, tr
 from ..integrations.market_data import benchmark_label
 from ._shared import (
     benchmark_selector, chart_with_reading, guard, load_benchmark, period_selector,
@@ -71,7 +71,7 @@ def render_performance(ctx) -> None:
 
     # ── Cumulative performance ───────────────────────────────────────────────
     section(tr("cumulative_performance", lang),
-            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} · {ctx.period}")
+            f"{tr('portfolio', lang)} {tr('vs', lang)} {bench_name} · {period_label(ctx.period, lang)}")
 
     series_map = {tr("portfolio", lang): values}
     if bench_aligned is not None:

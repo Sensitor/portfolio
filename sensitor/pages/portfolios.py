@@ -25,7 +25,7 @@ from ..ui.components import (
     pill_html, section, spacer,
 )
 from ..ui.themes import INK, INK_MUTED, PLOTLY_CONFIG, html
-from ..core.i18n import na, tr
+from ..core.i18n import na, period_label, tr
 from ._shared import require_store_and_user, snapshot_metrics
 
 LOADED_KEY = "sensitor_loaded_portfolio"
@@ -56,7 +56,7 @@ def render_portfolios(ctx) -> None:
 
 def _save_block(ctx, lang, store, email) -> None:
     section(tr("save_current", lang),
-            f"{len(ctx.tickers)} {tr('assets', lang).lower()} · {ctx.period}")
+            f"{len(ctx.tickers)} {tr('assets', lang).lower()} · {period_label(ctx.period, lang)}")
 
     name_col, client_col, button_col = st.columns([2, 2, 1], gap="medium")
     with name_col:

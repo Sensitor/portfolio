@@ -24,7 +24,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from ..core.i18n import na, tr
+from ..core.i18n import na, period_label, tr
 from ..trading import setups as taxonomy
 from ..trading.analytics import format_duration
 from ..trading.context import build_context
@@ -141,7 +141,8 @@ def period_selector(ctx, key: str) -> str:
     current = ctx.period if ctx.period in options else options[-1]
     selected = st.radio(
         tr("period", ctx.lang), options, index=options.index(current),
-        horizontal=True, key=key, label_visibility="collapsed",
+        horizontal=True, format_func=lambda code: period_label(code, ctx.lang), key=key,
+        label_visibility="collapsed",
     )
     if selected != ctx.period:
         ctx.set_period(selected)

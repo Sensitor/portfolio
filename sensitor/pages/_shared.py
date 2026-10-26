@@ -15,7 +15,7 @@ from ..integrations import market_data as market
 from ..investment import currency as FX
 from ..ui.components import empty_state, note, reading
 from ..ui.themes import PLOTLY_CONFIG
-from ..core.i18n import tr
+from ..core.i18n import period_label, tr
 
 
 def chart_with_reading(fig, key: str, lines: list[str], lang: str, *,
@@ -68,7 +68,7 @@ def period_selector(ctx, key: str) -> str:
         tr("period", ctx.lang),
         options,
         index=options.index(current),
-        horizontal=True,
+        horizontal=True, format_func=lambda code: period_label(code, ctx.lang),
         key=key,
         label_visibility="collapsed",
     )

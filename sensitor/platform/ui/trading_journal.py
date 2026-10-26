@@ -253,7 +253,7 @@ def dashboard(catalog, email, route) -> None:
 
 def _empty_state(email: str | None) -> None:
     html('<div class="sx-c-blank"><div class="rub">Votre journal est vide</div><h3>Trois façons de commencer.</h3>'
-         '<p>Saisissez un trade en trente secondes, importez un fichier de vos trades, ou explorez d\'abord un '
+         '<p>Importez le rapport d\'historique de MetaTrader 5, saisissez un trade en trente secondes, ou explorez d\'abord un '
          'journal d\'exemple pour voir ce que la revue vous apprendra.</p>'
          '<ol><li><b>Un trade suffit</b> pour voir sa revue règle par règle.</li>'
          '<li><b>Dix trades</b> donnent un premier relevé.</li>'
@@ -262,13 +262,14 @@ def _empty_state(email: str | None) -> None:
     with a:
         rt.link("Saisir un trade", "journal_add", key="empty_add", kind="primary", width="stretch")
     with b:
-        rt.link("Importer un fichier", "journal_add", key="empty_import", width="stretch")
+        rt.link("Importer depuis MetaTrader 5", "journal_add", key="empty_import", width="stretch")
     with c:
         if st.button("Explorer l'exemple", key="empty_demo", width="stretch"):
             st.session_state[DEMO_KEY] = True
             st.rerun()
-    note("Vos trades MetaTrader 5 se synchronisent depuis « Saisir », et ceux déjà synchronisés dans "
-         "l'application d'analyse apparaissent ici : c'est le même compte et le même journal.")
+    note("Depuis MetaTrader 5 : exportez le rapport d'historique (Boîte à outils, Historique, clic droit, "
+         "Rapport) et déposez-le dans « Saisir ». Les trades déjà synchronisés dans l'application d'analyse "
+         "apparaissent ici : c'est le même compte et le même journal.")
 
 
 def _streaks(trades: list[Trade], reviews: dict) -> tuple[int, int]:
@@ -765,23 +766,27 @@ def _annotate(trade: Trade, email: str) -> None:
 # =============================================================================
 
 def add_page(catalog, email, route) -> None:
-    _header("Saisir", "Ajouter des <em>trades</em>.", "Saisissez un trade avec ce que vous savez déjà : vos "
-            "prix et le montant risqué. La taille de position et le résultat en R sont calculés pour vous.")
+    _header("Saisir", "Ajouter des <em>trades</em>.", "Le plus rapide : le rapport d'historique de "
+            "MetaTrader 5, exporté en trois clics. Vous pouvez aussi saisir un trade à la main, importer un "
+            "tableur ou synchroniser le terminal.")
     nav("journal_add", email)
     if not email:
         _signin_prompt("add", "Connectez-vous pour saisir vos trades.")
         footer()
         return
+    from . import journal_analysis
     store = rt.get_store()
-    section(1, "Saisir un trade", "Heures de Paris. Avec un stop, le risque en argent suffit : la taille "
+    section(1, "Importer depuis MetaTrader 5", "Le rapport d'historique du terminal : toutes vos positions "
+            "clôturées d'un coup, avec leur stop. Le même rapport réimporté ne crée aucun doublon.")
+    journal_analysis.report_section(store, email)
+    section(2, "Saisir un trade", "Heures de Paris. Avec un stop, le risque en argent suffit : la taille "
             "est déduite de la distance au stop.")
     _entry_form(store, email)
-    section(2, "Importer un fichier", "Un tableur au format du modèle : une ligne par trade. Séparateur "
-            "« ; » ou « , », virgule décimale acceptée.")
+    section(3, "Importer un autre tableur", "Pour un autre courtier : le modèle Sensitor, une ligne par trade. "
+            "Séparateur « ; » ou « , », virgule décimale acceptée.")
     _import(store, email)
-    section(3, "Synchroniser MetaTrader 5", "Votre historique lu directement dans le terminal : chaque trade "
-            "arrive avec ses prix, son stop et son résultat, prêt pour la revue.")
-    from . import journal_analysis
+    section(4, "Synchroniser le terminal", "Sur un serveur Windows où tourne MetaTrader 5 : l'historique lu "
+            "directement dans le terminal, sans exporter de fichier.")
     journal_analysis.sync_section(store, email)
     footer()
 

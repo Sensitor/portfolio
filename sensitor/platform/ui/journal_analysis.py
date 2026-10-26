@@ -79,6 +79,65 @@ RENDERERS = {page: _page(page, label, render) for page, label, render in PAGES}
 # METATRADER 5
 # =============================================================================
 
+CLOCKS = {"ny+7": "UTC+2 l'hiver, UTC+3 l'été (la plupart des courtiers forex)",
+          "2": "UTC+2 toute l'année", "3": "UTC+3 toute l'année", "0": "UTC", "1": "UTC+1 (heure de Paris en hiver)"}
+CLOCK_KEY = "jr_report_clock"
+STEPS = (
+    ("Ouvrez l'historique", "Dans MetaTrader 5 sur ordinateur, ouvrez la <b>Boîte à outils</b> (Ctrl+T) et "
+     "l'onglet <b>Historique</b>."),
+    ("Choisissez la période", "Clic droit dans la liste, puis la période : <b>Tout l'historique</b>, ou les "
+     "derniers mois."),
+    ("Exportez le rapport", "Clic droit encore, <b>Rapport</b>, puis <b>HTML</b> ou <b>Open XML</b> (Excel). "
+     "Enregistrez le fichier."),
+    ("Déposez-le ici", "Vos positions clôturées sont lues avec leurs prix, leur stop et leur résultat. Rien "
+     "d'autre n'est demandé."),
+)
+
+
+def report_section(store, email: str) -> None:
+    """Section « Importer depuis MetaTrader 5 » of the entry page: the history report, without a terminal."""
+    from ...integrations import mt5_report as MR
+    from ...integrations import sync as broker_sync
+
+    html('<ol class="sx-j-steps">' + "".join(f"<li><b>{esc(t)}</b><span>{body}</span></li>" for t, body in STEPS)
+         + "</ol>")
+    with st.container(key="panel_jr_report"):
+        upload = st.file_uploader("Le rapport MetaTrader 5", type=["html", "htm", "xlsx"], key="jr_report")
+        clock = st.selectbox("Heure du serveur de votre courtier", list(CLOCKS), format_func=CLOCKS.get,
+                             key=CLOCK_KEY, help="Les heures du rapport sont celles du serveur. La plupart des "
+                             "courtiers forex affichent l'heure de New York plus sept heures, soit UTC+2 l'hiver et "
+                             "UTC+3 l'été : c'est le choix proposé. L'horloge de la fenêtre « Market Watch » "
+                             "du terminal vous le confirme.")
+        if upload is None:
+            return
+        try:
+            report = MR.read(upload.getvalue(), upload.name, clock=clock if clock == MR.NY_PLUS_7 else float(clock))
+        except MR.ReportError as exc:
+            st.error(f"Ce fichier n'a pas pu être lu : {exc}.")
+            return
+        n = len(report.trades)
+        account = f"compte {report.account_login}, " if report.account_login else ""
+        html(f'<p class="sx-note"><b>{n}</b> position{"s" if n > 1 else ""} clôturée{"s" if n > 1 else ""} '
+             f'trouvée{"s" if n > 1 else ""} ({esc(account)}{esc(report.currency or "")})'
+             + (f", {len(report.skipped)} ligne{'s' if len(report.skipped) > 1 else ''} écartée"
+                f"{'s' if len(report.skipped) > 1 else ''}" if report.skipped else "") + ".</p>")
+        if report.skipped:
+            rows = "".join(f"<tr><td>{line}</td><td>{esc(why)}</td></tr>" for line, why in report.skipped[:8])
+            html(f'<table><thead><tr><th>Ligne</th><th>Raison</th></tr></thead><tbody>{rows}</tbody></table>')
+        if not n:
+            return
+        if st.button(f"Importer {n} trade{'s' if n > 1 else ''}", key="jr_report_go", type="primary"):
+            result = broker_sync.sync_trades(MR.ReportSource(report), store, email,
+                                             since=min(t.opened_at for t in report.trades))
+            message = (f"Import terminé : {result.added} ajouté{'s' if result.added > 1 else ''}, "
+                       f"{result.updated} mis à jour, {result.unchanged} déjà à jour.")
+            if result.annotations_kept:
+                message += " Vos annotations sont conservées."
+            J.flash(message + " Réimporter le même rapport, ou un plus récent, ne crée aucun doublon.")
+            st.session_state.pop("jr_report", None)
+            st.rerun()
+
+
 def terminal_available() -> bool:
     """Whether this server can reach a terminal at all: the package ships for Windows only."""
     return importlib.util.find_spec("MetaTrader5") is not None
@@ -103,8 +162,8 @@ def sync_section(store, email: str) -> None:
          'notes, émotions et évaluations sont conservés.</p>')
     if not terminal_available():
         notice("Pas de terminal sur ce serveur", "Ce déploiement ne tourne pas sous Windows avec MetaTrader 5 : la "
-               "synchronisation directe n'y est pas possible. Saisissez vos trades ou importez-les au format du "
-               "modèle ci-dessus.", "info")
+               "synchronisation directe n'y est pas possible. Importez plutôt le rapport d'historique, en haut de "
+               "cette page : le résultat est le même.", "info")
         return
     last = st.session_state.get(SYNC_DEFAULTS) or {}
     with st.container(key="panel_jr_mt5"):

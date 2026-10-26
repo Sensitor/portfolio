@@ -21,7 +21,7 @@ from ..ui.components import (
     data_table, empty_state, metric_card, note, num, page_header, pct, section, spacer,
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import define, tr
+from ..core.i18n import define, period_label, tr
 from ._shared import chart_with_reading, guard, period_selector
 
 
@@ -55,7 +55,7 @@ def render_optimize(ctx) -> None:
 
     # ── Named portfolios ─────────────────────────────────────────────────────
     section(tr("efficient_frontier", lang),
-            f"{len(result['tickers'])} {tr('assets', lang).lower()} · {ctx.period}")
+            f"{len(result['tickers'])} {tr('assets', lang).lower()} · {period_label(ctx.period, lang)}")
 
     c1, c2, c3 = st.columns(3, gap="medium")
     with c1:

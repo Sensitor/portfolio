@@ -637,7 +637,8 @@ def main() -> int:
     try:
         linked = run({"page": "journal_add"}, token("linked@example.com"))
         check("journal: MetaTrader 5 synchronisation is in the space now, not a link to the analytics app",
-              "Synchroniser MetaTrader 5" in text(linked) and not linked.get("link_button"))
+              "Importer depuis MetaTrader 5" in text(linked) and "Synchroniser le terminal" in text(linked)
+              and not linked.get("link_button"))
         linked = run({"page": "tools"})
         check("tools: the old address opens the space, with nothing left to open in the full app",
               "Analyser son portefeuille" in text(linked) and not linked.get("link_button"))
