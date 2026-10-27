@@ -110,9 +110,16 @@ other.
   setups, trades per day, daily loss limit in R, pause after losses; table
   `trading_plans`). Every closed trade is checked rule by rule: respected,
   broken, or not checkable (never counted as a pass). Mistakes the member
-  recorded on a trade count as departures; nothing is inferred from prices.
+  recorded on a trade count as departures; nothing is inferred from prices. A
+  trade imported from MT5 without a setup is not checkable on the setup rule
+  until it is annotated: a blank to fill, not a trade taken without a setup.
   Each broken rule points to the Academy lesson that teaches it. The dashboard
-  shows the compliance rate, the R of trades inside and outside the plan, the
+  opens on the performance in money: the net result, the win rate, profit
+  factor, expectancy, average gain and loss, the largest drawdown (measured from
+  the starting point, so a first losing trade counts) and the best and worst
+  trade; then the capital curve, one step per trade from zero or from the
+  plan's capital, with the drawdown under the peak; then the result per day and
+  per asset. The plan comes after: it shows the compliance rate, the R of trades inside and outside the plan, the
   curve as traded against the curve with departures set to zero, the cost per
   rule with a priority lesson, a calendar of R per day, and results by setup
   and session with their sample size.

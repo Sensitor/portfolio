@@ -198,9 +198,9 @@ def trade_row(trade: Trade, review: R.TradeReview | None, *, key: str) -> None:
 # =============================================================================
 
 def dashboard(catalog, email, route) -> None:
-    _header("", "Chaque trade, <em>jugé</em> sur votre plan.",
-            "Vos trades confrontés aux règles que vous avez écrites : ce que vous avez respecté, ce que "
-            "les écarts vous ont coûté en R, et la leçon qui corrige l'écart le plus cher.")
+    _header("", "Votre trading, <em>en chiffres</em>.",
+            "Votre résultat, votre courbe de capital et vos meilleurs actifs, puis chaque trade confronté aux "
+            "règles de votre plan.")
     book = _book(email)
     nav("journal", email)
     _demo_banner(book, email, key="dash")
@@ -220,35 +220,201 @@ def dashboard(catalog, email, route) -> None:
     rep = R.report(trades, reviews)
     metrics = compute_metrics(trades)
 
+    _performance(book, trades, metrics, period)
+
+    section(1, "Votre capital, trade après trade", "Chaque point est un trade clôturé, dans l'ordre. La zone "
+            "brique sous le sommet atteint, c'est le recul.")
+    _equity(book, trades)
+
+    section(2, "Jour par jour, actif par actif", "Le résultat net de chaque journée, et ce que chaque actif a "
+            "rapporté ou coûté sur la période.")
+    _days_and_assets(trades)
+
+    section(3, "Le respect de votre plan", "Vos trades confrontés aux règles que vous avez écrites : ce que "
+            "vous avez respecté, et ce que les écarts ont coûté en R.")
     _record(book, rep, metrics, trades, reviews, period)
     if not book.plan_written and not book.demo:
         notice("Plan par défaut", "Vos trades sont revus avec un plan de départ (1 % de risque, rapport "
                "de 1,5, trois trades par jour). Écrivez le vôtre dans « Mon plan » : la revue suivra vos règles.",
                "info")
-
-    section(1, "Ce que vos écarts vous ont coûté", "Vos trades tels qu'ils ont été pris, et les mêmes trades si "
-            "chaque écart au plan avait été évité. La zone entre les deux, c'est le prix des écarts.")
     _curves(trades, reviews)
 
-    section(2, "Où partent vos R", "Chaque règle de votre plan : une marque par écart, et ce que les trades "
+    section(4, "Où partent vos R", "Chaque règle de votre plan : une marque par écart, et ce que les trades "
             "concernés ont rapporté ou coûté.")
     _rules(rep, key="dash")
 
-    section(3, "Vos jours, un par un", "Un carré par jour : vert pour un jour gagnant en R, brique pour un jour "
-            "perdant. Les semaines se lisent de gauche à droite.")
+    section(5, "Vos jours en R, et ce qui fonctionne", "Un carré par jour, vert pour un jour gagnant en R, "
+            "brique pour un jour perdant ; puis vos résultats par setup et par séance.")
     _regularity(trades)
-
-    section(4, "Ce qui fonctionne pour vous", "Vos résultats par setup et par séance, avec le nombre de "
-            "trades derrière chaque chiffre.")
     _breakdowns(trades)
 
-    section(5, "Vos derniers trades", "À droite de chaque trade, son empreinte : les neuf règles du plan, "
+    section(6, "Vos derniers trades", "À droite de chaque trade, son empreinte : les neuf règles du plan, "
             "toujours dans le même ordre. Une case brique, une règle enfreinte.")
     recent = sorted(trades, key=lambda t: t.closed_at, reverse=True)[:6]
     for t in recent:
         trade_row(t, book.reviews.get(t.id), key="dash")
     rt.link("Voir tous les trades", "journal_trades", key="dash_all_trades")
     footer()
+
+
+# =============================================================================
+# PERFORMANCE: THE RESULT IN MONEY, FIRST
+# =============================================================================
+
+def _book_currency(trades: list[Trade]) -> str:
+    """The account currency's sign, or nothing when the trades mix currencies (their sum would mean nothing)."""
+    codes = {t.account_currency for t in trades if t.account_currency}
+    return _currency(codes.pop()) if len(codes) == 1 else ""
+
+
+def _money(value: float | None, currency: str, *, decimals: int = 2, sign: bool = True) -> str:
+    if value is None:
+        return "n.d."
+    text = V.signed(value, decimals) if sign else V.fr(value, decimals)
+    return f"{text}\u00a0{currency}" if currency else text
+
+
+def _performance(book: Book, trades: list[Trade], m: dict, period: str) -> None:
+    """The headline: net result in money, then the figures a trader reads first."""
+    cur = _book_currency(trades)
+    when = {"30": "les 30 derniers jours", "90": "les 90 derniers jours"}.get(period, "toute la période")
+    first, last = min(t.closed_at for t in trades), max(t.closed_at for t in trades)
+    span = (f"le {date_fr(_paris(first))}" if _paris(first).date() == _paris(last).date()
+            else f"du {date_fr(_paris(first))} au {date_fr(_paris(last))}")
+    net = m.get("net_pnl") or 0.0
+    costs = m.get("total_costs")
+    split = (f'<span><b class="up">{esc(_money(m.get("gross_profit"), cur, decimals=0))}</b> de gains</span>'
+             f'<span><b class="down">{esc(_money(m.get("gross_loss"), cur, decimals=0))}</b> de pertes</span>'
+             + (f'<span><b>{esc(_money(costs, cur))}</b> de frais et swaps</span>' if costs else ""))
+    win, pf, e, e_r = m.get("win_rate"), m.get("profit_factor"), m.get("expectancy"), m.get("expectancy_r")
+    dd = m.get("max_drawdown")
+
+    def tile(label: str, value: str, sub: str, tone_: str = "") -> str:
+        return (f'<div><div class="l">{esc(label)}</div><div class="v {tone_}">{esc(value)}</div>'
+                f'<div class="s">{esc(sub)}</div></div>')
+
+    tiles = "".join((
+        tile("Taux de réussite", "n.d." if win is None else f"{V.fr(win * 100, 1)}\u202f%",
+             f"{_plural(m.get('n_wins', 0), 'gagnant')}, {_plural(m.get('n_losses', 0), 'perdant')}"
+             + (f", {m['n_scratch']} à zéro" if m.get("n_scratch") else "")),
+        tile("Facteur de profit", "n.d." if pf is None else V.fr(pf),
+             "Pas encore de perte." if pf is None else f"Pour 1 perdu, {V.fr(pf)} gagné.",
+             "" if pf is None else ("up" if pf >= 1 else "down")),
+        tile("Espérance par trade", _money(e, cur), (f"Soit {V.r_text(e_r)} par trade." if e_r is not None
+                                                      else "En argent, frais compris."), V.tone(e)),
+        tile("Gain moyen, perte moyenne",
+             f"{_money(m.get('avg_win'), cur, decimals=0)} / {_money(m.get('avg_loss'), cur, decimals=0)}",
+             "n.d." if not m.get("payoff_ratio") else f"Un gain moyen vaut {V.fr(m['payoff_ratio'])} perte moyenne."),
+        tile("Plus fort recul", _money(-abs(dd) if dd else 0.0, cur, decimals=0),
+             "Du sommet au creux de la courbe de résultat.", "down" if dd else ""),
+        tile("Meilleur et pire trade",
+             f"{_money(m.get('best_trade'), cur, decimals=0)} / {_money(m.get('worst_trade'), cur, decimals=0)}",
+             f"Sur {_plural(m['n'], 'trade')}."),
+    ))
+    html(f'<div class="sx-c-perf"><div class="hero"><div class="rub">Performance · {esc(when)}'
+         f'{" · exemple synthétique" if book.demo else ""}</div>'
+         f'<div class="pnl {V.tone(net)}">{esc(_money(net, cur))}</div>'
+         f'<div class="sub">Résultat net de {_plural(m["n"], "trade")} clôturé{"s" if m["n"] > 1 else ""}, '
+         f'{esc(span)}.</div><div class="split">{split}</div></div>'
+         f'<div class="tiles">{tiles}</div></div>')
+
+
+def _chart(fig, key: str, *, height: int, x_label: str = "", y_label: str = "", xaxis: dict | None = None,
+           yaxis: dict | None = None, right: int = 16) -> None:
+    """The design system's chart style, then this chart's own axes (a date axis, a list of names)."""
+    K = V.K
+    font = "Schibsted Grotesk, DM Sans, sans-serif"
+    chart_style(fig, x_label=x_label, y_label=y_label, height=height, legend=False)
+    fig.update_layout(font=dict(family=font, color=K["ink-2"]), margin=dict(l=10, r=right, t=18, b=10),
+                      xaxis=dict(showgrid=False, tickfont=dict(family=font, size=11.5, color=K["graphite"]),
+                                 linecolor=K["rule-strong"]),
+                      yaxis=dict(gridcolor=K["rule"], zerolinecolor=K["rule-strong"],
+                                 tickfont=dict(family=font, size=11.5, color=K["graphite"])),
+                      hoverlabel=dict(font=dict(family=font)))
+    fig.update_xaxes(**(xaxis or {}))
+    fig.update_yaxes(**(yaxis or {}))
+    with st.container(key=f"chart_{key}"):
+        st.plotly_chart(fig, key=f"plot_{key}", theme=None, config={"displayModeBar": False, "responsive": True})
+
+
+def _equity(book: Book, trades: list[Trade]) -> None:
+    """The capital curve in money: the line, the peak it has reached, and the drawdown below the peak."""
+    K = V.K
+    cur = _book_currency(trades)
+    ordered = sorted(trades, key=lambda t: (t.closed_at, t.id))
+    base = book.plan.capital if (book.plan_written or book.demo) and book.plan.capital else 0.0
+    ys, peaks, texts, colors = [], [], [], []
+    level = peak = base
+    for t in ordered:
+        level += t.pnl
+        peak = max(peak, level)
+        ys.append(level)
+        peaks.append(peak)
+        colors.append(K["up"] if t.pnl > 0 else K["down"] if t.pnl < 0 else K["graphite"])
+        texts.append(f"{_when(t.closed_at)} · {t.symbol} · {_side(t).lower()} · {_money(t.pnl, cur)}")
+    # One step per trade, from the starting point: weekends and quiet days do not flatten the curve.
+    xs, ys, peaks = list(range(len(ordered) + 1)), [base] + ys, [base] + peaks
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=xs, y=peaks, line=dict(color=K["rule-strong"], width=1, dash="dot"),
+                             hoverinfo="skip", name="Sommet"))
+    fig.add_trace(go.Scatter(x=xs, y=ys, line=dict(color=K["ink"], width=2.4), fill="tonexty",
+                             fillcolor="rgba(154,58,44,0.12)", name="Capital" if base else "Résultat cumulé",
+                             mode="lines", hoverinfo="skip"))
+    fig.add_trace(go.Scatter(x=xs[1:], y=ys[1:], mode="markers", text=texts,
+                             marker=dict(size=7, color=colors, line=dict(color=K["sheet"], width=1.5)),
+                             hovertemplate="Trade %{x} · %{text}<br>" + ("Capital" if base else "Cumul")
+                             + " : %{y:,.2f}" + (f"\u00a0{cur}" if cur else "") + "<extra></extra>"))
+    # The final value above the last point, inside the plot: no margin to reserve on a phone.
+    fig.add_annotation(x=xs[-1], y=ys[-1], text=f"<b>{_money(ys[-1], cur, sign=not base)}</b>", showarrow=False,
+                       xanchor="right", yanchor="bottom", yshift=8,
+                       font=dict(family="Schibsted Grotesk, sans-serif", size=13,
+                                 color=K["up"] if ys[-1] >= base else K["down"]))
+    _chart(fig, "jr_equity", height=400, x_label="Trades, dans l'ordre de clôture",
+           y_label=("Capital" if base else "Résultat cumulé") + (f", en {cur}" if cur else ""),
+           xaxis=dict(tickformat="d", range=[-0.3, len(ordered) + 0.3]),
+           yaxis=dict(ticksuffix=f"\u00a0{cur}" if cur else "", tickformat=",.0f"))
+    foot = ("La courbe part du capital écrit dans votre plan et ajoute le résultat net de chaque trade."
+            if base else "La courbe part de zéro et ajoute le résultat net de chaque trade. Indiquez votre capital "
+            "dans « Mon plan » pour la lire en capital.")
+    html(f'<div class="sx-chart-foot"><b>Lecture</b><span>{esc(foot)} Les points verts sont les trades gagnants, '
+         'les points brique les perdants.</span></div>')
+
+
+def _days_and_assets(trades: list[Trade]) -> None:
+    K = V.K
+    cur = _book_currency(trades)
+    suffix = f"\u00a0{cur}" if cur else ""
+    left, right = st.columns([1.35, 1], gap="large")
+    with left:
+        days: dict = {}
+        for t in trades:
+            day = _paris(t.closed_at).date()
+            days[day] = days.get(day, 0.0) + t.pnl
+        ordered = sorted(days.items())
+        fig = go.Figure(go.Bar(x=[d for d, _ in ordered], y=[v for _, v in ordered],
+                               marker=dict(color=[K["up"] if v >= 0 else K["down"] for _, v in ordered],
+                                           cornerradius=3),
+                               hovertemplate="%{x|%d/%m} · %{y:+,.2f}" + suffix + "<extra></extra>"))
+        _chart(fig, "jr_days", height=280, y_label="Résultat du jour",
+               xaxis=dict(type="date", tickformat="%d/%m"), yaxis=dict(ticksuffix=suffix, tickformat=",.0f"))
+        green = sum(1 for _, v in ordered if v > 0)
+        html(f'<div class="sx-chart-foot"><b>Lecture</b><span>{green} jour{"s" if green > 1 else ""} gagnant'
+             f'{"s" if green > 1 else ""} sur {len(ordered)}.</span></div>')
+    with right:
+        rows = sorted(performance.by_symbol(trades, "fr"), key=lambda r: r["net_pnl"])[-8:]
+        fig = go.Figure(go.Bar(y=[r["label"] for r in rows], x=[r["net_pnl"] for r in rows], orientation="h",
+                               marker=dict(color=[K["up"] if r["net_pnl"] >= 0 else K["down"] for r in rows],
+                                           cornerradius=3),
+                               customdata=[r["n"] for r in rows],
+                               hovertemplate="%{y} · %{x:+,.2f}" + suffix + " · %{customdata} trades<extra></extra>"))
+        _chart(fig, "jr_assets", height=max(200, 70 + 34 * len(rows)),
+               xaxis=dict(ticksuffix=suffix, tickformat=",.0f", showgrid=True, gridcolor=K["rule"],
+                          zeroline=True, zerolinecolor=K["rule-strong"]),
+               yaxis=dict(type="category", showgrid=False, tickfont=dict(size=12.5, color=K["ink"])))
+        best = rows[-1] if rows else None
+        if best:
+            html(f'<div class="sx-chart-foot"><b>Lecture</b><span>{esc(best["label"])} : '
+                 f'{esc(_money(best["net_pnl"], cur))} sur {_plural(best["n"], "trade")}.</span></div>')
 
 
 def _empty_state(email: str | None) -> None:
@@ -379,12 +545,10 @@ def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews
         return (f'<div><div class="l">{esc(label)}</div><div class="v {tone_}">{value}</div>'
                 f'<div class="s">{esc(sentence)}</div></div>')
 
-    pf, win = m.get("profit_factor"), m.get("win_rate")
+    # In R only: the result in money, the win rate and the profit factor head the page (`_performance`).
     figures = "".join((
         figure("Espérance par trade", esc(V.r_text(m.get("expectancy_r"))), f["e"], V.tone(m.get("expectancy_r"))),
         figure("Résultat total", esc(V.r_text(m.get("total_r"))), f["total"], V.tone(m.get("total_r"))),
-        figure("Taux de réussite", "n.d." if win is None else f"{round(win * 100)} %", f["win"]),
-        figure("Profit factor", "n.d." if pf is None else esc(V.fr(pf)), f["pf"]),
         figure("Drawdown maximum", esc(V.r_text(m.get("max_drawdown_r"))), f["dd"],
                "down" if (m.get("max_drawdown_r") or 0) < 0 else ""),
         figure("Coût des écarts",
@@ -400,7 +564,7 @@ def _record(book: Book, rep: R.PlanReport, m: dict, trades: list[Trade], reviews
          f'<div class="sx-c-count"><div><div class="big">{rep.n_followed}<small> / {rep.n_checked}</small></div>'
          f'<div class="lab">trades dans le plan</div></div>{V.record(marks)}</div>{key}</div>'
          f'<div class="sx-c-margin"><div class="rub">Lecture</div>{V.notes(reading)}</div></div>'
-         f'<div class="sx-c-figures">{figures}</div>')
+         f'<div class="sx-c-figures four">{figures}</div>')
 
 
 def _curves(trades: list[Trade], reviews: dict) -> None:

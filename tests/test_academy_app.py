@@ -12,6 +12,7 @@ Run with:  python tests/test_academy_app.py
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -279,7 +280,11 @@ def test_journal_space(alice_tok: str) -> None:
     body = text(visitor)
     check("visitor: the demonstration journal, labelled as such",
           "Exemple synthétique" in body and "Plan respecté sur" in body, error(visitor))
-    check("visitor: the plan-versus-traded chart is drawn", len(visitor.get("plotly_chart")) == 1)
+    charts = [json.loads(c.proto.spec) for c in visitor.get("plotly_chart")]
+    names = {t.get("name") for c in charts for t in c["data"]}
+    check("visitor: the capital curve, the days, the assets and the plan-versus-traded chart are drawn",
+          len(charts) == 4 and "Plan seul" in names and bool({"Résultat cumulé", "Capital"} & names),
+          str((len(charts), names)))
     demo_trade = run({"page": "journal_trade", "trade": "demo-005"})
     check("visitor: a demonstration trade shows its automatic review",
           "La revue automatique" in text(demo_trade) and "Demander la revue" not in text(demo_trade))
@@ -632,7 +637,7 @@ def main() -> int:
           "Préparer la séance" in text(room) and not room.exception and not room.text_input)
     journal = run({"page": "journal"})
     check("journal: open in the platform itself, no longer a link away",
-          "Chaque trade" in text(journal) and "Lien non configuré" not in text(journal))
+          "en chiffres" in text(journal) and "Lien non configuré" not in text(journal))
     os.environ["SENSITOR_TOOLS_URL"] = "https://outils.example"
     try:
         linked = run({"page": "journal_add"}, token("linked@example.com"))

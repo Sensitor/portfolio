@@ -94,9 +94,9 @@ def compute_metrics(trades) -> dict:
     durations = [t.duration_minutes for t in trades if t.duration_minutes is not None]
 
     equity = equity_curve(trades)
-    drawdown = max_drawdown(equity)
+    drawdown = max_drawdown(equity, start=0.0)
     r_equity = r_curve(trades)
-    r_drawdown = max_drawdown(r_equity)
+    r_drawdown = max_drawdown(r_equity, start=0.0)
 
     streaks = compute_streaks(trades)
 
@@ -197,9 +197,14 @@ def r_curve(trades) -> list[dict]:
     return points
 
 
-def max_drawdown(curve) -> dict:
+def max_drawdown(curve, start: float | None = None) -> dict:
     """
     Deepest peak-to-trough decline of a cumulative curve.
+
+    `start` is where the curve begins before its first point: zero for a
+    cumulative P&L or R, the starting balance for an equity. Without it the first
+    point is the first peak, so a book whose very first trade is its worst loss
+    reports a drawdown that leaves that loss out.
 
     `depth_pct` is relative to the peak and is `None` when the peak is at or
     below zero — a percentage drawdown from a negative balance is not a
@@ -209,7 +214,7 @@ def max_drawdown(curve) -> dict:
         return {"depth": None, "depth_pct": None, "current": None,
                 "peak_at": None, "trough_at": None}
 
-    peak = curve[0]["equity"]
+    peak = curve[0]["equity"] if start is None else max(start, curve[0]["equity"])
     peak_at = curve[0]["at"]
     best_peak_at = trough_at = None
     depth = 0.0
@@ -226,7 +231,7 @@ def max_drawdown(curve) -> dict:
             depth_pct = (decline / peak) if peak > 0 else None
 
     final = curve[-1]["equity"]
-    running_peak = max(p["equity"] for p in curve)
+    running_peak = max([p["equity"] for p in curve] + ([start] if start is not None else []))
     current = min(final - running_peak, 0.0)
 
     return {

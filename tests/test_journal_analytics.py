@@ -173,7 +173,7 @@ def main() -> int:
     print("\nThe dashboard and the separate app, on a mixed book")
     dash = run({"page": "journal"}, alice)
     check("the dashboard renders on its default period (it raised a TypeError before)",
-          not dash.exception and "Ce que vos écarts vous ont coûté" in page_text(dash), error(dash))
+          not dash.exception and "Votre capital, trade après trade" in page_text(dash), error(dash))
     for period in ("30", "all"):
         dash.radio(key="jr_period_dash").set_value(period).run()
         check(f"and on the period « {period} »", not dash.exception, error(dash))
@@ -252,7 +252,7 @@ def main() -> int:
           len(store().list_trades("erin@example.com")) == 2 and kept.notes == "Entrée trop tôt.")
     after = run({"page": "journal"}, erin)
     check("the synced trades are reviewed on the dashboard", not after.exception
-          and "Ce que vos écarts vous ont coûté" in page_text(after), error(after))
+          and "Votre capital, trade après trade" in page_text(after), error(after))
 
     failures = [c for c in CHECKS if not c[1]]
     print(f"\n{len(CHECKS)} checks, {len(failures)} failures")

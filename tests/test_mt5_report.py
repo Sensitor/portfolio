@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import sys
+import json
 import tempfile
 from datetime import datetime, timedelta, timezone
 from html import unescape
@@ -67,6 +68,7 @@ def error(app: AppTest) -> str:
 
 def main() -> int:
     from sensitor.integrations import mt5, mt5_report as R, sync
+    from sensitor.platform.ui import trade_visuals as V
     from sensitor.trading import setups as TS
 
     print("\nReading the report")
@@ -182,7 +184,35 @@ def main() -> int:
     check("nothing reaches another member", not store().list_trades("autre@example.com"))
     dash = run({"page": "journal"}, member)
     check("the imported trades are reviewed on the dashboard", not dash.exception
-          and "Ce que vos écarts vous ont coûté" in page_text(dash), error(dash))
+          and "Votre capital, trade après trade" in page_text(dash), error(dash))
+    dash.radio(key="jr_period_dash").set_value("all").run()
+    body = page_text(dash)
+    net = sum(t.pnl for t in saved)
+    head = body.index("Performance ·")
+    check("the page opens on the result in money, before the plan",
+          head < body.index("Le respect de votre plan") and f"{V.signed(net)}\u00a0€" in body
+          and "Taux de réussite" in body and "Facteur de profit" in body, body[head:head + 300])
+    curve = [json.loads(c.proto.spec) for c in dash.get("plotly_chart")]
+    equity = next((c for c in curve if any(t.get("name") == "Résultat cumulé" for t in c["data"])), None)
+    line = next(t for t in equity["data"] if t.get("name") == "Résultat cumulé") if equity else {}
+    check("the capital curve starts at zero, one step per trade, and ends on the net result",
+          bool(line) and line["y"][0] == 0 and len(line["y"]) == len(saved) + 1 and abs(line["y"][-1] - net) < 1e-9)
+    level = peak = drop = 0.0
+    for t in sorted(saved, key=lambda t: t.closed_at):
+        level += t.pnl
+        peak, drop = max(peak, level), max(drop, peak - level)
+    check("the largest drawdown is measured from zero, as on the curve",
+          drop > 0 and f"{V.signed(-drop, 0)}\u00a0€" in body, str(drop))
+    check("per day and per asset, as charts", sum(1 for c in curve if c["data"] and c["data"][0].get("type") == "bar") >= 2)
+
+    print("\nThe review of an imported trade")
+    from sensitor.trading import review as RV
+    plain = saved[0].annotated(setups=[])
+    check("an imported trade without a setup is a blank to fill, not a breach",
+          next(c for c in RV.review_trade(plain, RV.DEFAULT_PLAN).checks if c.rule == "setup").status == RV.NA)
+    tagged = plain.annotated(setups=["ote"])
+    check("once annotated, its setup is checked", next(c for c in RV.review_trade(tagged, RV.DEFAULT_PLAN).checks
+                                                       if c.rule == "setup").status == RV.OK)
     cable_id = next(t.id for t in saved if t.symbol == "GBPUSD")
     sheet = run({"page": "journal_trade", "trade": cable_id}, member)
     check("an imported trade offers its initial stop", any(n.key == f"jr_an_stop_{cable_id}" for n in sheet.number_input))
