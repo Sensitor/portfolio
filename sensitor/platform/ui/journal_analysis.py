@@ -83,14 +83,14 @@ CLOCKS = {"ny+7": "UTC+2 l'hiver, UTC+3 l'été (la plupart des courtiers forex)
           "2": "UTC+2 toute l'année", "3": "UTC+3 toute l'année", "0": "UTC", "1": "UTC+1 (heure de Paris en hiver)"}
 CLOCK_KEY = "jr_report_clock"
 STEPS = (
-    ("Ouvrez l'historique", "Dans MetaTrader 5 sur ordinateur, ouvrez la <b>Boîte à outils</b> (Ctrl+T) et "
-     "l'onglet <b>Historique</b>."),
-    ("Choisissez la période", "Clic droit dans la liste, puis la période : <b>Tout l'historique</b>, ou les "
-     "derniers mois."),
-    ("Exportez le rapport", "Clic droit encore, <b>Rapport</b>, puis <b>HTML</b> ou <b>Open XML</b> (Excel). "
-     "Enregistrez le fichier."),
-    ("Déposez-le ici", "Vos positions clôturées sont lues avec leurs prix, leur stop et leur résultat. Rien "
-     "d'autre n'est demandé."),
+    ("Ouvrez l'historique", "Dans MetaTrader 5 sur ordinateur, ouvrez la <b>Boîte à outils</b> (Ctrl+T, ou Cmd+T "
+     "sur Mac) et cliquez sur l'onglet <b>Historique</b> (<i>History</i>) en bas de la fenêtre."),
+    ("Choisissez la période", "Clic droit dans la liste (sur Mac : clic à deux doigts), puis la période : "
+     "<b>Tout l'historique</b> (<i>All History</i>), ou les derniers mois."),
+    ("Exportez le rapport", "Clic droit encore, <b>Rapport</b> (<i>Report</i>), puis <b>HTML</b> ou <b>Open XML</b> "
+     "(Excel). Enregistrez le fichier."),
+    ("Déposez-le ici", "Vos positions clôturées sont lues avec leurs prix, leur stop et leur résultat. Les positions "
+     "encore ouvertes viendront au prochain rapport, une fois fermées."),
 )
 
 
@@ -104,10 +104,11 @@ def report_section(store, email: str) -> None:
     with st.container(key="panel_jr_report"):
         upload = st.file_uploader("Le rapport MetaTrader 5", type=["html", "htm", "xlsx"], key="jr_report")
         clock = st.selectbox("Heure du serveur de votre courtier", list(CLOCKS), format_func=CLOCKS.get,
-                             key=CLOCK_KEY, help="Les heures du rapport sont celles du serveur. La plupart des "
+                             key=CLOCK_KEY, help="Les heures du rapport sont celles du serveur, affichée en haut de la "
+                             "fenêtre Market Watch du terminal (« Market Watch: 19:35 »). Comparez-la à l'heure "
+                             "UTC, qui a une heure de retard sur Paris en hiver et deux en été. La plupart des "
                              "courtiers forex affichent l'heure de New York plus sept heures, soit UTC+2 l'hiver et "
-                             "UTC+3 l'été : c'est le choix proposé. L'horloge de la fenêtre « Market Watch » "
-                             "du terminal vous le confirme.")
+                             "UTC+3 l'été : c'est le choix proposé.")
         if upload is None:
             return
         try:
@@ -121,6 +122,12 @@ def report_section(store, email: str) -> None:
              f'trouvée{"s" if n > 1 else ""} ({esc(account)}{esc(report.currency or "")})'
              + (f", {len(report.skipped)} ligne{'s' if len(report.skipped) > 1 else ''} écartée"
                 f"{'s' if len(report.skipped) > 1 else ''}" if report.skipped else "") + ".</p>")
+        k = report.protective_stops
+        if k:
+            notice("Stops au point d'entrée ou en profit", f"{k} position{'s ont' if k > 1 else ' a'} un dernier stop "
+                   "au point d'entrée ou en profit. Le rapport ne donne que le dernier stop, pas celui de "
+                   "départ : pour ne pas inventer un R, il n'est pas calculé pour ces trades. Saisissez le stop de "
+                   "départ sur la fiche d'un trade pour obtenir son R.", "info")
         if report.skipped:
             rows = "".join(f"<tr><td>{line}</td><td>{esc(why)}</td></tr>" for line, why in report.skipped[:8])
             html(f'<table><thead><tr><th>Ligne</th><th>Raison</th></tr></thead><tbody>{rows}</tbody></table>')

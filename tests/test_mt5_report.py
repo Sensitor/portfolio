@@ -25,7 +25,7 @@ os.environ["SENSITOR_AUTH"] = "multi"
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
-from fixtures.mt5_report import HEADER_FR, html_report, positions, xlsx_report  # noqa: E402
+from fixtures.mt5_report import HEADER_FR, html_report, positions, special_positions, xlsx_report  # noqa: E402
 
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sensitor_app.py")
 CHECKS: list[tuple[str, bool, str]] = []
@@ -104,6 +104,24 @@ def main() -> int:
     check("a summer trade read on New York + 7 is three hours behind the server clock",
           ny.trades[0].opened_at == datetime.strptime(summer[0][0], "%Y.%m.%d %H:%M:%S") - timedelta(hours=3))
 
+    print("\nThe layout of a real export")
+    special = R.read(html_report(rows + special_positions(datetime(2026, 1, 20, 12, 0))), clock=2.0)
+    check("the filler cell sits in data rows only, and the values stay under their header",
+          len(special.trades) == 5 and special.trades[0].exit_price == 1.083 and special.trades[0].take_profit == 1.084)
+    check("the « Open Positions » and « Results » tables are not read as trades",
+          all(t.symbol != "EURUSD" or t.id.endswith("1001") for t in special.trades))
+    protected, partial_pos = special.trades[3], special.trades[4]
+    check("a last stop in profit is a protection, not a risk: no R is made up for it",
+          protected.stop_loss is None and protected.r_multiple is None and protected.raw["last_stop"] == 4178.90
+          and special.protective_stops == 1)
+    check("a stop on the losing side is kept", partial_pos.stop_loss == 85510.0 and partial_pos.r_multiple is not None)
+    check("« 0.15 / 0.2 »: a position partly closed is read for its closed part",
+          partial_pos.raw["partly_closed"] == {"closed": 0.15, "opened": 0.2} and partial_pos.gross_pnl == 288.37)
+    check("prices keep the report's digits", partial_pos.entry_price == 84515.11)
+    check("the stop rule, both ways", R.risk_stop(mt5.DEAL_TYPE_BUY, 100.0, 99.0) == 99.0
+          and R.risk_stop(mt5.DEAL_TYPE_BUY, 100.0, 100.0) is None and R.risk_stop(mt5.DEAL_TYPE_SELL, 100.0, 99.0) is None
+          and R.risk_stop(mt5.DEAL_TYPE_SELL, 100.0, 101.0) == 101.0 and R.risk_stop(mt5.DEAL_TYPE_BUY, 100.0, None) is None)
+
     print("\nWhat it refuses, and what it skips")
     for label, raw in (("an empty file", b""), ("a page with no Positions table", b"<html><table><tr><td>x</td></tr></table></html>"),
                        ("a broken Excel file", b"PK\x03\x04 not a zip")):
@@ -134,6 +152,12 @@ def main() -> int:
     check("the same history imported again, from the other format: no duplicate, annotations kept",
           len(store().list_trades(email)) == 3 and again.added == 0 and kept.notes == "Sortie trop tôt."
           and kept.setups == ["ote", "bos"])
+    fixed = kept.annotated(stop_loss=1.0790, raw={**kept.raw, "stop_by_member": True})
+    store().save_trade(email, fixed)
+    sync.sync_trades(R.ReportSource(html), store(), email, since=min(t.opened_at for t in html.trades))
+    after = store().get_trade(email, first.id)
+    check("an initial stop the member wrote survives a new import, which only knows the last stop",
+          after.stop_loss == 1.0790 and after.raw.get("stop_by_member") is True, str((after.stop_loss, after.raw)))
 
     print("\nThe entry page")
     member = token("membre@example.com")
@@ -159,6 +183,21 @@ def main() -> int:
     dash = run({"page": "journal"}, member)
     check("the imported trades are reviewed on the dashboard", not dash.exception
           and "Ce que vos écarts vous ont coûté" in page_text(dash), error(dash))
+    cable_id = next(t.id for t in saved if t.symbol == "GBPUSD")
+    sheet = run({"page": "journal_trade", "trade": cable_id}, member)
+    check("an imported trade offers its initial stop", any(n.key == f"jr_an_stop_{cable_id}" for n in sheet.number_input))
+    sheet.number_input(key=f"jr_an_stop_{cable_id}").set_value(1.2800).run()
+    [b for b in sheet.button if b.label == "Enregistrer les annotations"][0].click().run()
+    check("a stop on the wrong side is refused, and nothing is saved",
+          "du côté de la perte" in " ".join(e.value for e in sheet.error)
+          and store().get_trade("membre@example.com", cable_id).stop_loss is None)
+    sheet = run({"page": "journal_trade", "trade": cable_id}, member)
+    sheet.number_input(key=f"jr_an_stop_{cable_id}").set_value(1.2680).run()
+    [b for b in sheet.button if b.label == "Enregistrer les annotations"][0].click().run()
+    fixed = store().get_trade("membre@example.com", cable_id)
+    check("with its initial stop, the trade gets its R and keeps it as the member's",
+          fixed.stop_loss == 1.268 and fixed.r_multiple is not None and fixed.raw.get("stop_by_member") is True,
+          str((fixed.stop_loss, fixed.r_multiple)))
 
     print("\nSetups")
     check("the entry form offers the shorthand first", [o for o in app.multiselect(key="jr_e_setups").options][:6]

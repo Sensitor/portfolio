@@ -90,6 +90,11 @@ def _preserve_journal(incoming, existing):
     # stop that has appeared since the last sync is accepted.
     if incoming.stop_loss is None and existing.stop_loss is not None:
         changes["stop_loss"] = existing.stop_loss
+    # An initial stop the trader wrote is an annotation: the broker only knows the
+    # last stop, which a trader who moves stops to break-even has already changed.
+    if (existing.raw or {}).get("stop_by_member") and existing.stop_loss is not None:
+        changes["stop_loss"] = existing.stop_loss
+        changes["raw"] = {**(incoming.raw or {}), "stop_by_member": True}
     if incoming.take_profit is None and existing.take_profit is not None:
         changes["take_profit"] = existing.take_profit
 

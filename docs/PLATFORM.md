@@ -164,6 +164,16 @@ other.
   winter, UTC+3 in summer, on the American dates), the convention of most forex
   brokers; a fixed offset can be chosen. The page says what it found before
   anything is written, and names the lines it skipped.
+  Checked against a real export (a broker's demo account, 27 October 2026, kept
+  out of the repository): 22 positions read, net result, gross profit and loss
+  and profit factor equal to the report's own « Results ». What that file
+  taught: MT5 puts its hidden filler cell in the data rows and not in the
+  header, so cells are matched by their rank among visible ones; « 0.15 / 0.2 »
+  is a position partly closed, read for its closed part; and the report gives
+  each position's last stop, not its first. A stop at the entry or in profit is
+  a protection, not a risk, so it is not used for R (the page counts them); on
+  an imported trade's page the member can enter the initial stop, which the
+  next import or sync keeps (`raw.stop_by_member`, honoured by the sync merge).
 * **Setups** (`trading/setups.py`) carry the shorthand traders use: OTE, BOS,
   CHoCH, FVG, iFVG, Expansion 50 %, Order Block, prise de liquidité, Breaker,
   SMT, News, then the classical ones. The long names, English and French, stay

@@ -11,8 +11,10 @@ labels, and its « Positions » table holds one line per closed position:
 The table is found by its shape rather than its words: a header of thirteen
 cells whose seventh and eighth are « S / L » and « T / P » (the « Orders » table
 has eleven, « Open Positions » twelve), then the lines below it whose first and
-ninth cells are times. Columns are matched by position in that header, so a
-hidden filler cell or a merged « Profit » cell moves nothing.
+ninth cells are times. Columns are matched by their rank among visible cells:
+MT5 adds a hidden filler cell to each data row and not to the header, and
+merges « Profit » over two columns, and neither moves a value. A position
+partly closed (« 0.15 / 0.2 ») is read for its closed part.
 
 Each line becomes the two deals the terminal would have returned for it, an in
 and an out, and goes through `mt5.build_trade`: the same trade ids as a live
@@ -61,6 +63,7 @@ class Report:
     account_login: str | None
     currency: str | None
     skipped: list[tuple[int, str]] = field(default_factory=list)    # (line in the table, reason)
+    protective_stops: int = 0       # stops at entry or in profit, left out of the R (see `read`)
 
     @property
     def account_id(self) -> str | None:
@@ -72,7 +75,15 @@ class Report:
 # =============================================================================
 
 class _Rows(HTMLParser):
-    """Table rows as [(column, text)], columns counted with every colspan, hidden cells included."""
+    """
+    Table rows as [(column, text)]: every visible cell in order, empty ones included.
+
+    MetaTrader writes a hidden filler cell (`class="hidden" colspan="8"`) after
+    « Type » in each data row of the « Positions » table, and not in its header.
+    Counting visible cells, rather than columns with their spans, is what lines a
+    data row up with its header. Empty cells count, so a position without a stop
+    keeps its target in the « T / P » column.
+    """
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -86,18 +97,17 @@ class _Rows(HTMLParser):
         if tag == "tr":
             self._row, self._col = [], 0
         elif tag in ("td", "th") and self._row is not None:
-            span = dict(attrs).get("colspan") or "1"
-            self._cell = {"col": self._col, "span": int(span) if str(span).isdigit() else 1, "text": []}
+            hidden = "hidden" in (dict(attrs).get("class") or "").split()
+            self._cell = {"col": self._col, "hidden": hidden, "text": []}
 
     def handle_endtag(self, tag):
         if tag in ("td", "th") and self._cell is not None and self._row is not None:
-            text = " ".join("".join(self._cell["text"]).split())
-            if text:
-                self._row.append((self._cell["col"], text))
-            self._col += self._cell["span"]
+            if not self._cell["hidden"]:
+                self._row.append((self._col, " ".join("".join(self._cell["text"]).split())))
+                self._col += 1
             self._cell = None
         elif tag == "tr" and self._row is not None:
-            if self._row:
+            if any(text for _c, text in self._row):
                 self.rows.append(self._row)
             self._row = None
 
@@ -218,7 +228,7 @@ def _side(text: str) -> int | None:
 
 
 def _is_positions_header(cells) -> bool:
-    texts = [t for _c, t in cells]
+    texts = [t for _c, t in cells if t]
     if len(texts) != len(COLUMNS) or _time(texts[0]):
         return False
     slash = [re.sub(r"\s", "", t.lower()) for t in texts[6:8]]
@@ -245,6 +255,23 @@ def server_offset(server_time: datetime, clock) -> float:
     return 7 + new_york.utcoffset().total_seconds() / 3600
 
 
+def risk_stop(direction: int, entry: float, stop: float | None) -> float | None:
+    """
+    The report's stop if it can measure the risk taken, else None.
+
+    The report gives each position's last stop, not the one it opened with. A
+    stop moved to the entry price or into profit protects a gain: it says nothing
+    of the risk taken, and used as such it turns a trade closed at +0.36 into
+    +1 R. Only a stop on the losing side of the entry is kept; one that was
+    tightened there still overstates the R, which the trade page lets the member
+    correct with the initial stop.
+    """
+    if not stop:
+        return None
+    losing_side = stop < entry if direction == mt5.DEAL_TYPE_BUY else stop > entry
+    return stop if losing_side else None
+
+
 def read(raw: bytes, filename: str = "", *, clock=NY_PLUS_7, currency: str | None = None) -> Report:
     """
     Every closed position of a MetaTrader 5 history report, as journal trades.
@@ -265,10 +292,10 @@ def read(raw: bytes, filename: str = "", *, clock=NY_PLUS_7, currency: str | Non
     account_currency = (found.group(2) if found else None) or currency or "USD"
     account_id = f"mt5-{login}" if login else None
 
-    trades, skipped, header = [], [], None
+    trades, skipped, header, protective = [], [], None, 0
     for index, cells in enumerate(rows):
         if _is_positions_header(cells):
-            header = [c for c, _t in cells]
+            header = [c for c, t in cells if t]
             continue
         if header is None:
             continue
@@ -280,7 +307,11 @@ def read(raw: bytes, filename: str = "", *, clock=NY_PLUS_7, currency: str | Non
             continue
         line = index + 1
         side, position = _side(values["type"]), _number(values["position"])
-        volume, entry, exit_ = _number(values["volume"]), _number(values["open_price"]), _number(values["close_price"])
+        # « 0.15 / 0.2 »: a position partly closed, 0.15 lot out of 0.2. The closed part is a finished trade
+        # and is read as one; when the rest closes, the next report gives the whole position, same id.
+        closed_volume, _, opened_volume = str(values["volume"] or "").partition("/")
+        volume, entry, exit_ = _number(closed_volume), _number(values["open_price"]), _number(values["close_price"])
+        partial = bool(opened_volume.strip()) and (_number(opened_volume) or 0) > (volume or 0)
         if not closed:
             skipped.append((line, "position encore ouverte"))
             continue
@@ -299,20 +330,29 @@ def read(raw: bytes, filename: str = "", *, clock=NY_PLUS_7, currency: str | Non
              "entry": mt5.DEAL_ENTRY_OUT, "price": exit_, "time": stamp(closed), "time_msc": stamp(closed) * 1000,
              "commission": 0.0, "swap": _number(values["swap"]) or 0.0, "profit": _number(values["profit"]) or 0.0},
         ]
-        stop, target = _number(values["sl"]), _number(values["tp"])
-        trade = mt5.build_trade(int(position), deals, stop=stop or None, take_profit=target or None,
+        last_stop, target = _number(values["sl"]), _number(values["tp"])
+        stop = risk_stop(side, entry, last_stop)
+        if last_stop and stop is None:
+            protective += 1
+        trade = mt5.build_trade(int(position), deals, stop=stop, take_profit=target or None,
                                 account_id=account_id, currency=account_currency,
                                 offset_hours=server_offset(opened, clock))
         if trade is None:
             skipped.append((line, "position non clôturée"))
             continue
+        # One deal each way: the volume-weighted price is the deal's price, less the float noise of the sum.
+        trade = trade.annotated(entry_price=round(trade.entry_price, 8), exit_price=round(trade.exit_price, 8))
         trade.raw["imported_from"] = "report"
+        if last_stop:
+            trade.raw["last_stop"] = last_stop
+        if partial:
+            trade.raw["partly_closed"] = {"closed": volume, "opened": _number(opened_volume)}
         trades.append(trade)
 
     if not trades and not skipped:
         raise ReportError("aucun tableau « Positions » trouvé : exportez le rapport depuis l'onglet Historique du "
                           "terminal (clic droit, Rapport), au format HTML ou Excel")
-    return Report(trades, login, account_currency, skipped)
+    return Report(trades, login, account_currency, skipped, protective)
 
 
 @dataclass

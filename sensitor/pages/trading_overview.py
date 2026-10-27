@@ -98,8 +98,10 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
             bar=win_rate if win_rate is not None else None,
             bar_color=(STATUS["good"] if metrics["expectancy"] and metrics["expectancy"] > 0
                        else STATUS["warning"]),
-            caption=(f"{metrics['n_wins']}{'G' if lang == 'fr' else 'W'} / {metrics['n_losses']}{'P' if lang == 'fr' else 'L'}"
-                     + (f" / {metrics['n_scratch']}S" if metrics["n_scratch"] else "")),
+            # In French: gagnants, perdants, nuls.
+            caption=(f"{metrics['n_wins']}{'G' if lang == 'fr' else 'W'} / "
+                     f"{metrics['n_losses']}{'P' if lang == 'fr' else 'L'}"
+                     + (f" / {metrics['n_scratch']}{'N' if lang == 'fr' else 'S'}" if metrics["n_scratch"] else "")),
         )
 
     with c3:

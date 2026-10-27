@@ -734,14 +734,31 @@ def _annotate(trade: Trade, email: str) -> None:
                                               value=trade.discipline or 0,
                                               format_func=lambda v: "non noté" if not v else f"{v} sur 5",
                                               key=f"jr_an_disc_{trade.id}")
+            initial = None
+            if trade.source == "mt5":
+                initial = st.number_input(
+                    "Stop de départ", min_value=0.0, value=trade.stop_loss, format="%.5f", key=f"jr_an_stop_{trade.id}",
+                    help="MetaTrader donne le dernier stop de la position. Si vous l'aviez déplacé (au point "
+                         "d'entrée, ou plus près), saisissez celui de l'entrée : le R est recalculé, et une "
+                         "nouvelle importation le garde.")
             notes = st.text_area("Notes", value=trade.notes or "", max_chars=2000, height=110,
                                  key=f"jr_an_notes_{trade.id}")
             if st.form_submit_button("Enregistrer les annotations", type="primary"):
-                updated = trade.annotated(setups=list(setups), mistakes=list(mistakes), emotion_before=emotion or None,
-                                          discipline=discipline or None, notes=notes.strip() or None)
-                store.save_trade(email, updated)
-                flash("Annotations enregistrées. La revue en tient compte.")
-                st.rerun()
+                changes = dict(setups=list(setups), mistakes=list(mistakes), emotion_before=emotion or None,
+                               discipline=discipline or None, notes=notes.strip() or None)
+                wrong_side = False
+                if trade.source == "mt5" and initial != trade.stop_loss:
+                    side = 1 if trade.direction.value == "long" else -1
+                    wrong_side = bool(initial) and (trade.entry_price - initial) * side <= 0
+                    changes["stop_loss"] = initial or None
+                    changes["raw"] = {**(trade.raw or {}), "stop_by_member": bool(initial)}
+                if wrong_side:
+                    st.error("Le stop de départ doit être du côté de la perte : sous l'entrée pour un achat, "
+                             "au-dessus pour une vente. Rien n'a été enregistré.")
+                else:
+                    store.save_trade(email, trade.annotated(**changes))
+                    flash("Annotations enregistrées. La revue en tient compte.")
+                    st.rerun()
     if trade.source == "manual" or trade.id.startswith(("m-", "csv-")):
         if st.session_state.get("jr_delete") == trade.id:
             html('<p class="sx-note">Supprimer définitivement ce trade de votre journal ?</p>')
