@@ -48,6 +48,63 @@ def is_url(target: str) -> bool:
     return str(target).startswith(("postgres://", "postgresql://"))
 
 
+def _parts(url: str):
+    """(scheme, user, password or None, host and the rest), the host found after the *last* « @ »."""
+    from urllib.parse import unquote
+
+    scheme, sep, rest = str(url).partition("://")
+    if not sep or "@" not in rest:
+        return None
+    userinfo, _, host_and_rest = rest.rpartition("@")
+    user, colon, password = userinfo.partition(":")
+    return scheme, unquote(user), (unquote(password) if colon else None), host_and_rest
+
+
+def normalise_url(url: str) -> str:
+    """
+    The URL with its user name and password percent-encoded.
+
+    A password pasted as it is, with an « @ », a « : » or a « / » in it, breaks the
+    URL: with « motdepasse@@host », libpq reads the host as « @host » and the
+    password without its last character. The host starts after the last « @ »,
+    so everything before it is the user and password; an « %xx » already there is
+    decoded first, so it is not encoded twice.
+    """
+    from urllib.parse import quote
+
+    parts = _parts(url)
+    if parts is None:
+        return url
+    scheme, user, password, rest = parts
+    secret = f":{quote(password, safe='')}" if password is not None else ""
+    return f"{scheme}://{quote(user, safe='')}{secret}@{rest}"
+
+
+def explain(error: Exception, url: str) -> str:
+    """Why a Postgres database could not be opened, in French, never with the password."""
+    from urllib.parse import urlsplit
+
+    parts = _parts(url)
+    password = parts[2] if parts else None
+    try:
+        host = urlsplit(normalise_url(url)).hostname or ""
+    except ValueError:
+        host = ""
+    text = (str(error).strip().splitlines() or [type(error).__name__])[0]
+    if password and password in text:
+        text = type(error).__name__
+    hints = []
+    if host.startswith("db.") and host.endswith(".supabase.co"):
+        hints.append("Cette adresse Supabase directe n'existe qu'en IPv6, que Streamlit Cloud ne sait pas joindre : "
+                     "prenez la chaîne « Session pooler » (bouton Connect du projet Supabase), en "
+                     "« …pooler.supabase.com ».")
+    elif "could not translate host name" in text or "Name or service not known" in text:
+        hints.append(f"Le serveur « {host} » est introuvable : adresse mal copiée, ou projet en pause.")
+    if "password authentication failed" in text:
+        hints.append("Le mot de passe est refusé : vérifiez-le, ou réinitialisez-le dans Supabase.")
+    return " ".join([f"Message du serveur : {text}."] + hints)
+
+
 # =============================================================================
 # TRANSLATION
 # =============================================================================
@@ -214,7 +271,7 @@ class Connection:
         # `DictCursor`, not `RealDictCursor`: its rows answer to both `row["n"]`
         # and `row[0]`, which is what `sqlite3.Row` does and what the callers
         # above this layer assume.
-        self._conn = psycopg2.connect(dsn, cursor_factory=psycopg2.extras.DictCursor)
+        self._conn = psycopg2.connect(normalise_url(dsn), cursor_factory=psycopg2.extras.DictCursor)
         self._conn.autocommit = False
 
     # ── The sqlite3 surface ──────────────────────────────────────────────────

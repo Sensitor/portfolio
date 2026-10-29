@@ -33,9 +33,23 @@ from the dashboard. It looks like:
 postgresql://user:password@ep-something.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
-**[Supabase](https://supabase.com)** — create a project, then
-*Project Settings → Database → Connection string → URI*. Replace
-`[YOUR-PASSWORD]` with the password you set.
+**[Supabase](https://supabase.com)** — create a project, then the **Connect**
+button at the top of the project, and copy the **Session pooler** string. It
+looks like:
+
+```
+postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+```
+
+Not the « Direct connection » one (`db.<project-ref>.supabase.co`): that host
+has only an IPv6 address, Streamlit Cloud cannot reach IPv6, and the app
+reports the database as unavailable with the password and everything else
+right. Replace `[YOUR-PASSWORD]` with the password you set. A password with
+`@`, `:` or `/` in it can be pasted as it is: the app percent-encodes the user
+name and password before connecting (`postgres.normalise_url`). When the
+connection fails, the Account page says why under « Détail technique », with
+the server's message and, for the two usual Supabase mistakes, what to change;
+the password is never shown.
 
 Pick a region near you; every page load makes a few queries and the round trip
 is the whole latency.

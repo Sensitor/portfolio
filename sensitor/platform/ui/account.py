@@ -83,6 +83,10 @@ def _visitor() -> None:
                 "progression. Aucun moyen de paiement n'est demandé.")
     if rt.get_store() is None:
         st.error("La base de données est indisponible : la connexion est impossible pour l'instant.")
+        reason = rt.store_error()
+        if reason:
+            with st.expander("Détail technique"):
+                st.write(reason)
         return
     multi = rt.multi_user()
     left, right = st.columns([1.15, 1], gap="large")
