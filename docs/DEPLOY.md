@@ -33,7 +33,7 @@ from the dashboard. It looks like:
 postgresql://user:password@ep-something.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
-**[Supabase](https://supabase.com)** — create a project, then the **Connect**
+**[Supabase](https://supabase.com)**: create a project, then the **Connect**
 button at the top of the project, and copy the **Session pooler** string. It
 looks like:
 
