@@ -23,7 +23,7 @@ from ..ui.components import (
     section, spacer,
 )
 from ..ui.themes import ACCENT, PALETTE, PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
-from ..core.i18n import na, tr
+from ..core.i18n import na, period_label, tr
 from ._shared import chart_with_reading
 from ._trading_shared import (
     account_selector, duration_text, filtered_badge, guard, period_selector,
@@ -98,8 +98,10 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
             bar=win_rate if win_rate is not None else None,
             bar_color=(STATUS["good"] if metrics["expectancy"] and metrics["expectancy"] > 0
                        else STATUS["warning"]),
-            caption=(f"{metrics['n_wins']}W / {metrics['n_losses']}L"
-                     + (f" / {metrics['n_scratch']}S" if metrics["n_scratch"] else "")),
+            # In French: gagnants, perdants, nuls.
+            caption=(f"{metrics['n_wins']}{'G' if lang == 'fr' else 'W'} / "
+                     f"{metrics['n_losses']}{'P' if lang == 'fr' else 'L'}"
+                     + (f" / {metrics['n_scratch']}{'N' if lang == 'fr' else 'S'}" if metrics["n_scratch"] else "")),
         )
 
     with c3:
@@ -185,7 +187,8 @@ def _kpi_rows(tctx, metrics, lang, currency) -> None:
         # run of losses, zero when the last trade was flat and broke both.
         streak = metrics["current_streak"]
         kind = "win" if streak > 0 else ("loss" if streak < 0 else None)
-        peak = f"max {metrics['max_win_streak']}W / {metrics['max_loss_streak']}L"
+        peak = (f"max {metrics['max_win_streak']}{'G' if lang == 'fr' else 'W'} / "
+                f"{metrics['max_loss_streak']}{'P' if lang == 'fr' else 'L'}")
         metric_card(
             tr("current_streak", lang),
             f"{abs(streak)}" if streak else na(lang),
@@ -238,7 +241,7 @@ def _copilot_block(tctx, lang) -> None:
 
 def _equity_block(tctx, metrics, lang, currency) -> None:
     section(tr("equity_curve", lang),
-            f"{metrics['n']} {tr('trades', lang).lower()} · {tctx.period}")
+            f"{metrics['n']} {tr('trades', lang).lower()} · {period_label(tctx.period, lang)}")
 
     depth = metrics["max_drawdown"]
     payoff = metrics["payoff_ratio"]

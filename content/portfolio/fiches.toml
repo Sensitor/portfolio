@@ -1,0 +1,393 @@
+# Les fiches de la bibliothèque d'actifs, écrites pour la plateforme.
+#
+# Une entrée par symbole de `sensitor/investment/assets.py` (ASSET_INFO), et
+# trois champs :
+#
+#   description  ce qu'est l'actif, en faits ;
+#   role         le rôle qu'on lui prête d'ordinaire dans un portefeuille ;
+#   limite       ce que ce rôle ne couvre pas, ou le risque qu'il porte.
+#
+# Les règles, vérifiées par tests/test_portfolio_space.py :
+#   * aucun chiffre (un nom qui en contient, comme S&P 500 ou CAC 40, est admis) :
+#     un chiffre affiché par la plateforme est sourcé ou calculé, et ceux du
+#     catalogue de l'analyseur ne le sont pas ;
+#   * aucun conseil de taille de position ni de recommandation ;
+#   * aucun tiret long ;
+#   * Bitcoin n'est jamais présenté comme une couverture assurée.
+#
+# Relu le 25 octobre 2026.
+
+[AAPL]
+description = "Conçoit l'iPhone, le Mac, l'iPad et des services (App Store, iCloud, abonnements). Les services pèsent de plus en plus dans ses résultats."
+role = "Une grande valeur américaine de qualité, souvent détenue pour la solidité de son bilan et de sa marque."
+limite = "Une grande part du chiffre d'affaires dépend encore de l'iPhone. Le titre pèse lourd dans les indices américains : le détenir à côté d'un ETF S&P 500 ou Nasdaq, c'est le compter deux fois."
+
+[MSFT]
+description = "Logiciels d'entreprise (Office, Teams), cloud (Azure), systèmes d'exploitation et jeux vidéo (Xbox, Activision Blizzard)."
+role = "Une grande valeur technologique aux revenus en bonne partie récurrents, par abonnements."
+limite = "Sa valorisation suppose une croissance continue du cloud et de l'IA, et le titre est déjà l'une des premières lignes des indices américains."
+
+[GOOGL]
+description = "Maison mère de Google (recherche et publicité), de YouTube, de Google Cloud et de Waymo. La publicité reste l'essentiel du chiffre d'affaires."
+role = "Une exposition à la publicité en ligne et au cloud."
+limite = "Dépend du marché publicitaire, et fait l'objet de procédures de concurrence aux États-Unis et en Europe."
+
+[AMZN]
+description = "Commerce en ligne, publicité et Amazon Web Services, son activité de cloud, qui fournit une grande part de ses bénéfices."
+role = "Une exposition à la consommation en ligne et à l'infrastructure du cloud."
+limite = "Les marges du commerce sont faibles et suivent la consommation : le bénéfice repose largement sur le cloud."
+
+[NVDA]
+description = "Conçoit des processeurs graphiques et des accélérateurs pour l'intelligence artificielle, avec l'écosystème logiciel CUDA. Fournisseur dominant des centres de données."
+role = "Une exposition directe aux investissements dans l'IA."
+limite = "Un titre très volatil, dont les résultats dépendent des dépenses de quelques grands clients du cloud. Il est déjà très présent dans les ETF Nasdaq et S&P 500."
+
+[META]
+description = "Facebook, Instagram, WhatsApp et Threads, financés par la publicité. Investit aussi dans l'IA et dans la réalité virtuelle (Reality Labs)."
+role = "Une exposition à la publicité numérique."
+limite = "Dépend du marché publicitaire et de la régulation des réseaux sociaux. Reality Labs est lourdement déficitaire jusqu'ici."
+
+[TSLA]
+description = "Véhicules électriques et stockage d'énergie. Développe aussi la conduite autonome et des robots."
+role = "Un pari sur l'électrification et l'autonomie, plus que sur l'automobile d'aujourd'hui."
+limite = "Valorisé bien au-dessus des constructeurs traditionnels pour des activités encore à venir : un titre très volatil, sensible aux annonces de son dirigeant."
+
+[JPM]
+description = "La plus grande banque américaine par les actifs : banque de détail, banque d'investissement, gestion d'actifs et marchés."
+role = "Une exposition au secteur financier américain."
+limite = "Une banque suit le cycle du crédit et les taux, et souffre en récession."
+
+[JNJ]
+description = "Groupe de santé : médicaments innovants et technologies médicales. La santé grand public a été séparée dans une autre société, Kenvue."
+role = "Une valeur de santé, souvent détenue pour la régularité de son dividende."
+limite = "Exposé aux expirations de brevets et aux litiges, notamment sur le talc. Un dividende n'est jamais acquis."
+
+[XOM]
+description = "L'un des grands groupes pétroliers et gaziers mondiaux, intégré de l'exploration au raffinage et à la chimie."
+role = "Une exposition à l'énergie, souvent vue comme un contrepoids quand le pétrole monte."
+limite = "Les résultats suivent le prix du pétrole et du gaz, et la transition énergétique pèse à long terme."
+
+[V]
+description = "Un réseau de paiement par carte : il perçoit une commission sur les transactions sans prêter lui-même."
+role = "Une exposition à la croissance des paiements électroniques, avec peu d'actifs et de fortes marges."
+limite = "Une valorisation élevée, et un risque réglementaire sur les commissions."
+
+[SPY]
+description = "Réplique l'indice S&P 500, les grandes entreprises américaines. L'un des ETF les plus échangés au monde."
+role = "Une base d'actions américaines en une seule ligne."
+limite = "Pondéré par la capitalisation : les grandes valeurs technologiques y pèsent lourd. Coté en dollars : un investisseur en euros porte le risque de change."
+
+[QQQ]
+description = "Réplique le Nasdaq-100 : les grandes valeurs non financières du Nasdaq, à forte dominante technologique."
+role = "Une exposition aux grandes valeurs de croissance américaines."
+limite = "Concentré sur quelques géants : plus volatil que le S&P 500, et en grande partie redondant avec lui."
+
+[VTI]
+description = "Réplique l'ensemble du marché d'actions américain, petites et moyennes capitalisations comprises, avec des frais très bas."
+role = "Une base d'actions américaines plus large que le S&P 500."
+limite = "Les grandes capitalisations y dominent quand même : il se comporte presque comme le S&P 500. Coté en dollars."
+
+[VOO]
+description = "Réplique le S&P 500, comme SPY, avec des frais plus bas."
+role = "Une base d'actions américaines pour une détention longue."
+limite = "Les mêmes risques que SPY : concentration sur les grandes valeurs technologiques, et change pour un investisseur en euros. Détenir les deux, c'est détenir deux fois la même chose."
+
+[VXUS]
+description = "Réplique les actions du monde entier hors États-Unis, pays développés et pays émergents."
+role = "Le complément international d'une poche d'actions américaines."
+limite = "Moins concentré sur la technologie, mais exposé à de nombreuses devises, et à des marchés qui ne suivent pas le même cycle que les États-Unis."
+
+[EFA]
+description = "Réplique les grandes et moyennes capitalisations des pays développés hors États-Unis et Canada : Europe, Japon, Australie."
+role = "Une diversification vers les marchés développés hors États-Unis."
+limite = "Ni pays émergents, ni Canada, et un risque de change sur chacune des devises."
+
+[EEM]
+description = "Réplique les grandes et moyennes capitalisations des pays émergents : Chine, Inde, Taïwan, Corée du Sud et Brésil, entre autres."
+role = "Une exposition à des économies dont le cycle diffère de celui des pays développés."
+limite = "Volatilité élevée, risques politiques et de change, et une forte part de quelques pays."
+
+[VNQ]
+description = "Réplique les sociétés foncières cotées américaines (REIT) : bureaux, logements, commerces, entrepôts, centres de données."
+role = "Une exposition à l'immobilier sans détenir de biens, avec des revenus distribués."
+limite = "Sensible aux taux : l'immobilier coté baisse souvent quand ils montent, et il suit les actions dans une crise."
+
+[TLT]
+description = "Réplique les obligations d'État américaines à très longue échéance."
+role = "Souvent détenu pour amortir une récession : quand les taux baissent, les obligations longues montent."
+limite = "Très sensible aux taux : quand ils montent vite, il peut baisser autant que des actions, comme lors de la remontée des taux d'après la pandémie."
+
+[AGG]
+description = "Le marché obligataire américain de qualité, au sens large : emprunts d'État, d'entreprises et titres hypothécaires."
+role = "Une poche obligataire de base, moins sensible aux taux que les obligations longues."
+limite = "Un rendement modeste, une baisse possible quand les taux montent, et une cotation en dollars."
+
+[LQD]
+description = "Réplique les obligations d'entreprises américaines de bonne qualité (investment grade)."
+role = "Un rendement un peu supérieur à celui des emprunts d'État, en échange d'un risque de crédit."
+limite = "Sensible à la fois aux taux et à la santé des entreprises : il peut baisser en même temps que les actions dans une crise."
+
+[SCHD]
+description = "Réplique des actions américaines à dividende, choisies sur la qualité et la régularité de leurs versements."
+role = "Une poche d'actions orientée revenus, plus défensive que l'indice."
+limite = "Peu de valeurs technologiques : il peut faire nettement moins bien que le marché quand la croissance mène. Un dividende n'est jamais acquis."
+
+[GLD]
+description = "Détient de l'or physique en coffre et suit le cours de l'or, moins les frais."
+role = "Souvent détenu comme valeur refuge, et pour un comportement différent de celui des actions et des obligations."
+limite = "L'or ne verse aucun revenu et peut baisser pendant des années. Son lien avec l'inflation est loin d'être régulier."
+
+[SLV]
+description = "Détient de l'argent métal et suit son cours."
+role = "Un métal précieux qui a aussi des usages industriels (électronique, panneaux solaires)."
+limite = "Bien plus volatil que l'or, et lié au cycle industriel."
+
+[XLK]
+description = "Réplique les valeurs technologiques du S&P 500, dominées par quelques très grandes entreprises."
+role = "Une exposition sectorielle à la technologie américaine."
+limite = "Très concentré : quelques titres en font une grande part. Redondant avec QQQ et avec le S&P 500."
+
+[XLF]
+description = "Réplique les valeurs financières du S&P 500 : banques, assurances, gestionnaires d'actifs, réseaux de paiement."
+role = "Une exposition sectorielle à la finance américaine."
+limite = "Suit le cycle du crédit et les taux ; les banques souffrent en récession."
+
+[ARKK]
+description = "Un fonds géré activement par ARK Invest, concentré sur des entreprises dites de rupture : génomique, robotique, fintech, crypto."
+role = "Un pari de conviction sur l'innovation, choisi par un gérant."
+limite = "Très volatil et concentré sur des valeurs souvent non rentables. Il a déjà connu des baisses très profondes."
+
+[BTC-USD]
+description = "La première cryptomonnaie, sur un registre public tenu sans autorité centrale. Son émission est fixée par le protocole, et plafonnée."
+role = "Présenté par ses partisans comme une réserve de valeur, en raison de cette rareté programmée. La question est débattue : le cours « Bitcoin, une réserve de valeur ? » l'examine, données à l'appui."
+limite = "Très volatil, avec des baisses profondes et répétées. Il n'a pas toujours protégé contre l'inflation ni dans les crises : ce n'est pas une couverture assurée."
+
+[ETH-USD]
+description = "La principale plateforme de contrats intelligents : finance décentralisée, jetons, applications. L'ether paie les frais de transaction, et le réseau fonctionne en preuve d'enjeu."
+role = "Une exposition à l'usage des applications sur blockchain."
+limite = "Très volatil, en concurrence avec d'autres blockchains, et soumis à des règles encore mouvantes."
+
+[SOL-USD]
+description = "Une blockchain conçue pour des transactions rapides et peu chères, très utilisée pour les jetons et la finance décentralisée."
+role = "Un pari sur une blockchain concurrente d'Ethereum."
+limite = "Plus volatil que le bitcoin et l'ether, et le réseau a déjà connu des interruptions."
+
+[BNB-USD]
+description = "Le jeton de l'écosystème Binance, la plus grande plateforme d'échange de cryptomonnaies : réductions de frais, transactions sur BNB Chain."
+role = "Une exposition à l'activité de Binance et de sa blockchain."
+limite = "Sa valeur dépend d'une seule entreprise, qui a été poursuivie par les autorités américaines et a conclu une transaction avec elles."
+
+[XRP-USD]
+description = "Un actif numérique conçu pour les paiements internationaux, porté par l'entreprise Ripple."
+role = "Un pari sur l'adoption des paiements transfrontaliers sur blockchain."
+limite = "Très volatil, et lié au sort d'une seule entreprise, longtemps en litige avec le régulateur américain des marchés (SEC)."
+
+[ADA-USD]
+description = "Une blockchain à preuve d'enjeu développée selon une démarche académique, lancée par Charles Hoskinson, cofondateur d'Ethereum."
+role = "Un pari sur une plateforme de contrats intelligents concurrente d'Ethereum."
+limite = "Un écosystème d'applications plus réduit que celui d'Ethereum, et une forte volatilité."
+
+[AVAX-USD]
+description = "Une blockchain rapide aux frais bas, qui permet de créer des réseaux spécialisés reliés entre eux."
+role = "Un pari sur une plateforme concurrente d'Ethereum."
+limite = "Une concurrence forte, et une volatilité très élevée."
+
+[DOT-USD]
+description = "Un protocole qui relie plusieurs blockchains et leur fait partager une sécurité commune, fondé par Gavin Wood, cofondateur d'Ethereum."
+role = "Un pari sur l'interopérabilité entre blockchains."
+limite = "Une adoption encore incertaine, et une volatilité très élevée."
+
+[LINK-USD]
+description = "Un réseau d'oracles : il apporte aux contrats intelligents des données extérieures, comme des prix."
+role = "Une exposition à une infrastructure utilisée par de nombreuses applications de finance décentralisée."
+limite = "L'usage du réseau ne se traduit pas mécaniquement dans le prix du jeton, et la volatilité est très élevée."
+
+[MATIC-USD]
+description = "Polygon, un ensemble de solutions pour faire passer Ethereum à l'échelle avec des frais plus bas. Le jeton MATIC est remplacé par POL."
+role = "Un pari sur la croissance de l'écosystème Ethereum."
+limite = "La concurrence d'autres solutions de mise à l'échelle, et un changement de jeton à suivre : le symbole MATIC peut ne plus refléter le jeton actuel."
+
+[DOGE-USD]
+description = "Une cryptomonnaie née comme une plaisanterie, devenue populaire grâce à sa communauté. Son émission n'est pas plafonnée."
+role = "Un actif spéculatif, porté par l'attention qu'il reçoit."
+limite = "Ni rareté, ni usage propre marqué : son prix dépend surtout des effets de mode et de quelques personnalités."
+
+[INJ-USD]
+description = "Une blockchain dédiée à la finance décentralisée : échanges, dérivés, marchés prédictifs."
+role = "Un pari sur un écosystème de finance décentralisée spécialisé."
+limite = "Un petit écosystème, une liquidité moindre que celle des grandes cryptomonnaies, et une volatilité très élevée."
+
+[TON-USD]
+description = "Une blockchain conçue à l'origine par l'équipe de Telegram, aujourd'hui portée par une fondation indépendante, et intégrée à la messagerie pour les paiements."
+role = "Un pari sur la diffusion des paiements en cryptomonnaie par une messagerie grand public."
+limite = "Dépend fortement de son intégration à Telegram, et la volatilité est très élevée."
+
+["MC.PA"]
+description = "Le premier groupe de luxe au monde : Louis Vuitton, Dior, Moët Hennessy, Sephora, Tiffany."
+role = "Une grande valeur française du luxe, au fort pouvoir de fixation des prix."
+limite = "Dépend de la maroquinerie et des demandes chinoise et américaine : plus cyclique que ses marques ne le laissent penser, et l'un des plus gros poids du CAC 40."
+
+["RMS.PA"]
+description = "Une maison d'ultra-luxe, dont la production est volontairement tenue sous la demande."
+role = "Le luxe le moins sensible aux cycles du secteur."
+limite = "Une valorisation durablement élevée : le prix payé laisse peu de marge en cas de déception."
+
+["KER.PA"]
+description = "Gucci, Saint Laurent, Bottega Veneta, Balenciaga : un groupe très dépendant de Gucci."
+role = "Une exposition au luxe européen plus risquée que LVMH."
+limite = "Corrélé à LVMH : détenir les deux, c'est surtout renforcer le même pari sur le luxe."
+
+["OR.PA"]
+description = "Le premier groupe cosmétique au monde, du grand public au luxe et à la dermocosmétique."
+role = "Une valeur de consommation plutôt défensive, avec une part de luxe."
+limite = "Une valorisation élevée, et une partie de la croissance qui dépend de la Chine et des ventes en voyage."
+
+["RI.PA"]
+description = "L'un des premiers groupes mondiaux de spiritueux : Absolut, Jameson, Martell, Ricard."
+role = "Une valeur de consommation, souvent rangée parmi les défensives."
+limite = "Exposé au même cycle de demande chinoise et américaine que le luxe, et au recul de la consommation d'alcool."
+
+["BN.PA"]
+description = "Produits laitiers et végétaux, eaux et nutrition spécialisée."
+role = "L'une des valeurs les plus défensives de la cote : croissance lente, demande stable."
+limite = "Peu de croissance : elle fait souvent moins bien que le marché quand il monte fort."
+
+["CA.PA"]
+description = "Distributeur alimentaire en France et à l'international, aux marges faibles et aux volumes élevés."
+role = "Une valeur de rendement, peu liée au cycle du luxe."
+limite = "Une concurrence intense et des marges minces."
+
+["EL.PA"]
+description = "Verres et montures dans une seule entreprise (Varilux, Ray-Ban, Oakley), et la distribution optique."
+role = "Une valeur de qualité portée par des besoins durables : le vieillissement de la population et la myopie."
+limite = "Une valorisation élevée, et une croissance qui passe beaucoup par les acquisitions."
+
+["AIR.PA"]
+description = "Avions commerciaux, dont il forme un duopole avec Boeing, et hélicoptères, défense et espace."
+role = "Une valeur industrielle de cycle long, avec un carnet de commandes de plusieurs années."
+limite = "Le risque porte sur les livraisons et la chaîne d'approvisionnement, et sur les chocs qui clouent les avions au sol."
+
+["SAF.PA"]
+description = "Moteurs d'avions (avec General Electric au sein de CFM), trains d'atterrissage et équipements."
+role = "Une exposition à l'aéronautique, dont une grande part du bénéfice vient de l'entretien des moteurs en service."
+limite = "Dépend du trafic aérien : une crise comme celle de la pandémie le frappe directement."
+
+["HO.PA"]
+description = "Électronique de défense, avionique, radars, communications sécurisées et cybersécurité."
+role = "Une exposition à la défense, avec des clients surtout publics."
+limite = "Dépend des budgets publics et des décisions politiques : la valorisation monte avec les tensions géopolitiques et peut redescendre avec elles."
+
+["SU.PA"]
+description = "Distribution électrique, automatismes industriels et gestion de l'énergie, notamment pour les centres de données."
+role = "Une exposition à l'électrification et à l'efficacité énergétique."
+limite = "Une valorisation élevée, et une partie de la croissance liée aux centres de données de l'IA."
+
+["LR.PA"]
+description = "Appareillage électrique, cheminement de câbles et infrastructures pour les bâtiments et les centres de données."
+role = "Une valeur industrielle régulière, qui grandit par acquisitions."
+limite = "Liée à la construction, et corrélée à Schneider Electric."
+
+["DG.PA"]
+description = "Concessions d'autoroutes et d'aéroports, et une importante activité de construction."
+role = "Une valeur d'infrastructure, dont les péages sont en partie indexés sur l'inflation."
+limite = "Les concessions ont une fin, et leurs conditions dépendent des pouvoirs publics."
+
+["SGO.PA"]
+description = "Matériaux et solutions de construction, de plus en plus tournés vers la rénovation et l'isolation."
+role = "Une valeur cyclique liée au bâtiment."
+limite = "Sensible aux taux et à l'activité de construction."
+
+["ML.PA"]
+description = "Pneumatiques, dont l'essentiel du bénéfice vient du remplacement plutôt que des véhicules neufs."
+role = "Une valeur industrielle moins cyclique que les constructeurs automobiles."
+limite = "Exposé au prix des matières premières (caoutchouc, pétrole) et à la concurrence asiatique."
+
+["AI.PA"]
+description = "Gaz industriels et médicaux (oxygène, azote, hydrogène), vendus sur des contrats longs."
+role = "Une valeur défensive, au chiffre d'affaires très prévisible."
+limite = "Une croissance régulière mais lente, et une valorisation qui le reflète."
+
+["TTE.PA"]
+description = "Une major pétrolière et gazière intégrée, avec une activité d'électricité et de renouvelables en croissance."
+role = "Une exposition à l'énergie et au rendement, qui tient quand le pétrole monte."
+limite = "Les résultats suivent le prix du pétrole et du gaz, et la transition énergétique pèse à long terme."
+
+["ENGI.PA"]
+description = "Réseaux régulés, production d'électricité renouvelable et services énergétiques."
+role = "Une valeur de rendement, rendue défensive par ses activités régulées."
+limite = "Un endettement important, qui rend le titre sensible aux taux."
+
+["VIE.PA"]
+description = "Eau, déchets et services énergétiques, en grande partie sous contrats publics longs."
+role = "Un service aux collectivités, dont les contrats sont indexés sur l'inflation."
+limite = "Un endettement important, qui rend le titre sensible aux taux."
+
+["SAN.PA"]
+description = "Un groupe pharmaceutique centré sur l'immunologie et les vaccins."
+role = "Une valeur de santé défensive, peu liée au cycle économique."
+limite = "Dépend de quelques médicaments phares, et de l'échéance de leurs brevets."
+
+["BNP.PA"]
+description = "La première banque de la zone euro par les actifs, banque universelle."
+role = "Une exposition aux banques européennes, qui profitent de taux plus élevés."
+limite = "Suit le coût du risque et les crises financières : les banques baissent fort dans les récessions."
+
+["GLE.PA"]
+description = "Une banque universelle française, avec une forte activité de marchés."
+role = "Une exposition plus risquée au secteur bancaire français."
+limite = "Historiquement la plus volatile des banques françaises cotées, et très corrélée à BNP Paribas et au Crédit Agricole."
+
+["ACA.PA"]
+description = "La société cotée du groupe mutualiste Crédit Agricole : banque de détail, assurance et gestion d'actifs (Amundi)."
+role = "Une banque orientée revenus, moins dépendante des marchés que ses pairs."
+limite = "Reste exposée au cycle du crédit, et elle est contrôlée par le groupe mutualiste plutôt que par ses actionnaires cotés."
+
+["STMPA.PA"]
+description = "Un fabricant franco-italien de semi-conducteurs : puces pour l'automobile, l'industrie et l'électronique."
+role = "Une exposition européenne aux semi-conducteurs."
+limite = "Très cyclique, avec des cycles de stocks marqués : ses baisses sont souvent bien plus fortes que celles du marché."
+
+["CAP.PA"]
+description = "Services informatiques et conseil."
+role = "Une exposition aux budgets informatiques des entreprises."
+limite = "Cyclique : quand les entreprises réduisent leurs dépenses, le chiffre d'affaires suit. L'IA peut aussi transformer son métier."
+
+["DSY.PA"]
+description = "Logiciels de conception et de simulation (CATIA, SOLIDWORKS) et logiciels pour la santé (Medidata)."
+role = "Un éditeur de logiciels européen, aux revenus en partie récurrents."
+limite = "Une valorisation élevée, et une croissance qui a ralenti."
+
+["ORA.PA"]
+description = "L'opérateur télécom historique français, présent en Europe et en Afrique."
+role = "Une valeur de rendement, souvent détenue pour son dividende."
+limite = "Une croissance faible et des investissements lourds. Il se comporte un peu comme une obligation, et baisse quand les taux montent."
+
+["STLAP.PA"]
+description = "Peugeot, Citroën, Fiat, Jeep, Opel et d'autres marques dans un seul groupe, coté à Paris, Milan et New York. Cette ligne est la cotation parisienne."
+role = "Une valeur automobile très cyclique."
+limite = "Des marges et des résultats très variables d'une année à l'autre, et une exposition aux droits de douane et à la concurrence chinoise."
+
+["RNO.PA"]
+description = "Un constructeur automobile français (Renault, Dacia, Alpine), avec une participation dans Nissan."
+role = "Une exposition au marché automobile européen."
+limite = "Très cyclique, et corrélé à Stellantis."
+
+["ALTBG.PA"]
+description = "Une société cotée sur Euronext Growth Paris, anciennement The Blockchain Group, qui détient du bitcoin dans son bilan et lève des fonds pour en acheter davantage."
+role = "Une exposition indirecte et amplifiée au bitcoin, au travers d'une action."
+limite = "Ses baisses amplifient celles du bitcoin, par son financement et par un marché du titre étroit : une position difficile à vendre quand le marché baisse."
+
+["CW8.PA"]
+description = "Réplique l'indice MSCI World, les actions des pays développés, en une ligne cotée en euros. Sa réplication synthétique le rend éligible au PEA."
+role = "Souvent utilisé comme base d'une poche d'actions diversifiée."
+limite = "Les États-Unis y pèsent la majorité, et les grandes valeurs technologiques beaucoup : « monde » ne veut pas dire équilibré. Aucun pays émergent."
+
+["ESE.PA"]
+description = "Réplique le S&P 500 en une ligne cotée en euros, éligible au PEA par réplication synthétique."
+role = "Une poche d'actions américaines sans compte en dollars."
+limite = "Le prix est en euros, mais les entreprises gagnent en dollars : le risque de change n'est pas couvert, il est toujours là."
+
+["PAEEM.PA"]
+description = "Réplique les actions des pays émergents, en une ligne cotée en euros."
+role = "Une diversification vers des économies dont le cycle diffère de celui du monde développé."
+limite = "Volatilité élevée, risques politiques et de change, et une forte part de quelques pays comme la Chine, l'Inde et Taïwan."

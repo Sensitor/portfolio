@@ -12,6 +12,7 @@ Run with:  python tests/test_academy_app.py
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -177,7 +178,7 @@ def test_new_tracks(alice: str) -> None:
         home = run({"page": "academy"})
         body = text(home)
         check("the programme is grouped by track, trading first",
-              body.index("Trading · 9 sur 10") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 2 sur 2"))
+              body.index("Trading · 10 sur 11") < body.index("Monnaie et Bitcoin · 2 sur 2") < body.index("Crypto · 2 sur 2"))
         lesson = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-sourcee"})
         body = text(lesson)
         check("the sourced lesson renders", not lesson.exception, error(lesson))
@@ -212,8 +213,8 @@ def test_universes() -> None:
     landing = text(run({"page": "home"}))
     check("the landing presents one ecosystem", "L'écosystème Sensitor" in landing
           and "Apprendre le <em>trading</em>." in landing
-          and 'Comprendre la <em class="cu">monnaie</em>.' in landing
-          and 'Diversifier avec la <em class="cu">crypto</em>.' in landing)
+          and 'Diversifier avec la <em class="cu">crypto</em>.' in landing
+          and 'Comprendre la <em class="cu">monnaie</em>' not in landing)
     check("…with both universes side by side, trading not placed above money",
           'sx-ucard uni-trading' in landing and 'sx-ucard uni-monnaie' in landing)
     check("…and the first course of each universe to start with",
@@ -221,7 +222,7 @@ def test_universes() -> None:
           and 'sx-feature uni-monnaie' in landing)
     academy = text(run({"page": "academy"}))
     check("the Academy opens on its two universes", "Deux univers, un seul programme" in academy
-          and 'comprendre la <em class="cu">monnaie</em>' in academy)
+          and 'diversifier avec la <em class="cu">crypto</em>' in academy)
     check("open courses are listed under the head of their universe",
           academy.index('sx-uhead uni-trading') < academy.index('sx-feature uni-trading')
           < academy.index('sx-uhead uni-monnaie') < academy.index('sx-feature uni-monnaie'))
@@ -279,7 +280,11 @@ def test_journal_space(alice_tok: str) -> None:
     body = text(visitor)
     check("visitor: the demonstration journal, labelled as such",
           "Exemple synthétique" in body and "Plan respecté sur" in body, error(visitor))
-    check("visitor: the plan-versus-traded chart is drawn", len(visitor.get("plotly_chart")) == 1)
+    charts = [json.loads(c.proto.spec) for c in visitor.get("plotly_chart")]
+    names = {t.get("name") for c in charts for t in c["data"]}
+    check("visitor: the capital curve, the days, the assets and the plan-versus-traded chart are drawn",
+          len(charts) == 4 and "Plan seul" in names and bool({"Résultat cumulé", "Capital"} & names),
+          str((len(charts), names)))
     demo_trade = run({"page": "journal_trade", "trade": "demo-005"})
     check("visitor: a demonstration trade shows its automatic review",
           "La revue automatique" in text(demo_trade) and "Demander la revue" not in text(demo_trade))
@@ -397,6 +402,32 @@ def test_journal_edge_cases() -> None:
         store().answer_review("blank@example.com", r["id"], {"comment": "Revue.", "strengths": "", "improve": "", "scores": {}, "lessons": []})
     body = text(run({"page": "coach"}, empty))
     check("an empty queue says so plainly", "Aucune demande" in body and "La file est vide" in body)
+
+
+def test_prop_simulator() -> None:
+    print("\nThe challenge simulator reads only the member's own journal")
+    from sensitor.trading import demo
+
+    dan, erin = token("dan@example.com"), token("erin@example.com")
+    store().save_trades("dan@example.com", demo.trades())
+    closed = sum(1 for t in demo.trades() if t.is_closed and t.r_multiple is not None)
+
+    visitor = run({"page": "lab"})
+    check("the lab shows the challenge simulator", "Ses chances de réussir un challenge" in text(visitor),
+          error(visitor))
+    check("a visitor is offered no journal figures", not visitor.toggle)
+    mine = run({"page": "lab"}, dan)
+    labels = [t.label for t in mine.toggle]
+    check("a member with a journal is offered their own figures",
+          f"Utiliser les chiffres de mon journal ({closed} trades fermés)" in labels, str(labels))
+    other = run({"page": "lab"}, erin)
+    check("another member is not offered them", not other.toggle and str(closed) + " trades fermés" not in text(other))
+    mine.toggle[0].set_value(True).run()
+    body = text(mine)
+    check("switched on, the simulator states the sample and its range",
+          not mine.exception and f"Sur {closed} trades, votre taux de réussite se situe" in body, error(mine))
+    lesson = run({"page": "lesson", "course": "reussir-un-challenge", "lesson": "probabilite-de-reussite"}, dan)
+    check("the lesson embeds the same simulator", "Ses chances de réussir un challenge" in text(lesson), error(lesson))
 
 
 def test_direction_prototype(tok: str) -> None:
@@ -585,6 +616,7 @@ def main() -> int:
     test_hash_demo(alice)
     test_no_secret_asked(alice)
     test_journal_space(alice)
+    test_prop_simulator()
     test_direction_prototype(alice)
     test_journal_edge_cases()
 
@@ -593,24 +625,28 @@ def main() -> int:
     check("the old academy_app.py entry point still renders", not legacy.exception, error(legacy))
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
-          'comprendre la <em class="cu">monnaie</em>' in text(old))
-    for page in ("market", "community"):
+          'diversifier avec la <em class="cu">crypto</em>' in text(old))
+    for page in ("community",):
         app = run({"page": page})
         body = text(app)
         check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)
         check(f"{page}: offers no input of any kind",
               not app.text_input and not app.radio and not app.checkbox and not app.text_area)
+    room = run({"page": "market"})
+    check("market: the trading room is open, and offers a visitor no input",
+          "Préparer la séance" in text(room) and not room.exception and not room.text_input)
     journal = run({"page": "journal"})
     check("journal: open in the platform itself, no longer a link away",
-          "Chaque trade" in text(journal) and "Lien non configuré" not in text(journal))
+          "en chiffres" in text(journal) and "Lien non configuré" not in text(journal))
     os.environ["SENSITOR_TOOLS_URL"] = "https://outils.example"
     try:
         linked = run({"page": "journal_add"}, token("linked@example.com"))
-        check("journal: MetaTrader 5 synchronisation opens the analytics app's journal",
-              any(b.url == "https://outils.example/?page=trading_journal" for b in linked.get("link_button")))
+        check("journal: MetaTrader 5 synchronisation is in the space now, not a link to the analytics app",
+              "Importer depuis MetaTrader 5" in text(linked) and "Synchroniser le terminal" in text(linked)
+              and not linked.get("link_button"))
         linked = run({"page": "tools"})
-        check("tools: opens the portfolio side of the analytics app",
-              any(b.url == "https://outils.example/?page=overview" for b in linked.get("link_button")))
+        check("tools: the old address opens the space, with nothing left to open in the full app",
+              "Analyser son portefeuille" in text(linked) and not linked.get("link_button"))
     finally:
         os.environ.pop("SENSITOR_TOOLS_URL", None)
     shell = run({"page": "home"})
@@ -622,8 +658,9 @@ def main() -> int:
     check("the visitor's landing speaks of trading and of money",
           "Apprendre le <em>trading</em>." in text(run({"page": "home"})))
     tools = run({"page": "tools"})
-    check("tools: no link when the address is not configured",
-          "Lien non configuré" in text(tools))
+    check("tools: the space opens, with no link out and no address to configure",
+          "Analyser son portefeuille" in text(tools) and "pas renseignée" not in text(tools)
+          and not tools.get("link_button"))
     sidebar = [b.label for b in run({"page": "home"}).sidebar.button]
     from sensitor.platform import spaces
     check("the sidebar lists every space, in registry order",

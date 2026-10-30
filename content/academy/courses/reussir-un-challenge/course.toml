@@ -1,0 +1,39 @@
+id = "reussir-un-challenge"
+path = "prop-firm"
+title = "Réussir un challenge prop firm"
+summary = "Sept leçons pour aborder un challenge en connaissant ses règles et ses chances : ce que l'on achète, la lecture des règles de FTMO et de Topstep, le seuil suiveur, la perte journalière, la règle de régularité, puis la probabilité de réussite calculée à partir de ses propres statistiques."
+level = "intermediaire"
+status = "published"
+version = 1
+objectives = [
+  "Dire ce que vend un challenge et ce qu'il coûte réellement en moyenne.",
+  "Lire les règles d'un challenge et calculer chaque seuil, jour après jour.",
+  "Distinguer un seuil fixe, un seuil suiveur et un seuil verrouillé.",
+  "Estimer ses chances de réussite à partir de son taux de réussite, de son ratio gain / risque et de son risque par trade.",
+]
+prerequisites = ["Gérer le risque dans la durée"]
+final_quiz = "prop-firm-validation"
+
+[[module]]
+id = "comprendre-le-challenge"
+title = "Comprendre le challenge"
+summary = "Ce que l'on paie, ce que l'on reçoit, et les quatre familles de règles qui décident de tout."
+lessons = ["ce-que-vous-achetez", "lire-les-regles"]
+
+[[module]]
+id = "les-limites"
+title = "Les limites, une par une"
+summary = "Le seuil de perte maximale, la perte journalière et la règle de régularité, calculés sur des exemples tirés des pages des sociétés."
+lessons = ["seuil-suiveur", "perte-journaliere", "regle-de-regularite"]
+
+[[module]]
+id = "les-chances"
+title = "Ses chances, chiffrées"
+summary = "La probabilité de réussir, calculée exactement à partir de ses propres statistiques, et ce qu'elle dit du risque par trade."
+lessons = ["probabilite-de-reussite"]
+
+[[module]]
+id = "bilan-prop"
+title = "Faire le point"
+summary = "Les règles du parcours rassemblées, puis un quiz de validation corrigé."
+lessons = ["recap-prop-firm"]

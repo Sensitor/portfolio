@@ -20,13 +20,16 @@ Rules enforced in this module
 
 from __future__ import annotations
 
+import functools
+
 import numpy as np
 import plotly.graph_objects as go
 
+from ..core.numbers import french_figure
 from .themes import (
     ACCENT, AXIS, BORDER_STRONG, DIVERGING, GRID, INK, INK_2, INK_FAINT,
     INK_MUTED, NEG, NEUTRAL, PALETTE, PALETTE_ALLPAIRS, POS, SERIOUS, STATUS, SURFACE, SURFACE_2,
-    WARNING, fade, plotly_layout, series_color,
+    WARNING, fade, in_french, plotly_layout, series_color,
 )
 
 _BAR_RADIUS = 4
@@ -1231,3 +1234,24 @@ def trading_comparison(rows, height: int | None = None, lang: str = "en") -> go.
         margin=dict(l=8, r=8, t=30, b=6),
     ))
     return fig
+
+
+# =============================================================================
+# FRENCH TYPOGRAPHY
+# =============================================================================
+# Every factory above returns its figure through `french_figure` when the page is
+# read in French: decimal comma, narrow spaces in thousands, the currency after
+# the value. Done once here so no factory has to carry a language argument for it.
+
+def _in_french_typography(factory):
+    @functools.wraps(factory)
+    def build(*args, **kwargs):
+        fig = factory(*args, **kwargs)
+        return french_figure(fig) if isinstance(fig, go.Figure) and in_french() else fig
+    return build
+
+
+for _name, _factory in list(globals().items()):
+    if callable(_factory) and not _name.startswith("_") and getattr(_factory, "__module__", "") == __name__:
+        globals()[_name] = _in_french_typography(_factory)
+del _name, _factory

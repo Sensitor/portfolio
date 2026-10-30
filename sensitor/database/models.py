@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 TABLES: dict[str, str] = {
     "users": """
@@ -340,6 +340,27 @@ CREATE TABLE IF NOT EXISTS trade_reviews (
     answered_at  TEXT,
     seen_at      TEXT
 )""",
+
+    # ── Trading room ─────────────────────────────────────────────────────────
+    # A session prepared by a coach before the open, and its review after the
+    # close (see platform.market). Written by coaches only, read by members at the
+    # access level the author chose. Not member data: the author's address is
+    # kept to show who wrote it to the team, and cleared if that account goes.
+    "market_sessions": """
+CREATE TABLE IF NOT EXISTS market_sessions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    author_email  TEXT REFERENCES users(email) ON DELETE SET NULL ON UPDATE CASCADE,
+    session_date  TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    access        TEXT NOT NULL DEFAULT 'member' CHECK (access IN ('public', 'member', 'premium')),
+    status        TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    content       TEXT NOT NULL,          -- JSON, platform.market.clean_session()["content"]
+    review        TEXT,                   -- JSON, platform.market.clean_review(), or NULL
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL,
+    published_at  TEXT,
+    reviewed_at   TEXT
+)""",
 }
 
 INDEXES = """
@@ -357,6 +378,7 @@ CREATE INDEX IF NOT EXISTS idx_attempts_user ON quiz_attempts(user_email, quiz_i
 CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_email, created_at);
 CREATE INDEX IF NOT EXISTS idx_reviews_user ON trade_reviews(user_email, created_at);
 CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_market_published ON market_sessions(status, session_date);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

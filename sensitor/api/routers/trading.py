@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ...trading.context import PERIODS, build_context
 from ...trading.journal import TradeFilter, TradeJournal
+from ...trading.models import on_utc_clock
 from ..deps import Store, current_user, get_store
 from ..schemas import (
     BreakdownRow, CurvePoint, DayPnL, Finding, TradesPage, TradingMetrics,
@@ -50,7 +51,7 @@ def _context(store: Store, email: str, period: str, account: str | None,
         )
     criteria = TradeFilter(symbols=[symbol] if symbol else None)
     return build_context(
-        TradeJournal(store.list_trades(email)),
+        TradeJournal(on_utc_clock(store.list_trades(email), aware=False)),
         lang=lang, period=period, account_id=account, criteria=criteria,
     )
 

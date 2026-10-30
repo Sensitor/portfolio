@@ -70,6 +70,7 @@ from sensitor.investment.portfolio import UltimatePortfolioAnalyzer, latest_pric
 from sensitor.pages import _workspace
 from sensitor.ui import themes as sensitor_design
 from sensitor.investment.context import build_context
+from sensitor.investment.holdings import split_analysed, value as holdings_value
 from sensitor.platform.brand import mark_svg as _mark_svg
 from sensitor.core.i18n import tr as s_tr
 from sensitor.pages import (
@@ -2589,17 +2590,14 @@ def main():
                 else:
                     st.session_state.real_portfolio_prices = prices
 
-                    # Calculate total value and weights
-                    asset_values = {}
-                    for ticker in tickers_list:
-                        if ticker in prices:
-                            asset_values[ticker] = prices[ticker] * holdings[ticker]
-
-                    total_value = sum(asset_values.values())
+                    # Total value and weights, the same way the platform values them.
+                    valuation = holdings_value(
+                        {tk: holdings[tk] for tk in tickers_list}, prices)
+                    asset_values = valuation.values
+                    total_value = valuation.total
                     st.session_state.real_portfolio_total_value = total_value
 
-                    # Calculate weights from real values
-                    real_weights = {tk: val / total_value for tk, val in asset_values.items() if total_value > 0}
+                    real_weights = valuation.weights
                     available_tickers = list(real_weights.keys())
 
                     # Store in session state for the dashboard to use
@@ -2620,10 +2618,7 @@ def main():
                         # money stayed in `initial_value` and was attributed
                         # across the survivors — the analysed book came out
                         # larger than the holdings that were actually in it.
-                        analysed = sum(asset_values[t] for t in analyzer.tickers
-                                       if t in asset_values)
-                        excluded = {t: v for t, v in asset_values.items()
-                                    if t not in analyzer.tickers}
+                        analysed, excluded = split_analysed(asset_values, analyzer.tickers)
                         if excluded and analysed > 0:
                             analyzer.initial_value = analysed
                             analyzer.portfolio_values = (

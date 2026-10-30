@@ -75,7 +75,7 @@ def test_real_catalog():
     check("four tracks, trading first, completed by money, Bitcoin and crypto", [t.id for t in catalog.tracks]
           == ["trading", "monnaie-bitcoin", "crypto", "investissement"])
     trading = catalog.paths_in("trading")
-    check("the ten trading paths keep their numbers", [p.number for p in trading] == list(range(1, 11)))
+    check("the eleven trading paths keep their numbers", [p.number for p in trading] == list(range(1, 12)))
     check("paths are ordered by track, then number",
           [p.track for p in catalog.paths] == sorted((p.track for p in catalog.paths),
                                                      key=[t.id for t in catalog.tracks].index))
@@ -91,7 +91,7 @@ def test_real_catalog():
           and catalog.path("bitcoin").label == "Monnaie et Bitcoin · Parcours 02")
     planned = {p.id for p in catalog.paths if p.status == C.PLANNED}
     check("only the founder's two methods are still announced",
-          planned == {"methode-sensitor", "methode-fondateur"} and len(catalog.paths) == 16,
+          planned == {"methode-sensitor", "methode-fondateur"} and len(catalog.paths) == 17,
           str(sorted(planned)))
     check("only the new tracks require sources",
           {t.id for t in catalog.tracks if t.require_sources} == {"monnaie-bitcoin", "crypto", "investissement"})
@@ -1561,6 +1561,164 @@ def test_risk_path_figures():
         check("path 5 helpers refuse bad input", raises(bad, ValueError))
 
 
+def test_prop_firm_figures():
+    """Path 11: the rules as published, the thresholds, the consistency rules and the odds."""
+    print("\nPath 11 figures")
+    from dataclasses import replace
+    from itertools import product
+    from sensitor.academy import expectancy as X
+    from sensitor.academy import propfirm as PF
+
+    two, one, top = (PF.RULESETS[k] for k in ("ftmo-2-step", "ftmo-1-step", "topstep-50k"))
+    check("FTMO 2-Step as published: 10 % target, 5 % daily, 10 % static, 4 days",
+          (two.target, two.daily_loss, two.max_loss, two.trailing, two.min_days)
+          == (10000, 5000, 10000, PF.STATIC, 4))
+    check("FTMO 1-Step as published: 3 % daily, 10 % trailing, consistency 50 % of profit",
+          (one.daily_loss, one.trailing, one.lock_at_start, one.consistency, one.consistency_pct)
+          == (3000, PF.EOD, False, "profit", 50))
+    check("Topstep 50K as published: 3 000 $ target, 2 000 $ trailing locked, optional 1 000 $ daily",
+          (top.target, top.max_loss, top.lock_at_start, top.daily_loss, top.daily_loss_fails)
+          == (3000, 2000, True, 1000, False))
+    check("every ruleset names its sources and their dates",
+          all(r.sources and all(u.startswith("https://") and d.startswith("2026-") for _, u, d in r.sources)
+              for r in PF.RULESETS.values()))
+
+    # Topstep's own examples
+    days = PF.walk(top, [500, -500])
+    check("Topstep: +500 then -500 leaves the floor at 48 500 $",
+          days[1].max_floor == 48500 and days[1].close == 50000 and days[1].status == "running")
+    breach = PF.walk(top, [-1950], lows=[-2250])[0]
+    check("Topstep: an open loss to 47 750 $ breaches, whatever the close",
+          breach.status == "failed" and breach.reason == "max_loss" and breach.low == 47750)
+    # FTMO's own examples
+    check("FTMO: 102 000 $ at midnight gives 97 000 $ (2-Step) and 99 000 $ (1-Step)",
+          PF.daily_floor(two, 102000) == 97000 and PF.daily_floor(one, 102000) == 99000)
+    check("FTMO 1-Step: the floor follows the highest midnight balance", PF.max_floor(one, 102000) == 92000)
+    check("FTMO 2-Step: the floor stays at 90 000 $", PF.max_floor(two, 120000) == 90000)
+
+    # The constructed month of the lesson and its chart
+    rows = {r["jour"]: r for r in PF.floors_rows()}
+    d8 = rows[8]
+    check("lesson: day 8 at 51 000 $, floors 48 000 / 50 600 / 50 000 $",
+          (d8["solde"], d8["fixe"], d8["suiveur"], d8["verrouille"]) == (51000, 48000, 50600, 50000))
+    check("lesson: margins of 3 000, 400 and 1 000 $",
+          (d8["solde"] - d8["fixe"], d8["solde"] - d8["suiveur"], d8["solde"] - d8["verrouille"]) == (3000, 400, 1000))
+    check("lesson: the month ends at 52 700 $", rows[12]["solde"] == 52700)
+    seuil = {s.id: s.answer for s in C.load_catalog().exercise("seuil-suiveur").steps}
+    check("exercise: balance, fixed, trailing before and after day 4, locked",
+          (rows[4]["solde"], rows[4]["fixe"], rows[3]["suiveur"], rows[4]["suiveur"], rows[4]["verrouille"])
+          == (seuil["solde-j4"], seuil["fixe-j4"], seuil["suiveur-j3"], seuil["suiveur-j4"], seuil["verrouille-j4"]))
+
+    # Consistency
+    check("FTMO: 6 000 of 10 000 fails; 12 000 $ needed",
+          not PF.consistency_profit_ok([6000, 4000]) and PF.consistency_profit_needed(6000) == 12000)
+    check("Topstep: 1 600 $ keeps 3 000 $, 1 800 $ gives 3 273 $, 2 200 $ gives 4 000 $",
+          PF.consistency_target(3000, 1600) == 3000 and round(PF.consistency_target(3000, 1800)) == 3273
+          and round(PF.consistency_target(3000, 2200)) == 4000 and close(0.55 * 3000, 1650))
+    reg = {s.id: s.answer for s in C.load_catalog().exercise("regularite-challenge").steps}
+    check("exercise: 56.25 %, 9 000 $, 1 650 $, 3 636.36 $",
+          close(4500 / 8000 * 100, reg["part-ftmo"]) and close(PF.consistency_profit_needed(4500), reg["total-ftmo"])
+          and close(0.55 * 3000, reg["limite-topstep"])
+          and abs(PF.consistency_target(3000, 2000) - reg["objectif-topstep"]) <= 0.01)
+
+    # Sizing
+    check("lesson: 5 losses under 5 %, 3 under 3 %, at 1 000 $",
+          PF.losses_to(5000, 1000) == 5 and PF.losses_to(3000, 1000) == 3)
+    check("lesson: 80 trades from the expectancy alone", close(PF.expected_trades_to_target(10, 1, .45, 1.5), 80))
+    check("lesson: a pass costs 2 000 $ at one chance in four, 1 000 $ at one in two",
+          PF.cost_per_pass(500, .25) == 2000 and PF.cost_per_pass(500, .5) == 1000)
+
+    # The odds, exact: against the gambler's ruin and against a brute-force walk
+    plain = replace(two, daily_loss_pct=None)
+    q = .45 / .55
+    check("odds agree with the gambler's ruin (floor crossed at -11 R, target at +10 R)",
+          abs(PF.pass_odds(plain, win_rate=.55, reward_r=1, risk_pct=1, max_trades=5000).passed
+              - (1 - q ** 11) / (1 - q ** 21)) < 1e-9)
+
+    def brute(rules, p, reward, risk, k, n):
+        target, loss, daily = rules.target_pct / risk, rules.max_loss_pct / risk, rules.daily_loss_pct
+        daily = None if daily is None else daily / risk
+        out = {"pass": 0.0, "max": 0.0, "daily": 0.0}
+        for seq in product((True, False), repeat=n):
+            pnl, peak, opened, stopped, prob, end = 0.0, 0.0, 0.0, False, 1.0, None
+            for t, won in enumerate(seq):
+                prob *= p if won else 1 - p
+                if end is None and not stopped:
+                    pnl += reward if won else -1
+                    floor = -loss if rules.trailing == PF.STATIC else (
+                        min(max(peak, 0) - loss, 0) if rules.lock_at_start else max(peak, 0) - loss)
+                    touch = rules.breach_on_touch
+                    hit = (lambda x, f, on: x <= f + 1e-9 if on else x < f - 1e-9)
+                    if hit(pnl, floor, touch):
+                        end = "max"
+                    elif daily is not None and hit(pnl, opened - daily, touch or not rules.daily_loss_fails):
+                        if rules.daily_loss_fails:
+                            end = "daily"
+                        else:
+                            stopped = True
+                    elif pnl >= target - 1e-9:
+                        end = "pass"
+                if (t + 1) % k == 0:
+                    peak, opened, stopped = max(peak, pnl), pnl, False
+            if end:
+                out[end] += prob
+        return out
+
+    for rules, risk in ((two, 2.5), (one, 2), (top, 1)):
+        exact = PF.pass_odds(rules, win_rate=.45, reward_r=1.5, risk_pct=risk, trades_per_day=2, max_trades=12)
+        b = brute(rules, .45, 1.5, risk, 2, 12)
+        check(f"odds agree with brute force: {rules.id} at {risk} %",
+              abs(exact.passed - b["pass"]) < 1e-12 and abs(exact.failed_max - b["max"]) < 1e-12
+              and abs(exact.failed_daily - b["daily"]) < 1e-12, f"{exact} {b}")
+
+    rows = {r["risque"]: r for r in PF.odds_rows()}
+    want = {0.25: (None, 10.2), 0.5: (93.4, 39.6), 1.0: (85.5, 50.7), 2.0: (72.7, 51.5), 3.0: (35.2, 26.2)}
+    for risk, (p45, p40) in want.items():
+        check(f"chart: odds at {risk} %",
+              (p45 is None or rows[risk]["p45"] == p45) and rows[risk]["p40"] == p40, str(rows[risk]))
+    table = {"ftmo-2-step": (85.5, 14.4), "ftmo-1-step": (74.6, 25.4), "topstep-50k": (45.9, 54.1)}
+    for rid, (ok, ko) in table.items():
+        o = PF.pass_odds(PF.RULESETS[rid], win_rate=.45, reward_r=1.5, risk_pct=1)
+        check(f"lesson table: {rid} {ok} % / {ko} %",
+              round(o.passed * 100, 1) == ok and round(o.failed * 100, 1) == ko, str(o))
+    o = PF.pass_odds(one, win_rate=.45, reward_r=1.5, risk_pct=2)
+    check("lesson: FTMO 1-Step at 2 %: 23.6 % pass, 76.4 % by the daily limit",
+          round(o.passed * 100, 1) == 23.6 and round(o.failed_daily * 100, 1) == 76.4)
+    o = PF.pass_odds(two, win_rate=.45, reward_r=1.5, risk_pct=1)
+    check("lesson: those who pass do it in 58 trades on average", round(o.mean_trades_to_pass) == 58)
+    i = X.win_rate_interval(22, 50)
+    lo = PF.pass_odds(two, win_rate=i.low, reward_r=1.5, risk_pct=1).passed
+    hi = PF.pass_odds(two, win_rate=i.high, reward_r=1.5, risk_pct=1).passed
+    mid = PF.pass_odds(two, win_rate=.44, reward_r=1.5, risk_pct=1).passed
+    check("lesson: 22 / 50 gives 31.2 % to 57.7 %, hence 4.0 % to 99.8 % and 80.7 %",
+          (round(i.low * 100, 1), round(i.high * 100, 1), round(lo * 100, 1), round(hi * 100, 1), round(mid * 100, 1))
+          == (31.2, 57.7, 4.0, 99.8, 80.7))
+    check("lesson: 585 $ and 1 089 $ per pass for a 500 $ fee",
+          round(PF.cost_per_pass(500, .855)) == 585 and round(PF.cost_per_pass(500, .459)) == 1089)
+
+    # The lessons quote these figures as written
+    lessons_dir = Path(__file__).resolve().parents[1] / "content" / "academy" / "courses" / "reussir-un-challenge" / "lessons"
+    text = {f.stem: f.read_text(encoding="utf-8") for f in lessons_dir.glob("*.md")}
+    quoted = {"seuil-suiveur": ["50 600 $", "400 $", "52 700 $", "48 500 $", "47 750 $"],
+              "perte-journaliere": ["97 000 $", "99 000 $", "**5 pertes**", "**3 pertes**"],
+              "regle-de-regularite": ["**12 000 $**", "**1 650 $**", "**3 273 $**", "**4 000 $**"],
+              "probabilite-de-reussite": ["**93,4 %**", "**85,5 %**", "**72,7 %**", "**35,2 %**", "**50,7 %**",
+                                          "**51,5 %**", "**10,2 %**", "74,6 %", "45,9 %", "**23,6 %**",
+                                          "**76,4 %**", "**80 trades**", "**58 trades**", "**31,2 %**",
+                                          "**57,7 %**", "**4,0 %**", "**99,8 %**", "**80,7 %**", "**585 $**",
+                                          "**1 089 $**"]}
+    for lesson_id, figures in quoted.items():
+        missing = [f for f in figures if f not in text[lesson_id]]
+        check(f"lesson {lesson_id} quotes its computed figures", not missing, ", ".join(missing))
+
+    check("a journal profile: 3 wins of 2 R and 2 losses of 1 R",
+          PF.profile_from_r([2, 2, 2, -1, -1]) == PF.Profile(5, .6, 2, 1) and PF.profile_from_r([1, 2]) is None)
+    for bad in (lambda: PF.pass_odds(two, win_rate=1.2, reward_r=1, risk_pct=1),
+                lambda: PF.pass_odds(two, win_rate=.5, reward_r=1, risk_pct=0),
+                lambda: PF.losses_to(0, 1), lambda: PF.ruleset("inconnu")):
+        check("path 11 helpers refuse bad input", raises(bad, ValueError))
+
+
 def _brute_ruin(p, reward, risk, n, threshold):
     from itertools import product
     total = 0.0
@@ -2105,6 +2263,7 @@ def main() -> int:
     test_inflation_figures()
     test_savings_figures()
     test_risk_path_figures()
+    test_prop_firm_figures()
     test_printable()
     test_validation_catches_mistakes()
     test_drafts()

@@ -219,6 +219,13 @@ def test_curves_and_streaks() -> None:
     check("drawdown percentage from the peak", near(dd["depth_pct"], -0.75),
           str(dd["depth_pct"]))
 
+    first_loss = [make(f"L{i}", entry=100, exit_=100 + p, stop=99, opened=start + timedelta(days=i))
+                  for i, p in enumerate([-5, 1, 1])]
+    check("a first trade that loses counts in the drawdown, from zero",
+          near(TA.compute_metrics(first_loss)["max_drawdown"], -5.0)
+          and near(TA.max_drawdown(TA.equity_curve(first_loss), start=0.0)["depth"], -5.0)
+          and near(TA.max_drawdown(TA.equity_curve(first_loss))["depth"], 0.0),
+          str(TA.compute_metrics(first_loss)["max_drawdown"]))
     negative_peak = TA.max_drawdown([{"at": start, "equity": -5.0},
                                      {"at": start, "equity": -9.0}])
     check("no percentage drawdown from a negative peak",
@@ -477,7 +484,17 @@ def test_setups() -> None:
     check("combination is order-independent",
           TS.combination_key(["fvg", "bos"]) == TS.combination_key(["BOS", "FVG"]))
     check("untagged has its own key", TS.combination_key([]) == "untagged")
-    check("labels translate", TS.setup_label("fvg", "fr") == "Fair Value Gap")
+    check("labels translate", TS.setup_label("breakout", "fr") == "Cassure")
+    check("the usual shorthand is the label",
+          [TS.setup_label(k, "fr") for k in ("ote", "bos", "choch", "fvg", "expansion_50", "news")]
+          == ["OTE", "BOS", "CHoCH", "FVG", "Expansion 50 %", "News"])
+    check("the long names still fold onto the same keys, so saved trades keep their setup",
+          [TS.canonical_setup(x) for x in ("Break of Structure", "Rupture de Structure", "Change of Character",
+                                           "Changement de Caractère", "Optimal Trade Entry", "Actualité",
+                                           "50% expansion", "Expansion 50 %")]
+          == ["bos", "bos", "choch", "choch", "ote", "news", "expansion_50", "expansion_50"])
+    check("the pickers open on the setups traders tag most",
+          list(TS.SETUPS)[:6] == ["ote", "bos", "choch", "fvg", "ifvg", "expansion_50"])
     check("mistakes fold too", TS.canonical_mistake("fear of missing out") == "fomo")
 
 

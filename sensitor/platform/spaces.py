@@ -80,33 +80,40 @@ SPACES: tuple[Space, ...] = (
           entry="progress", pages=("progress",), numeral="IV",
           edition="bulletin"),
     Space("lab", "Trading Lab", "trader", LIVE,
-          "Le calculateur de risque, le simulateur de ruine et les exercices, sans capital réel.",
+          "Le calculateur de risque, le simulateur de ruine, le simulateur de challenge prop firm et les "
+          "exercices, sans capital réel.",
           entry="lab", pages=("lab",), numeral="V",
           planned=("Études de cas sur graphiques annotés", "Simulations de scénarios")),
     Space("journal", "Journal de trading", "trader", LIVE,
           "Chaque trade jugé sur votre propre plan : revue automatique règle par règle, coût des "
-          "écarts en R, calendrier de régularité, et revue d'un trade par un coach.",
+          "écarts en R, calendrier de régularité, performance, analyse, risque et comportement, "
+          "synchronisation MetaTrader 5, et revue d'un trade par un coach.",
           entry="journal",
-          pages=("journal", "journal_trades", "journal_trade", "journal_add", "journal_plan",
-                 "journal_reviews"),
+          pages=("journal", "journal_trades", "journal_trade", "journal_performance", "journal_analysis",
+                 "journal_risk", "journal_behaviour", "journal_add", "journal_plan", "journal_reviews"),
           numeral="VI",
-          planned=("Synchronisation MetaTrader 5 dans cet espace (aujourd'hui dans l'application "
-                   "d'analyse, sur le même compte)",
+          planned=("Import du rapport d'historique MetaTrader 5, sans terminal",
                    "Captures de graphique jointes à un trade"),
           related=(("Parcours 10 : Construire son processus de trading", "course:processus-de-trading"),
+                   ("Parcours 11 : Réussir un challenge prop firm", "course:reussir-un-challenge"),
                    ("Le modèle de plan de trading", "resource:modele-plan-de-trading"))),
-    Space("market", "Salle des marchés", "trader", PREPARING,
-          "Préparation de séance, scénarios et invalidations, revues pédagogiques.",
-          entry="market", pages=("market",), numeral="VII",
-          planned=("Contexte de marché et calendrier économique commentés",
-                   "Scénarios avec invalidation, publiés avant la séance",
-                   "Bilans pédagogiques après la séance, sans signaux"),
-          related=(("Leçon : lire la structure", "lesson:premiers-pas/structure-de-marche"),)),
-    Space("tools", "Portefeuille et risque", "investir", SEPARATE,
-          "Performance, allocation, exposition à Bitcoin et aux cryptomonnaies, risque, stress tests "
-          "et Monte Carlo.",
-          entry="tools", pages=("tools",), numeral="VIII",
-          planned=("Intégration au même espace membre",)),
+    Space("market", "Salle des marchés", "trader", LIVE,
+          "La séance préparée avant l'ouverture, contexte, calendrier et scénarios avec leur invalidation, "
+          "puis son bilan pédagogique après la clôture. Sans signaux.",
+          entry="market", pages=("market", "market_session", "market_edit"), numeral="VII",
+          planned=("Être prévenu à la publication d'une séance",),
+          related=(("Préparer sa séance", "lesson:processus-de-trading/preparer-seance"),
+                   ("Construire un scénario de liquidité", "lesson:liquidite-et-scenarios/scenario-liquidite"),
+                   ("Lire le calendrier économique", "lesson:trader-l-actualite/calendrier-economique"))),
+    Space("tools", "Portefeuille et risque", "investir", LIVE,
+          "Simuler une allocation, partir d'une allocation type ou suivre son portefeuille réel au prix du jour, "
+          "puis le lire : performance, santé, radiographie, risque, stress tests, optimisation, simulation et "
+          "Monte Carlo. Une bibliothèque d'actifs décrit chaque ligne.",
+          entry="portfolio",
+          pages=("portfolio", "pf_models", "pf_assets", "pf_overview", "pf_performance", "pf_health", "pf_xray",
+                 "pf_risk", "pf_stress", "pf_optimize", "pf_simulator", "pf_copilot", "pf_reports", "pf_portfolios"),
+          numeral="VIII",
+          related=(("Investir dans la crypto avec méthode", "course:investir-avec-methode"),)),
     Space("community", "Communauté", "echanger", PREPARING,
           "Questions, analyses partagées et retours d'expérience entre membres.",
           entry="community", pages=("community",), numeral="IX",
@@ -116,7 +123,8 @@ SPACES: tuple[Space, ...] = (
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach")
-LEGACY_PAGES = {"paths": "academy"}       # URLs from the first Academy release
+LEGACY_PAGES = {"paths": "academy",       # URLs from the first Academy release
+                "tools": "portfolio"}     # the link page of the analyzer, before it joined the space
 
 
 def all_pages() -> tuple[str, ...]:

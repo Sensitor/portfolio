@@ -347,9 +347,12 @@ def review_trade(trade: Trade, plan: TradingPlan, day_trades: list[Trade] | None
         checks.append(_check("session", OK if inside else FAIL,
                              f"Ouvert {phrase}." if inside else f"Ouvert {phrase}, hors du plan."))
 
-    # Setup.
+    # Setup. A trade imported from the broker carries no setup until the trader
+    # annotates it: that is a blank to fill, not a trade taken without a setup.
     tags = canonical_setups(trade.setups)
-    if plan.setups:
+    if not tags and trade.source == "mt5" and (plan.setups or plan.require_setup):
+        checks.append(_check("setup", NA, "Importé sans setup : annotez ce trade pour le vérifier."))
+    elif plan.setups:
         hit = [s for s in tags if s in plan.setups]
         if hit:
             checks.append(_check("setup", OK, f"Setup du plan : {_setup_names(hit)}."))

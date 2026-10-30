@@ -34,6 +34,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response,
 from ...trading.analytics import downsample
 from ...trading.context import build_context
 from ...trading.journal import TradeJournal
+from ...trading.models import on_utc_clock
 from ..deps import Store, current_user, get_store
 from ..schemas import MobileOverview, TradeDelta
 
@@ -147,7 +148,7 @@ def overview(request: Request, response: Response,
     if _not_modified(request, etag):
         return _unchanged_response(etag)
 
-    ctx = build_context(TradeJournal(store.list_trades(email)),
+    ctx = build_context(TradeJournal(on_utc_clock(store.list_trades(email), aware=False)),
                         lang=lang, period=period, account_id=account)
     metrics = ctx.metrics
     symbols = ctx.breakdown("symbol")

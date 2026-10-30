@@ -34,6 +34,8 @@ into "Other" rather than generating a 9th hue.
 import re
 import streamlit as st
 
+from ..core.numbers import french_html
+
 # =============================================================================
 # TOKENS
 # =============================================================================
@@ -204,7 +206,17 @@ def html(markup: str) -> None:
     """
     compact = _TAG_GAP.sub("><", markup.strip())
     compact = _WS.sub(" ", compact)
+    if in_french():
+        compact = french_html(compact)
     st.markdown(compact, unsafe_allow_html=True)
+
+
+def in_french() -> bool:
+    """Whether the page is read in French, so its figures take French typography (`core.numbers`)."""
+    try:
+        return st.session_state.get("language") == "fr"
+    except Exception:                                   # noqa: BLE001 - no session outside a run
+        return False
 
 
 # =============================================================================
@@ -279,43 +291,15 @@ PLOTLY_CONFIG_ZOOM = {
 # CSS THEME
 # =============================================================================
 
-def inject_theme() -> None:
-    """Inject the full app stylesheet. Call once, early, in main()."""
-    st.markdown(
-        f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
-/* ---------- Base plane: paper, no halo ---------- */
-.stApp {{ background: {BG_DEEP} !important; }}
-html, body, [class*="css"] {{ font-family: {FONT} !important; }}
-
-:is([data-testid="stMainBlockContainer"], .block-container) {{
-  padding: 1.5rem 2rem 4rem 2rem !important;
-  max-width: 1480px !important;
-}}
-@media (max-width: 900px) {{
-  :is([data-testid="stMainBlockContainer"], .block-container) {{
-    padding: 0.9rem 0.9rem 3rem 0.9rem !important;
-  }}
-}}
-/* The chrome header is hidden but still reserves 60px of page height, which
-   pushed every page down by a header's worth of empty space. */
-[data-testid="stHeader"] {{ height: 0 !important; min-height: 0 !important; }}
-[data-testid="stToolbar"], [data-testid="stDecoration"] {{ display: none !important; }}
-
-{MAIN} h1, {MAIN} h2 {{
-  color: {INK} !important; font-family: {TITLE} !important;
-  letter-spacing: -0.015em !important; font-weight: 600 !important;
-}}
-{MAIN} h3 {{
-  color: {INK} !important; font-family: {TITLE} !important;
-  letter-spacing: -0.01em !important; font-weight: 600 !important;
-}}
-{MAIN} h4 {{
-  color: {INK} !important; letter-spacing: -0.01em !important; font-weight: 600 !important;
-}}
-{MAIN} p, {MAIN} li, {MAIN} label {{ color: {INK_2} !important; }}
-
+def components_css() -> str:
+    """
+    The stylesheet of the analysis components alone: page and section headers,
+    cards, metric cards, pills, alerts, the « Lecture » margin, the risk hatch,
+    ledger tables and tooltips. No page plane, sidebar or widget rule: this is
+    what the Sensitor platform injects to host the analysis pages inside its
+    own shell (`inject_components`), and what `inject_theme` builds on.
+    """
+    return f"""
 /* Figures: proportional. The tabular set of Schibsted widens the comma, which
    opens a gap in French decimals (« 12 ,5 »); columns align on the right. */
 .snr-num {{ font-variant-numeric: normal; }}
@@ -459,6 +443,52 @@ html, body, [class*="css"] {{ font-family: {FONT} !important; }}
 }}
 .snr-tip:hover .snr-tip-body {{ visibility: visible; opacity: 1; }}
 
+"""
+
+
+def inject_components() -> None:
+    """Inject `components_css()` alone, for a host app that styles its own page and widgets."""
+    st.markdown(f"<style>{components_css()}</style>", unsafe_allow_html=True)
+
+
+def inject_theme() -> None:
+    """Inject the full app stylesheet. Call once, early, in main()."""
+    st.markdown(
+        f"""<style>
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+/* ---------- Base plane: paper, no halo ---------- */
+.stApp {{ background: {BG_DEEP} !important; }}
+html, body, [class*="css"] {{ font-family: {FONT} !important; }}
+
+:is([data-testid="stMainBlockContainer"], .block-container) {{
+  padding: 1.5rem 2rem 4rem 2rem !important;
+  max-width: 1480px !important;
+}}
+@media (max-width: 900px) {{
+  :is([data-testid="stMainBlockContainer"], .block-container) {{
+    padding: 0.9rem 0.9rem 3rem 0.9rem !important;
+  }}
+}}
+/* The chrome header is hidden but still reserves 60px of page height, which
+   pushed every page down by a header's worth of empty space. */
+[data-testid="stHeader"] {{ height: 0 !important; min-height: 0 !important; }}
+[data-testid="stToolbar"], [data-testid="stDecoration"] {{ display: none !important; }}
+
+{MAIN} h1, {MAIN} h2 {{
+  color: {INK} !important; font-family: {TITLE} !important;
+  letter-spacing: -0.015em !important; font-weight: 600 !important;
+}}
+{MAIN} h3 {{
+  color: {INK} !important; font-family: {TITLE} !important;
+  letter-spacing: -0.01em !important; font-weight: 600 !important;
+}}
+{MAIN} h4 {{
+  color: {INK} !important; letter-spacing: -0.01em !important; font-weight: 600 !important;
+}}
+{MAIN} p, {MAIN} li, {MAIN} label {{ color: {INK_2} !important; }}
+
+{components_css()}
 /* ---------- Sidebar: the navy binding, the one place with the grid ---------- */
 [data-testid="stSidebar"] {{
   background-color: {INK} !important; background-image: {ISO} !important;

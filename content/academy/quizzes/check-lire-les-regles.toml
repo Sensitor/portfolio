@@ -1,0 +1,73 @@
+id = "check-lire-les-regles"
+title = "Contrôle : lire les règles"
+course = "reussir-un-challenge"
+lesson = "lire-les-regles"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "ftmo-max"
+prompt = "Sur FTMO 2-Step, comment se calcule la perte maximale ?"
+kind = "single"
+lesson = "lire-les-regles"
+
+[[question.option]]
+id = "fixe"
+text = "10 % sous le solde initial, fixe."
+correct = true
+explanation = "Oui : le seuil reste à 90 000 $ sur un compte de 100 000 $."
+
+[[question.option]]
+id = "suiveuse"
+text = "10 % sous le plus haut solde de minuit."
+explanation = "C'est la règle de FTMO 1-Step."
+
+[[question.option]]
+id = "jour"
+text = "5 % sous le solde du jour."
+explanation = "C'est la perte journalière de FTMO 2-Step."
+
+[[question]]
+id = "topstep-dll"
+prompt = "Sur le Trading Combine de Topstep, que se passe-t-il si la limite journalière optionnelle est atteinte ?"
+kind = "single"
+lesson = "lire-les-regles"
+
+[[question.option]]
+id = "seance"
+text = "Les positions sont fermées jusqu'à la séance suivante, sans violation de règle."
+correct = true
+explanation = "Oui : Topstep précise que le compte reste éligible."
+
+[[question.option]]
+id = "elimine"
+text = "Le compte est éliminé."
+explanation = "C'est la conséquence chez FTMO, pas chez Topstep."
+
+[[question.option]]
+id = "rien"
+text = "Rien, elle n'est qu'indicative."
+explanation = "Elle ferme les positions et bloque les nouveaux trades jusqu'à 17 h, heure de Chicago."
+
+[[question]]
+id = "lire"
+prompt = "Pour chaque limite, quelles trois choses écrire avant de trader ?"
+kind = "single"
+lesson = "lire-les-regles"
+
+[[question.option]]
+id = "trois"
+text = "Le montant en dollars, sa référence, et ce qui se passe quand elle est atteinte."
+correct = true
+explanation = "Oui : combien, depuis quoi, et la conséquence."
+
+[[question.option]]
+id = "montant"
+text = "Seulement le pourcentage affiché."
+explanation = "Un pourcentage sans sa référence peut tromper de plusieurs milliers de dollars."
+
+[[question.option]]
+id = "date"
+text = "La date de fin du challenge et le prix."
+explanation = "Utiles, mais ils ne disent pas où se trouve la limite."

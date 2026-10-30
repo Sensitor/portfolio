@@ -225,6 +225,10 @@ def test_every_user_method_is_scoped():
         # E-mailed reset and verification tokens: the same construction, the
         # same reasoning. The link is how the account is found.
         "account_token", "use_account_token",
+        # The trading room's published sessions: content written by coaches for
+        # everyone, not anyone's data. Drafts and authors are only returned to a
+        # coach, which `tests/test_market.py` checks.
+        "market_sessions", "market_session",
     }
     offenders = []
     for name, method in inspect.getmembers(Store, inspect.isfunction):

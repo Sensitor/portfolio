@@ -184,7 +184,7 @@ def test_upgrade() -> None:
     check("the journal table is there after the upgrade",
           store.add_journal_entry("old@example.com", kind="free", body="Première note.") > 0)
     check("the database is at the current version",
-          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 10)
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 11)
 
     print("\nUpgrading a version-8 database (journal without routines)")
     path = os.path.join(WORK, "v8.db")
@@ -239,7 +239,8 @@ def test_upgrade() -> None:
     check("the plan and review tables are there",
           store.get_trading_plan("old@example.com") == {"risk_pct": 1.0}
           and [r["id"] for r in store.coach_queue("team@example.com")] == [request])
-    check("the database is at version 10", store._read("PRAGMA user_version")[0][0] == 10)
+    check("the trading room's table is there, empty", store.market_sessions() == [])
+    check("the database is at the current version", store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION)
 
 
 def main() -> int:

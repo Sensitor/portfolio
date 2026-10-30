@@ -26,7 +26,7 @@ place, and each one is reused as it was:
 | `sensitor/academy/*` domain | unchanged: content, quiz, risk, progress, access |
 | `/academy/*` API routes | unchanged; the shell does not add a second backend |
 | Academy Streamlit UI | split: the generic parts became the platform shell, the Academy pages became the first space |
-| `portfolio_optimizer_saas.py` | kept as it is; linked as the « Portefeuille et risque » space, and for MetaTrader 5 synchronisation from the journal |
+| `portfolio_optimizer_saas.py` | kept as it is; its portfolio pages are the « Portefeuille et risque » space and its trading pages the journal's analytics, on the same account and tables |
 
 What moved:
 
@@ -67,10 +67,10 @@ so numerals, rules, markers, bars and charts follow. A card carries the class
 | II | Bibliothèque | Apprendre | live | `library`, `resource` |
 | III | Psychologie et discipline | Apprendre | live | `psychology` (private reflection journal and session routine) |
 | IV | Progression | Apprendre | live | `progress` |
-| V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, exercises) |
-| VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_add`, `journal_plan`, `journal_reviews` |
-| VII | Salle des marchés | Trader | preparing | `market` |
-| VIII | Portefeuille et risque | Investir | separate | `tools` (opens the analytics app on `?page=overview`) |
+| V | Trading Lab | Trader | live | `lab` (risk calculator, ruin simulator, prop firm challenge simulator, exercises) |
+| VI | Journal de trading | Trader | live | `journal`, `journal_trades`, `journal_trade`, `journal_performance`, `journal_analysis`, `journal_risk`, `journal_behaviour`, `journal_add`, `journal_plan`, `journal_reviews` |
+| VII | Salle des marchés | Trader | live | `market`, `market_session`, `market_edit` (coaches) |
+| VIII | Portefeuille et risque | Investir | live | `portfolio` (build), `pf_models`, `pf_assets`, `pf_overview`, `pf_performance`, `pf_health`, `pf_xray`, `pf_risk`, `pf_stress`, `pf_optimize`, `pf_simulator`, `pf_copilot`, `pf_reports`, `pf_portfolios`; the old `tools` address opens `portfolio` |
 | IX | Communauté | Échanger | preparing | `community` |
 
 The analytics app honours `?page=` only for `overview`, `trading_overview` and
@@ -102,16 +102,24 @@ written before v9 stay out of the routine counts).
   checklist. Nothing in it is announced as planned any more.
 
 **Journal de trading** is live, in this app and on the same `trades` table as
-the analytics app, so trades synchronised from MetaTrader 5 there appear here.
+the analytics app: a trade synchronised, entered or imported in one is in the
+other.
 
 * **The plan and the automatic review** (`trading/review.py`). A member writes
   their rules once (stop, maximum risk, minimum reward-to-risk, sessions,
   setups, trades per day, daily loss limit in R, pause after losses; table
   `trading_plans`). Every closed trade is checked rule by rule: respected,
   broken, or not checkable (never counted as a pass). Mistakes the member
-  recorded on a trade count as departures; nothing is inferred from prices.
+  recorded on a trade count as departures; nothing is inferred from prices. A
+  trade imported from MT5 without a setup is not checkable on the setup rule
+  until it is annotated: a blank to fill, not a trade taken without a setup.
   Each broken rule points to the Academy lesson that teaches it. The dashboard
-  shows the compliance rate, the R of trades inside and outside the plan, the
+  opens on the performance in money: the net result, the win rate, profit
+  factor, expectancy, average gain and loss, the largest drawdown (measured from
+  the starting point, so a first losing trade counts) and the best and worst
+  trade; then the capital curve, one step per trade from zero or from the
+  plan's capital, with the drawdown under the peak; then the result per day and
+  per asset. The plan comes after: it shows the compliance rate, the R of trades inside and outside the plan, the
   curve as traded against the curve with departures set to zero, the cost per
   rule with a priority lesson, a calendar of R per day, and results by setup
   and session with their sample size.
@@ -133,9 +141,154 @@ the analytics app, so trades synchronised from MetaTrader 5 there appear here.
   is about a closed trade only; the form says no recommendation belongs in it.
 * **Demonstration.** A visitor, or a member who asks, sees a constructed
   journal (`trading/demo.py`), labelled « Exemple synthétique » on every page.
+* **French figures** (`core/numbers.py`). The analysis pages, the journal's
+  and the portfolio's, are read in French, so their figures are in French
+  typography: « 1 709,00 € », « 35,5 % », « +0,18 R ». The analyzer's own
+  `ui.themes.html` passes its text through `french_html` when the page language
+  is French, and every chart factory through `french_figure` (decimal comma,
+  narrow spaces, the currency after the value); tags, attributes, styles and
+  drawings are never touched. Periods read « 7 j, 30 j, Tout » and « 1 mois …
+  Max ». The separate app read in English keeps English typography.
+* **Analytics** (`platform/ui/journal_analysis.py`): Performance, Analyse,
+  Risque and Comportement are the separate app's trading pages
+  (`sensitor.pages.trading_*`), in French and styled by the analyzer's
+  component stylesheet, as the portfolio space does. They read the member's own
+  book through the verified email, never the demonstration (the page says so
+  when the dashboard shows it); a visitor is asked to sign in, an empty journal
+  gets the journal's empty state.
+* **The MetaTrader 5 history report**, section 1 of « Saisir », the quickest
+  way in and the one that needs no terminal on the server
+  (`integrations/mt5_report.py`). The page gives the four steps: in MT5 on a
+  computer, Toolbox (Ctrl+T), « Historique » tab, right click, the period,
+  « Rapport », « HTML » or « Open XML ». The file is read with the standard
+  library, HTML in UTF-16 as MT5 writes it or XLSX, in any terminal language:
+  the « Positions » table is found by its shape (thirteen columns, « S / L »
+  and « T / P » in seventh and eighth place). Each line becomes the two deals
+  the terminal would have returned and goes through `mt5.build_trade`, so the
+  ids are the live sync's (`mt5-<account>-<position>`), and through the sync's
+  merge, so re-importing, or syncing later, adds nothing twice and keeps the
+  member's annotations. The broker's clock defaults to New York + 7 (UTC+2 in
+  winter, UTC+3 in summer, on the American dates), the convention of most forex
+  brokers; a fixed offset can be chosen. The page says what it found before
+  anything is written, and names the lines it skipped.
+  Checked against a real export (a broker's demo account, 27 October 2026, kept
+  out of the repository): 22 positions read, net result, gross profit and loss
+  and profit factor equal to the report's own « Results ». What that file
+  taught: MT5 puts its hidden filler cell in the data rows and not in the
+  header, so cells are matched by their rank among visible ones; « 0.15 / 0.2 »
+  is a position partly closed, read for its closed part; and the report gives
+  each position's last stop, not its first. A stop at the entry or in profit is
+  a protection, not a risk, so it is not used for R (the page counts them); on
+  an imported trade's page the member can enter the initial stop, which the
+  next import or sync keeps (`raw.stop_by_member`, honoured by the sync merge).
+* **Setups** (`trading/setups.py`) carry the shorthand traders use: OTE, BOS,
+  CHoCH, FVG, iFVG, Expansion 50 %, Order Block, prise de liquidité, Breaker,
+  SMT, News, then the classical ones. The long names, English and French, stay
+  as aliases, accents folded, so every trade already saved keeps its setup.
+* **MetaTrader 5 synchronisation**, section 4 of « Saisir ». The form calls the
+  connector (`integrations/mt5.py`) and the merge rule that keeps setups,
+  notes, emotions and ratings across syncs (`integrations/sync.py`); trades are
+  matched on the broker's position number, so a second sync adds nothing twice.
+  It asks for the investor password, which only reads, drops it from the session
+  on submit and remembers only the account number, server, UTC offset and
+  window. The package `MetaTrader5` ships for Windows only: on a server without
+  it, the section says so and shows no form.
+* **One clock** (`trading.models.on_utc_clock`). MT5 and the separate app store
+  naive UTC times, the platform aware UTC; Python cannot compare the two, and a
+  book holding both made the dashboard's period filter and the separate app's
+  pages raise. Each reader now puts the book on its own clock as it loads it:
+  aware for the platform, naive for the separate app and the API. A naive time
+  is read as UTC, which is what every writer means.
 
-**The separate space** links to the portfolio app when `SENSITOR_TOOLS_URL` is
-set, and says the link is not configured otherwise.
+**Salle des marchés** is live (`platform/market.py` for the rules,
+`platform/ui/market_room.py` for the pages, table `market_sessions`, schema v11).
+A coach prepares a session before the open: the week's context, the day's
+calendar (one line per publication, « 14:30 | Emploi américain | forte », Paris
+time), up to four scenarios, each a condition, what to watch and its
+**invalidation, which is mandatory**, the lessons it uses, and optionally the
+address of a live (https YouTube or Vimeo only). After the close, the review
+gives each scenario its outcome (joué, invalidé, non déclenché), what the
+session teaches, the replay and further lessons.
+
+* **No signals.** `market.signal_phrases` flags instructions to buy or sell,
+  « signal d'achat / de vente », profit targets and promises of results, on
+  words, accents and case removed, without catching analysis vocabulary
+  (« les vendeurs », « un signal de faiblesse », « rien n'est garanti »). The
+  store refuses to publish a session that has any, and a review cannot be saved
+  with one. Every session page carries the same pedagogical notice.
+* **Who writes, who reads.** Writing, publishing, reviewing and deleting go
+  through store methods that check the coach role in their own query; a draft
+  and its author are returned to a coach only; a published session cannot be
+  deleted, only unpublished. Readers get each session at the access level its
+  author chose (public, member, premium), decided by `academy.access` like the
+  lessons. A departing coach's sessions stay, without the address.
+* **No invented content.** With nothing published, the room says so and shows
+  how a session is built; there is no sample session.
+* The room lists the latest session, the earlier ones with the print of their
+  outcomes, and the record of every reviewed scenario, then the lessons on
+  preparing a session, building a liquidity scenario and reading the calendar.
+
+**Portefeuille et risque** is the portfolio analyzer inside the member space
+(`platform/ui/portfolio_space.py`). Nothing of the analysis is rewritten: the
+eleven pages are the `sensitor.pages` renderers, given the context the separate
+app builds (`investment.context.build_context`), in French, and styled by the
+analyzer's component stylesheet alone (`ui.themes.components_css`, injected by
+`inject_components`: headers, cards, alerts, tables, the « Lecture » margin, the
+risk hatch, with no page, sidebar or widget rule; the separate app's own
+stylesheet is byte for byte what it was).
+
+* **Building page** (`portfolio`): lines from the asset library, their weights
+  (brought back to 100 % in proportion), the currency and the risk profile, then
+  « Analyser le portefeuille », which prices the last two years as the separate
+  app does. A free account composes five lines, a premium one fifty; an
+  allocation built elsewhere with more lines stays whole and can be edited, not
+  grown.
+* **The real portfolio**, in quantities: lines from the library or outside it
+  (a short name, « APPARTEMENT », « ASSURANCE-VIE »), a price typed by hand with
+  its currency for whatever no provider covers (used only when no quote exists,
+  and marked as the member's estimate with its date), then « Valoriser et
+  analyser ». The valuation is `investment.holdings`, the one rule both apps
+  use: quantity × today's price in the base currency, a total, weights, and the
+  lines without any price named rather than valued at zero. A line priced by
+  hand has no history, so the analysis leaves it out with its money; the
+  building page shows the whole wealth, line by line with the source of each
+  price, and every analysis page says which lines are valued but not analysed.
+* **One working portfolio per member.** The allocation is the `workspace` row
+  of the verified email, restored and written by `pages._workspace` exactly as
+  in the separate app, so a portfolio built in one opens in the other. The
+  analyzer itself (the price history) stays in the session. A visitor can
+  analyse; nothing is kept.
+* **Navigation.** The separate app's page changes (the copilot sending a change
+  to the simulator, the portfolios page asking for a new analysis of a saved
+  allocation) become the platform's pages.
+* **Allocations types** (`pf_models`): the analyzer's eight model portfolios,
+  from the most prudent to the most aggressive, framed as compositions to study,
+  never as advice. Each shows its lines and weights and its share by kind of
+  asset (shares, bonds, gold and commodities, listed real estate, crypto),
+  computed from the weights and the library's sectors (`composition`). The
+  catalogue's hand-written expected return and volatility are not shown: the
+  figures are those the analysis computes once the allocation is loaded. Names
+  and descriptions are written for the platform, without a figure or a promise.
+  « Étudier cette allocation » analyses it and makes it the working portfolio.
+* **Actifs** (`pf_assets`, a sheet with `asset=`): the asset library, searched
+  by symbol, name or sector and filtered by class. A sheet gives the asset's
+  class, sector and geography in French, its risk level and its liquidity in
+  words, and the platform's own text, written in `content/portfolio/fiches.toml`
+  and loaded by `platform.asset_sheets`: what the asset is, the role usually
+  given to it, and the limit of that role, marked as a reading and not advice.
+  The catalogue's prose is not shown: it carries unsourced figures (fees, market
+  shares, user counts), allocation ranges and sizing advice. A crypto sheet, or a
+  bitcoin treasury company's, points to the course « Bitcoin, une réserve de
+  valeur ? ». « Ajouter » puts the asset in the working portfolio (an equal
+  share, the other lines keeping their proportions, within the free account's
+  five lines) or, in real mode, in the holdings with its quantity.
+* **Writing a sheet.** One entry per symbol of `investment.assets.ASSET_INFO`,
+  with `description`, `role` and `limite`, each a sentence ending with a full
+  stop. `asset_sheets.problems()` checks, and the tests enforce, that every asset
+  has a sheet and no sheet is orphaned, and that no text carries a figure (a name
+  such as S&P 500 or CAC 40 is allowed), advice or a promise (« il faut »,
+  « par défaut », « garanti »…) or a long dash. A new asset in the analyzer's
+  library therefore needs its sheet before the tests pass.
 
 ### Adding a space
 

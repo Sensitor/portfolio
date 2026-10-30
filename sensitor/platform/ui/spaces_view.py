@@ -47,39 +47,6 @@ def preparing(catalog, email, route) -> None:
     footer()
 
 
-def _separate(space_id: str, title: str, intro: str, items: tuple[str, ...], page: str,
-              button: str) -> None:
-    """A space that lives in the analytics application, reachable by link when configured."""
-    space = spaces.space(space_id)
-    _header(space)
-    url = rt.tools_url()
-    html(f'<div style="margin-top:1.2rem">{pill(space.status_label, "sep", "external")}</div>')
-    section(1, title, intro)
-    rows = "".join(f'<li><span class="n">{i:02d}</span><span class="x">{esc(x)}</span><span></span></li>'
-                   for i, x in enumerate(items, start=1))
-    html(f'<ul class="sx-plan">{rows}</ul>')
-    if url:
-        st.link_button(button, f"{url.rstrip('/')}/?page={page}")
-    else:
-        notice("Lien non configuré",
-               "L'adresse de l'application d'analyse n'est pas renseignée pour ce déploiement "
-               "(variable SENSITOR_TOOLS_URL).", "info")
-    footer()
-
-
-def tools(catalog, email, route) -> None:
-    _separate("tools", "Une application à part, pour l'instant",
-              "L'analyse de portefeuille existe et fonctionne, dans une application distincte. Elle "
-              "rejoindra cet espace membre dans une étape ultérieure.",
-              ("Performance, allocation et contributions, avec Bitcoin et les cryptomonnaies parmi les "
-               "actifs suivis.",
-               "Risque : volatilité, drawdown, VaR, corrélations, concentration et diversification.",
-               "Stress tests historiques, dont l'hiver crypto de 2022, et chocs personnalisés.",
-               "Simulateur Monte Carlo et frontière efficiente.",
-               "Les mêmes comptes : l'adresse et le mot de passe utilisés ici fonctionnent aussi là-bas."),
-              "overview", "Ouvrir l'analyse de portefeuille")
-
-
 def space_cards(*, key: str, exclude: tuple[str, ...] = ()) -> None:
     """
     The map of spaces: one register, a line per space, each line a link. The

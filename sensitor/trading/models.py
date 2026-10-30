@@ -399,6 +399,36 @@ class Trade:
         return replace(self, **changes)
 
 
+def on_utc_clock(trades, *, aware: bool) -> list["Trade"]:
+    """
+    The trades with their times on one clock: UTC, either all aware or all naive.
+
+    Both conventions reach the trades table. The MetaTrader 5 connector and the
+    separate app's entry form store naive UTC; the platform's entry form and CSV
+    import store aware UTC. Python refuses to compare the two, so a journal that
+    holds both breaks on the first sort or period filter. Each reader puts the
+    book on its own clock as it loads it: the platform, which compares with
+    `datetime.now(timezone.utc)`, asks for aware times; the separate app and the
+    API, which compare with naive ones, ask for naive times. A naive time is
+    read as UTC, which is what every writer means by it.
+    """
+    def moment(value):
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        value = value.astimezone(timezone.utc)
+        return value if aware else value.replace(tzinfo=None)
+
+    out = []
+    for trade in trades:
+        opened, closed = moment(trade.opened_at), moment(trade.closed_at)
+        same = opened == trade.opened_at and closed == trade.closed_at and (
+            (trade.opened_at.tzinfo is not None) == aware)
+        out.append(trade if same else replace(trade, opened_at=opened, closed_at=closed))
+    return out
+
+
 def _opt_float(value):
     return None if value is None or value == "" else float(value)
 

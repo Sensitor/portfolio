@@ -1,0 +1,73 @@
+id = "check-perte-journaliere"
+title = "Contrôle : la perte journalière"
+course = "reussir-un-challenge"
+lesson = "perte-journaliere"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "limite"
+prompt = "FTMO 2-Step, compte de 100 000 $, solde de 102 000 $ à minuit. Où se trouve la limite du jour ?"
+kind = "single"
+lesson = "perte-journaliere"
+
+[[question.option]]
+id = "97"
+text = "À 97 000 $."
+correct = true
+explanation = "102 000 − 5 % de 100 000 = 97 000 $."
+
+[[question.option]]
+id = "969"
+text = "À 96 900 $."
+explanation = "Le pourcentage s'applique au solde initial, pas au solde de minuit."
+
+[[question.option]]
+id = "95"
+text = "À 95 000 $."
+explanation = "La limite repart du solde de minuit, pas du solde initial."
+
+[[question]]
+id = "pertes"
+prompt = "FTMO 1-Step, compte de 100 000 $, 1 % du solde initial par trade. Combien de pertes de 1 000 $ atteignent la limite du jour ?"
+kind = "single"
+lesson = "perte-journaliere"
+
+[[question.option]]
+id = "trois"
+text = "3"
+correct = true
+explanation = "3 % de 100 000 = 3 000 $, soit trois pertes de 1 000 $."
+
+[[question.option]]
+id = "cinq"
+text = "5"
+explanation = "Ce serait la limite de 5 % de FTMO 2-Step."
+
+[[question.option]]
+id = "deux"
+text = "2"
+explanation = "Ce serait avec 2 % par trade."
+
+[[question]]
+id = "equite"
+prompt = "Chez FTMO, qu'est-ce qui ne doit pas passer sous la limite journalière ?"
+kind = "single"
+lesson = "perte-journaliere"
+
+[[question.option]]
+id = "equite"
+text = "L'équité, positions ouvertes comprises."
+correct = true
+explanation = "Oui : une perte latente compte avant d'être fermée."
+
+[[question.option]]
+id = "solde"
+text = "Le solde des positions fermées seulement."
+explanation = "FTMO mesure l'équité, pas seulement le solde."
+
+[[question.option]]
+id = "initial"
+text = "Le solde initial."
+explanation = "Le solde initial ne bouge pas : c'est la référence du pourcentage."

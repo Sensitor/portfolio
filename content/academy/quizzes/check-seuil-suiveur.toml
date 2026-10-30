@@ -1,0 +1,73 @@
+id = "check-seuil-suiveur"
+title = "Contrôle : le seuil de perte maximale"
+course = "reussir-un-challenge"
+lesson = "seuil-suiveur"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "suiveur"
+prompt = "Compte de 50 000 $, perte maximale suiveuse de 2 000 $. Le plus haut solde de fin de journée est 52 600 $. Où est le seuil ?"
+kind = "single"
+lesson = "seuil-suiveur"
+
+[[question.option]]
+id = "506"
+text = "À 50 600 $."
+correct = true
+explanation = "52 600 − 2 000 = 50 600 $."
+
+[[question.option]]
+id = "48"
+text = "À 48 000 $."
+explanation = "Ce serait un seuil fixe."
+
+[[question.option]]
+id = "50"
+text = "À 50 000 $."
+explanation = "Ce serait un seuil verrouillé au solde initial."
+
+[[question]]
+id = "redescend"
+prompt = "Le lendemain, le solde baisse de 500 $. Que fait un seuil suiveur ?"
+kind = "single"
+lesson = "seuil-suiveur"
+
+[[question.option]]
+id = "reste"
+text = "Il reste où il est : il ne redescend jamais."
+correct = true
+explanation = "Oui : il suit les plus hauts, pas les baisses."
+
+[[question.option]]
+id = "baisse"
+text = "Il baisse de 500 $."
+explanation = "Un seuil suiveur ne redescend pas."
+
+[[question.option]]
+id = "initial"
+text = "Il revient au solde initial moins la perte maximale."
+explanation = "Il ne revient jamais en arrière."
+
+[[question]]
+id = "latent"
+prompt = "Solde de 50 000 $, seuil à 48 000 $. Une position ouverte fait descendre le compte à 47 750 $, puis se ferme à 48 050 $. Selon Topstep ?"
+kind = "single"
+lesson = "seuil-suiveur"
+
+[[question.option]]
+id = "perdu"
+text = "Le compte est liquidé : le seuil se juge en temps réel, pertes latentes comprises."
+correct = true
+explanation = "Oui : c'est l'exemple donné par Topstep."
+
+[[question.option]]
+id = "ok"
+text = "Rien, puisque le solde final est au-dessus du seuil."
+explanation = "Le passage sous le seuil en cours de journée suffit."
+
+[[question.option]]
+id = "demain"
+text = "Le seuil sera vérifié en fin de journée."
+explanation = "Le seuil suit la fin de journée mais se franchit à tout moment."

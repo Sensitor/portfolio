@@ -1,0 +1,228 @@
+id = "prop-firm-validation"
+title = "Quiz de validation : réussir un challenge prop firm"
+course = "reussir-un-challenge"
+lesson = "recap-prop-firm"
+feedback = "deferred"
+pass_threshold = 0.7
+version = 1
+intro = "Dix questions sur l'ensemble du parcours. La correction détaillée s'affiche après la soumission."
+
+[[question]]
+id = "cout"
+prompt = "Une tentative coûte 500 $ et a une chance sur deux de réussir. Que coûte une réussite en moyenne ?"
+kind = "single"
+lesson = "ce-que-vous-achetez"
+
+[[question.option]]
+id = "mille"
+text = "1 000 $"
+correct = true
+explanation = "500 ÷ 0,5 = 1 000 $ : il faut en moyenne deux tentatives."
+
+[[question.option]]
+id = "cinq"
+text = "500 $"
+explanation = "Ce serait le cas avec une réussite certaine."
+
+[[question.option]]
+id = "deux-cent"
+text = "250 $"
+explanation = "Il faut diviser les frais par la probabilité, pas les multiplier."
+
+[[question]]
+id = "ftmo-max"
+prompt = "Sur FTMO 2-Step, comment se calcule la perte maximale ?"
+kind = "single"
+lesson = "lire-les-regles"
+
+[[question.option]]
+id = "fixe"
+text = "10 % sous le solde initial, fixe."
+correct = true
+explanation = "Oui : le seuil reste à 90 000 $ sur un compte de 100 000 $."
+
+[[question.option]]
+id = "suiveuse"
+text = "10 % sous le plus haut solde de minuit."
+explanation = "C'est la règle de FTMO 1-Step."
+
+[[question.option]]
+id = "jour"
+text = "5 % sous le solde du jour."
+explanation = "C'est la perte journalière de FTMO 2-Step."
+
+[[question]]
+id = "topstep-dll"
+prompt = "Sur le Trading Combine de Topstep, que se passe-t-il si la limite journalière optionnelle est atteinte ?"
+kind = "single"
+lesson = "lire-les-regles"
+
+[[question.option]]
+id = "seance"
+text = "Les positions sont fermées jusqu'à la séance suivante, sans violation de règle."
+correct = true
+explanation = "Oui : Topstep précise que le compte reste éligible."
+
+[[question.option]]
+id = "elimine"
+text = "Le compte est éliminé."
+explanation = "C'est la conséquence chez FTMO, pas chez Topstep."
+
+[[question.option]]
+id = "rien"
+text = "Rien, elle n'est qu'indicative."
+explanation = "Elle ferme les positions et bloque les nouveaux trades jusqu'à 17 h, heure de Chicago."
+
+[[question]]
+id = "suiveur"
+prompt = "Compte de 50 000 $, perte maximale suiveuse de 2 000 $. Le plus haut solde de fin de journée est 52 600 $. Où est le seuil ?"
+kind = "single"
+lesson = "seuil-suiveur"
+
+[[question.option]]
+id = "506"
+text = "À 50 600 $."
+correct = true
+explanation = "52 600 − 2 000 = 50 600 $."
+
+[[question.option]]
+id = "48"
+text = "À 48 000 $."
+explanation = "Ce serait un seuil fixe."
+
+[[question.option]]
+id = "50"
+text = "À 50 000 $."
+explanation = "Ce serait un seuil verrouillé au solde initial."
+
+[[question]]
+id = "latent"
+prompt = "Solde de 50 000 $, seuil à 48 000 $. Une position ouverte fait descendre le compte à 47 750 $, puis se ferme à 48 050 $. Selon Topstep ?"
+kind = "single"
+lesson = "seuil-suiveur"
+
+[[question.option]]
+id = "perdu"
+text = "Le compte est liquidé : le seuil se juge en temps réel, pertes latentes comprises."
+correct = true
+explanation = "Oui : c'est l'exemple donné par Topstep."
+
+[[question.option]]
+id = "ok"
+text = "Rien, puisque le solde final est au-dessus du seuil."
+explanation = "Le passage sous le seuil en cours de journée suffit."
+
+[[question.option]]
+id = "demain"
+text = "Le seuil sera vérifié en fin de journée."
+explanation = "Le seuil suit la fin de journée mais se franchit à tout moment."
+
+[[question]]
+id = "limite"
+prompt = "FTMO 2-Step, compte de 100 000 $, solde de 102 000 $ à minuit. Où se trouve la limite du jour ?"
+kind = "single"
+lesson = "perte-journaliere"
+
+[[question.option]]
+id = "97"
+text = "À 97 000 $."
+correct = true
+explanation = "102 000 − 5 % de 100 000 = 97 000 $."
+
+[[question.option]]
+id = "969"
+text = "À 96 900 $."
+explanation = "Le pourcentage s'applique au solde initial, pas au solde de minuit."
+
+[[question.option]]
+id = "95"
+text = "À 95 000 $."
+explanation = "La limite repart du solde de minuit, pas du solde initial."
+
+[[question]]
+id = "topstep"
+prompt = "Trading Combine 50K, objectif 3 000 $, meilleur jour 1 800 $. Quel devient l'objectif ?"
+kind = "single"
+lesson = "regle-de-regularite"
+
+[[question.option]]
+id = "3273"
+text = "Environ 3 273 $."
+correct = true
+explanation = "1 800 ÷ 0,55 = 3 272,73 $."
+
+[[question.option]]
+id = "3000"
+text = "Il reste à 3 000 $."
+explanation = "1 800 $ dépasse 55 % de 3 000 $, soit 1 650 $."
+
+[[question.option]]
+id = "3600"
+text = "3 600 $."
+explanation = "Ce serait avec une règle de 50 %."
+
+[[question]]
+id = "avantage"
+prompt = "45 % de réussite, gain moyen de 1,5 R, perte de 1 R. Quelle est l'espérance d'un trade ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "0125"
+text = "+0,125 R"
+correct = true
+explanation = "0,45 × 1,5 − 0,55 = 0,125 R."
+
+[[question.option]]
+id = "0675"
+text = "+0,675 R"
+explanation = "Il faut retrancher les pertes : 0,55 × 1 R."
+
+[[question.option]]
+id = "zero"
+text = "0 R"
+explanation = "Ce serait avec 40 % de réussite."
+
+[[question]]
+id = "risque"
+prompt = "Avec cet avantage, sous FTMO 2-Step, que se passe-t-il quand le risque passe de 2 % à 3 % par trade ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "chute"
+text = "La probabilité de réussir chute de 72,7 % à 35,2 % : deux pertes le même jour dépassent la limite de 5 %."
+correct = true
+explanation = "Oui : 2 × 3 % = 6 %."
+
+[[question.option]]
+id = "monte"
+text = "Elle monte, puisque l'objectif est atteint plus vite."
+explanation = "Les chemins rapides existent, mais l'élimination devient plus probable."
+
+[[question.option]]
+id = "rien"
+text = "Elle ne change pas, l'avantage étant le même."
+explanation = "Le risque par trade change la distance aux limites, en nombre de pertes."
+
+[[question]]
+id = "sans-avantage"
+prompt = "Sans avantage, quelle est au mieux la probabilité de réussir la phase 1 de FTMO 2-Step ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "moitie"
+text = "Environ une chance sur deux, et cela prend d'autant plus de trades que le risque est faible."
+correct = true
+explanation = "50,7 % à 1 %, 51,5 % à 2 % par trade."
+
+[[question.option]]
+id = "faible-risque"
+text = "Elle devient très élevée si le risque par trade est faible."
+explanation = "Un risque faible allonge la course, il ne crée pas d'avantage."
+
+[[question.option]]
+id = "nulle"
+text = "Zéro."
+explanation = "Le hasard peut faire réussir, environ une fois sur deux."

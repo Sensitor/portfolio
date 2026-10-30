@@ -1,0 +1,73 @@
+id = "check-probabilite-de-reussite"
+title = "Contrôle : ses chances de réussite"
+course = "reussir-un-challenge"
+lesson = "probabilite-de-reussite"
+feedback = "immediate"
+pass_threshold = 0.66
+version = 1
+
+[[question]]
+id = "avantage"
+prompt = "45 % de réussite, gain moyen de 1,5 R, perte de 1 R. Quelle est l'espérance d'un trade ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "0125"
+text = "+0,125 R"
+correct = true
+explanation = "0,45 × 1,5 − 0,55 = 0,125 R."
+
+[[question.option]]
+id = "0675"
+text = "+0,675 R"
+explanation = "Il faut retrancher les pertes : 0,55 × 1 R."
+
+[[question.option]]
+id = "zero"
+text = "0 R"
+explanation = "Ce serait avec 40 % de réussite."
+
+[[question]]
+id = "risque"
+prompt = "Avec cet avantage, sous FTMO 2-Step, que se passe-t-il quand le risque passe de 2 % à 3 % par trade ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "chute"
+text = "La probabilité de réussir chute de 72,7 % à 35,2 % : deux pertes le même jour dépassent la limite de 5 %."
+correct = true
+explanation = "Oui : 2 × 3 % = 6 %."
+
+[[question.option]]
+id = "monte"
+text = "Elle monte, puisque l'objectif est atteint plus vite."
+explanation = "Les chemins rapides existent, mais l'élimination devient plus probable."
+
+[[question.option]]
+id = "rien"
+text = "Elle ne change pas, l'avantage étant le même."
+explanation = "Le risque par trade change la distance aux limites, en nombre de pertes."
+
+[[question]]
+id = "echantillon"
+prompt = "44 % de réussite mesuré sur 50 trades. Que dire de la probabilité de réussir calculée à partir de ce chiffre ?"
+kind = "single"
+lesson = "probabilite-de-reussite"
+
+[[question.option]]
+id = "fourchette"
+text = "Elle est très incertaine : la fourchette va de 4,0 % à 99,8 % sous FTMO 2-Step à 1 %."
+correct = true
+explanation = "Sur 50 trades, le vrai taux se situe entre 31,2 % et 57,7 %."
+
+[[question.option]]
+id = "fiable"
+text = "Elle est fiable, 50 trades suffisent."
+explanation = "Sur 50 trades, l'intervalle du taux de réussite est très large."
+
+[[question.option]]
+id = "nulle"
+text = "Elle ne veut rien dire du tout."
+explanation = "Elle est informative, à condition de lire sa fourchette."

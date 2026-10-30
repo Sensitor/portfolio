@@ -45,7 +45,7 @@ COOKIE_OP = "ac_cookie_op"
 
 ROUTE_KEY = "ac_route"
 TOKEN_KEY = "session_token"
-ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review")
+ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review", "session", "asset")
 
 
 def tools_url() -> str:
@@ -73,12 +73,26 @@ def _store():
     return Store()
 
 
+_STORE_ERROR: list[str] = []          # why the last opening failed; no secret in it (`postgres.explain`)
+
+
 def get_store():
     """The shared store, or None if the database cannot be opened."""
     try:
-        return _store()
-    except Exception:                                    # noqa: BLE001
+        store = _store()
+    except Exception as exc:                             # noqa: BLE001
+        from ...database import connection, postgres
+        target = connection.target()
+        _STORE_ERROR[:] = [postgres.explain(exc, target) if postgres.is_url(target)
+                           else f"Fichier de base de données illisible : {type(exc).__name__}."]
         return None
+    _STORE_ERROR.clear()
+    return store
+
+
+def store_error() -> str:
+    """Why the database could not be opened, for the page that says so; empty when it is open."""
+    return _STORE_ERROR[0] if _STORE_ERROR else ""
 
 
 def get_auth():

@@ -230,3 +230,15 @@ pdf = "fiche-on-chain.pdf"
 access = "member"
 lessons = ["donnees-on-chain", "activite-reseau", "frais-budget-securite", "espace-de-bloc", "minage-et-pools", "indicateurs-de-prix", "recap-on-chain"]
 
+
+[[resource]]
+id = "fiche-prop-firm"
+title = "Réussir un challenge prop firm"
+description = "Les règles de FTMO et de Topstep lues ligne à ligne, les formules des seuils et de la régularité, et les repères de probabilité du parcours 11."
+kind = "fiche"
+category = "Gestion du risque"
+level = "intermediaire"
+file = "fiche-prop-firm.md"
+pdf = "fiche-prop-firm.pdf"
+access = "member"
+lessons = ["ce-que-vous-achetez", "lire-les-regles", "seuil-suiveur", "perte-journaliere", "regle-de-regularite", "probabilite-de-reussite", "recap-prop-firm"]
