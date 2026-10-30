@@ -148,24 +148,32 @@ def test_mode_detection():
     print("\nMode")
 
     original = os.environ.get("SENSITOR_AUTH")
+    original_url = os.environ.get("SENSITOR_DB_URL")
     try:
         os.environ.pop("SENSITOR_AUTH", None)
-        check("the default is single-user", auth_mode() == SINGLE)
+        os.environ.pop("SENSITOR_DB_URL", None)
+        check("the default for a local file is single-user", auth_mode() == SINGLE)
+        os.environ["SENSITOR_DB_URL"] = "postgresql://u:p@db.example.com/sensitor"
+        check("with a PostgreSQL database configured and nothing said, the default is multi", auth_mode() == MULTI)
+        os.environ["SENSITOR_AUTH"] = "single"
+        check("single-user mode on a shared database has to be asked for in so many words", auth_mode() == SINGLE)
+        os.environ.pop("SENSITOR_DB_URL", None)
 
         os.environ["SENSITOR_AUTH"] = "multi"
         check("multi is opt-in by environment", auth_mode() == MULTI)
         os.environ["SENSITOR_AUTH"] = "MULTI"
         check("and is case-insensitive", auth_mode() == MULTI)
 
-        # A typo must not silently disable authentication, so the safe reading
-        # is the mode that asks for less, not more.
+        # A typo must not silently disable authentication: single-user mode has
+        # no passwords, so the safe reading of a value nobody meant is multi.
         os.environ["SENSITOR_AUTH"] = "multiuser"
-        check("an unrecognised value falls back to single", auth_mode() == SINGLE)
+        check("an unrecognised value keeps passwords on (multi)", auth_mode() == MULTI)
     finally:
-        if original is None:
-            os.environ.pop("SENSITOR_AUTH", None)
-        else:
-            os.environ["SENSITOR_AUTH"] = original
+        for key, value in (("SENSITOR_AUTH", original), ("SENSITOR_DB_URL", original_url)):
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 def test_single_user_mode():
@@ -414,12 +422,49 @@ def test_no_streamlit():
           sys.modules.get("streamlit") is None)
 
 
+def test_no_claim_without_proof():
+    print("\nAn account without a password cannot be claimed")
+    single, store = fresh("claim.db", mode=SINGLE)
+    old = single.sign_in("victime@example.com")
+    multi = Auth(store, mode=MULTI)
+    claim = multi.sign_up("victime@example.com", "un-mot-de-passe-solide")
+    check("a sign-up on an address that has a row, without a password, is refused",
+          not claim and claim.reason == "already_registered" and not store.credential("victime@example.com").get("password_hash"))
+    check("a session issued in single-user mode is not accepted once passwords are required",
+          multi.resolve(old.token) is None)
+    check("and it is revoked", store.session(token_fingerprint(old.token)) is None)
+    changed = multi.change_password("victime@example.com", None, "un-autre-mot-de-passe")
+    check("no first password without proof of the address", not changed and changed.reason == "invalid_credentials")
+    token = multi.request_password_reset("victime@example.com")
+    check("the owner gets a reset link for the address", bool(token))
+    done = multi.reset_password(token, "un-mot-de-passe-solide")
+    check("and sets a first password with it, then signs in", bool(done)
+          and bool(multi.sign_in("victime@example.com", "un-mot-de-passe-solide")))
+
+
+def test_tier_is_not_overwritten():
+    print("\nA level set by an administrator stays")
+    auth, store = fresh("tier.db", mode=MULTI)
+    auth.sign_up("membre@example.com", "un-mot-de-passe-solide")
+    store.set_tier("membre@example.com", "premium")
+    store.upsert_user("membre@example.com", "free")
+    check("refreshing the row with another level does not change it",
+          store.get_user("membre@example.com")["tier"] == "premium")
+    store.upsert_user("nouveau@example.com", "free")
+    check("a new row takes the level it is created with", store.get_user("nouveau@example.com")["tier"] == "free")
+    single = Auth(store, mode=SINGLE)
+    single.sign_in("membre@example.com")
+    check("a single-user sign-in does not lower it either", store.get_user("membre@example.com")["tier"] == "premium")
+    store.set_tier("membre@example.com", "free")
+    check("set_tier changes it", store.get_user("membre@example.com")["tier"] == "free")
+
+
 def main() -> int:
     for test in (test_password_hashing, test_password_strength, test_tokens,
                  test_mode_detection, test_single_user_mode, test_sign_up_and_in,
                  test_lockout, test_sessions, test_password_change,
                  test_rehash_on_sign_in, test_one_account_cannot_reach_another,
-                 test_no_streamlit):
+                 test_no_claim_without_proof, test_tier_is_not_overwritten, test_no_streamlit):
         test()
 
     failures = [c for c in CHECKS if not c[1]]

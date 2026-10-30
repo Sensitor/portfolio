@@ -4,9 +4,22 @@ __pycache__/
 # Local persistence — saved portfolios and snapshots. Personal financial data;
 # never committed. Override the location with SENSITOR_DB_PATH.
 sensitor_data.db
+*.db
 *.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Secrets: environment files and Streamlit secrets are never committed.
+.env
+.env.*
+.streamlit/secrets.toml
 
 # Node — the mobile client's dependencies are installed, never committed.
 node_modules/
 mobile/node_modules/
 package-lock.json
+
+# Database backups hold every member's personal and financial data.
+sensitor-backup-*

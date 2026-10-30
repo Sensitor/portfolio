@@ -1,0 +1,10 @@
+# Shared by both apps (sensitor_app.py and portfolio_optimizer_saas.py).
+
+[server]
+# Serves `static/` at `app/static/`: the fonts are delivered by the app itself
+# rather than by Google (scripts/build_fonts.py).
+enableStaticServing = true
+
+[browser]
+# No usage statistics sent to Streamlit: nothing about visitors leaves the app.
+gatherUsageStats = false

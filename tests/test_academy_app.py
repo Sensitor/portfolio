@@ -13,6 +13,7 @@ Run with:  python tests/test_academy_app.py
 from __future__ import annotations
 
 import json
+import pathlib
 import os
 import sys
 import tempfile
@@ -197,7 +198,7 @@ def test_new_tracks(alice: str) -> None:
               "Leçon Premium" in text(free) and "aucun paiement" in text(free)
               and "Le contenu premium visible" not in text(free))
         pro = token("pro@example.com")
-        store().upsert_user("pro@example.com", tier="pro")
+        store().set_tier("pro@example.com", "pro")
         opened = run({"page": "lesson", "course": "fixture-monnaie", "lesson": "lecon-premium"}, pro)
         check("premium, pro member: the lesson opens", "Le contenu premium visible" in text(opened)
               and not opened.exception, error(opened))
@@ -243,7 +244,8 @@ def test_universes() -> None:
     css = theme.stylesheet()
     check("the stylesheet recolours a money page and changes its title face",
           '.stApp:has(.sx-scope.uni-monnaie) [data-testid="stMain"]' in css
-          and "--serif: var(--grotesk)" in css and "Space+Grotesk" in css)
+          and "--serif: var(--grotesk)" in css and "app/static/fonts/fonts.css" in css
+          and "'Space Grotesk'" in (pathlib.Path(__file__).resolve().parents[1] / "static" / "fonts" / "fonts.css").read_text())
     from sensitor.academy import content as C
     from sensitor.academy.ui import chart_view
     catalog = C.load_catalog()

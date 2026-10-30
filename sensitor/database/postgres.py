@@ -254,6 +254,12 @@ _PRAGMA = re.compile(r"^\s*PRAGMA\s+(\w+)\s*(?:=\s*(\S+)|\(\s*(\w+)\s*\))?\s*;?\
                      re.IGNORECASE)
 
 
+# TCP keepalives, so a pooler or a server that drops idle connections is noticed
+# by the operating system rather than by the next member who loads a page.
+CONNECT_OPTIONS = {"connect_timeout": 10, "keepalives": 1, "keepalives_idle": 30,
+                   "keepalives_interval": 10, "keepalives_count": 3}
+
+
 class Connection:
     """
     A `sqlite3.Connection` lookalike over psycopg2.
@@ -261,18 +267,61 @@ class Connection:
     Autocommit is off: `Store._write` commits or rolls back around each unit of
     work, exactly as it does on SQLite, so a half-applied change is impossible
     on either backend.
+
+    The connection lives for the whole process, shared by every session, and a
+    hosted Postgres closes connections it judges idle (Neon when it suspends,
+    the Supabase pooler after a timeout). A closed connection is therefore
+    reopened, and the statement retried once, but only when that statement
+    opened its transaction: retrying the third statement of a write on a fresh
+    connection would apply it without the first two. A failure in the middle of
+    a write is raised; `Store._write` rolls back, and the next unit of work gets
+    a fresh connection.
     """
 
-    def __init__(self, dsn: str):
+    def __init__(self, dsn: str, connect=None):
         import psycopg2
         import psycopg2.extras
 
         self._dsn = dsn
+        self._errors = (psycopg2.OperationalError, psycopg2.InterfaceError)
         # `DictCursor`, not `RealDictCursor`: its rows answer to both `row["n"]`
         # and `row[0]`, which is what `sqlite3.Row` does and what the callers
-        # above this layer assume.
-        self._conn = psycopg2.connect(normalise_url(dsn), cursor_factory=psycopg2.extras.DictCursor)
+        # above this layer assume. `connect` exists for the tests.
+        self._connect = connect or (lambda: psycopg2.connect(
+            normalise_url(dsn), cursor_factory=psycopg2.extras.DictCursor, **CONNECT_OPTIONS))
+        self._conn = None
+        self._in_transaction = False
+        self.reconnects = 0
+        self._open()
+
+    def _open(self) -> None:
+        if self._conn is not None:
+            try:
+                self._conn.close()
+            except Exception:                            # noqa: BLE001 - already gone
+                pass
+        self._conn = self._connect()
         self._conn.autocommit = False
+        self._in_transaction = False
+
+    def _run(self, work):
+        """Run `work(cursor)`, reopening a dropped connection when that is safe."""
+        if self._conn.closed:
+            self._open()
+            self.reconnects += 1
+        first = not self._in_transaction
+        try:
+            cursor = self._conn.cursor()
+            work(cursor)
+        except self._errors:
+            if not (self._conn.closed and first):
+                raise
+            self._open()
+            self.reconnects += 1
+            cursor = self._conn.cursor()
+            work(cursor)
+        self._in_transaction = True
+        return cursor
 
     # ── The sqlite3 surface ──────────────────────────────────────────────────
 
@@ -280,9 +329,19 @@ class Connection:
         pragma = _PRAGMA.match(sql)
         if pragma:
             return self._pragma(pragma)
-        cursor = self._conn.cursor()
-        cursor.execute(to_pg_sql(sql), tuple(params))
-        return Cursor(cursor)
+        statement, values = to_pg_sql(sql), tuple(params)
+        return Cursor(self._run(lambda cursor: cursor.execute(statement, values)))
+
+    def end_read(self) -> None:
+        """
+        End the transaction a read opened. Without it, a connection that only
+        reads stays « idle in transaction » for the life of the process: it holds
+        locks that block the schema change the other app makes at start-up, and
+        one failed read leaves every later statement refused.
+        """
+        if self._in_transaction and not self._conn.closed:
+            self._conn.rollback()
+        self._in_transaction = False
 
     def _pragma(self, match):
         """
@@ -332,10 +391,8 @@ class Connection:
 
     def executemany(self, sql: str, seq) -> Cursor:
         rows = [tuple(item) for item in seq]
-        cursor = self._conn.cursor()
-        if rows:
-            cursor.executemany(to_pg_sql(sql), rows)
-        return Cursor(cursor)
+        statement = to_pg_sql(sql)
+        return Cursor(self._run(lambda cursor: cursor.executemany(statement, rows) if rows else None))
 
     def executescript(self, script: str) -> None:
         """
@@ -350,9 +407,12 @@ class Connection:
 
     def commit(self) -> None:
         self._conn.commit()
+        self._in_transaction = False
 
     def rollback(self) -> None:
-        self._conn.rollback()
+        if not self._conn.closed:
+            self._conn.rollback()
+        self._in_transaction = False
 
     def close(self) -> None:
         self._conn.close()

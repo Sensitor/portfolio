@@ -1,0 +1,24 @@
+# Les informations des pages légales (mentions légales, conditions d'utilisation,
+# confidentialité). À remplir par le fondateur : aucune n'est inventée.
+# Un champ vide s'affiche « à compléter » sur la page, et la page porte un
+# bandeau tant qu'il en reste un ou que `relu` vaut false.
+
+relu = false                 # true une fois les trois textes relus par un juriste
+mise_a_jour = "2026-10-30"   # date de la version des textes
+sauvegardes_jours = ""       # durée de conservation des sauvegardes de la base, en jours
+
+[editeur]
+raison_sociale = ""          # ex. : la dénomination de la société
+forme = ""                   # SAS, SASU, EURL, entreprise individuelle…
+capital = ""                 # capital social, si société
+siege = ""                   # adresse du siège
+rcs = ""                     # RCS et ville, ou numéro SIREN
+tva = ""                     # numéro de TVA intracommunautaire, s'il y en a un
+directeur_publication = ""   # nom de la personne responsable de la publication
+contact = ""                 # adresse e-mail de contact
+contact_donnees = ""         # adresse pour exercer ses droits sur ses données (peut être la même)
+
+[hebergement]
+application = ""             # hébergeur de l'application : nom, adresse (ex. : Streamlit Community Cloud, Snowflake Inc.)
+base_de_donnees = ""         # hébergeur de la base : nom, adresse, région (ex. : Supabase, région UE)
+emails = ""                  # prestataire d'envoi des e-mails, s'il y en a un

@@ -72,7 +72,16 @@ class Store:
 
     def _read(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
         with self._lock:
-            return self._conn.execute(sql, params).fetchall()
+            try:
+                rows = self._conn.execute(sql, params).fetchall()
+            except Exception:
+                # A failed read must not leave the shared connection in an aborted transaction.
+                self._conn.rollback()
+                raise
+            end = getattr(self._conn, "end_read", None)    # Postgres: close the read's transaction
+            if end is not None:
+                end()
+            return rows
 
     def close(self) -> None:
         with self._lock:
@@ -82,7 +91,14 @@ class Store:
 
     def upsert_user(self, email: str, tier: str = "free",
                     display_name: str | None = None) -> None:
-        """Record or refresh a user. Tier is mirrored here for the advisor view."""
+        """
+        Record or refresh a user.
+
+        `tier` is the level of a *new* row only. An existing row keeps its level:
+        it is changed by `set_tier` alone, so a page that refreshes the row with
+        the level it happens to hold in session cannot undo a level set by an
+        administrator.
+        """
         email = _email(email)
         if not email:
             return
@@ -92,11 +108,19 @@ class Store:
                 """INSERT INTO users (email, tier, display_name, created_at, updated_at)
                    VALUES (?, ?, ?, ?, ?)
                    ON CONFLICT(email) DO UPDATE SET
-                     tier = excluded.tier,
                      display_name = COALESCE(excluded.display_name, users.display_name),
                      updated_at = excluded.updated_at""",
                 (email, tier, display_name, now, now),
             )
+
+    def set_tier(self, email: str, tier: str) -> None:
+        """The one way to change a member's level (`admin set-tier`, later a verified payment)."""
+        email = _email(email)
+        if not email:
+            return
+        with self._write() as conn:
+            self._ensure_user(conn, email)
+            conn.execute("UPDATE users SET tier = ?, updated_at = ? WHERE email = ?", (tier, _now(), email))
 
     def get_user(self, email: str) -> dict | None:
         rows = self._read("SELECT * FROM users WHERE email = ?", (_email(email),))
@@ -666,6 +690,16 @@ class Store:
                 "locked_until = NULL, updated_at = ? WHERE email = ?",
                 (_now(), _now(), _email(email)),
             )
+
+    def reset_login_failures(self, email: str) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE users SET failed_logins = 0, locked_until = NULL, updated_at = ? WHERE email = ?",
+                         (_now(), _email(email)))
+
+    def count_account_tokens(self, email: str, purpose: str, *, since: str) -> int:
+        """Tokens of this purpose created for an address since a moment: how many e-mails were asked for."""
+        return self._count("SELECT COUNT(*) AS n FROM account_tokens WHERE user_email = ? AND purpose = ? "
+                           "AND created_at >= ?", _email(email), purpose, since)
 
     def record_login_failure(self, email: str, *,
                              locked_until: str | None = None) -> int:

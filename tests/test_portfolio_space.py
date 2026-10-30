@@ -364,6 +364,28 @@ def main() -> int:
     unknown = run({"page": "pf_assets", "asset": "NOPE"}, gina)
     check("an unknown asset says so", "n'est pas dans la bibliothèque" in page_text(unknown) and not unknown.exception)
 
+    print("\nA shared browser: what one member leaves, the next one does not get")
+    same = run({"page": "portfolio"}, erin)
+    held = dict(same.session_state["real_portfolio_holdings"])
+    same.session_state["ac_route"] = {"page": "account"}
+    same.run()
+    [b for b in same.button if b.key == "sign_out"][0].click().run()
+    def held_in(app, key):
+        return app.session_state[key] if key in app.session_state else None
+
+    gone = [k for k in ("real_portfolio_holdings", "manual_prices", "current_portfolio", "selected_tickers",
+                        "weights", "pf_valuation") if held_in(same, k)]
+    check("signing out drops the portfolio held in the session, not only the token",
+          bool(held) and not gone and "session_token" not in same.session_state, str(gone))
+    next_one = token("suivant@example.com")
+    same.session_state["session_token"] = next_one
+    same.session_state["ac_route"] = {"page": "portfolio"}
+    same.run()
+    mine = store().load_workspace("suivant@example.com")
+    check("the next member on the same browser sees none of it, and nothing is filed under them",
+          "APPARTEMENT" not in text(same) and not held_in(same, "real_portfolio_holdings")
+          and (mine is None or mine.is_empty), str(mine))
+
     print("\nThe separate app's navigation, translated")
     hop = run({"page": "pf_copilot"}, alice, analyzer=analyzer, state={"page": "simulator"})
     check("a copilot change opens the simulator page", not hop.exception and hop.session_state["ac_route"]["page"] == "pf_simulator",

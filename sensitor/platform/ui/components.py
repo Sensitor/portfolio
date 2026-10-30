@@ -225,7 +225,14 @@ def diagram(svg: str, caption: str, number: int | None = None) -> None:
          f'<span>{esc(caption)}</span></figcaption></figure>')
 
 
+LEGAL_LINKS = (("mentions", "Mentions légales"), ("conditions", "Conditions d'utilisation"),
+               ("confidentialite", "Confidentialité"))
+
+
 def footer() -> None:
+    # Plain links, not buttons: they work without the app's state and a crawler can follow them.
+    links = "".join(f'<a href="?page={page}" target="_self">{esc(label)}</a>' for page, label in LEGAL_LINKS)
     html(f'<footer class="sx-footer"><span class="m">{brand.monogram_svg(16, color="#0f1b26")}'
          f'SENSITOR</span><span class="c">CONTENU ÉDUCATIF · NE CONSTITUE PAS UN CONSEIL EN '
-         f'INVESTISSEMENT</span><span>APPRENDRE AVEC MÉTHODE</span></footer>')
+         f'INVESTISSEMENT</span><span>APPRENDRE AVEC MÉTHODE</span>'
+         f'<nav class="sx-legal" aria-label="Informations légales">{links}</nav></footer>')

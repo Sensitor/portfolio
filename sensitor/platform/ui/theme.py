@@ -45,12 +45,9 @@ TOKENS = {
     "on-navy-copper": "#e6b98e",
 }
 
-FONTS = ("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500"
-         "&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700"
-         "&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600"
-         "&family=Space+Grotesk:wght@400;500;600;700"
-         "&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500"
-         "&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap")
+# Served by the app itself (`static/fonts/`, built by `scripts/build_fonts.py`):
+# no request to Google, so no visitor's address leaves for a third party.
+FONTS = "app/static/fonts/fonts.css"
 
 ISO_GRID = ("repeating-linear-gradient(30deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
             "repeating-linear-gradient(150deg, rgba(169,198,226,.055) 0 1px, transparent 1px 34px),"
@@ -678,6 +675,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   letter-spacing: var(--r-footer-track, .05em); }
 .stApp .sx-footer .m { display: flex; align-items: center; gap: .7rem; color: var(--ink); letter-spacing: .2em; font-weight: 500; }
 .stApp .sx-footer .c { text-align: center; }
+.stApp .sx-footer .sx-legal { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
+.stApp .sx-footer .sx-legal a { color: var(--muted) !important; text-decoration: underline; text-underline-offset: 3px; }
+.stApp .sx-footer .sx-legal a:hover { color: var(--ink) !important; }
 
 /* Lesson page */
 .stApp .sx-lesson-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 1.6rem; align-items: start; margin-top: .4rem; }

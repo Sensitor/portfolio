@@ -51,6 +51,7 @@ SESSION_DAYS = 30
 RESET_MINUTES = 60
 VERIFY_HOURS = 48
 MAX_FAILED_LOGINS = 5
+MAX_TOKENS_PER_HOUR = 3        # reset or verification e-mails per address and purpose
 LOCKOUT_MINUTES = 15
 
 
@@ -59,12 +60,22 @@ def auth_mode() -> str:
     Which mode this deployment runs in.
 
     Read from the environment on every call rather than captured at import, so a
-    test — and an operator — can change it without reloading the package.
-    Anything other than "multi" is single: an unrecognised value must not
-    silently disable authentication, so the safe reading of a typo is the mode
-    that asks for less, not more.
+    test, and an operator, can change it without reloading the package.
+
+    Single-user mode has no passwords: whoever types an address opens that
+    journal. So it is never reached by accident. « single » must be written to
+    get it; left unset, the mode is single only for a local SQLite file, and
+    multi as soon as a PostgreSQL database is configured, the sign of a shared
+    deployment; and a value that is neither (a typo) means multi, the mode that
+    keeps the data closed.
     """
-    return MULTI if os.getenv("SENSITOR_AUTH", "").strip().lower() == MULTI else SINGLE
+    value = os.getenv("SENSITOR_AUTH", "").strip().lower()
+    if value in (MULTI, SINGLE):
+        return value
+    if value:
+        return MULTI
+    url = os.getenv("SENSITOR_DB_URL", "").strip()
+    return MULTI if url.startswith(("postgres://", "postgresql://")) else SINGLE
 
 
 def is_multi_user() -> bool:
@@ -142,7 +153,12 @@ class Auth:
             self.store.upsert_user(email, tier)
             return self._issue(email)
 
-        if existing and existing.get("password_hash"):
+        # Any existing row is a conflict, with a password or without one. A row
+        # without one comes from single-user mode or from before passwords
+        # existed: letting a sign-up give it a password would hand that journal
+        # to whoever types the address first. Its owner proves the address with
+        # « Mot de passe oublié » instead (`request_password_reset`).
+        if existing:
             return AuthResult(False, email=email, reason="already_registered")
 
         try:
@@ -171,7 +187,11 @@ class Auth:
             return AuthResult(False, reason="invalid_email")
 
         if not self.multi_user:
-            self.store.upsert_user(email, self._tier_for(email))
+            self.store.upsert_user(email)
+            # `PRO_EMAILS` can raise an address, never lower one: a level set by
+            # an administrator (`admin set-tier`) is not undone by a sign-in.
+            if self._tier_for(email) != "free":
+                self.store.set_tier(email, self._tier_for(email))
             return self._issue(email)
 
         credential = self.store.credential(email)
@@ -197,6 +217,12 @@ class Auth:
         return self._issue(email)
 
     def _count_failure(self, email: str, credential: dict) -> None:
+        # A lock that has run out starts a fresh count. Otherwise every failure
+        # after the first lock re-locks at once, and anyone who knows an address
+        # can keep its owner out by failing once every quarter of an hour.
+        if credential.get("locked_until") and self._locked_until(credential) is None:
+            self.store.reset_login_failures(email)
+            credential = {**credential, "failed_logins": 0}
         attempts = (credential.get("failed_logins") or 0) + 1
         lock = None
         if attempts >= MAX_FAILED_LOGINS:
@@ -239,6 +265,13 @@ class Auth:
         row = self.store.session(token_fingerprint(token))
         if not row:
             return None
+        if self.multi_user:
+            # A session issued in single-user mode, for an account that has no
+            # password yet, is not proof of anything once passwords are required.
+            credential = self.store.credential(row["user_email"])
+            if not credential or not credential.get("password_hash"):
+                self.store.revoke_session(token_fingerprint(token))
+                return None
         self.store.touch_session(token_fingerprint(token))
         return row["user_email"]
 
@@ -266,7 +299,9 @@ class Auth:
 
         credential = self.store.credential(email)
         stored = (credential or {}).get("password_hash")
-        if stored and not verify_password(current or "", stored):
+        # No stored password means no way to check who is asking: the owner sets
+        # the first one through a reset link, which proves the address.
+        if not stored or not verify_password(current or "", stored):
             return AuthResult(False, email=email, reason="invalid_credentials")
 
         try:
@@ -286,13 +321,17 @@ class Auth:
     # message either way, and the token is simply not created for an unknown
     # address.
 
-    def request_password_reset(self, email: str) -> str | None:
-        """A reset token for an account that has a password, else None."""
+    def request_password_reset(self, email: str, *, limited: bool = True) -> str | None:
+        """
+        A reset token for an existing account, else None. An account without a
+        password gets one too: following the link e-mailed to the address is how
+        its owner sets a first password.
+        """
         email = _normalise(email)
         credential = self.store.credential(email) if email else None
-        if not self.multi_user or not credential or not credential.get("password_hash"):
+        if not self.multi_user or not credential:
             return None
-        return self._account_token(email, "reset", timedelta(minutes=RESET_MINUTES))
+        return self._account_token(email, "reset", timedelta(minutes=RESET_MINUTES), limited=limited)
 
     def reset_password(self, token: str, new_password: str) -> AuthResult:
         """
@@ -318,11 +357,11 @@ class Auth:
         self.store.record_login_success(email)
         return self._issue(email)
 
-    def request_verification(self, email: str) -> str | None:
+    def request_verification(self, email: str, *, limited: bool = True) -> str | None:
         email = _normalise(email)
         if not email or self.store.get_user(email) is None:
             return None
-        return self._account_token(email, "verify", timedelta(hours=VERIFY_HOURS))
+        return self._account_token(email, "verify", timedelta(hours=VERIFY_HOURS), limited=limited)
 
     def verify_email(self, token: str) -> AuthResult:
         row = self._valid_token(token, "verify")
@@ -331,7 +370,16 @@ class Auth:
         self.store.set_email_verified(row["user_email"])
         return AuthResult(True, email=row["user_email"])
 
-    def _account_token(self, email: str, purpose: str, lifetime: timedelta) -> str:
+    def _account_token(self, email: str, purpose: str, lifetime: timedelta, *,
+                       limited: bool = True) -> str | None:
+        """
+        A new e-mailed token, or None past `MAX_TOKENS_PER_HOUR` for this address and
+        purpose: each one sends an e-mail, and a form that sends on demand lets
+        anyone flood a mailbox. The page shows the same message either way.
+        """
+        since = _stamp(_now() - timedelta(hours=1))
+        if limited and self.store.count_account_tokens(email, purpose, since=since) >= MAX_TOKENS_PER_HOUR:
+            return None
         token = new_token()
         self.store.create_account_token(email, token_fingerprint(token), purpose=purpose,
                                         expires_at=_stamp(_now() + lifetime))

@@ -33,7 +33,7 @@ def _mirror_secrets() -> None:
     known = (
         "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
         "SENSITOR_API_TOKEN", "SENSITOR_CORS_ORIGINS",
-        "PRO_EMAILS", "STRIPE_PAYMENT_LINK",
+        "PRO_EMAILS",
     )
     try:
         available = st.secrets
@@ -82,17 +82,12 @@ from sensitor.pages import (
 )
 
 # =============================================================================
-# STRIPE / SUBSCRIPTION CONFIGURATION
+# ACCESS CONFIGURATION
 # =============================================================================
 
-# Configuration now lives in sensitor.core.config, which reads the environment
-# once and has no Streamlit dependency — the same settings serve the app, the
-# report generator and the future API. Re-bound to the original names so the
-# legacy pages below are untouched.
-STRIPE_CONFIG = {
-    'payment_link': core_config.STRIPE_PAYMENT_LINK,
-    'pro_price_monthly': core_config.PRO_PRICE_MONTHLY,
-}
+# Configuration lives in sensitor.core.config. There is no payment link: no
+# paid plan exists until a regulatory review has been done (CLAUDE.md), so the
+# Stripe button and price this app used to show are gone.
 PRO_EMAILS = core_config.PRO_EMAILS
 TIER_LIMITS = core_config.TIER_LIMITS
 
@@ -138,8 +133,18 @@ MODEL_PORTFOLIOS = assets.MODEL_PORTFOLIOS
 # =============================================================================
 
 def resolve_tier(email: str) -> str:
-    """Entitlement for an email address. Delegates to sensitor.core.config."""
-    return core_config.resolve_tier(email)
+    """
+    Entitlement for an email address: « pro » if `PRO_EMAILS` lists it, or if
+    the account's level in the database is premium (set with `admin set-tier`,
+    the same level the platform reads), else « free ».
+    """
+    if core_config.resolve_tier(email) == "pro":
+        return "pro"
+    from sensitor.academy.access import has_premium
+    from sensitor.pages._shared import get_store
+    store = get_store()
+    user = store.get_user(email) if store is not None and email else None
+    return "pro" if user and has_premium(user.get("tier")) else "free"
 
 
 
@@ -781,40 +786,35 @@ def render_enhanced_charts(analyzer, lang="en"):
         st.plotly_chart(fig, use_container_width=True)
 
 def render_upgrade_prompt(lang="en"):
-    """Upgrade CTA card for free users."""
-    price = STRIPE_CONFIG['pro_price_monthly']
-    link = STRIPE_CONFIG['payment_link']
-    title = "Upgrade to Pro" if lang == 'en' else "Passer à Pro"
+    """
+    What the extended access adds, for a free account. No price and no payment
+    link: there is no paid plan until a regulatory review has been done
+    (CLAUDE.md), and the extended access is granted by the Sensitor team
+    (`python -m sensitor.core.admin set-tier … premium`).
+    """
+    title = "Extended access" if lang == 'en' else "Accès étendu"
     sub = (
-        f"Unlock unlimited assets, portfolio optimisation, stress tests and more for ${price}/month."
+        "Extended access adds more assets per portfolio, optimisation and stress tests. "
+        "There is no paid plan: it is granted by the Sensitor team."
         if lang == 'en' else
-        f"Débloquez les actifs illimités, l'optimisation, les stress tests et plus encore pour {price} €/mois."
+        "L'accès étendu ajoute davantage d'actifs par portefeuille, l'optimisation et les stress tests. "
+        "Il n'y a pas d'abonnement payant : il est attribué par l'équipe Sensitor."
     )
     features = [
         ("Up to 50 assets per portfolio", "Jusqu'à 50 actifs par portefeuille"),
         ("Portfolio optimisation (Markowitz)", "Optimisation (Markowitz)"),
         ("Historical crisis stress tests", "Stress tests crises historiques"),
         ("Full Health Score breakdown", "Score de Santé détaillé"),
-        ("Unlimited analyses", "Analyses illimitées"),
     ]
     features_html = "".join(
         f"<div style='font-size:0.85rem;color:#1F4A72;margin:4px 0;'>&#10003; {f[0] if lang=='en' else f[1]}</div>"
         for f in features
     )
-    btn_html = (
-        f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:14px;'
-        f'padding:10px 28px;background:#1F4A72;color:#FFFDF8;'
-        f'border-radius:3px;font-weight:600;font-size:0.9rem;text-decoration:none;">{title} · ${price}/mo</a>'
-    ) if link else (
-        f'<div style="margin-top:14px;font-size:0.82rem;color:#1F4A72;">Contact us to upgrade</div>'
-    )
-
     st.markdown(f"""
     <div class="upgrade-card">
       <h3>{title}</h3>
       <p style="margin-bottom:12px;">{sub}</p>
       {features_html}
-      {btn_html}
     </div>
     """, unsafe_allow_html=True)
 
@@ -822,16 +822,16 @@ def render_upgrade_prompt(lang="en"):
 def render_paywall(feature_name, lang="en"):
     """Inline paywall block for locked features."""
     msg = (
-        f"**{feature_name}** is available on the Pro plan."
+        f"**{feature_name}** is available with extended access."
         if lang == 'en' else
-        f"**{feature_name}** est disponible sur le plan Pro."
+        f"**{feature_name}** est disponible avec l'accès étendu."
     )
     st.markdown(f"""
     <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-left:3px solid #855615;border-radius:3px;
                 padding:20px 24px;text-align:center;margin:12px 0;">
             <div style="font-weight:600;color:#0F1B26;margin-bottom:4px;">{feature_name}</div>
       <div style="font-size:0.87rem;color:#1F4A72;">
-        {'Available on Pro plan' if lang == 'en' else 'Disponible sur le plan Pro'}
+        {'Available with extended access' if lang == 'en' else "Disponible avec l'accès étendu"}
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1623,71 +1623,16 @@ def main():
         _account_page(lang, tier)
 
         st.markdown("---")
-        st.markdown("### Plans" if lang == 'en' else "### Abonnements")
-
-        col_free, col_pro = st.columns(2)
-        with col_free:
-            st.markdown("""
-            <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-top:2px solid #0F1B26;border-radius:3px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:#0F1B26;margin-bottom:4px;">Free</div>
-              <div style="font-size:1.5rem;font-weight:800;color:#0F1B26;">$0<span style="font-size:0.9rem;color:#59636B;font-weight:400;">/mo</span></div>
-              <hr style="border-color:#D8D2C3;margin:12px 0;">
-              <div style="font-size:0.85rem;color:#59636B;">Up to 5 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Basic metrics &amp; charts</div>
-              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Asset Library</div>
-            </div>""", unsafe_allow_html=True)
-
-        with col_pro:
-            price = STRIPE_CONFIG['pro_price_monthly']
-            link = STRIPE_CONFIG['payment_link']
-            btn = (
-                f'<a href="{link}" target="_blank" style="display:block;margin-top:14px;'
-                f'padding:10px 0;background:#FFFDF8;color:#0F1B26;'
-                f'border-radius:3px;font-weight:600;font-size:0.88rem;text-decoration:none;'
-                f'text-align:center;">Subscribe · ${price}/mo</a>'
-            ) if link else (
-                f'<div style="margin-top:14px;font-size:0.82rem;color:rgba(255,253,248,0.7);">'
-                f'Set STRIPE_PAYMENT_LINK env var to activate.</div>'
-            )
-            st.markdown(f"""
-            <div style="background:#0F1B26;border-top:2px solid #855615;border-radius:3px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:#FFFDF8;margin-bottom:4px;">Pro</div>
-              <div style="font-size:1.5rem;font-weight:800;color:#FFFDF8;">${price}<span style="font-size:0.9rem;color:rgba(255,253,248,0.62);font-weight:400;">/mo</span></div>
-              <hr style="border-color:rgba(255,253,248,0.15);margin:12px 0;">
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);">Up to 50 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Portfolio optimisation (Markowitz)</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Crisis stress tests</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Full Health Score breakdown</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Unlimited analyses</div>
-              {btn}
-            </div>""", unsafe_allow_html=True)
-
-        st.markdown("---")
-        how_label = "How Pro access works" if lang == 'en' else "Comment fonctionne l'accès Pro"
-        with st.expander(how_label):
-            st.markdown(
-                """
-**Step 1: Subscribe** via the button above (Stripe secure checkout).
-
-**Step 2: Send your email** to the app administrator so your email is added to the Pro list
-(or configure the `PRO_EMAILS` environment variable on Streamlit Cloud with your email).
-
-**Step 3: Log in** here with that email and your Pro features will unlock immediately.
-
-> For automated activation, set up a Stripe webhook pointing to your backend and write the
-> paying customer's email into the `PRO_EMAILS` environment variable.
-                """ if lang == 'en' else """
-**Étape 1 : Abonnez-vous** via le bouton ci-dessus (paiement sécurisé Stripe).
-
-**Étape 2 : Envoyez votre email** à l'administrateur pour être ajouté à la liste Pro
-(ou configurez la variable d'environnement `PRO_EMAILS` sur Streamlit Cloud avec votre email).
-
-**Étape 3 : Connectez-vous** ici avec cet email et vos fonctionnalités Pro s'activeront.
-
-> Pour une activation automatique, configurez un webhook Stripe vers votre backend
-> qui écrit l'email de l'abonné dans la variable `PRO_EMAILS`.
-                """
-            )
+        st.markdown("### Access" if lang == 'en' else "### Accès")
+        st.markdown(
+            ("Free access: up to 5 assets per portfolio, every analysis page. Extended access adds up to 50 "
+             "assets, optimisation and stress tests; there is no paid plan, and it is granted by the Sensitor "
+             "team on the same account as the platform."
+             if lang == 'en' else
+             "Accès gratuit : jusqu'à 5 actifs par portefeuille, toutes les pages d'analyse. L'accès étendu ajoute "
+             "jusqu'à 50 actifs, l'optimisation et les stress tests ; il n'y a pas d'abonnement payant, il est "
+             "attribué par l'équipe Sensitor, sur le même compte que la plateforme.")
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # ASSET LIBRARY PAGE

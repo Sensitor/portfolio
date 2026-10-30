@@ -15,7 +15,7 @@ from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from .. import brand, spaces
-from . import (account, home, journal_analysis, market_room, portfolio_space, psychology, spaces_view, theme,
+from . import (account, home, journal_analysis, legal_pages, market_room, portfolio_space, psychology, spaces_view, theme,
                trade_reviews, trading_journal)
 from . import runtime as rt
 from .components import edition, esc, html
@@ -25,6 +25,9 @@ RENDERERS = {
     "account": account.render,
     "reset": account.reset_page,
     "verify": account.verify_page,
+    "mentions": legal_pages.RENDERERS["mentions"],
+    "conditions": legal_pages.RENDERERS["conditions"],
+    "confidentialite": legal_pages.RENDERERS["confidentialite"],
     "academy": academy.academy_home,
     "course": academy.course_page,
     "lesson": academy.lesson_page,

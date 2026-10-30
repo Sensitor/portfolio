@@ -24,7 +24,8 @@ from .components import crumbs, date_fr, esc, footer, html, note, notice, page_h
 REASONS = {
     "invalid_email": "Adresse e-mail invalide.",
     "invalid_credentials": "Adresse ou mot de passe incorrect.",
-    "already_registered": "Un compte existe déjà avec cette adresse. Connectez-vous.",
+    "already_registered": "Un compte existe déjà avec cette adresse. Connectez-vous, ou utilisez "
+                          "« Mot de passe oublié » si vous n'avez pas encore de mot de passe.",
     "weak_password": "Mot de passe trop faible.",
     "locked": "Trop de tentatives. Réessayez dans quelques minutes.",
     "invalid_token": "Ce lien n'est plus valable : il a déjà servi ou il a expiré.",

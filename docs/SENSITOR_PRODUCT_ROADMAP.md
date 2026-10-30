@@ -280,6 +280,29 @@ Complexité relative : **S** (moins d'une journée), **M** (quelques jours),
 - `main` est la branche déployée, et toute la suite passe en intégration
   continue.
 
+**Avancement P0 au 30 octobre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P0.1 | **à faire par vous** : adresse « Session pooler » dans les secrets, `SENSITOR_PUBLIC_URL`, SMTP | secrets Streamlit |
+| P0.2 | fait : reconnexion, fin de transaction après les lectures, une seule connexion par processus ; testé sur un vrai PostgreSQL | `database/postgres.py`, `repositories.py`, `pages/_shared.py`, `tests/test_db_errors.py` |
+| P0.3 | fait : sauvegarde et restauration en Python, testées sur SQLite et PostgreSQL ; **à faire par vous** : planifier la sauvegarde et la ranger chiffrée | `database/backup.py`, `tests/test_backup.py`, `docs/DEPLOY.md` §6 |
+| P0.4 | fait : `upsert_user` ne touche plus au niveau, `set_tier` dédié ; l'analyseur lit aussi `users.tier` | `repositories.py`, `core/admin.py`, `portfolio_optimizer_saas.py`, `tests/test_auth.py` |
+| P0.5 | fait : un compte sans mot de passe ne se réclame plus à l'inscription ; une session sans mot de passe n'est plus acceptée en multi ; premier mot de passe par lien e-mail | `core/auth.py`, `tests/test_auth.py` |
+| P0.6 | fait : `multi` par défaut dès qu'une base PostgreSQL est configurée ; une valeur inconnue vaut `multi` | `core/auth.py` |
+| P0.7 | fait : la déconnexion vide toute la session | `platform/ui/runtime.py`, `tests/test_portfolio_space.py` |
+| P0.8 | fait : masquage du mot de passe dans `describe()`, `.gitignore` complété | `database/connection.py`, `.gitignore` |
+| P0.9 | fait : plus de lien ni de prix d'abonnement dans l'analyseur ; `landing_page.html` et `DEPLOYMENT_GUIDE.md` archivés | `portfolio_optimizer_saas.py`, `docs/archive/` |
+| P0.10 | fait : trois pages légales reliées en pied de page, polices servies par l'application, statistiques Streamlit coupées ; **à faire par vous** : remplir `content/legal/editeur.toml`, faire relire les textes | `content/legal/`, `platform/legal.py`, `.streamlit/config.toml`, `static/fonts/`, `tests/test_legal.py` |
+| P0.11 | fait : 3 e-mails de réinitialisation ou de vérification par heure et par adresse ; compteur d'échecs remis à zéro à l'expiration du verrou | `core/auth.py`, `tests/test_accounts.py` |
+| P0.12 | **à faire par vous** : fusionner la branche dans `main`, déployer depuis `main`, choisir Python 3.11 dans les réglages de Streamlit Cloud | GitHub, Streamlit Cloud |
+| P0.13 | fait : 31,4 % confirmé sur impots.gouv.fr et cité dans les deux leçons, l'hypothèse ronde de 30 % expliquée ; relecture professionnelle conseillée | leçons `fiscalite-crypto`, `frais-impots` |
+| P0.14 | fait : workflow GitHub Actions, PostgreSQL compris | `.github/workflows/tests.yml` |
+| P0.15 | **décision à prendre par vous** : journal de démonstration et jeux de données synthétiques, étiquetés | voir l'audit §3 |
+
+Contrôle d'ensemble : `python -m sensitor.core.admin check`, lancé avec les
+variables de production, liste ce qui manque encore.
+
 ### P1 · fondations de la nouvelle offre
 
 | # | Tâche | Complexité |

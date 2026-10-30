@@ -67,10 +67,10 @@ def mirror_secrets() -> None:
             continue
 
 
-@st.cache_resource(show_spinner=False)
 def _store():
-    from ...database import Store
-    return Store()
+    """The process's one store, shared with the analyzer pages the platform reuses (`pages._shared`)."""
+    from ...pages._shared import open_store
+    return open_store()
 
 
 _STORE_ERROR: list[str] = []          # why the last opening failed; no secret in it (`postgres.explain`)
@@ -202,8 +202,13 @@ def sign_out() -> None:
     auth = get_auth()
     if auth is not None:
         auth.sign_out(st.session_state.get(TOKEN_KEY))
+    # Everything the session holds goes, not only the token: the portfolio being
+    # analysed, the real holdings and their prices, the journal's filters, the
+    # forms. On a shared browser the next person must start from nothing, and
+    # the analyzer pages would otherwise file what is left under their account.
+    # Only the page being shown stays.
     for key in list(st.session_state):
-        if key == TOKEN_KEY or key.startswith("quiz::") or key.startswith("ex::"):
+        if key != ROUTE_KEY:
             del st.session_state[key]
     st.session_state[COOKIE_OP] = ("clear", None)
 

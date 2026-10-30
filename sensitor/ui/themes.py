@@ -455,7 +455,7 @@ def inject_theme() -> None:
     """Inject the full app stylesheet. Call once, early, in main()."""
     st.markdown(
         f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('app/static/fonts/fonts.css');
 
 /* ---------- Base plane: paper, no halo ---------- */
 .stApp {{ background: {BG_DEEP} !important; }}

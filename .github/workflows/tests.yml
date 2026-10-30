@@ -1,0 +1,47 @@
+# The whole test suite, on every push and pull request: the content validator,
+# then every tests/test_*.py, with a real PostgreSQL for the tests that take
+# SENSITOR_TEST_PG (database, reconnection, backup), so a query that works on
+# SQLite and not on Postgres is caught before it reaches production.
+
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sensitor_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SENSITOR_TEST_PG: postgresql://postgres:postgres@localhost:5432/sensitor_test
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Dependencies
+        # fastapi and httpx for the API tests; the app itself does not need them.
+        run: pip install -r requirements.txt "fastapi>=0.110" httpx
+      - name: Content
+        run: python -m sensitor.academy.validate
+      - name: Tests
+        run: |
+          status=0
+          for f in tests/test_*.py; do
+            echo "::group::$f"
+            python "$f" || { echo "::error file=$f::$f failed"; status=1; }
+            echo "::endgroup::"
+          done
+          exit $status

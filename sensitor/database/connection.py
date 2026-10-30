@@ -33,7 +33,6 @@ tested against a database built from the previous schema and populated.
 from __future__ import annotations
 
 import os
-import re
 import sqlite3
 from datetime import datetime, timezone
 
@@ -79,8 +78,12 @@ def describe(where: str | None = None) -> str:
     """Where the data lives, with any password removed, for showing a person."""
     where = where or target()
     if pg.is_url(where):
-        cleaned = re.sub(r"://[^@/]*@", "://…@", str(where))
-        return f"PostgreSQL · {cleaned.split('?')[0]}"
+        # Cut at the *last* « @ », as libpq does: a password may itself hold « @ » or « / ».
+        parts = pg._parts(where)                          # noqa: SLF001
+        if parts is None:
+            return f"PostgreSQL · {str(where).split('?')[0]}"
+        scheme, user, _password, rest = parts
+        return f"PostgreSQL · {scheme}://{user}:…@{rest.split('?')[0]}"
     return f"SQLite · {os.path.abspath(where)}"
 
 

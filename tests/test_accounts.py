@@ -243,12 +243,65 @@ def test_upgrade() -> None:
     check("the database is at the current version", store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION)
 
 
+def test_limits(store: Store) -> None:
+    print("\nLimits on e-mails and on the lockout")
+    from datetime import datetime, timedelta, timezone
+    from sensitor.core import auth as A
+    auth = Auth(store, mode="multi")
+    auth.sign_up("quota@example.com", PASSWORD)
+    tokens = [auth.request_password_reset("quota@example.com") for _ in range(A.MAX_TOKENS_PER_HOUR + 1)]
+    check("three reset e-mails an hour per address, then none", all(tokens[:-1]) and tokens[-1] is None,
+          str([bool(t) for t in tokens]))
+    check("the last link sent still works", bool(auth.reset_password(tokens[-2], "un-nouveau-mot-de-passe")))
+    check("the operator's command is not limited", bool(auth.request_password_reset("quota@example.com", limited=False)))
+    verifies = [auth.request_verification("quota@example.com") for _ in range(A.MAX_TOKENS_PER_HOUR + 1)]
+    check("the same for the verification e-mail", all(verifies[:-1]) and verifies[-1] is None)
+
+    auth.sign_up("verrou@example.com", PASSWORD)
+    for _ in range(A.MAX_FAILED_LOGINS):
+        auth.sign_in("verrou@example.com", "pas-le-bon")
+    check("the account is locked after the failures", auth.sign_in("verrou@example.com", PASSWORD).reason == "locked")
+    past = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat(timespec="seconds")
+    with store._write() as conn:                                     # noqa: SLF001
+        conn.execute("UPDATE users SET locked_until = ? WHERE email = ?", (past, "verrou@example.com"))
+    auth.sign_in("verrou@example.com", "pas-le-bon")
+    after = store.credential("verrou@example.com")
+    check("once the lock has run out, one more failure counts as the first, not a new lock",
+          after["failed_logins"] == 1 and not auth._locked_until(after))  # noqa: SLF001
+    check("and the owner signs in", bool(auth.sign_in("verrou@example.com", PASSWORD)))
+
+
+def test_check() -> None:
+    print("\nThe pre-launch check")
+    saved = {k: os.environ.get(k) for k in ("SENSITOR_AUTH", "SENSITOR_SMTP_HOST", "SENSITOR_PUBLIC_URL")}
+    try:
+        os.environ.update(SENSITOR_AUTH="multi", SENSITOR_SMTP_HOST="smtp.example.com",
+                          SENSITOR_PUBLIC_URL="https://sensitor.example")
+        results = dict((what, ok) for ok, what in admin.checks())
+        check("passwords, e-mails and the https address are reported as done",
+              results.get("Comptes avec mot de passe (SENSITOR_AUTH=multi)") is True
+              and results.get("Envoi d'e-mails configuré (SENSITOR_SMTP_*)") is True
+              and results.get("Adresse publique https://sensitor.example") is True)
+        check("a local SQLite file is reported as not durable", any("SQLite" in w and not ok for w, ok in results.items()))
+        check("the legal pages left to complete are reported", any("Pages légales" in w and not ok for w, ok in results.items()))
+        with redirect_stdout(io.StringIO()):
+            check("the command exits 1 while anything is missing", admin.main(["check"]) == 1)
+    finally:
+        for key, value in saved.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
 def main() -> int:
     store = Store(os.environ["SENSITOR_DB_PATH"])
     test_reset(store)
     test_verification(store)
     test_mailer()
     test_admin(store)
+    test_limits(store)
+    test_check()
     test_export_and_delete(store)
     test_upgrade()
     print(f"\n{COUNT} checks, {len(FAILURES)} failures")
