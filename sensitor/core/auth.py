@@ -170,8 +170,8 @@ class Auth:
                               detail=str(exc))
 
         self.store.upsert_user(email)
-        self._grant_listed(email)
         self.store.set_password_hash(email, hash_password(password))
+        self._grant_listed(email)
         return self._issue(email)
 
     # ── Sign in ──────────────────────────────────────────────────────────────
@@ -214,6 +214,7 @@ class Auth:
             self.store.set_password_hash(email, hash_password(password))
 
         self.store.record_login_success(email)
+        self._grant_listed(email)
         return self._issue(email)
 
     def _count_failure(self, email: str, credential: dict) -> None:
@@ -275,6 +276,9 @@ class Auth:
                 self.store.revoke_session(token_fingerprint(token))
                 return None
         self.store.touch_session(token_fingerprint(token))
+        from .config import listed
+        if row["user_email"] in listed("PRO_EMAILS") | listed("SENSITOR_ADMIN_EMAILS"):
+            self._grant_listed(row["user_email"])      # a session opened before the setting changed
         return row["user_email"]
 
     def sign_out(self, token: str | None) -> None:
@@ -380,6 +384,7 @@ class Auth:
         self.store.set_password_hash(email, hash_password(new_password))
         self.store.revoke_sessions(email)
         self.store.record_login_success(email)
+        self._grant_listed(email)
         return self._issue(email)
 
     def request_verification(self, email: str, *, limited: bool = True) -> str | None:
@@ -437,14 +442,32 @@ class Auth:
 
     def _grant_listed(self, email: str) -> None:
         """
-        An address listed in `PRO_EMAILS` gets a « config » entitlement, once:
-        the variable can raise a level, never lower one, so a level an
-        administrator set or revoked since is not undone by a sign-in.
+        What the deployment's settings give an address, applied when it signs in
+        or opens a session:
+
+        * listed in `PRO_EMAILS`: a « config » entitlement, once. The variable
+          can raise a level, never lower one, so a level an administrator set or
+          revoked since is not undone by a sign-in.
+        * listed in `SENSITOR_ADMIN_EMAILS`: the administrator role, for a
+          deployment with no command line. Only for an account with a password
+          in multi mode, and, once e-mail is configured, a verified address: a
+          stranger who registers the address first must not become one.
         """
+        from . import mailer
         from . import permissions as P
-        from .config import PRO_EMAILS
-        if email in PRO_EMAILS and not any(e["source"] == "config" for e in self.store.entitlements(email)):
+        from .config import listed
+        email = _normalise(email)
+        if email in listed("PRO_EMAILS") and not any(e["source"] == "config" for e in self.store.entitlements(email)):
             self.store.set_tier(email, P.PREMIUM, source="config", reference="config", reason="PRO_EMAILS")
+        if email in listed("SENSITOR_ADMIN_EMAILS") and P.ADMIN not in self.store.roles(email):
+            credential = self.store.credential(email) or {}
+            if self.multi_user and not credential.get("password_hash"):
+                return
+            if mailer.configured() and not (self.store.get_user(email) or {}).get("email_verified_at"):
+                return
+            self.store.grant_role(email, P.ADMIN, granted_by="config")
+            from . import logs
+            logs.get(__name__).info("an administrator was named from SENSITOR_ADMIN_EMAILS")
 
 
 def _normalise(email: str) -> str:

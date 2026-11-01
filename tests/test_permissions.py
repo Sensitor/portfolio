@@ -179,13 +179,12 @@ def test_store() -> None:
 
 def test_pro_emails() -> None:
     print("\nPRO_EMAILS becomes an entitlement, once")
-    from sensitor.core import config
     from sensitor.core.auth import Auth
     from sensitor.database import Store
     store = Store(os.path.join(WORK, "pro.db"))
     listed = "vip@example.com"
-    original = config.PRO_EMAILS
-    config.PRO_EMAILS = frozenset({listed})
+    original = os.environ.get("PRO_EMAILS")
+    os.environ["PRO_EMAILS"] = listed
     try:
         auth = Auth(store, mode="multi")
         auth.sign_up(listed, PASSWORD)
@@ -202,7 +201,46 @@ def test_pro_emails() -> None:
               Auth(store, mode="multi").sign_up("sly@example.com", PASSWORD, tier="premium").ok
               and store.access("sly@example.com").level == "free")
     finally:
-        config.PRO_EMAILS = original
+        if original is None:
+            os.environ.pop("PRO_EMAILS", None)
+        else:
+            os.environ["PRO_EMAILS"] = original
+        store.close()
+
+
+def test_admin_emails() -> None:
+    print("\nSENSITOR_ADMIN_EMAILS names administrators without a command line")
+    from sensitor.core.auth import Auth
+    from sensitor.database import Store
+    store = Store(os.path.join(WORK, "admins.db"))
+    auth = Auth(store, mode="multi")
+    os.environ["SENSITOR_ADMIN_EMAILS"] = " Fondateur@Example.com , autre@example.com"
+    os.environ.pop("SENSITOR_SMTP_HOST", None)
+    try:
+        auth.sign_up("fondateur@example.com", PASSWORD)
+        check("a listed address is an administrator from its sign-up", store.is_admin("fondateur@example.com")
+              and store.admin_members("fondateur@example.com") is not None)
+        auth.sign_up("membre@example.com", PASSWORD)
+        check("an address that is not listed is not", not store.is_admin("membre@example.com"))
+        token = auth.sign_up("tard@example.com", PASSWORD).token
+        os.environ["SENSITOR_ADMIN_EMAILS"] += ",tard@example.com"
+        auth.resolve(token)
+        check("a session opened before the setting gets the role at the next page", store.is_admin("tard@example.com"))
+        os.environ["SENSITOR_SMTP_HOST"] = "smtp.example.com"
+        auth.sign_up("autre@example.com", PASSWORD)
+        check("with e-mail configured, an unverified address is not named", not store.is_admin("autre@example.com"))
+        store.set_email_verified("autre@example.com")
+        auth.sign_in("autre@example.com", PASSWORD)
+        check("once verified, it is", store.is_admin("autre@example.com"))
+        check("the role says where it came from",
+              store._read("SELECT granted_by FROM user_roles WHERE user_email = ?",
+                          ("autre@example.com",))[0][0] == "config")
+        from sensitor.platform.ui import runtime
+        check("the platform copies the setting from the Streamlit secrets",
+              "SENSITOR_ADMIN_EMAILS" in runtime.SECRET_KEYS and "PRO_EMAILS" in runtime.SECRET_KEYS)
+    finally:
+        os.environ.pop("SENSITOR_ADMIN_EMAILS", None)
+        os.environ.pop("SENSITOR_SMTP_HOST", None)
         store.close()
 
 
@@ -359,6 +397,7 @@ def main() -> int:
     test_migration()
     test_store()
     test_pro_emails()
+    test_admin_emails()
     test_no_level_strings()
     test_api()
     test_pages()

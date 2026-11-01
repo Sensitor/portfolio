@@ -221,8 +221,13 @@ serving, so the fonts come from `static/fonts/` (built by
 statistics: no visitor data leaves for a third party.
 
 
-**Administrators.** Name the first one from a machine that reaches the
-database: `python -m sensitor.core.admin set-role you@example.com admin`. The
+**Administrators.** On Streamlit Cloud, with no command line, list them in the
+secrets: `SENSITOR_ADMIN_EMAILS = "you@example.com"` (comma-separated for
+several). The address becomes an administrator at its next sign-in, or at the
+next page if it is already signed in, provided it has an account with a
+password and, once e-mail is configured, a verified address. Elsewhere,
+`python -m sensitor.core.admin set-role you@example.com admin` does the same
+from a machine that reaches the database. The
 « Membres et accès » page then appears in the platform's sidebar for that
 account; it grants and revokes Premium (with a reason and an optional end) and
 names coaches and other administrators. `check` reports a deployment with no
