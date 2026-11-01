@@ -6,7 +6,7 @@ duration_minutes = 16
 access = "member"
 status = "published"
 version = 1
-updated = 2026-10-20
+updated = 2026-10-30
 objectives = [
   "Distinguer les opérations imposables de celles qui ne le sont pas.",
   "Calculer une plus-value selon la formule du portefeuille global.",
@@ -18,6 +18,8 @@ sources = [
   "Code général des impôts, article 150 VH bis : plus-values de cession d'actifs numériques réalisées par les particuliers.",
   "Code général des impôts, article 1649 bis C : déclaration des comptes d'actifs numériques ouverts à l'étranger (formulaire 3916-bis).",
   "Direction générale des Finances publiques, formulaire 2086 et notice : déclaration des plus ou moins-values sur actifs numériques.",
+  "impots.gouv.fr, « Comment déclarer les plus ou moins-values sur cessions d'actifs numériques ? », modifiée le 17 juillet 2026, consultée le 30 octobre 2026 : prélèvement forfaitaire unique de 31,4 % (12,8 % d'impôt, 18,6 % de prélèvements sociaux).",
+  "impots.gouv.fr, « Les revenus mobiliers », modifiée le 8 avril 2026, consultée le 30 octobre 2026 : prélèvements sociaux à 18,6 % à compter du 1er janvier 2026, et pour les revenus de 2025 qui n'ont pas été prélevés à la source.",
 ]
 +++
 
@@ -36,7 +38,7 @@ Pour un particulier qui investit de façon occasionnelle, le régime est celui d
 L'impôt porte sur la **plus-value**, et seulement au moment de la conversion en monnaie ou du paiement.
 
 ::: callout warning "Le taux de l'année"
-Le gain est soumis par défaut au prélèvement forfaitaire unique, qui additionne une part d'impôt sur le revenu et les prélèvements sociaux ; on peut opter pour le barème progressif. Ce taux a changé ces dernières années : il était de 30 % jusqu'aux gains de 2024, et plusieurs sources indiquent 31,4 % depuis la hausse des prélèvements sociaux votée pour 2026. **Vérifiez le taux de l'année sur impots.gouv.fr** avant tout calcul. Les exercices utilisent 31,4 % comme hypothèse.
+Le gain est soumis par défaut au prélèvement forfaitaire unique, qui additionne une part d'impôt sur le revenu et les prélèvements sociaux ; on peut opter pour le barème progressif. Ce taux a changé : il était de 30 % jusqu'aux gains de 2024. Les prélèvements sociaux sont passés de 17,2 % à 18,6 %, et l'administration fiscale indique désormais un taux de **31,4 %** : 12,8 % d'impôt sur le revenu et 18,6 % de prélèvements sociaux, y compris pour les gains de 2025 déclarés en 2026. **Vérifiez le taux de l'année sur impots.gouv.fr** avant tout calcul : il dépend des lois de finances. Les exercices utilisent 31,4 %.
 :::
 
 ## La formule du portefeuille global

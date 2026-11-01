@@ -33,7 +33,6 @@ tested against a database built from the previous schema and populated.
 from __future__ import annotations
 
 import os
-import re
 import sqlite3
 from datetime import datetime, timezone
 
@@ -79,8 +78,12 @@ def describe(where: str | None = None) -> str:
     """Where the data lives, with any password removed, for showing a person."""
     where = where or target()
     if pg.is_url(where):
-        cleaned = re.sub(r"://[^@/]*@", "://…@", str(where))
-        return f"PostgreSQL · {cleaned.split('?')[0]}"
+        # Cut at the *last* « @ », as libpq does: a password may itself hold « @ » or « / ».
+        parts = pg._parts(where)                          # noqa: SLF001
+        if parts is None:
+            return f"PostgreSQL · {str(where).split('?')[0]}"
+        scheme, user, _password, rest = parts
+        return f"PostgreSQL · {scheme}://{user}:…@{rest.split('?')[0]}"
     return f"SQLite · {os.path.abspath(where)}"
 
 
@@ -115,6 +118,10 @@ def connect(path: str | None = None):
     had_tables = _table_names(conn) != set()
     conn.executescript(SCHEMA)
     _migrate(conn, fresh=not had_tables)
+    _carry_access(conn)
+    # The copy opened a transaction, and SQLite ignores the foreign-key pragma
+    # inside one: commit first, so enforcement is really on for this connection.
+    conn.commit()
 
     conn.execute("PRAGMA foreign_keys = ON")
     conn.commit()
@@ -142,9 +149,33 @@ def _connect_postgres(url: str):
 
     if not fresh:
         _add_missing_columns_pg(conn)
+    _carry_access(conn)
     pg.set_version(conn, SCHEMA_VERSION)
     conn.commit()
     return conn
+
+
+# Version 12 moves access out of two columns of `users` into its own tables.
+# Run on every open, for both engines, and idempotent: a row is copied only when
+# nothing has been recorded for it yet. A level revoked since resets the cache
+# to « free » and leaves a revoked row, so it is never copied back; a coach
+# removed by `Store.set_role` has `users.role` cleared at the same time.
+_CARRY_ACCESS = (
+    """INSERT INTO entitlements (user_email, level, source, reference, reason, starts_at, created_at)
+       SELECT email, 'premium', 'migration', 'migration', 'niveau enregistré avant les droits', ?, ?
+       FROM users WHERE LOWER(tier) IN ('pro', 'premium')
+       AND NOT EXISTS (SELECT 1 FROM entitlements e WHERE e.user_email = users.email)""",
+    """INSERT INTO user_roles (user_email, role, granted_by, created_at)
+       SELECT email, 'coach', 'migration', ?
+       FROM users WHERE role = 'coach'
+       AND NOT EXISTS (SELECT 1 FROM user_roles r WHERE r.user_email = users.email AND r.role = 'coach')""",
+)
+
+
+def _carry_access(conn) -> None:
+    stamp = now()           # when the copy was made: the earlier columns kept no date
+    for statement in _CARRY_ACCESS:
+        conn.execute(statement, (stamp,) * statement.count("?"))
 
 
 def _index_statements() -> list[str]:
@@ -235,6 +266,13 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     #
     # Version 11 adds `market_sessions`, the trading room's sessions and reviews.
     # A new table only, so no existing row is touched.
+    #
+    # Version 12 adds `entitlements` and `user_roles`. New tables, filled from
+    # `users.tier` and `users.role` by `_carry_access` on every open; the two
+    # columns stay, the first as a cache, the second as a fallback.
+    #
+    # Version 13 adds `newsletter`, the subscriptions with their proof of
+    # consent. A new table only.
     #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.

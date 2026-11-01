@@ -34,8 +34,7 @@ import re
 
 import streamlit as st
 
-from ...academy import access as A
-from ...core import config as core_config
+from ...core import permissions as P
 from ...investment import assets
 from ...investment.context import build_context
 from ...investment import holdings as H
@@ -131,7 +130,7 @@ def _prepare(email: str | None) -> None:
     state.setdefault("weights", {})
     state.setdefault("real_portfolio_holdings", {})
     state.setdefault("manual_prices", {})
-    state["user_tier"] = "pro" if A.has_premium(rt.tier(email)) else "free"
+    state["user_tier"] = rt.tier(email)
     if email:
         _workspace.restore(analysis_store(), email)
     if _workspace.take_resume_flag() and state["current_portfolio"] is None:
@@ -459,14 +458,14 @@ def _name(ticker: str) -> str:
 
 
 def _form(state) -> None:
-    allowed = core_config.tier_limits(state.get("user_tier", "free"))["max_assets"]
+    allowed = P.limit(P.for_level(state.get("user_tier")), "portfolio.max_assets")
     universe = sorted(assets.ASSET_INFO)
     current = [t for t in state.get("selected_tickers") or [] if t in assets.ASSET_INFO]
     # A portfolio built elsewhere with more lines stays whole: it can be edited, not grown.
     limit = max(allowed, len(current))
     with st.container(key="panel_pf_build"):
         if len(current) > allowed:
-            note(f"Ce portefeuille compte {len(current)} lignes ; un compte gratuit en compose {allowed} au plus. "
+            note(f"Ce portefeuille compte {len(current)} lignes ; votre accès en compose {allowed} au plus. "
                  "Vous pouvez le modifier, pas l'agrandir.")
         chosen = st.multiselect(f"Lignes (au plus {limit})", universe, default=current, key="pf_tickers",
                                 format_func=lambda t: f"{t} · {_name(t)}", max_selections=limit,
@@ -740,12 +739,12 @@ def _asset_sheet(ticker: str, info: dict, email) -> None:
             rt.go(BUILD)
             st.rerun()
         return
-    allowed = core_config.tier_limits(state.get("user_tier", "free"))["max_assets"]
+    allowed = P.limit(P.for_level(state.get("user_tier")), "portfolio.max_assets")
     if ticker in tickers:
         note("Cet actif est déjà dans votre portefeuille de travail.")
         return
     if len(tickers) >= allowed:
-        note(f"Votre portefeuille de travail compte {len(tickers)} lignes ; un compte gratuit en compose {allowed} au "
+        note(f"Votre portefeuille de travail compte {len(tickers)} lignes ; votre accès en compose {allowed} au "
              "plus. Retirez-en une sur la page Construire pour faire de la place.")
         return
     if st.button("Ajouter à mon portefeuille de travail", key=f"pf_asset_add_{_slug(ticker)}", type="primary"):

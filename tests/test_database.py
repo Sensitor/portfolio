@@ -225,6 +225,9 @@ def test_every_user_method_is_scoped():
         # E-mailed reset and verification tokens: the same construction, the
         # same reasoning. The link is how the account is found.
         "account_token", "use_account_token",
+        # The newsletter's e-mailed links: the same construction, the same
+        # reasoning; `tests/test_newsletter.py` checks them.
+        "newsletter_confirm", "newsletter_stop",
         # The trading room's published sessions: content written by coaches for
         # everyone, not anyone's data. Drafts and authors are only returned to a
         # coach, which `tests/test_market.py` checks.
@@ -316,7 +319,8 @@ def test_user_lifecycle():
           counts == {"portfolios": 1, "snapshots": 1, "accounts": 1,
                      "trades": 2, "sessions": 0, "workspace": 1,
                      "lesson_progress": 0, "quiz_attempts": 0, "journal_entries": 1,
-                     "trading_plans": 1, "trade_reviews": 1},
+                     "trading_plans": 1, "trade_reviews": 1, "entitlements": 0, "user_roles": 0,
+                     "newsletter": 0},
           f"got {counts}")
     check("the plan and the requests are gone",
           store.get_trading_plan(ALICE) is None and store.review_requests(ALICE) == [])

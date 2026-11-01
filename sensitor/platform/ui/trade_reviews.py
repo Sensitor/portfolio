@@ -23,6 +23,7 @@ from ...trading import coaching as C
 from ...trading import review as R
 from ...trading.models import Trade
 from ...trading.setups import mistake_label, setup_label
+from ...core import permissions as P
 from .. import spaces
 from . import runtime as rt
 from . import trade_visuals as V
@@ -33,7 +34,7 @@ from .trading_journal import flash, lesson_ref, nav, show_flash
 
 def _quota(email: str) -> tuple[int, int]:
     store = rt.get_store()
-    quota = C.monthly_quota(rt.tier(email))
+    quota = P.limit(rt.member(email), "review.monthly_quota")
     return store.count_review_requests(email, C.month_start()), quota
 
 
@@ -324,7 +325,7 @@ def coach_page(catalog, email, route) -> None:
                 "Ce que les membres ont choisi d'envoyer, du plus ancien au plus récent. Un trade, son plan, "
                 "une question : rien d'autre de leur journal.")
     store = rt.get_store()
-    if not email or store is None or not store.is_coach(email):
+    if store is None or not rt.can(email, "review.answer"):
         notice("Accès réservé", "Cette page est réservée aux coachs de Sensitor.", "lock")
         footer()
         return

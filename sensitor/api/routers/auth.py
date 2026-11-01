@@ -9,6 +9,7 @@ here — there is one credential store and one verification path.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
 from ...core.auth import SESSION_DAYS, Auth
 from ..deps import (
@@ -119,7 +120,30 @@ def me(email: str = Depends(current_user),
     user = store.get_user(email) or {}
     return MeResponse(
         email=email,
-        tier=user.get("tier", "free"),
+        tier=store.access(email).level,          # computed from entitlements; the column is a cache
         display_name=user.get("display_name"),
         last_login_at=user.get("last_login_at"),
     )
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str = ""
+
+
+@router.get("/me/export")
+def export(email: str = Depends(current_user), store: Store = Depends(get_store)) -> dict:
+    """Everything stored for the caller, the same file as the account page's export."""
+    return store.export_user(email)
+
+
+@router.post("/me/delete")
+def delete_account(body: DeleteAccountRequest, email: str = Depends(current_user),
+                   auth: Auth = Depends(get_auth)) -> dict:
+    """
+    Delete the caller's account and everything filed under it, confirmed by the
+    password (a bearer token alone is not enough). Returns what was deleted.
+    """
+    counts = auth.delete_account(email, body.password) if auth.multi_user else None
+    if counts is None:
+        raise _REJECTED
+    return {"deleted": counts}

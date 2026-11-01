@@ -1037,3 +1037,50 @@ valued in euros inside a dollar portfolio is not read as dollars.
 
 The day's change skips them rather than counting them as unchanged: a price
 that has not been re-typed is not a price that did not move.
+
+---
+
+## 16. Access, the newsletter and the public site (P1)
+
+### One place decides access
+
+`sensitor/core/permissions.py` holds the levels (`visitor`, `free`, `premium`),
+the roles (`coach`, `admin`), the capabilities and the limits. Pages ask
+`can(member, capability)` or `limit(member, name)`; none compares a level string,
+which `tests/test_permissions.py` checks by reading the source. The values
+earlier versions wrote (`pro` and `premium` in `users.tier`, `PRO_EMAILS`) are
+read by `level_of` and nowhere else.
+
+The level comes from `entitlements`, one row per grant (source, reference,
+reason, start, optional end, revocation), never updated except to revoke it, so
+the table is also the trace. `users.tier` is a cache kept for the API and the
+mobile app. Roles live in `user_roles`; `users.role` is kept in step for the
+coach role until it can be dropped. Both tables are filled from the old columns
+on every open, idempotently (`connection._carry_access`).
+
+Every administrator write is checked in the `Store`'s own SQL
+(`EXISTS (… role = 'admin')`), like the coach's writes: the platform page and
+the API routes cannot grant anything the store refuses. An administrator does
+not read premium content by being one.
+
+### The newsletter
+
+`platform/newsletter.py` over a `newsletter` table keyed by address (a visitor
+can subscribe). Consent text and date are stored; the confirmation link is a
+fingerprinted token valid 48 hours and needs a button press, so a mail scanner
+that opens links subscribes nobody; the unsubscribe link works in one click.
+The provider (`integrations/brevo.py`, standard library only) is optional and
+told on confirmation and unsubscription.
+
+### The public site
+
+`sensitor/site/articles.py` reads `content/media/articles` with the Academy's
+front matter and block parser and enforces the house rules;
+`sensitor/site/build.py` writes static pages from the same catalogue as the
+platform. Lessons are listed and linked, not copied: formulas, simulators and
+quizzes stay in the platform.
+
+### Logs
+
+`core/logs.py` configures the `sensitor` logger on stderr and scrubs every
+formatted line, traceback included.

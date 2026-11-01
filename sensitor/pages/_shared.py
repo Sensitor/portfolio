@@ -54,6 +54,27 @@ def guard(ctx, lang: str) -> bool:
     return True
 
 
+def allowed(capability: str) -> bool:
+    """
+    Whether the level held in session (`user_tier`, set server-side from the
+    member's entitlements by either app) has this capability.
+    """
+    from ..core import permissions as P
+    return P.can(P.for_level(st.session_state.get("user_tier")), capability)
+
+
+def locked(capability: str, lang: str) -> None:
+    """The card a page shows instead of a feature the level does not include."""
+    from ..core import permissions as P
+    label = P.CAPABILITIES[capability].label
+    if lang == "fr":
+        empty_state("Accès Premium", f"{label} fait partie de l'accès Premium, attribué par Sensitor. "
+                    "Il n'existe aujourd'hui aucun abonnement payant.", icon="◇")
+    else:
+        empty_state("Premium access", "This feature is part of Premium access, granted by Sensitor. "
+                    "There is no paid subscription today.", icon="◇")
+
+
 def period_selector(ctx, key: str) -> str:
     """
     Horizontal period pills.
@@ -168,19 +189,31 @@ def single_asset_note(ctx) -> None:
 
 
 @st.cache_resource(show_spinner=False)
+def open_store():
+    """
+    The shared persistence layer, one per process.
+
+    Cached as a resource, not data: one connection per app process, reused across
+    reruns and sessions, and the same object for the platform, whose own opener
+    (`platform.ui.runtime`) calls this one. A failure raises, so it is not cached:
+    the next run tries again instead of keeping the database closed until the
+    process restarts.
+    """
+    from ..database import Store
+    return Store()
+
+
 def get_store():
     """
-    The shared persistence layer.
-
-    Cached as a resource, not data: one SQLite connection per app process, reused
-    across reruns and sessions. Returns None if the database cannot be opened —
-    a read-only filesystem, for instance — so the pages can degrade to a clear
-    message instead of failing on import.
+    The store, or None if the database cannot be opened (a read-only filesystem,
+    a server not reachable), so the pages can degrade to a clear message instead
+    of failing on import.
     """
     try:
-        from ..database import Store
-        return Store()
-    except Exception:                                   # noqa: BLE001
+        return open_store()
+    except Exception as exc:                            # noqa: BLE001
+        from ..core import logs
+        logs.get(__name__).error("database unavailable: %s", type(exc).__name__)
         return None
 
 

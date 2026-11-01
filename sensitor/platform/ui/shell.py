@@ -14,10 +14,14 @@ import streamlit.components.v1 as components
 from ...academy.content import ContentError
 from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
+from ...core import permissions as P
 from .. import brand, spaces
-from . import (account, home, journal_analysis, market_room, portfolio_space, psychology, spaces_view, theme,
+from . import (account, admin, home, journal_analysis, legal_pages, market_room, newsletter_pages, portfolio_space, psychology, spaces_view, theme,
                trade_reviews, trading_journal)
 from . import runtime as rt
+from ...core import logs
+
+log = logs.get(__name__)
 from .components import edition, esc, html
 
 RENDERERS = {
@@ -25,6 +29,9 @@ RENDERERS = {
     "account": account.render,
     "reset": account.reset_page,
     "verify": account.verify_page,
+    "mentions": legal_pages.RENDERERS["mentions"],
+    "conditions": legal_pages.RENDERERS["conditions"],
+    "confidentialite": legal_pages.RENDERERS["confidentialite"],
     "academy": academy.academy_home,
     "course": academy.course_page,
     "lesson": academy.lesson_page,
@@ -63,6 +70,10 @@ RENDERERS = {
     "journal_plan": trading_journal.plan_page,
     "journal_reviews": trade_reviews.reviews_page,
     "coach": trade_reviews.coach_page,
+    "admin": admin.render,
+    "newsletter": newsletter_pages.subscribe_page,
+    "newsletter_confirm": newsletter_pages.confirm_page,
+    "newsletter_stop": newsletter_pages.stop_page,
 }
 
 
@@ -86,11 +97,16 @@ def _sidebar(page: str, email: str | None, catalog) -> None:
                 rt.link(space.label, space.entry, key=f"{prefix}_{space.id}",
                         kind="primary" if active else "secondary", width="stretch")
         store = rt.get_store() if email else None
-        if store is not None and store.is_coach(email):
+        who_am_i = rt.member(email)
+        if store is not None and P.can(who_am_i, "review.answer"):
             pending = len(store.coach_queue(email, "pending"))
             html('<div class="sx-side-label">COACHING</div>')
             rt.link(f"File de revue · {pending}" if pending else "File de revue", "coach", key="nav_coach",
                     kind="primary" if page == "coach" else "secondary", width="stretch")
+        if store is not None and P.can(who_am_i, "admin.members"):
+            html('<div class="sx-side-label">GESTION</div>')
+            rt.link("Membres et accès", "admin", key="nav_admin",
+                    kind="primary" if page == "admin" else "secondary", width="stretch")
         html('<div class="sx-side-label">COMPTE</div>')
         rt.link("Mon compte" if email else "Se connecter", "account", key="nav_account",
                 kind="primary" if page == "account" else "secondary", width="stretch")
@@ -124,6 +140,13 @@ def main() -> None:
     email = rt.current_user()
     _sidebar(page, email, catalog)
     edition(spaces.edition_of(page))
-    RENDERERS.get(page, home.render)(catalog, email, route)
+    try:
+        RENDERERS.get(page, home.render)(catalog, email, route)
+    except Exception as exc:
+        # Streamlit's own control flow (rerun, stop) passes through untouched.
+        if type(exc).__module__.startswith("streamlit"):
+            raise
+        log.exception("page %s raised %s", page, type(exc).__name__)
+        raise
     _scroll_to_top()
     rt.flush_cookie()

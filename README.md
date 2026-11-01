@@ -65,8 +65,15 @@ None of these is needed by the app, and the API process needs no Streamlit.
 | `SENSITOR_AUTH` | `single` | `multi` for real accounts |
 | `SENSITOR_API_TOKEN` | *(unset)* | single-user API key; without it the API issues no sessions |
 | `SENSITOR_CORS_ORIGINS` | *(unset)* | comma-separated; never defaults to `*` |
-| `PRO_EMAILS` | *(unset)* | comma-separated addresses on the Pro tier |
-| `STRIPE_PAYMENT_LINK` | *(unset)* | the upgrade link |
+| `PRO_EMAILS` | *(unset)* | comma-separated addresses given Premium at sign-in (a « config » entitlement, once) |
+| `SENSITOR_PUBLIC_URL` | *(unset)* | the member area's address, for the links in e-mails |
+| `SENSITOR_SMTP_*`, `SENSITOR_MAIL_FROM` | *(unset)* | outgoing e-mail: verification, reset, newsletter confirmation |
+| `SENSITOR_BREVO_API_KEY`, `SENSITOR_BREVO_LIST_ID` | *(unset)* | optional newsletter provider |
+| `SENSITOR_LOG_LEVEL` | `INFO` | technical logs on stderr, scrubbed of personal data |
+| `SENSITOR_SITE_URL` | *(unset)* | the public site's address, for `scripts/build_site.py` |
+
+Access (levels, roles, capabilities, limits) is decided in one place,
+`sensitor/core/permissions.py`; there is no payment flow.
 
 ### The two authentication modes
 
@@ -77,8 +84,9 @@ open your own spreadsheet is theatre. The Account page says so plainly.
 **multi** — accounts have passwords (scrypt), sign-in verifies, repeated
 failures throttle, sessions expire, and no account can reach another's data.
 
-An unrecognised value falls back to **single**, not multi: a typo must not
-silently claim protection the deployment does not have.
+With a PostgreSQL URL configured, the default is **multi**, and an unrecognised
+value also means **multi**: a typo must not open a shared deployment without
+passwords.
 
 > Before putting this anywhere other people can reach: set `SENSITOR_AUTH=multi`,
 > put TLS in front of it, and point `SENSITOR_DB_PATH` at a persistent volume.
@@ -311,6 +319,11 @@ python tests/test_academy_api.py          #  92 checks — Academy and journal o
 python tests/test_academy_app.py          # 309 checks — platform pages, headless
 python tests/test_platform.py             #  74 checks — spaces registry, brand
 python tests/test_accounts.py             #  42 checks — reset, verification, e-mail
+python tests/test_permissions.py          # levels, entitlements, roles, admin page and routes
+python tests/test_newsletter.py           # double opt-in, export, deletion, scrubbed logs
+python tests/test_site.py                 # articles, the static site, sitemap and RSS
+python tests/test_legal.py                # the legal pages
+python tests/test_backup.py               # dump and restore
 python -m sensitor.academy.validate       # content check before publishing
 cd mobile && npm run test:integration     #  38 checks against a live server
 ```
@@ -333,8 +346,13 @@ platform is a second app from the same repository with main file
 `sensitor_app.py` and the same secrets.
 
 **A server.** Run the Streamlit app and, if you want the API, a separate
-uvicorn process against the same `SENSITOR_DB_PATH`. Put TLS in front of both.
+uvicorn process against the same database. Put TLS in front of both.
 Set `SENSITOR_AUTH=multi`.
+
+**The public site.** `python scripts/build_site.py --base-url … --app-url …`
+writes a static site from `content/` into `site/`, for any static host.
+See [docs/DEPLOY.md](docs/DEPLOY.md), sections 6 to 9, for backups, the
+pre-launch check, an own domain, the public site, the newsletter and the logs.
 
 ---
 

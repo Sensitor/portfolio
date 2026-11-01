@@ -25,7 +25,7 @@ from ..ui.components import (
 from ..ui.themes import INK, INK_2, INK_FAINT, INK_MUTED, PLOTLY_CONFIG, STATUS, html
 from ..core.i18n import na, tr
 from ..integrations.market_data import benchmark_label
-from ._shared import benchmark_selector, chart_with_reading, guard
+from ._shared import allowed, benchmark_selector, chart_with_reading, guard, locked
 
 # Crisis windows reach back to 2000, well before any portfolio's own window.
 _HISTORY_START = "1999-01-01"
@@ -36,6 +36,9 @@ def render_stress(ctx) -> None:
 
     page_header(tr("nav_stress", lang), tr("stress_sub", lang),
                 eyebrow=tr("product_short", lang))
+    if not allowed("portfolio.stress_test"):
+        locked("portfolio.stress_test", lang)
+        return
     if not guard(ctx, lang):
         return
 

@@ -109,7 +109,21 @@ curl -X POST localhost:8000/auth/sign-in \
 | `POST /auth/sign-up` | multi-user mode only; 409 if registered, 400 if weak |
 | `POST /auth/sign-out` | revoke this session; idempotent |
 | `POST /auth/sign-out-everywhere` | revoke all of the caller's sessions |
-| `GET /auth/me` | email, tier, last login |
+| `GET /auth/me` | email, level (`free` or `premium`, computed from the active entitlements), last login |
+| `GET /auth/me/export` | everything stored for the caller, the same file as the account page |
+| `POST /auth/me/delete` | `{"password": …}`: deletes the account and everything filed under it; 401 without the right password |
+
+### Admin
+
+Administrators only: every route answers 403 to anyone else, and the `Store`
+method behind it checks the role in its own SQL. A member's address travels in
+the body, never in the path.
+
+| | |
+|---|---|
+| `GET /admin/members?q=` | members: address, name, level, roles, dates; never a credential |
+| `POST /admin/access` | `{"email", "reason", "ends_at"?}`: grants Premium; 422 without a reason or for an unknown member |
+| `DELETE /admin/access/{id}` | revokes an active entitlement; 404 when there is none |
 
 ### Trading
 

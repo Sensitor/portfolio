@@ -6,7 +6,7 @@ duration_minutes = 14
 access = "member"
 status = "published"
 version = 1
-updated = 2026-10-17
+updated = 2026-10-30
 objectives = [
   "Calculer l'effet de frais annuels sur un capital à long terme.",
   "Intégrer un impôt sur les gains dans une simulation.",
@@ -18,6 +18,7 @@ sources = [
   "Calcul mensuel des frais prélevés sur l'encours ; impôt appliqué aux gains à la sortie, au taux retenu comme hypothèse.",
   "Autorité des marchés financiers (AMF), information des épargnants sur les frais des placements.",
   "Bogle, J. C. (2007). The Little Book of Common Sense Investing. Hoboken : Wiley.",
+  "impots.gouv.fr, « Les revenus mobiliers », modifiée le 8 avril 2026, consultée le 30 octobre 2026 : prélèvements sociaux à 18,6 % à compter du 1er janvier 2026.",
 ]
 +++
 
@@ -34,7 +35,7 @@ Les frais d'un placement sont souvent exprimés en pourcentage de l'encours, cha
 À la sortie, les gains sont souvent imposés. Le taux dépend du pays, du placement, de la durée de détention et parfois des revenus. En France, de nombreux revenus de l'épargne sont soumis à un prélèvement forfaitaire, et certaines enveloppes bénéficient d'une fiscalité réduite après une durée de détention ; les règles changent avec les lois de finances.
 
 ::: callout warning "Un taux d'impôt, une hypothèse"
-Les exemples de ce cours retiennent un impôt de 30 % sur les gains, appliqué une fois, à la sortie. C'est une hypothèse de calcul, pas une information fiscale : vérifiez le régime en vigueur pour votre situation, auprès de l'administration fiscale ou d'un professionnel.
+Les exemples de ce cours retiennent un impôt de 30 % sur les gains, appliqué une fois, à la sortie. C'est une hypothèse de calcul ronde, pas une information fiscale : en France, le prélèvement forfaitaire unique, qui était de 30 %, est de 31,4 % depuis la hausse des prélèvements sociaux à 18,6 % (impots.gouv.fr), et certaines enveloppes suivent d'autres règles. Vérifiez le régime en vigueur pour votre situation, auprès de l'administration fiscale ou d'un professionnel.
 :::
 
 ## À vous

@@ -33,7 +33,7 @@ def _mirror_secrets() -> None:
     known = (
         "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
         "SENSITOR_API_TOKEN", "SENSITOR_CORS_ORIGINS",
-        "PRO_EMAILS", "STRIPE_PAYMENT_LINK",
+        "PRO_EMAILS",
     )
     try:
         available = st.secrets
@@ -63,6 +63,7 @@ warnings.filterwarnings('ignore')
 # Engine, design system, visual components and the twelve Intelligence and
 # Workspace pages. Nothing below this line computes anything the package cannot.
 from sensitor.core import config as core_config
+from sensitor.core import permissions as P
 from sensitor.core.i18n import LEGACY_STRINGS, na
 from sensitor.investment import assets
 from sensitor.investment.currency import BASE_CURRENCIES, currency_symbol, mixed_currencies
@@ -82,19 +83,13 @@ from sensitor.pages import (
 )
 
 # =============================================================================
-# STRIPE / SUBSCRIPTION CONFIGURATION
+# ACCESS CONFIGURATION
 # =============================================================================
 
-# Configuration now lives in sensitor.core.config, which reads the environment
-# once and has no Streamlit dependency — the same settings serve the app, the
-# report generator and the future API. Re-bound to the original names so the
-# legacy pages below are untouched.
-STRIPE_CONFIG = {
-    'payment_link': core_config.STRIPE_PAYMENT_LINK,
-    'pro_price_monthly': core_config.PRO_PRICE_MONTHLY,
-}
+# Configuration lives in sensitor.core.config. There is no payment link: no
+# paid plan exists until a regulatory review has been done (CLAUDE.md), so the
+# Stripe button and price this app used to show are gone.
 PRO_EMAILS = core_config.PRO_EMAILS
-TIER_LIMITS = core_config.TIER_LIMITS
 
 
 # =============================================================================
@@ -138,8 +133,19 @@ MODEL_PORTFOLIOS = assets.MODEL_PORTFOLIOS
 # =============================================================================
 
 def resolve_tier(email: str) -> str:
-    """Entitlement for an email address. Delegates to sensitor.core.config."""
-    return core_config.resolve_tier(email)
+    """
+    The member's level, from their active entitlements: the same answer the
+    platform gets (`core.permissions`). `PRO_EMAILS` is turned into an
+    entitlement at sign-in (`core.auth`), so it is not read here.
+    """
+    from sensitor.pages._shared import get_store
+    store = get_store()
+    return store.access(email).level if store is not None and email else P.FREE
+
+
+def _who():
+    """The member known by the level held in session, for `P.can` and `P.limit`."""
+    return P.for_level(st.session_state.user_tier)
 
 
 
@@ -781,40 +787,35 @@ def render_enhanced_charts(analyzer, lang="en"):
         st.plotly_chart(fig, use_container_width=True)
 
 def render_upgrade_prompt(lang="en"):
-    """Upgrade CTA card for free users."""
-    price = STRIPE_CONFIG['pro_price_monthly']
-    link = STRIPE_CONFIG['payment_link']
-    title = "Upgrade to Pro" if lang == 'en' else "Passer à Pro"
+    """
+    What the extended access adds, for a free account. No price and no payment
+    link: there is no paid plan until a regulatory review has been done
+    (CLAUDE.md), and the extended access is granted by the Sensitor team
+    (`python -m sensitor.core.admin set-tier … premium`).
+    """
+    title = "Extended access" if lang == 'en' else "Accès étendu"
     sub = (
-        f"Unlock unlimited assets, portfolio optimisation, stress tests and more for ${price}/month."
+        "Extended access adds more assets per portfolio, optimisation and stress tests. "
+        "There is no paid plan: it is granted by the Sensitor team."
         if lang == 'en' else
-        f"Débloquez les actifs illimités, l'optimisation, les stress tests et plus encore pour {price} €/mois."
+        "L'accès étendu ajoute davantage d'actifs par portefeuille, l'optimisation et les stress tests. "
+        "Il n'y a pas d'abonnement payant : il est attribué par l'équipe Sensitor."
     )
     features = [
         ("Up to 50 assets per portfolio", "Jusqu'à 50 actifs par portefeuille"),
         ("Portfolio optimisation (Markowitz)", "Optimisation (Markowitz)"),
         ("Historical crisis stress tests", "Stress tests crises historiques"),
         ("Full Health Score breakdown", "Score de Santé détaillé"),
-        ("Unlimited analyses", "Analyses illimitées"),
     ]
     features_html = "".join(
         f"<div style='font-size:0.85rem;color:#1F4A72;margin:4px 0;'>&#10003; {f[0] if lang=='en' else f[1]}</div>"
         for f in features
     )
-    btn_html = (
-        f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:14px;'
-        f'padding:10px 28px;background:#1F4A72;color:#FFFDF8;'
-        f'border-radius:3px;font-weight:600;font-size:0.9rem;text-decoration:none;">{title} · ${price}/mo</a>'
-    ) if link else (
-        f'<div style="margin-top:14px;font-size:0.82rem;color:#1F4A72;">Contact us to upgrade</div>'
-    )
-
     st.markdown(f"""
     <div class="upgrade-card">
       <h3>{title}</h3>
       <p style="margin-bottom:12px;">{sub}</p>
       {features_html}
-      {btn_html}
     </div>
     """, unsafe_allow_html=True)
 
@@ -822,16 +823,16 @@ def render_upgrade_prompt(lang="en"):
 def render_paywall(feature_name, lang="en"):
     """Inline paywall block for locked features."""
     msg = (
-        f"**{feature_name}** is available on the Pro plan."
+        f"**{feature_name}** is available with extended access."
         if lang == 'en' else
-        f"**{feature_name}** est disponible sur le plan Pro."
+        f"**{feature_name}** est disponible avec l'accès étendu."
     )
     st.markdown(f"""
     <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-left:3px solid #855615;border-radius:3px;
                 padding:20px 24px;text-align:center;margin:12px 0;">
             <div style="font-weight:600;color:#0F1B26;margin-bottom:4px;">{feature_name}</div>
       <div style="font-size:0.87rem;color:#1F4A72;">
-        {'Available on Pro plan' if lang == 'en' else 'Disponible sur le plan Pro'}
+        {'Available with extended access' if lang == 'en' else "Disponible avec l'accès étendu"}
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1243,7 +1244,7 @@ def _sidebar(lang):
 
         # Tier badge
         tier = st.session_state.user_tier
-        tier_label = TIER_LIMITS[tier]['label']
+        tier_label = P.LEVEL_LABELS[P.level_of(tier)]
         email_display = st.session_state.user_email or ("Demo mode" if lang == 'en' else "Mode démo")
         st.markdown(
             f"<div style='font-size:0.78rem;color:rgba(255,253,248,0.6);margin-bottom:4px;'>{email_display}</div>"
@@ -1252,9 +1253,9 @@ def _sidebar(lang):
             f"letter-spacing:0.06em;text-transform:uppercase;'>{tier_label}</div>",
             unsafe_allow_html=True
         )
-        if tier == 'free':
+        if not P.is_premium(tier):
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-            if st.button("Upgrade to Pro" if lang == 'en' else "Passer à Pro",
+            if st.button("Premium access" if lang == 'en' else "Accès Premium",
                          use_container_width=True):
                 st.session_state.page = "account"
                 st.rerun()
@@ -1346,7 +1347,7 @@ def _account_page(lang, tier):
 
     if email:
         st.success(f"{s_tr('signed_in_as', lang)} **{email}** · "
-                   f"{TIER_LIMITS[tier]['label']}")
+                   f"{P.LEVEL_LABELS[P.level_of(tier)]}")
         cols = st.columns([1, 1, 3])
         with cols[0]:
             if st.button(s_tr("sign_out", lang), key="acct_out"):
@@ -1449,7 +1450,7 @@ def _clear_session():
     st.session_state.session_token = ""
     st.session_state.user_email = ""
     st.session_state.authenticated = False
-    st.session_state.user_tier = "free"
+    st.session_state.user_tier = P.FREE
     # The allocation on screen belongs to whoever just signed out. Their row
     # stays in the database and comes back when they return; what is dropped
     # here is the copy in memory, so the next person to use this browser does
@@ -1588,8 +1589,11 @@ def _restore_workspace(lang):
 def main():
     init_session_state()
     lang = st.session_state.language
+    # Read fresh on every run: a level granted or revoked since sign-in applies now.
+    if st.session_state.get("authenticated") and st.session_state.get("user_email"):
+        st.session_state.user_tier = resolve_tier(st.session_state.user_email)
     tier = st.session_state.user_tier
-    limits = TIER_LIMITS[tier]
+    who = _who()
 
     _restore_workspace(lang)
     _sidebar(lang)
@@ -1623,71 +1627,16 @@ def main():
         _account_page(lang, tier)
 
         st.markdown("---")
-        st.markdown("### Plans" if lang == 'en' else "### Abonnements")
-
-        col_free, col_pro = st.columns(2)
-        with col_free:
-            st.markdown("""
-            <div style="background:#FFFDF8;border:1px solid #D8D2C3;border-top:2px solid #0F1B26;border-radius:3px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:#0F1B26;margin-bottom:4px;">Free</div>
-              <div style="font-size:1.5rem;font-weight:800;color:#0F1B26;">$0<span style="font-size:0.9rem;color:#59636B;font-weight:400;">/mo</span></div>
-              <hr style="border-color:#D8D2C3;margin:12px 0;">
-              <div style="font-size:0.85rem;color:#59636B;">Up to 5 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Basic metrics &amp; charts</div>
-              <div style="font-size:0.85rem;color:#59636B;margin-top:4px;">Asset Library</div>
-            </div>""", unsafe_allow_html=True)
-
-        with col_pro:
-            price = STRIPE_CONFIG['pro_price_monthly']
-            link = STRIPE_CONFIG['payment_link']
-            btn = (
-                f'<a href="{link}" target="_blank" style="display:block;margin-top:14px;'
-                f'padding:10px 0;background:#FFFDF8;color:#0F1B26;'
-                f'border-radius:3px;font-weight:600;font-size:0.88rem;text-decoration:none;'
-                f'text-align:center;">Subscribe · ${price}/mo</a>'
-            ) if link else (
-                f'<div style="margin-top:14px;font-size:0.82rem;color:rgba(255,253,248,0.7);">'
-                f'Set STRIPE_PAYMENT_LINK env var to activate.</div>'
-            )
-            st.markdown(f"""
-            <div style="background:#0F1B26;border-top:2px solid #855615;border-radius:3px;padding:20px 22px;">
-              <div style="font-weight:700;font-size:1rem;color:#FFFDF8;margin-bottom:4px;">Pro</div>
-              <div style="font-size:1.5rem;font-weight:800;color:#FFFDF8;">${price}<span style="font-size:0.9rem;color:rgba(255,253,248,0.62);font-weight:400;">/mo</span></div>
-              <hr style="border-color:rgba(255,253,248,0.15);margin:12px 0;">
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);">Up to 50 assets per portfolio</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Portfolio optimisation (Markowitz)</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Crisis stress tests</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Full Health Score breakdown</div>
-              <div style="font-size:0.85rem;color:rgba(255,253,248,0.85);margin-top:4px;">Unlimited analyses</div>
-              {btn}
-            </div>""", unsafe_allow_html=True)
-
-        st.markdown("---")
-        how_label = "How Pro access works" if lang == 'en' else "Comment fonctionne l'accès Pro"
-        with st.expander(how_label):
-            st.markdown(
-                """
-**Step 1: Subscribe** via the button above (Stripe secure checkout).
-
-**Step 2: Send your email** to the app administrator so your email is added to the Pro list
-(or configure the `PRO_EMAILS` environment variable on Streamlit Cloud with your email).
-
-**Step 3: Log in** here with that email and your Pro features will unlock immediately.
-
-> For automated activation, set up a Stripe webhook pointing to your backend and write the
-> paying customer's email into the `PRO_EMAILS` environment variable.
-                """ if lang == 'en' else """
-**Étape 1 : Abonnez-vous** via le bouton ci-dessus (paiement sécurisé Stripe).
-
-**Étape 2 : Envoyez votre email** à l'administrateur pour être ajouté à la liste Pro
-(ou configurez la variable d'environnement `PRO_EMAILS` sur Streamlit Cloud avec votre email).
-
-**Étape 3 : Connectez-vous** ici avec cet email et vos fonctionnalités Pro s'activeront.
-
-> Pour une activation automatique, configurez un webhook Stripe vers votre backend
-> qui écrit l'email de l'abonné dans la variable `PRO_EMAILS`.
-                """
-            )
+        st.markdown("### Access" if lang == 'en' else "### Accès")
+        st.markdown(
+            ("Free access: up to 5 assets per portfolio, every analysis page. Extended access adds up to 50 "
+             "assets, optimisation and stress tests; there is no paid plan, and it is granted by the Sensitor "
+             "team on the same account as the platform."
+             if lang == 'en' else
+             "Accès gratuit : jusqu'à 5 actifs par portefeuille, toutes les pages d'analyse. L'accès étendu ajoute "
+             "jusqu'à 50 actifs, l'optimisation et les stress tests ; il n'y a pas d'abonnement payant, il est "
+             "attribué par l'équipe Sensitor, sur le même compte que la plateforme.")
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # ASSET LIBRARY PAGE
@@ -2152,7 +2101,7 @@ def main():
                 "Simulate historical crisis scenarios" if lang == 'en'
                 else "Simuler des scénarios de crise historiques",
             )
-            if limits['can_stress_test']:
+            if P.can(who, "portfolio.stress_test"):
                 if st.button(t("run_stress", lang), type="primary"):
                     with st.spinner("Running stress tests…" if lang == 'en' else "Calcul des stress tests…"):
                         stress_results = analyzer.stress_test_scenarios()
@@ -2179,14 +2128,15 @@ def main():
         title = t('new_analysis', lang)
         st.title(title)
 
-        max_assets = limits['max_assets']
+        max_assets = P.limit(who, "portfolio.max_assets")
         current_count = len(st.session_state.selected_tickers)
 
-        if tier == 'free' and current_count >= max_assets:
+        if not P.is_premium(tier) and current_count >= max_assets:
+            premium_max = P.LIMITS["portfolio.max_assets"][P.PREMIUM]
             st.warning(
-                f"Free plan: up to {max_assets} assets. Upgrade to Pro for up to 50."
+                f"Free access: up to {max_assets} assets. Premium access allows {premium_max}."
                 if lang == 'en' else
-                f"Plan Free: jusqu'à {max_assets} actifs. Passez à Pro pour 50."
+                f"Accès gratuit : jusqu'à {max_assets} actifs. L'accès Premium en compte {premium_max}."
             )
 
         tabs = st.tabs([t("search", lang), t("browse", lang)])
@@ -2320,7 +2270,7 @@ def main():
             st.info(t("welcome", lang))
 
         # Show upgrade banner if near limit
-        if tier == 'free' and current_count >= max_assets - 1:
+        if not P.is_premium(tier) and current_count >= max_assets - 1:
             render_upgrade_prompt(lang)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -2330,13 +2280,13 @@ def main():
         title = t('models', lang)
         st.title(title)
 
-        if tier == 'free':
+        if not P.can(who, "portfolio.models"):
             preview_note = (
-                "Model portfolios are available on the **Pro** plan. "
+                "Model portfolios are part of **Premium** access. "
                 "Here is a preview: upgrade to use them."
                 if lang == 'en' else
-                "Les portefeuilles modèles sont disponibles sur le plan **Pro**. "
-                "Voici un aperçu : passez à Pro pour les utiliser."
+                "Les portefeuilles modèles font partie de l'accès **Premium**. "
+                "Voici un aperçu."
             )
             st.info(preview_note)
 
@@ -2346,7 +2296,7 @@ def main():
             desc_key = "description_fr" if lang == 'fr' else "description_en"
             description = model_data.get(desc_key, model_data.get("description_en", ""))
 
-            if tier == 'pro':
+            if P.can(who, "portfolio.models"):
                 alloc_html = "".join(
                     f"<span style='display:inline-block;background:rgba(31,74,114,0.15);border-radius:8px;"
                     f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#33414D;"
@@ -2360,7 +2310,7 @@ def main():
                     f"<span style='display:inline-block;background:rgba(31,74,114,0.08);border-radius:8px;"
                     f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#59636B;"
                     f"margin:3px;border:1px solid rgba(31,74,114,0.15);filter:blur(0px);'>"
-                    f"🔒 {n} {locked_label} · Pro</span>"
+                    f"🔒 {n} {locked_label} · Premium</span>"
                 )
             ret_label = t("expected_return", lang)
             vol_label = t("volatility", lang)
@@ -2385,7 +2335,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-            if tier == 'pro':
+            if P.can(who, "portfolio.models"):
                 use_label = t("use_model", lang)
                 if st.button(use_label, key=f"use_{model_name}", use_container_width=False):
                     st.session_state.selected_tickers = list(model_data['allocation'].keys())
@@ -2406,7 +2356,7 @@ def main():
                             st.session_state.page = "overview"
                             st.rerun()
             else:
-                locked_msg = "Pro plan required" if lang == 'en' else "Plan Pro requis"
+                locked_msg = "Premium access required" if lang == 'en' else "Accès Premium requis"
                 st.caption(f"🔒 {locked_msg}")
 
             st.markdown("")
@@ -2661,7 +2611,7 @@ def main():
 
             st.markdown("---")
 
-            if not limits['can_optimize']:
+            if not P.can(who, "portfolio.optimize"):
                 render_paywall(
                     "Portfolio Optimisation" if lang == 'en' else "Optimisation du Portefeuille",
                     lang

@@ -292,7 +292,7 @@ def main() -> int:
         url = "/academy/courses/premiers-pas/lessons/budget-de-risque"
         check("premium, anonymous: 401", client.get(url).status_code == 401)
         check("premium, free account: 403", client.get(url, headers=h(bob)).status_code == 403)
-        Store(os.environ["SENSITOR_DB_PATH"]).upsert_user(BOB, tier="pro")
+        Store(os.environ["SENSITOR_DB_PATH"]).set_tier(BOB, "pro")
         check("premium, pro account: 200", client.get(url, headers=h(bob)).status_code == 200)
         quiz = client.get("/academy/quizzes/check-budget-de-risque", headers=h(alice))
         check("its quiz follows the lesson: 403 for a free account", quiz.status_code == 403)

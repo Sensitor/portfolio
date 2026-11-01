@@ -280,6 +280,29 @@ Complexité relative : **S** (moins d'une journée), **M** (quelques jours),
 - `main` est la branche déployée, et toute la suite passe en intégration
   continue.
 
+**Avancement P0 au 30 octobre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P0.1 | **à faire par vous** : adresse « Session pooler » dans les secrets, `SENSITOR_PUBLIC_URL`, SMTP | secrets Streamlit |
+| P0.2 | fait : reconnexion, fin de transaction après les lectures, une seule connexion par processus ; testé sur un vrai PostgreSQL | `database/postgres.py`, `repositories.py`, `pages/_shared.py`, `tests/test_db_errors.py` |
+| P0.3 | fait : sauvegarde et restauration en Python, testées sur SQLite et PostgreSQL ; **à faire par vous** : planifier la sauvegarde et la ranger chiffrée | `database/backup.py`, `tests/test_backup.py`, `docs/DEPLOY.md` §6 |
+| P0.4 | fait : `upsert_user` ne touche plus au niveau, `set_tier` dédié ; l'analyseur lit aussi `users.tier` | `repositories.py`, `core/admin.py`, `portfolio_optimizer_saas.py`, `tests/test_auth.py` |
+| P0.5 | fait : un compte sans mot de passe ne se réclame plus à l'inscription ; une session sans mot de passe n'est plus acceptée en multi ; premier mot de passe par lien e-mail | `core/auth.py`, `tests/test_auth.py` |
+| P0.6 | fait : `multi` par défaut dès qu'une base PostgreSQL est configurée ; une valeur inconnue vaut `multi` | `core/auth.py` |
+| P0.7 | fait : la déconnexion vide toute la session | `platform/ui/runtime.py`, `tests/test_portfolio_space.py` |
+| P0.8 | fait : masquage du mot de passe dans `describe()`, `.gitignore` complété | `database/connection.py`, `.gitignore` |
+| P0.9 | fait : plus de lien ni de prix d'abonnement dans l'analyseur ; `landing_page.html` et `DEPLOYMENT_GUIDE.md` archivés | `portfolio_optimizer_saas.py`, `docs/archive/` |
+| P0.10 | fait : trois pages légales reliées en pied de page, polices servies par l'application, statistiques Streamlit coupées ; **à faire par vous** : remplir `content/legal/editeur.toml`, faire relire les textes | `content/legal/`, `platform/legal.py`, `.streamlit/config.toml`, `static/fonts/`, `tests/test_legal.py` |
+| P0.11 | fait : 3 e-mails de réinitialisation ou de vérification par heure et par adresse ; compteur d'échecs remis à zéro à l'expiration du verrou | `core/auth.py`, `tests/test_accounts.py` |
+| P0.12 | **à faire par vous** : fusionner la branche dans `main`, déployer depuis `main`, choisir Python 3.11 dans les réglages de Streamlit Cloud | GitHub, Streamlit Cloud |
+| P0.13 | fait : 31,4 % confirmé sur impots.gouv.fr et cité dans les deux leçons, l'hypothèse ronde de 30 % expliquée ; relecture professionnelle conseillée | leçons `fiscalite-crypto`, `frais-impots` |
+| P0.14 | fait : workflow GitHub Actions, PostgreSQL compris | `.github/workflows/tests.yml` |
+| P0.15 | **décision à prendre par vous** : journal de démonstration et jeux de données synthétiques, étiquetés | voir l'audit §3 |
+
+Contrôle d'ensemble : `python -m sensitor.core.admin check`, lancé avec les
+variables de production, liste ce qui manque encore.
+
 ### P1 · fondations de la nouvelle offre
 
 | # | Tâche | Complexité |
@@ -310,6 +333,22 @@ Complexité relative : **S** (moins d'une journée), **M** (quelques jours),
   qui enfreint les règles de contenu.
 - L'application mobile fonctionne sans modification (tests d'intégration
   mobile verts).
+
+**Avancement P1 au 1er novembre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P1.1 | fait : `can()` et `limit()`, tables `entitlements` et `user_roles`, migration des valeurs `pro`, `premium`, du rôle coach et de `PRO_EMAILS` (droit « config » à la connexion) ; tous les contrôles passent par le module, un test le vérifie dans le code | `core/permissions.py`, `database/repositories.py`, `database/connection.py`, `tests/test_permissions.py` |
+| P1.2 | fait : rôle administrateur, page « Membres et accès » (recherche, attribution du Premium avec motif et date de fin, retrait, rôles), routes `/admin` de l'API ; refus côté serveur testé sur le `Store` et l'API | `platform/ui/admin.py`, `api/routers/admin.py` |
+| P1.3 | fait : optimisation, stress tests, allocations types et nombre de lignes rattachés aux capacités, dans la plateforme et l'analyseur (corrige A5) ; extrait des séances verrouillées masqué (corrige S5) | `pages/_shared.py`, `portfolio_space.py`, `portfolio_optimizer_saas.py`, `market_room.py` |
+| P1.4 | fait : niveau d'accès et rôles affichés, nom affiché, lettre dans la page Compte | `platform/ui/account.py` |
+| P1.5 | fait : consentement enregistré, double confirmation par bouton, désinscription en un clic, synchronisation Brevo facultative, export et suppression ; **à faire par vous** : SMTP, et une liste Brevo si vous voulez envoyer des campagnes | `platform/newsletter.py`, `integrations/brevo.py`, `tests/test_newsletter.py` |
+| P1.6 | fait : articles dans `content/media/articles` validés aux règles maison, générateur du site statique (accueil, à propos, Academy, articles, ressources, lettre, pages légales), sitemap, RSS, Open Graph ; **à faire par vous** : écrire les articles, choisir l'hébergeur statique et le domaine | `site/`, `scripts/build_site.py`, `tests/test_site.py`, `DEPLOY.md` §8 |
+| P1.7 | **à faire par vous** : choisir l'hébergeur et le domaine ; procédure écrite pour l'espace membre et l'API | `DEPLOY.md` §7 |
+| P1.8 | fait : export complet (accès, sessions, lettre, contenu écrit en tant que coach), suppression confirmée par le mot de passe, export et suppression dans l'API (corrige S6) | `repositories.py`, `core/auth.py`, `api/routers/auth.py` |
+| P1.9 | fait : journaux techniques sur la sortie d'erreur, nettoyés des adresses, jetons et adresses de base ; pages en erreur, base injoignable ou reconnectée, e-mails non envoyés, comptes verrouillés (corrige S7) | `core/logs.py` |
+| P1.10 | **décision à prendre par vous** : proposition écrite ; étiquette et invite Premium de la Bibliothèque corrigées | `docs/PREMIUM.md`, `academy/ui/library.py` |
+| P1.11 | fait : README, ARCHITECTURE, API, DEPLOY, CLAUDE.md | `docs/` |
 
 ### P2 · monétisation et accompagnement
 

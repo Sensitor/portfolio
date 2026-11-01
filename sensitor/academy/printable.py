@@ -11,7 +11,8 @@ from. The test suite compares it with the current source: editing a sheet
 without rebuilding its PDF fails the tests instead of shipping a stale file.
 
 The Markdown subset is the one the library uses: headings, paragraphs, bold and
-italic, bullet, numbered and task lists, tables and horizontal rules.
+italic, bullet, numbered and task lists, tables and horizontal rules; inline code
+and links (web addresses and site paths) for the public site and the legal pages.
 """
 
 from __future__ import annotations
@@ -46,10 +47,17 @@ def write_manifest(folder: Path, entries: dict[str, str]) -> None:
 
 # ── Markdown subset → HTML ───────────────────────────────────────────────────
 
+_LINK = re.compile(r"\[([^\]]+)\]\(((?:https?://|/|\?)[^\s)]+)\)")
+
+
 def _inline(text: str) -> str:
     out = html.escape(text, quote=False)
+    out = re.sub(r"`([^`]+)`", r"<code>\1</code>", out)
     out = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(r"(?<![*\w])\*(?!\s)(.+?)(?<!\s)\*(?![*\w])", r"<em>\1</em>", out)
+    # Links: absolute web addresses and site paths only (no `javascript:`).
+    # The text is already escaped (`&` is `&amp;`); only the quote is left to close off.
+    out = _LINK.sub(lambda m: f'<a href="{m.group(2).replace(chr(34), "&quot;")}">{m.group(1)}</a>', out)
     return out
 
 

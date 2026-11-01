@@ -85,6 +85,12 @@ a password. In `single` mode the email is a filing label and anyone who can
 reach the app can open any of it — which is correct on your own laptop and
 wrong on a public URL.
 
+Since 30 October 2026, a deployment with a PostgreSQL `SENSITOR_DB_URL` and no
+`SENSITOR_AUTH` runs in `multi` mode by default, and a value that is neither
+`single` nor `multi` (a typo) means `multi` too: single-user mode, which has no
+passwords, now has to be asked for in so many words. Set it anyway, so the
+intent is written down.
+
 ---
 
 ## 3. Moving what you already have
@@ -172,3 +178,123 @@ you two databases and one of them looks empty.
 
 Put TLS in front of anything that leaves your own network: the app sends a
 session token on every request.
+
+---
+
+## 6. Backups, and checking a deployment before it opens
+
+**Backups.** `python -m sensitor.database.backup dump <file>.json.gz` writes every
+row of every table to one gzipped JSON file, on either backend, with no
+PostgreSQL client tools; `restore <file>` writes it back into an *empty*
+database, in one transaction, and refuses a dump taken by a newer schema. Both
+take `--db` to name another database than the app's. A PostgreSQL dump restores
+into a SQLite file and the other way round, which is also how to inspect one.
+Tested on both backends (`tests/test_backup.py`).
+
+- Run it from a machine that can reach the database (your computer, with the
+  same `SENSITOR_DB_URL` as the app), daily or before every deployment, and keep
+  the files in encrypted storage, never in the repository (`.gitignore` covers
+  `sensitor-backup-*`): they hold every member's personal and financial data.
+- Your provider's own backups (Supabase, Neon) come in addition; check what your
+  plan keeps and for how long, and write that duration in
+  `content/legal/editeur.toml` (`sauvegardes_jours`), which the privacy policy
+  quotes.
+- Restore once into a scratch database to know the procedure works:
+  `python -m sensitor.database.backup restore <file> --db /tmp/essai.db`.
+
+**Before opening to members.** `python -m sensitor.core.admin check`, run with
+the production environment, lists what is still missing and exits 1 while
+anything is: a durable PostgreSQL database that answers, `multi` mode, an e-mail
+server, an `https` `SENSITOR_PUBLIC_URL`, and the legal pages' publisher details
+and review (`content/legal/editeur.toml`).
+
+**Connections.** The app keeps one PostgreSQL connection per process. If the
+server closes it (Neon suspending, the Supabase pooler's idle timeout), the next
+statement that opens a transaction reconnects and runs again; a drop in the
+middle of a write is raised and rolled back, never replayed. Reads end their
+transaction, so the shared connection never sits « idle in transaction ».
+Tested against a real server (`tests/test_db_errors.py` with `SENSITOR_TEST_PG`).
+
+**Fonts and usage statistics.** `.streamlit/config.toml` turns on static file
+serving, so the fonts come from `static/fonts/` (built by
+`scripts/build_fonts.py`) instead of Google, and turns off Streamlit's usage
+statistics: no visitor data leaves for a third party.
+
+
+**Administrators.** Name the first one from a machine that reaches the
+database: `python -m sensitor.core.admin set-role you@example.com admin`. The
+« Membres et accès » page then appears in the platform's sidebar for that
+account; it grants and revokes Premium (with a reason and an optional end) and
+names coaches and other administrators. `check` reports a deployment with no
+administrator.
+
+---
+
+## 7. The member area on its own domain (P1.7)
+
+Streamlit Community Cloud is fine to start, but it sleeps after inactivity and
+serves only `*.streamlit.app`. For `app.sensitor.fr`, run the same app on a host
+that does not sleep:
+
+| Host | Start command | Notes |
+|---|---|---|
+| Render (web service) | `streamlit run sensitor_app.py --server.port $PORT --server.address 0.0.0.0` | custom domain and TLS included; pick a paid instance so it does not sleep |
+| Railway | the same | custom domain and TLS included |
+| A VPS (Scaleway, OVH, Hetzner) | the same, behind Caddy or nginx | Caddy obtains the certificate by itself |
+
+Environment, on any of them: `SENSITOR_DB_URL` (the Supabase « Session pooler »
+URL), `SENSITOR_AUTH=multi`, `SENSITOR_PUBLIC_URL=https://app.sensitor.fr`, the
+`SENSITOR_SMTP_*` settings, and `PYTHON_VERSION=3.11` where the host asks for it.
+Point the domain with a `CNAME` record from `app` to the host's address. A
+reverse proxy must pass WebSockets (`Upgrade` and `Connection` headers), which
+Streamlit needs.
+
+**The API** (`sensitor/api`, for the mobile app and later the payment webhook)
+is a second service from the same repository:
+
+    pip install -r requirements.txt "fastapi>=0.110" "uvicorn>=0.27"
+    uvicorn sensitor.api.app:create_app --factory --host 0.0.0.0 --port $PORT
+
+with the same `SENSITOR_DB_URL` and `SENSITOR_AUTH`, on `api.sensitor.fr`, and
+`SENSITOR_CORS_ORIGINS` set to the origins allowed to call it. It shares the
+accounts and the sessions of the platform.
+
+---
+
+## 8. The public site (P1.6)
+
+`scripts/build_site.py` writes a static site from `content/` (articles in
+`content/media/articles`, the Academy's programme, the free sheets, the legal
+pages, `sitemap.xml`, `feed.xml`, `robots.txt`). Any static host builds it:
+
+| Setting | Value |
+|---|---|
+| Build command | `pip install -r requirements.txt && python scripts/build_site.py --base-url https://sensitor.fr --app-url https://app.sensitor.fr` |
+| Output folder | `site` |
+| Python | 3.11 |
+
+Cloudflare Pages, Netlify and GitHub Pages all accept this. The site has no
+script, no cookie and no third-party request; its fonts are the platform's own
+files. The newsletter button opens the platform's form
+(`?page=newsletter`). An article is published by setting `status = "published"`
+in its file; `python -m sensitor.academy.validate` refuses one that breaks the
+house rules (long dash, missing sources or review date, a tool or quiz block).
+
+---
+
+## 9. The newsletter and the logs
+
+**Newsletter.** Subscriptions work as soon as e-mail is configured: the form
+records the consent, sends a confirmation link valid 48 hours, and the
+subscription is active once the member presses « Confirmer » on that page.
+Every message carries a one-click unsubscribe link. To send campaigns, add a
+Brevo list: `SENSITOR_BREVO_API_KEY` and `SENSITOR_BREVO_LIST_ID` (secrets
+only). Confirmed addresses are then added to the list and removed on
+unsubscription. Fill `newsletter` in `content/legal/editeur.toml` with the
+provider's name; the privacy policy quotes it.
+
+**Logs.** The app writes technical events to the standard error stream (the
+host's log view): a page that raised, the database unreachable or reconnecting,
+an e-mail not sent, a provider that refused a call, an account locked. Every
+line is scrubbed of e-mail addresses, tokens, passwords and database URLs
+before it is written. `SENSITOR_LOG_LEVEL` sets the level (INFO by default).

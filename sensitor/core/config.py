@@ -31,32 +31,14 @@ DEFAULT_RISK_FREE_RATE = float(os.getenv("SENSITOR_RISK_FREE_RATE", "0.04"))
 # ── Persistence ──────────────────────────────────────────────────────────────
 DB_PATH = os.getenv("SENSITOR_DB_PATH", "sensitor_data.db")
 
-# ── Billing and entitlements ─────────────────────────────────────────────────
-STRIPE_PAYMENT_LINK = os.getenv("STRIPE_PAYMENT_LINK", "")
-PRO_PRICE_MONTHLY = 9.99
+# ── Access ───────────────────────────────────────────────────────────────────
+# No billing: no paid plan exists before a regulatory review (CLAUDE.md).
 
-# Comma-separated emails granted Pro: PRO_EMAILS=alice@x.com,bob@y.com
+# Comma-separated addresses granted Premium at sign-in, as a « config »
+# entitlement (`core.auth`). Lowercase, like every stored address.
+# PRO_EMAILS=alice@x.com,bob@y.com
 PRO_EMAILS = frozenset(
     e.strip().lower() for e in os.getenv("PRO_EMAILS", "").split(",") if e.strip()
 )
 
-TIER_LIMITS = {
-    "free": {"max_assets": 5, "can_optimize": False,
-             "can_stress_test": False, "label": "Free"},
-    "pro": {"max_assets": 50, "can_optimize": True,
-            "can_stress_test": True, "label": "Pro"},
-}
-
-
-def resolve_tier(email: str) -> str:
-    """
-    Entitlement for an email address.
-
-    Matching is lowercase so a user who types their address with different
-    capitalisation than the environment variable still gets what they paid for.
-    """
-    return "pro" if (email or "").strip().lower() in PRO_EMAILS else "free"
-
-
-def tier_limits(tier: str) -> dict:
-    return TIER_LIMITS.get(tier, TIER_LIMITS["free"])
+# Levels, capabilities and limits are in `core.permissions`.

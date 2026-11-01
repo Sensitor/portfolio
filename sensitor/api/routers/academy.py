@@ -48,8 +48,8 @@ _PREMIUM = HTTPException(status_code=status.HTTP_403_FORBIDDEN,
 
 
 def _tier(store: Store, email: str | None) -> str | None:
-    user = store.get_user(email) if email else None
-    return (user or {}).get("tier")
+    """The caller's level from their active entitlements (`core.permissions`), as the platform reads it."""
+    return store.access(email).level if email else None
 
 
 def _deny(email: str | None) -> HTTPException:

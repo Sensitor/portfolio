@@ -1,5 +1,6 @@
 """
-A PostgreSQL address as people paste it, and the page that says why it fails.
+A PostgreSQL address as people paste it, the page that says why it fails, and
+a connection the server drops.
 
     python tests/test_db_errors.py
 
@@ -22,6 +23,8 @@ os.environ["SENSITOR_DB_URL"] = f"postgresql://postgres:{SECRET}@db.nexistepas-s
 os.environ["SENSITOR_AUTH"] = "multi"
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
+
+TEST_PG = os.getenv("SENSITOR_TEST_PG", "")
 
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sensitor_app.py")
 CHECKS: list[tuple[str, bool, str]] = []
@@ -72,11 +75,118 @@ def main() -> int:
           str(app.exception[0].value)[:200] if app.exception else shown[-400:])
     check("the password appears nowhere on the page", SECRET not in shown and SECRET.rstrip("@") not in shown)
 
+    print("\nA connection the server drops (simulated)")
+    simulated_drops()
+    if TEST_PG:
+        print("\nA connection the server drops (real PostgreSQL)")
+        real_drops()
+    else:
+        print("\n(SENSITOR_TEST_PG not set: the real PostgreSQL checks are skipped)")
+
     failures = [c for c in CHECKS if not c[1]]
     print(f"\n{len(CHECKS)} checks, {len(failures)} failures")
     for name, _, detail in failures:
         print(f"  FAIL  {name}   {detail}")
     return 1 if failures else 0
+
+
+class _FakeCursor:
+    def __init__(self, conn):
+        self.conn = conn
+        self.description, self.rowcount = (("n",),), 1
+
+    def execute(self, sql, params=()):
+        import psycopg2
+        if self.conn.fail_next:
+            self.conn.fail_next = False
+            self.conn.closed = 2
+            raise psycopg2.OperationalError("server closed the connection unexpectedly")
+        self.conn.statements.append(sql)
+
+    def fetchall(self):
+        return [(1,)]
+
+
+class _FakeConn:
+    def __init__(self, log):
+        self.closed, self.fail_next, self.statements, self.autocommit = 0, False, [], True
+        log.append(self)
+
+    def cursor(self):
+        return _FakeCursor(self)
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+    def close(self):
+        self.closed = 1
+
+
+def simulated_drops() -> None:
+    import psycopg2
+    from sensitor.database.postgres import Connection
+
+    opened: list = []
+    conn = Connection("postgresql://u:p@h/db", connect=lambda: _FakeConn(opened))
+    conn.execute("SELECT 1")
+    conn.end_read()
+    opened[-1].fail_next = True
+    conn.execute("SELECT 2")
+    check("a read on a connection the server closed reopens it and succeeds",
+          len(opened) == 2 and opened[-1].statements == ["SELECT 2"] and conn.reconnects == 1)
+    conn.end_read()
+
+    conn.execute("INSERT INTO t VALUES (1)")
+    opened[-1].fail_next = True
+    try:
+        conn.execute("INSERT INTO t VALUES (2)")
+        raised = False
+    except psycopg2.OperationalError:
+        raised = True
+    check("a drop in the middle of a write is raised, never replayed on a new connection",
+          raised and len(opened) == 2)
+    conn.rollback()
+    conn.execute("INSERT INTO t VALUES (3)")
+    check("the next unit of work gets a fresh connection", len(opened) == 3
+          and opened[-1].statements == ["INSERT INTO t VALUES (3)"])
+
+
+def real_drops() -> None:
+    import psycopg2
+    from sensitor.database import Store
+
+    store = Store(TEST_PG)
+    store.upsert_user("coupure@example.com")
+
+    def kill() -> None:
+        pid = store._conn._conn.get_backend_pid()                 # noqa: SLF001
+        admin = psycopg2.connect(TEST_PG)
+        admin.autocommit = True
+        admin.cursor().execute("SELECT pg_terminate_backend(%s)", (pid,))
+        admin.close()
+
+    before = store._conn.reconnects                               # noqa: SLF001
+    kill()
+    check("after the server ends the connection, the next read works without a restart",
+          store.get_user("coupure@example.com") is not None and store._conn.reconnects == before + 1)  # noqa: SLF001
+    kill()
+    store.upsert_user("coupure-2@example.com")
+    check("and so does the next write", store.get_user("coupure-2@example.com") is not None)
+    idle = psycopg2.connect(TEST_PG)
+    cur = idle.cursor()
+    cur.execute("SELECT count(*) FROM pg_stat_activity WHERE state = 'idle in transaction' AND pid = %s",
+                (store._conn._conn.get_backend_pid(),))                # noqa: SLF001
+    stuck = cur.fetchone()[0]
+    idle.close()
+    check("a read leaves no transaction open on the shared connection", stuck == 0, str(stuck))
+    try:
+        store._read("SELECT * FROM no_such_table")                # noqa: SLF001
+    except Exception:                                             # noqa: BLE001
+        pass
+    check("a failed read does not block the next statements", store.get_user("coupure@example.com") is not None)
 
 
 if __name__ == "__main__":

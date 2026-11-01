@@ -24,8 +24,13 @@ def _cover(resource: Resource, index: int, *, big: bool = False) -> str:
             f'<span class="ck">Sensitor</span></div>')
 
 
+ACCESS_LABELS = {"public": "Libre", "member": "Membres", "premium": "Premium"}
+
+
 def _access_pill(resource: Resource) -> str:
-    return pill("Libre", "free") if resource.access == "public" else pill("Membres", "member", "lock")
+    if resource.access == "public":
+        return pill("Libre", "free")
+    return pill(ACCESS_LABELS.get(resource.access, "Membres"), "member", "lock")
 
 
 def book_row(resource: Resource, *, key: str, index: int = 0, compact: bool = False) -> None:
@@ -97,7 +102,7 @@ def resource_page(catalog: Catalog, email: str | None, route: dict) -> None:
         html('<dl class="sx-facts" style="margin-top:2rem">'
              f'<div><dt>Type</dt><dd>{esc(resource.kind_label)}</dd></div>'
              f'<div><dt>Thème</dt><dd>{esc(resource.category)}</dd></div>'
-             f'<div><dt>Accès</dt><dd>{ {"public": "Libre", "premium": "Premium"}.get(resource.access, "Membres") }</dd></div>'
+             f'<div><dt>Accès</dt><dd>{ACCESS_LABELS.get(resource.access, "Membres")}</dd></div>'
              f'<div><dt>Format</dt><dd>{"PDF et texte" if resource.pdf else "Texte (Markdown)"}</dd></div>'
              f'<div><dt>Auteur</dt><dd>{esc(resource.author)}</dd></div></dl>')
         if allowed:
@@ -110,6 +115,10 @@ def resource_page(catalog: Catalog, email: str | None, route: dict) -> None:
                                file_name=resource.filename, mime="text/markdown",
                                key=f"dl_{resource.id}", type="secondary" if resource.pdf else "primary",
                                width="stretch")
+        elif access.lock_reason(resource.access, email, rt.tier(email)) == access.UPGRADE:
+            # Signed in, without the level: asking to sign in again would be wrong.
+            note("Cette fiche fait partie de l'accès Premium, attribué par Sensitor. "
+                 "Il n'existe aujourd'hui aucun abonnement payant.")
         else:
             rt.link("Se connecter pour télécharger", "account", key=f"dl_lock_{resource.id}",
                     kind="primary", width="stretch")

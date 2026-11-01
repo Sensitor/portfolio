@@ -150,6 +150,17 @@ def main() -> int:
                 dashed.append(f"{who} · {label}")
     check("no long dash on the space's pages", not dashed, str(dashed))
 
+    print("\nOptimisation and stress tests follow the level (core.permissions)")
+    premium = token("premium@example.com")
+    store().set_tier("premium@example.com", "premium")
+    for page, title in (("pf_optimize", "Frontière Efficiente"), ("pf_stress", "Scénarios Historiques")):
+        free_view = run({"page": page}, alice, analyzer=analyzer)
+        check(f"{page}: a free account sees the Premium card, not the result",
+              "Accès Premium" in text(free_view) and title not in text(free_view) and not free_view.exception)
+        full_view = run({"page": page}, premium, analyzer=analyzer)
+        check(f"{page}: a premium account sees the page", title in text(full_view) and not full_view.exception,
+              error(full_view))
+
     overview = run({"page": "pf_overview"}, alice, analyzer=analyzer)
     body = text(overview)
     check("the overview carries its « Lecture » margin, in French",
@@ -175,7 +186,7 @@ def main() -> int:
     check("with an analysis, the building page shows it and offers to read it",
           "Portefeuille analysé" in text(built) and any(b.label == "Lire la vue d'ensemble" for b in built.button))
     check("a free account composes five lines; a larger allocation stays whole, and the page says so",
-          any("au plus 7" in m.label for m in built.multiselect) and "un compte gratuit en compose 5" in text(built))
+          any("au plus 7" in m.label for m in built.multiselect) and "votre accès en compose 5" in text(built))
     fresh = run({"page": "portfolio"}, token("carol@example.com"))
     check("a new free account is capped at five lines", any("au plus 5" in m.label for m in fresh.multiselect))
 
@@ -351,7 +362,7 @@ def main() -> int:
           and not any(b.key == "pf_asset_add_SPY" for b in same.button))
     full = run({"page": "pf_assets", "asset": "QQQ"}, gina)
     check("a free account at five lines is told so, with no button", len(before) + 1 == 5
-          and "un compte gratuit en compose 5 au plus" in page_text(full)
+          and "votre accès en compose 5 au plus" in page_text(full)
           and not any(b.key == "pf_asset_add_QQQ" for b in full.button), str(before))
     real = run({"page": "pf_assets", "asset": "VNQ"}, erin)
     real.number_input(key="pf_asset_qty_VNQ").set_value(3.0).run()
@@ -363,6 +374,28 @@ def main() -> int:
           str(real.session_state["real_portfolio_holdings"]))
     unknown = run({"page": "pf_assets", "asset": "NOPE"}, gina)
     check("an unknown asset says so", "n'est pas dans la bibliothèque" in page_text(unknown) and not unknown.exception)
+
+    print("\nA shared browser: what one member leaves, the next one does not get")
+    same = run({"page": "portfolio"}, erin)
+    held = dict(same.session_state["real_portfolio_holdings"])
+    same.session_state["ac_route"] = {"page": "account"}
+    same.run()
+    [b for b in same.button if b.key == "sign_out"][0].click().run()
+    def held_in(app, key):
+        return app.session_state[key] if key in app.session_state else None
+
+    gone = [k for k in ("real_portfolio_holdings", "manual_prices", "current_portfolio", "selected_tickers",
+                        "weights", "pf_valuation") if held_in(same, k)]
+    check("signing out drops the portfolio held in the session, not only the token",
+          bool(held) and not gone and "session_token" not in same.session_state, str(gone))
+    next_one = token("suivant@example.com")
+    same.session_state["session_token"] = next_one
+    same.session_state["ac_route"] = {"page": "portfolio"}
+    same.run()
+    mine = store().load_workspace("suivant@example.com")
+    check("the next member on the same browser sees none of it, and nothing is filed under them",
+          "APPARTEMENT" not in text(same) and not held_in(same, "real_portfolio_holdings")
+          and (mine is None or mine.is_empty), str(mine))
 
     print("\nThe separate app's navigation, translated")
     hop = run({"page": "pf_copilot"}, alice, analyzer=analyzer, state={"page": "simulator"})
