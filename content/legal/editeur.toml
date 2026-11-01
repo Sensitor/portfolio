@@ -22,3 +22,4 @@ contact_donnees = ""         # adresse pour exercer ses droits sur ses données 
 application = ""             # hébergeur de l'application : nom, adresse (ex. : Streamlit Community Cloud, Snowflake Inc.)
 base_de_donnees = ""         # hébergeur de la base : nom, adresse, région (ex. : Supabase, région UE)
 emails = ""                  # prestataire d'envoi des e-mails, s'il y en a un
+newsletter = ""              # prestataire d'envoi de la lettre (ex. : Brevo, Sendinblue SAS, Paris), ou le même que ci-dessus

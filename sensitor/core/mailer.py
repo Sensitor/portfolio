@@ -85,6 +85,8 @@ class SMTPTransport:
                     server.starttls(context=context)
                     self._deliver(server, message)
         except (smtplib.SMTPException, OSError) as exc:
+            from . import logs
+            logs.get(__name__).warning("e-mail not sent: %s", type(exc).__name__)
             raise MailError(str(exc)) from exc
 
     def _deliver(self, server, message: EmailMessage) -> None:

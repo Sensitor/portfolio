@@ -208,9 +208,10 @@ def test_analyzer() -> None:
 
 def test_core() -> None:
     print("\ncore")
-    check("tier resolves to free by default", config.resolve_tier("nobody@x.com") == "free")
-    check("unknown tier falls back to free limits",
-          config.tier_limits("nonsense") == config.TIER_LIMITS["free"])
+    from sensitor.core import permissions as P
+    check("an unknown level reads as the free level, with its limits",
+          P.level_of("nonsense") == P.FREE
+          and P.limit(P.for_level("nonsense"), "portfolio.max_assets") == P.LIMITS["portfolio.max_assets"][P.FREE])
     check("exceptions share one base",
           issubclass(config and SensitorError, Exception))
 

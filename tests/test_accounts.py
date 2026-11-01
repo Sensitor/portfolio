@@ -184,7 +184,7 @@ def test_upgrade() -> None:
     check("the journal table is there after the upgrade",
           store.add_journal_entry("old@example.com", kind="free", body="Première note.") > 0)
     check("the database is at the current version",
-          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 11)
+          store._read("PRAGMA user_version")[0][0] == SCHEMA_VERSION == 13)
 
     print("\nUpgrading a version-8 database (journal without routines)")
     path = os.path.join(WORK, "v8.db")

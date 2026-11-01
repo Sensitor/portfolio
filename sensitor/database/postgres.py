@@ -304,9 +304,15 @@ class Connection:
         self._conn.autocommit = False
         self._in_transaction = False
 
+    @staticmethod
+    def _log_reconnect(why: str) -> None:
+        from ..core import logs
+        logs.get(__name__).warning("database connection %s: reconnecting", why)
+
     def _run(self, work):
         """Run `work(cursor)`, reopening a dropped connection when that is safe."""
         if self._conn.closed:
+            self._log_reconnect("closed")
             self._open()
             self.reconnects += 1
         first = not self._in_transaction
@@ -316,6 +322,7 @@ class Connection:
         except self._errors:
             if not (self._conn.closed and first):
                 raise
+            self._log_reconnect("dropped during a statement")
             self._open()
             self.reconnects += 1
             cursor = self._conn.cursor()

@@ -232,6 +232,8 @@ def run_sync(store, email: str, *, login, password, server, path, offset, days) 
         st.error(f"MetaTrader 5 n'a pas pu être lu. Message du terminal : {exc}")
         return
     except Exception as exc:                                      # noqa: BLE001
+        from ...core import logs
+        logs.get(__name__).exception("terminal sync failed: %s", type(exc).__name__)
         st.error(f"La synchronisation a échoué : {exc}")
         return
     message = f"Synchronisation terminée : {result.summary('fr')}."

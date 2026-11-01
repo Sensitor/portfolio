@@ -85,6 +85,8 @@ def get_store():
         target = connection.target()
         _STORE_ERROR[:] = [postgres.explain(exc, target) if postgres.is_url(target)
                            else f"Fichier de base de données illisible : {type(exc).__name__}."]
+        from ...core import logs
+        logs.get(__name__).error("database unavailable: %s", _STORE_ERROR[0])
         return None
     _STORE_ERROR.clear()
     return store
@@ -111,11 +113,27 @@ def catalog() -> Catalog:
     return cached_catalog(os.getenv("SENSITOR_ACADEMY_CONTENT") or None)
 
 
-def tier(email: str | None) -> str:
-    """The signed-in member's tier, read fresh from the store; « free » for a visitor."""
+def member(email: str | None):
+    """
+    The signed-in member as `core.permissions` sees them (level from active
+    entitlements, roles), read fresh from the store on every run: nothing about
+    one member is cached for another. A visitor without an address or a store.
+    """
+    from ...core import permissions as P
     store = get_store()
-    user = store.get_user(email) if email and store is not None else None
-    return str((user or {}).get("tier") or "free")
+    if not email or store is None:
+        return P.VISITOR_MEMBER
+    return store.access(email)
+
+
+def can(email: str | None, capability: str) -> bool:
+    from ...core import permissions as P
+    return P.can(member(email), capability)
+
+
+def tier(email: str | None) -> str:
+    """The signed-in member's level (`core.permissions`): « visitor », « free » or « premium »."""
+    return member(email).level
 
 
 def _cookie_token() -> str | None:

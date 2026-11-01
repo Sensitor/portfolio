@@ -25,6 +25,7 @@ import threading
 from contextlib import contextmanager
 from dataclasses import asdict
 
+from ..core import permissions as P
 from .connection import connect, describe, now as _now, target
 from .models import (
     SCHEMA_VERSION, TRADE_COLUMNS, Portfolio, Snapshot, TradingAccount, Workspace,
@@ -94,10 +95,10 @@ class Store:
         """
         Record or refresh a user.
 
-        `tier` is the level of a *new* row only. An existing row keeps its level:
-        it is changed by `set_tier` alone, so a page that refreshes the row with
-        the level it happens to hold in session cannot undo a level set by an
-        administrator.
+        `tier` is ignored and kept for earlier callers: a new row is free, and a
+        level comes from entitlements only (`set_tier`, `grant_access`), so a
+        page that refreshes the row with the level it happens to hold in session
+        can neither raise nor undo one.
         """
         email = _email(email)
         if not email:
@@ -110,17 +111,231 @@ class Store:
                    ON CONFLICT(email) DO UPDATE SET
                      display_name = COALESCE(excluded.display_name, users.display_name),
                      updated_at = excluded.updated_at""",
-                (email, tier, display_name, now, now),
+                (email, P.FREE, display_name, now, now),
             )
 
-    def set_tier(self, email: str, tier: str) -> None:
-        """The one way to change a member's level (`admin set-tier`, later a verified payment)."""
+    def set_tier(self, email: str, tier: str, *, source: str = "manual", reference: str = "cli",
+                 reason: str = "") -> None:
+        """
+        The system's way to set a member's level, for trusted callers only: the
+        operator's command line, `PRO_EMAILS` at sign-in, later a verified
+        payment. Premium records an entitlement (unless one is already active);
+        free revokes every active one. An administrator in the platform goes
+        through `grant_access` and `revoke_access`, which check the role.
+        """
         email = _email(email)
         if not email:
             return
+        level = P.level_of(tier)
         with self._write() as conn:
             self._ensure_user(conn, email)
-            conn.execute("UPDATE users SET tier = ?, updated_at = ? WHERE email = ?", (tier, _now(), email))
+            stamp = _now()
+            if level == P.PREMIUM:
+                if self._active_entitlements(conn, email, stamp):
+                    return
+                conn.execute(
+                    "INSERT INTO entitlements (user_email, level, source, reference, reason, starts_at, created_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)", (email, P.PREMIUM, source, reference, reason, stamp, stamp))
+            else:
+                conn.execute("UPDATE entitlements SET revoked_at = ?, revoked_by = ? "
+                             "WHERE user_email = ? AND revoked_at IS NULL", (stamp, reference, email))
+            self._cache_tier(conn, email, stamp)
+
+    # ── Access: entitlements and roles ───────────────────────────────────────
+    #
+    # The level is computed from the active entitlements by
+    # `core.permissions.level_from`; `users.tier` is a cache of it for the API
+    # and the mobile app. Every administrator write checks the caller's role in
+    # its own SQL statement, like the coach's writes.
+
+    _ADMIN = "EXISTS (SELECT 1 FROM user_roles a WHERE a.user_email = ? AND a.role = 'admin')"
+
+    @staticmethod
+    def _active_entitlements(conn, email: str, stamp: str) -> list:
+        return conn.execute(
+            "SELECT id FROM entitlements WHERE user_email = ? AND revoked_at IS NULL AND starts_at <= ? "
+            "AND (ends_at IS NULL OR ends_at > ?)", (email, stamp, stamp)).fetchall()
+
+    def _cache_tier(self, conn, email: str, stamp: str) -> None:
+        rows = conn.execute("SELECT level, starts_at, ends_at, revoked_at FROM entitlements WHERE user_email = ?",
+                            (email,)).fetchall()
+        level = P.level_from([dict(r) for r in rows], stamp)
+        conn.execute("UPDATE users SET tier = ?, updated_at = ? WHERE email = ?", (level, stamp, email))
+
+    def entitlements(self, email: str) -> list[dict]:
+        """Every grant recorded for one member, the latest first, revoked and expired ones included."""
+        return [dict(r) for r in self._read(
+            "SELECT id, level, source, reference, reason, starts_at, ends_at, revoked_at, revoked_by, created_at "
+            "FROM entitlements WHERE user_email = ? ORDER BY created_at DESC, id DESC", (_email(email),))]
+
+    def roles(self, email: str) -> frozenset:
+        return frozenset(r["role"] for r in self._read(
+            "SELECT role FROM user_roles WHERE user_email = ?", (_email(email),)))
+
+    def access(self, email: str) -> P.Member:
+        """The member as the permissions module sees them: level from active entitlements, and roles."""
+        email = _email(email)
+        if not email:
+            return P.VISITOR_MEMBER
+        level = P.level_from(self.entitlements(email), _now())
+        return P.Member(email, level, self.roles(email))
+
+    def has_admin(self) -> bool:
+        """Whether anyone holds the administrator role (the pre-launch check asks)."""
+        return bool(self._count("SELECT COUNT(*) AS n FROM user_roles WHERE role = 'admin'"))
+
+    def is_admin(self, email: str) -> bool:
+        return P.ADMIN in self.roles(email)
+
+    def grant_role(self, email: str, role: str, *, granted_by: str = "cli") -> bool:
+        """System path (command line). False for an unknown address."""
+        if role not in P.ROLES:
+            raise ValueError("unknown role")
+        email = _email(email)
+        with self._write() as conn:
+            if not conn.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchall():
+                return False
+            conn.execute("INSERT INTO user_roles (user_email, role, granted_by, created_at) VALUES (?, ?, ?, ?) "
+                         "ON CONFLICT (user_email, role) DO NOTHING", (email, role, granted_by, _now()))
+            if role == P.COACH:
+                conn.execute("UPDATE users SET role = 'coach', updated_at = ? WHERE email = ?", (_now(), email))
+            return True
+
+    def revoke_role(self, email: str, role: str) -> bool:
+        if role not in P.ROLES:
+            raise ValueError("unknown role")
+        email = _email(email)
+        with self._write() as conn:
+            cursor = conn.execute("DELETE FROM user_roles WHERE user_email = ? AND role = ?", (email, role))
+            if role == P.COACH:
+                conn.execute("UPDATE users SET role = '', updated_at = ? WHERE email = ?", (_now(), email))
+            return cursor.rowcount > 0
+
+    def _member_row(self, row: dict, stamp: str) -> dict:
+        email = row["email"]
+        return {
+            "email": email, "display_name": row.get("display_name"),
+            "level": P.level_from(self.entitlements(email), stamp),
+            "roles": sorted(self.roles(email)),
+            "email_verified_at": row.get("email_verified_at"), "last_login_at": row.get("last_login_at"),
+            "created_at": row.get("created_at"),
+        }
+
+    def admin_members(self, email: str, *, query: str = "", limit: int = 200) -> list[dict] | None:
+        """
+        The members, for an administrator: address, name, level, roles, dates.
+        None for anyone else. Never the password hash or the throttling state.
+        """
+        if not self.is_admin(email):
+            return None
+        pattern = f"%{(query or '').strip().lower()}%"
+        rows = self._read(
+            "SELECT email, display_name, email_verified_at, last_login_at, created_at FROM users "
+            "WHERE LOWER(email) LIKE ? OR LOWER(COALESCE(display_name, '')) LIKE ? "
+            "ORDER BY created_at DESC, email LIMIT ?", (pattern, pattern, int(limit)))
+        stamp = _now()
+        return [self._member_row(dict(r), stamp) for r in rows]
+
+    def admin_member(self, email: str, member: str) -> dict | None:
+        """One member and their whole access history, for an administrator; None otherwise."""
+        if not self.is_admin(email):
+            return None
+        rows = self._read("SELECT email, display_name, email_verified_at, last_login_at, created_at "
+                          "FROM users WHERE email = ?", (_email(member),))
+        if not rows:
+            return None
+        item = self._member_row(dict(rows[0]), _now())
+        item["entitlements"] = self.entitlements(member)
+        return item
+
+    def admin_count(self, email: str) -> dict | None:
+        """Head counts for the administrator's page."""
+        if not self.is_admin(email):
+            return None
+        stamp = _now()
+        return {
+            "members": self._count("SELECT COUNT(*) AS n FROM users"),
+            "premium": self._count(
+                "SELECT COUNT(DISTINCT user_email) AS n FROM entitlements WHERE revoked_at IS NULL "
+                "AND starts_at <= ? AND (ends_at IS NULL OR ends_at > ?)", stamp, stamp),
+            "verified": self._count("SELECT COUNT(*) AS n FROM users WHERE email_verified_at IS NOT NULL"),
+        }
+
+    def grant_access(self, email: str, member: str, *, reason: str, ends_at: str | None = None) -> int | None:
+        """
+        An administrator gives `member` the premium level, with a reason and an
+        optional end. Returns the entitlement's id; None when `email` is not an
+        administrator, the member does not exist, or the reason is empty.
+        """
+        admin, member = _email(email), _email(member)
+        reason = (reason or "").strip()[:300]
+        if not reason or not member:
+            return None
+        stamp = _now()
+        if ends_at is not None and ends_at <= stamp:
+            raise ValueError("the end date is in the past")
+        with self._write() as conn:
+            cursor = conn.execute(
+                "INSERT INTO entitlements (user_email, level, source, reference, reason, starts_at, ends_at, "
+                "created_at) SELECT ?, 'premium', 'manual', ?, ?, ?, ?, ? "
+                f"WHERE {self._ADMIN} AND EXISTS (SELECT 1 FROM users u WHERE u.email = ?) RETURNING id",
+                (member, admin, reason, stamp, ends_at, stamp, admin, member))
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            self._cache_tier(conn, member, stamp)
+            return int(row[0])
+
+    def revoke_access(self, email: str, entitlement_id: int) -> bool:
+        """An administrator ends an active entitlement now. False otherwise."""
+        admin = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            owner = conn.execute("SELECT user_email FROM entitlements WHERE id = ? AND revoked_at IS NULL",
+                                 (int(entitlement_id),)).fetchall()
+            if not owner:
+                return False
+            cursor = conn.execute(
+                "UPDATE entitlements SET revoked_at = ?, revoked_by = ? "
+                f"WHERE id = ? AND revoked_at IS NULL AND {self._ADMIN}",
+                (stamp, admin, int(entitlement_id), admin))
+            if cursor.rowcount == 0:
+                return False
+            self._cache_tier(conn, owner[0][0], stamp)
+            return True
+
+    def admin_set_role(self, email: str, member: str, role: str, on: bool) -> bool:
+        """
+        An administrator names or removes a coach or an administrator. An
+        administrator cannot remove their own role, so the platform always keeps one.
+        """
+        if role not in P.ROLES:
+            raise ValueError("unknown role")
+        admin, member = _email(email), _email(member)
+        if not on and role == P.ADMIN and admin == member:
+            return False
+        stamp = _now()
+        with self._write() as conn:
+            if not conn.execute(f"SELECT 1 WHERE {self._ADMIN}", (admin,)).fetchall():
+                return False
+            if not conn.execute("SELECT 1 FROM users WHERE email = ?", (member,)).fetchall():
+                return False
+            if on:
+                conn.execute("INSERT INTO user_roles (user_email, role, granted_by, created_at) VALUES (?, ?, ?, ?) "
+                             "ON CONFLICT (user_email, role) DO NOTHING", (member, role, admin, stamp))
+            else:
+                conn.execute("DELETE FROM user_roles WHERE user_email = ? AND role = ?", (member, role))
+            if role == P.COACH:
+                conn.execute("UPDATE users SET role = ?, updated_at = ? WHERE email = ?",
+                             ("coach" if on else "", stamp, member))
+            return True
+
+    def set_display_name(self, email: str, name: str | None) -> None:
+        """The name shown on the member's pages; empty clears it. Trimmed to 60 characters."""
+        name = " ".join((name or "").split())[:60] or None
+        with self._write() as conn:
+            conn.execute("UPDATE users SET display_name = ?, updated_at = ? WHERE email = ?",
+                         (name, _now(), _email(email)))
 
     def get_user(self, email: str) -> dict | None:
         rows = self._read("SELECT * FROM users WHERE email = ?", (_email(email),))
@@ -186,6 +401,12 @@ class Store:
                 "SELECT COUNT(*) AS n FROM trading_plans WHERE user_email = ?", email),
             "trade_reviews": self._count(
                 "SELECT COUNT(*) AS n FROM trade_reviews WHERE user_email = ?", email),
+            "entitlements": self._count(
+                "SELECT COUNT(*) AS n FROM entitlements WHERE user_email = ?", email),
+            "user_roles": self._count(
+                "SELECT COUNT(*) AS n FROM user_roles WHERE user_email = ?", email),
+            "newsletter": self._count(
+                "SELECT COUNT(*) AS n FROM newsletter WHERE email = ?", email),
         }
 
         with self._write() as conn:
@@ -207,7 +428,15 @@ class Store:
             conn.execute("UPDATE trade_reviews SET coach_email = NULL WHERE coach_email = ?", (email,))
             # The same for the sessions a departing coach wrote: they stay with the room.
             conn.execute("UPDATE market_sessions SET author_email = NULL WHERE author_email = ?", (email,))
+            conn.execute("DELETE FROM entitlements WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM user_roles WHERE user_email = ?", (email,))
+            # A departing administrator's address leaves the grants they made: the
+            # trace keeps what was done and when, no longer by whom.
+            conn.execute("UPDATE entitlements SET reference = 'compte supprimé' WHERE reference = ?", (email,))
+            conn.execute("UPDATE entitlements SET revoked_by = 'compte supprimé' WHERE revoked_by = ?", (email,))
+            conn.execute("UPDATE user_roles SET granted_by = 'compte supprimé' WHERE granted_by = ?", (email,))
             conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM newsletter WHERE email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -242,8 +471,33 @@ class Store:
             "journal_entries": self.journal_entries(email, limit=100_000),
             "trading_plan": self.get_trading_plan(email),
             "trade_reviews": self.review_requests(email),
+            "entitlements": self.entitlements(email),
+            "roles": sorted(self.roles(email)),
+            "newsletter": self.newsletter(email),
+            # Where and when the account is signed in; never the token or its fingerprint.
+            "sessions": [{k: row.get(k) for k in ("created_at", "last_seen_at", "expires_at", "label")}
+                         for row in self.list_sessions(email)],
+            # What the person wrote as a coach: sessions of the trading room and answers to reviews.
+            "authored": self.authored_by(email),
             "schema_version": SCHEMA_VERSION,
         }
+
+    def authored_by(self, email: str) -> dict:
+        """
+        Content written by this person as a coach: the trading room's sessions
+        and the answers given to review requests (the answer only, not the
+        member's trade). Part of the export; on deletion it stays, without the
+        author's address (`delete_user`).
+        """
+        email = _email(email)
+        sessions = [self._market_row(r) for r in self._read(
+            "SELECT id, session_date, title, access, status, content, review, published_at, updated_at "
+            "FROM market_sessions WHERE author_email = ? ORDER BY session_date", (email,))]
+        answers = [{"id": r["id"], "answered_at": r["answered_at"],
+                    "feedback": None if r["feedback"] is None else json.loads(r["feedback"])}
+                   for r in self._read("SELECT id, answered_at, feedback FROM trade_reviews WHERE coach_email = ? "
+                                       "ORDER BY answered_at", (email,))]
+        return {"market_sessions": sessions, "review_answers": answers}
 
     # ── Academy ──────────────────────────────────────────────────────────────
     #
@@ -460,16 +714,18 @@ class Store:
     # Coaches.
 
     def set_role(self, email: str, role: str) -> bool:
+        """The coach role on or off (`''`), kept for the earlier callers; `grant_role` is the general form."""
         if role not in ("", "coach"):
             raise ValueError("role must be '' or 'coach'")
-        with self._write() as conn:
-            cursor = conn.execute("UPDATE users SET role = ?, updated_at = ? WHERE email = ?",
-                                  (role, _now(), _email(email)))
-            return cursor.rowcount > 0
+        if role:
+            return self.grant_role(email, P.COACH)
+        if not self.get_user(email):
+            return False
+        self.revoke_role(email, P.COACH)
+        return True
 
     def is_coach(self, email: str) -> bool:
-        return bool(self._count("SELECT COUNT(*) AS n FROM users WHERE email = ? AND role = 'coach'",
-                                _email(email)))
+        return P.COACH in self.roles(email)
 
     def coach_queue(self, email: str, status: str = "pending", *, limit: int = 200) -> list[dict]:
         """
@@ -483,7 +739,7 @@ class Store:
         rows = self._read(
             "SELECT r.id, r.user_email, r.trade_id, r.trade, r.auto_review, r.plan, r.question, "
             "r.status, r.feedback, r.created_at, r.answered_at FROM trade_reviews r "
-            "WHERE r.status = ? AND EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach') "
+            "WHERE r.status = ? AND EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach') "
             f"ORDER BY {order} LIMIT ?", (status, _email(email), int(limit)))
         return [self._review_row(r) for r in rows]
 
@@ -494,7 +750,7 @@ class Store:
             cursor = conn.execute(
                 "UPDATE trade_reviews SET status = 'answered', coach_email = ?, feedback = ?, "
                 "answered_at = ? WHERE id = ? AND status = 'pending' "
-                "AND EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach')",
+                "AND EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')",
                 (coach_email, json.dumps(feedback, ensure_ascii=False), _now(), int(review_id),
                  coach_email))
             return cursor.rowcount > 0
@@ -505,7 +761,7 @@ class Store:
     # each session; the access check itself is the page's (academy.access). Every
     # write is gated on the coach role in SQL, like the review queue.
 
-    _COACH = "EXISTS (SELECT 1 FROM users c WHERE c.email = ? AND c.role = 'coach')"
+    _COACH = "EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')"
 
     @staticmethod
     def _market_row(row) -> dict:
@@ -610,6 +866,101 @@ class Store:
         status = "" if is_coach else " AND status = 'published'"
         rows = self._read(f"SELECT {columns} FROM market_sessions WHERE id = ?{status}", (int(session_id),))
         return self._market_row(rows[0]) if rows else None
+
+    # ── Newsletter ───────────────────────────────────────────────────────────
+    #
+    # Keyed by address (a visitor can subscribe). Active once confirmed by the
+    # e-mailed link; the wording accepted and its date are the proof of consent.
+    # The service around these methods is `platform.newsletter`.
+
+    _NEWSLETTER_PUBLIC = ("email, status, source, consent_text, consent_at, confirmed_at, unsubscribed_at, "
+                          "provider_synced_at, created_at")
+
+    def newsletter(self, email: str) -> dict | None:
+        """One address's subscription, without its token fingerprints."""
+        rows = self._read(f"SELECT {self._NEWSLETTER_PUBLIC} FROM newsletter WHERE email = ?", (_email(email),))
+        return dict(rows[0]) if rows else None
+
+    def newsletter_request(self, email: str, *, consent_text: str, source: str, confirm_fingerprint: str,
+                           unsubscribe_fingerprint: str, expires_at: str, resend_after: str) -> str:
+        """
+        Record a request to subscribe, awaiting confirmation. Returns « pending »
+        when a confirmation should be sent, « confirmed » when the address
+        already is (nothing to send), « throttled » when a link was sent after
+        `resend_after` (nothing sent, so the form cannot flood a mailbox).
+        """
+        email = _email(email)
+        stamp = _now()
+        with self._write() as conn:
+            rows = conn.execute("SELECT status, confirm_sent_at FROM newsletter WHERE email = ?", (email,)).fetchall()
+            if rows and rows[0][0] == "confirmed":
+                return "confirmed"
+            if rows and rows[0][0] == "pending" and (rows[0][1] or "") > resend_after:
+                return "throttled"
+            if rows:
+                conn.execute(
+                    "UPDATE newsletter SET status = 'pending', source = ?, consent_text = ?, consent_at = ?, "
+                    "confirm_fingerprint = ?, confirm_expires_at = ?, confirm_sent_at = ?, confirmed_at = NULL, "
+                    "unsubscribe_fingerprint = ?, unsubscribed_at = NULL, updated_at = ? WHERE email = ?",
+                    (source, consent_text, stamp, confirm_fingerprint, expires_at, stamp, unsubscribe_fingerprint,
+                     stamp, email))
+            else:
+                conn.execute(
+                    "INSERT INTO newsletter (email, status, source, consent_text, consent_at, confirm_fingerprint, "
+                    "confirm_expires_at, confirm_sent_at, unsubscribe_fingerprint, created_at, updated_at) "
+                    "VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (email, source, consent_text, stamp, confirm_fingerprint, expires_at, stamp,
+                     unsubscribe_fingerprint, stamp, stamp))
+            return "pending"
+
+    def newsletter_confirm(self, fingerprint: str) -> str | None:
+        """
+        Confirm by the e-mailed link's fingerprint: the address, or None for an
+        unknown, used or expired link. The link works once.
+        """
+        stamp = _now()
+        with self._write() as conn:
+            rows = conn.execute("SELECT email FROM newsletter WHERE confirm_fingerprint = ? AND status = 'pending' "
+                                "AND confirm_expires_at > ?", (fingerprint, stamp)).fetchall()
+            if not rows:
+                return None
+            conn.execute("UPDATE newsletter SET status = 'confirmed', confirmed_at = ?, confirm_fingerprint = NULL, "
+                         "updated_at = ? WHERE email = ?", (stamp, stamp, rows[0][0]))
+            return rows[0][0]
+
+    def newsletter_stop(self, fingerprint: str) -> str | None:
+        """One-click unsubscribe by the link every message carries: the address, or None."""
+        stamp = _now()
+        with self._write() as conn:
+            rows = conn.execute("SELECT email FROM newsletter WHERE unsubscribe_fingerprint = ?",
+                                (fingerprint,)).fetchall()
+            if not rows:
+                return None
+            conn.execute("UPDATE newsletter SET status = 'unsubscribed', unsubscribed_at = COALESCE("
+                         "CASE WHEN status = 'unsubscribed' THEN unsubscribed_at END, ?), confirm_fingerprint = NULL, "
+                         "updated_at = ? WHERE email = ?", (stamp, stamp, rows[0][0]))
+            return rows[0][0]
+
+    def newsletter_unsubscribe(self, email: str) -> bool:
+        """From the member's account page."""
+        stamp = _now()
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE newsletter SET status = 'unsubscribed', unsubscribed_at = ?, "
+                                  "confirm_fingerprint = NULL, updated_at = ? WHERE email = ? "
+                                  "AND status != 'unsubscribed'", (stamp, stamp, _email(email)))
+            return cursor.rowcount > 0
+
+    def newsletter_synced(self, email: str) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE newsletter SET provider_synced_at = ? WHERE email = ?", (_now(), _email(email)))
+
+    def newsletter_subscribers(self, email: str) -> list[dict] | None:
+        """The confirmed addresses with their proof of consent, for an administrator; None otherwise."""
+        if not self.is_admin(email):
+            return None
+        return [dict(r) for r in self._read(
+            "SELECT email, source, consent_at, confirmed_at FROM newsletter WHERE status = 'confirmed' "
+            "ORDER BY confirmed_at")]
 
     # ── Single-use account tokens ────────────────────────────────────────────
 

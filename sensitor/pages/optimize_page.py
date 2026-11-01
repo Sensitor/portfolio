@@ -22,7 +22,7 @@ from ..ui.components import (
 )
 from ..ui.themes import PLOTLY_CONFIG, PLOTLY_CONFIG_ZOOM, STATUS
 from ..core.i18n import define, period_label, tr
-from ._shared import chart_with_reading, guard, period_selector
+from ._shared import allowed, chart_with_reading, guard, locked, period_selector
 
 
 def render_optimize(ctx) -> None:
@@ -30,6 +30,9 @@ def render_optimize(ctx) -> None:
 
     page_header(tr("nav_optimize", lang), tr("optimize_sub", lang),
                 eyebrow=tr("product_short", lang))
+    if not allowed("portfolio.optimize"):
+        locked("portfolio.optimize", lang)
+        return
     if not guard(ctx, lang):
         return
 

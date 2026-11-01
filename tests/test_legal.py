@@ -35,6 +35,8 @@ TABLE_WORDS = {
     "trading_accounts": "numéro du compte", "trades": "Votre journal de trading", "lesson_progress": "leçons terminées",
     "quiz_attempts": "réponses aux quiz", "journal_entries": "journal de réflexion", "trading_plans": "plan de trading",
     "trade_reviews": "demandes de revue", "market_sessions": "salle des marchés",
+    "entitlements": "attribution de l'accès Premium", "user_roles": "vos rôles",
+    "newsletter": "texte exact du consentement",
 }
 
 

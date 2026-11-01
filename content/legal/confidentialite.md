@@ -17,6 +17,8 @@ Sensitor ne conserve que ce que vous lui confiez pour utiliser le service. Rien 
 - **Votre journal de réflexion**, dans l'espace Psychologie et discipline : vos notes, votre humeur et les points de votre routine.
 - **Votre journal de trading** : les trades saisis, importés ou synchronisés (instrument, sens, prix, taille, stop, objectif, résultat, frais), vos annotations (setups, écarts, émotions, notes), votre plan de trading, et, pour un import MetaTrader 5, le numéro du compte et les données brutes du courtier pour chaque position. Le mot de passe investisseur demandé pour une synchronisation MetaTrader 5 sert à la connexion et n'est jamais conservé.
 - **Vos portefeuilles** : les allocations enregistrées, leurs historiques, le portefeuille de travail, les quantités et les prix que vous saisissez à la main.
+- **Votre accès** : chaque attribution de l'accès Premium, avec sa date, sa durée, son motif et l'administrateur qui l'a décidée, ainsi que son éventuel retrait ; vos rôles s'il y a lieu (coach, administrateur).
+- **La lettre de Sensitor**, si vous vous y inscrivez, avec ou sans compte : votre adresse, le texte exact du consentement que vous avez accepté et sa date, la date de confirmation et, le cas échéant, celle de votre désinscription. Une inscription n'est active qu'après confirmation par le lien envoyé à votre adresse.
 - **Vos demandes de revue** : quand vous envoyez un trade à un coach, une copie de ce trade, de sa revue automatique, de votre plan et de votre question.
 
 Sensitor ne demande jamais de phrase de récupération, de clé privée ni de mot de passe d'exchange, et n'en conserve pas.
@@ -25,13 +27,14 @@ Sensitor ne demande jamais de phrase de récupération, de clé privée ni de mo
 
 - Pour vous fournir le service que vous utilisez : votre compte, votre progression, vos journaux et vos analyses. Base légale : l'exécution du service auquel vous vous inscrivez.
 - Pour la sécurité des comptes : sessions, verrouillage après plusieurs échecs de connexion, liens de réinitialisation à usage unique. Base légale : notre intérêt légitime à protéger vos données.
-- Pour vous écrire uniquement les e-mails liés à votre compte : vérification de votre adresse et mot de passe oublié.
+- Pour vous écrire les e-mails liés à votre compte : vérification de votre adresse et mot de passe oublié.
+- Pour vous envoyer la lettre, si vous l'avez demandée et confirmée. Base légale : votre consentement, que vous retirez à tout moment en un clic.
 
 ## Qui y a accès
 
 - **Vous seul**, pour vos journaux, vos trades, vos portefeuilles et votre progression : un autre membre n'y a jamais accès.
 - **Un coach Sensitor**, pour les seuls trades que vous choisissez de lui envoyer, sous un pseudonyme : il ne voit pas votre adresse ni le reste de votre journal.
-- **Nos hébergeurs**, qui stockent les données pour notre compte : {hebergement.application} pour l'application, {hebergement.base_de_donnees} pour la base de données, {hebergement.emails} pour l'envoi des e-mails.
+- **Nos hébergeurs**, qui stockent les données pour notre compte : {hebergement.application} pour l'application, {hebergement.base_de_donnees} pour la base de données, {hebergement.emails} pour l'envoi des e-mails, {hebergement.newsletter} pour l'envoi de la lettre.
 - Pour afficher les cours des actifs que vous analysez, nos serveurs interrogent un fournisseur de données de marché avec les seuls symboles des actifs (par exemple « SPY ») : aucune donnée vous concernant ne lui est transmise.
 
 Si un hébergeur traite des données hors de l'Union européenne, ce transfert est encadré par les garanties prévues par le RGPD (décision d'adéquation ou clauses contractuelles types) : {hebergement.application}.
@@ -41,6 +44,7 @@ Si un hébergeur traite des données hors de l'Union européenne, ce transfert e
 - Vos données sont conservées tant que votre compte existe.
 - Une session expire au bout de 30 jours. Un lien de réinitialisation expire au bout d'une heure, un lien de vérification au bout de 48 heures.
 - Quand vous supprimez votre compte, toutes vos données sont effacées immédiatement de la base. Elles peuvent subsister dans les sauvegardes jusqu'à leur rotation, au plus {sauvegardes_jours} jours.
+- Après une désinscription de la lettre, l'adresse, le consentement et la date de désinscription sont conservés pour prouver que votre choix a été respecté ; la suppression du compte, ou une demande écrite, les efface.
 - Les revues qu'un coach a rédigées et les séances de la salle des marchés restent publiées sans le nom de leur auteur si son compte est supprimé.
 
 ## Cookies
@@ -52,7 +56,8 @@ Sensitor dépose un seul cookie, `sensitor_session`, qui garde votre connexion d
 Vous pouvez à tout moment :
 
 - **télécharger toutes vos données** dans un fichier, depuis la page « Compte » (droit d'accès et à la portabilité) ;
-- **supprimer votre compte** et tout ce qui s'y rattache, depuis la même page (droit à l'effacement) ;
+- **supprimer votre compte** et tout ce qui s'y rattache, depuis la même page, en confirmant avec votre mot de passe (droit à l'effacement) ;
+- **vous désinscrire de la lettre** en un clic, depuis chaque message ou depuis la page « Compte » ;
 - corriger une donnée, vous opposer à un traitement ou en demander la limitation, en écrivant à {editeur.contact_donnees}.
 
 Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (www.cnil.fr).

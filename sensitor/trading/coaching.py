@@ -12,7 +12,7 @@ whether the member's own plan was followed, with the lessons to work on. It is
 about a closed trade, never a recommendation on a future one, which is the line
 between education and personalised investment advice; the coach's form says so.
 
-Quotas are per calendar month and per tier. There is no billing: the tier is set
+Quotas are per calendar month and per level, in `core.permissions`. There is no billing: the tier is set
 by hand, like every other access level, and the numbers below are a starting
 point for the founder to adjust.
 
@@ -27,7 +27,6 @@ from datetime import datetime, timezone
 
 from .models import Trade
 
-MONTHLY_QUOTA = {"free": 1, "member": 1, "pro": 8, "premium": 8}
 MAX_QUESTION = 1500
 MAX_TEXT = 4000
 MAX_LESSONS = 4
@@ -44,7 +43,9 @@ _LESSON = re.compile(r"^lesson:[a-z0-9-]+/[a-z0-9-]+$")
 
 
 def monthly_quota(tier: str | None) -> int:
-    return MONTHLY_QUOTA.get((tier or "free").strip().lower(), MONTHLY_QUOTA["free"])
+    """Requests a month for a member at this level (`core.permissions.LIMITS`)."""
+    from ..core import permissions as P
+    return P.limit(P.for_level(tier or P.FREE), "review.monthly_quota")
 
 
 def month_start(now: datetime | None = None) -> str:

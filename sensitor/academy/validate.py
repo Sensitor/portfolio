@@ -4,8 +4,9 @@ Check the content tree before publishing.
     python -m sensitor.academy.validate
 
 Lists every structural problem (broken references, answer keys with no right
-answer, missing files) and every published lesson that falls short of the
-editorial standard. Exits non-zero if anything is found, so it can run in CI.
+answer, missing files), every published lesson that falls short of the
+editorial standard, and every problem in the public site's articles
+(`content/media/articles`). Exits non-zero if anything is found, so it can run in CI.
 """
 
 from __future__ import annotations
@@ -16,7 +17,9 @@ from .content import CONTENT_ROOT, load_catalog, validate
 
 
 def main() -> int:
+    from ..site import articles
     problems = validate(include_drafts=True)
+    problems += articles.load()[1]
     if problems:
         print(f"{len(problems)} problème(s) dans {CONTENT_ROOT} :")
         for problem in problems:
@@ -27,7 +30,8 @@ def main() -> int:
     questions = sum(len(q.questions) for q in catalog.quizzes.values())
     print(f"Contenu valide : {len(catalog.courses)} cours, {lessons} leçons publiées, "
           f"{len(catalog.quizzes)} quiz ({questions} questions), "
-          f"{len(catalog.exercises)} exercice(s), {len(catalog.resources)} ressource(s).")
+          f"{len(catalog.exercises)} exercice(s), {len(catalog.resources)} ressource(s), "
+          f"{len(articles.published())} article(s) publié(s).")
     return 0
 
 

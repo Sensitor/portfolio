@@ -26,12 +26,16 @@ content/academy/          the courses, as files: the source of truth
   data/                   sourced CSV datasets, declared in datasets.toml
   charts.toml             interactive charts over those datasets
   resources/              revision sheets (Markdown) and their PDFs
+content/media/articles/   the public site's articles (same front matter, same rules)
+content/legal/            the legal pages and the publisher's details (editeur.toml)
 sensitor/academy/         domain: content loading and validation, quiz, exercises,
                           and one pure, tested module per subject (risk, structure,
                           zones, backtest, macro, discipline, money, inflation,
                           savings, bitcoin, hashing, crypto, invest)
 sensitor/academy/ui/      Academy pages (presentation only)
-sensitor/platform/        spaces registry, shell, theme, components
+sensitor/platform/        spaces registry, shell, theme, components, newsletter, legal
+sensitor/core/permissions.py  every access decision: levels, roles, capabilities, limits
+sensitor/site/            the public site: articles loader and static generator
 docs/                     ACADEMY.md, PLATFORM.md, PLAN_BITCOIN_CRYPTO.md, and more
 tests/                    one script per area
 ```
@@ -44,6 +48,8 @@ streamlit run sensitor_app.py
 python -m sensitor.academy.validate       # validates the content tree
 python tests/test_academy.py              # and every other tests/test_*.py
 python scripts/build_resource_pdfs.py     # after changing a revision sheet
+python scripts/build_site.py --base-url … --app-url …   # the public site, into site/
+python -m sensitor.core.admin check       # what a deployment still lacks
 ```
 
 Each test file is a plain script that prints its checks and returns a non-zero
@@ -69,6 +75,14 @@ status on failure. Run the whole `tests/` folder before committing.
 - **No personalised advice, order execution or payment flow** without a
   regulatory review first; access levels exist (public, member, premium), billing
   does not.
+- **Every access check asks `core.permissions`** (`can`, `limit`): no page
+  compares a level string, and every protected write checks the role in the
+  `Store`'s own SQL. Premium comes from an entitlement (`entitlements` table),
+  granted by an administrator with a reason; `users.tier` is a cache.
+- **A new table holding a member's data** enters the export, the deletion and the
+  privacy policy (`content/legal/confidentialite.md`); the tests compare them.
+- **Logs carry no personal data**: use `core.logs`, which scrubs addresses,
+  tokens and database URLs.
 - **Members' data is scoped by the verified email**; nothing user-specific is
   cached across users. The SQLite database stays out of git.
 - **The Telegram bot is out of scope**: do not modify it, its configuration,

@@ -63,6 +63,7 @@ warnings.filterwarnings('ignore')
 # Engine, design system, visual components and the twelve Intelligence and
 # Workspace pages. Nothing below this line computes anything the package cannot.
 from sensitor.core import config as core_config
+from sensitor.core import permissions as P
 from sensitor.core.i18n import LEGACY_STRINGS, na
 from sensitor.investment import assets
 from sensitor.investment.currency import BASE_CURRENCIES, currency_symbol, mixed_currencies
@@ -89,7 +90,6 @@ from sensitor.pages import (
 # paid plan exists until a regulatory review has been done (CLAUDE.md), so the
 # Stripe button and price this app used to show are gone.
 PRO_EMAILS = core_config.PRO_EMAILS
-TIER_LIMITS = core_config.TIER_LIMITS
 
 
 # =============================================================================
@@ -134,17 +134,18 @@ MODEL_PORTFOLIOS = assets.MODEL_PORTFOLIOS
 
 def resolve_tier(email: str) -> str:
     """
-    Entitlement for an email address: « pro » if `PRO_EMAILS` lists it, or if
-    the account's level in the database is premium (set with `admin set-tier`,
-    the same level the platform reads), else « free ».
+    The member's level, from their active entitlements: the same answer the
+    platform gets (`core.permissions`). `PRO_EMAILS` is turned into an
+    entitlement at sign-in (`core.auth`), so it is not read here.
     """
-    if core_config.resolve_tier(email) == "pro":
-        return "pro"
-    from sensitor.academy.access import has_premium
     from sensitor.pages._shared import get_store
     store = get_store()
-    user = store.get_user(email) if store is not None and email else None
-    return "pro" if user and has_premium(user.get("tier")) else "free"
+    return store.access(email).level if store is not None and email else P.FREE
+
+
+def _who():
+    """The member known by the level held in session, for `P.can` and `P.limit`."""
+    return P.for_level(st.session_state.user_tier)
 
 
 
@@ -1243,7 +1244,7 @@ def _sidebar(lang):
 
         # Tier badge
         tier = st.session_state.user_tier
-        tier_label = TIER_LIMITS[tier]['label']
+        tier_label = P.LEVEL_LABELS[P.level_of(tier)]
         email_display = st.session_state.user_email or ("Demo mode" if lang == 'en' else "Mode démo")
         st.markdown(
             f"<div style='font-size:0.78rem;color:rgba(255,253,248,0.6);margin-bottom:4px;'>{email_display}</div>"
@@ -1252,9 +1253,9 @@ def _sidebar(lang):
             f"letter-spacing:0.06em;text-transform:uppercase;'>{tier_label}</div>",
             unsafe_allow_html=True
         )
-        if tier == 'free':
+        if not P.is_premium(tier):
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-            if st.button("Upgrade to Pro" if lang == 'en' else "Passer à Pro",
+            if st.button("Premium access" if lang == 'en' else "Accès Premium",
                          use_container_width=True):
                 st.session_state.page = "account"
                 st.rerun()
@@ -1346,7 +1347,7 @@ def _account_page(lang, tier):
 
     if email:
         st.success(f"{s_tr('signed_in_as', lang)} **{email}** · "
-                   f"{TIER_LIMITS[tier]['label']}")
+                   f"{P.LEVEL_LABELS[P.level_of(tier)]}")
         cols = st.columns([1, 1, 3])
         with cols[0]:
             if st.button(s_tr("sign_out", lang), key="acct_out"):
@@ -1449,7 +1450,7 @@ def _clear_session():
     st.session_state.session_token = ""
     st.session_state.user_email = ""
     st.session_state.authenticated = False
-    st.session_state.user_tier = "free"
+    st.session_state.user_tier = P.FREE
     # The allocation on screen belongs to whoever just signed out. Their row
     # stays in the database and comes back when they return; what is dropped
     # here is the copy in memory, so the next person to use this browser does
@@ -1588,8 +1589,11 @@ def _restore_workspace(lang):
 def main():
     init_session_state()
     lang = st.session_state.language
+    # Read fresh on every run: a level granted or revoked since sign-in applies now.
+    if st.session_state.get("authenticated") and st.session_state.get("user_email"):
+        st.session_state.user_tier = resolve_tier(st.session_state.user_email)
     tier = st.session_state.user_tier
-    limits = TIER_LIMITS[tier]
+    who = _who()
 
     _restore_workspace(lang)
     _sidebar(lang)
@@ -2097,7 +2101,7 @@ def main():
                 "Simulate historical crisis scenarios" if lang == 'en'
                 else "Simuler des scénarios de crise historiques",
             )
-            if limits['can_stress_test']:
+            if P.can(who, "portfolio.stress_test"):
                 if st.button(t("run_stress", lang), type="primary"):
                     with st.spinner("Running stress tests…" if lang == 'en' else "Calcul des stress tests…"):
                         stress_results = analyzer.stress_test_scenarios()
@@ -2124,14 +2128,15 @@ def main():
         title = t('new_analysis', lang)
         st.title(title)
 
-        max_assets = limits['max_assets']
+        max_assets = P.limit(who, "portfolio.max_assets")
         current_count = len(st.session_state.selected_tickers)
 
-        if tier == 'free' and current_count >= max_assets:
+        if not P.is_premium(tier) and current_count >= max_assets:
+            premium_max = P.LIMITS["portfolio.max_assets"][P.PREMIUM]
             st.warning(
-                f"Free plan: up to {max_assets} assets. Upgrade to Pro for up to 50."
+                f"Free access: up to {max_assets} assets. Premium access allows {premium_max}."
                 if lang == 'en' else
-                f"Plan Free: jusqu'à {max_assets} actifs. Passez à Pro pour 50."
+                f"Accès gratuit : jusqu'à {max_assets} actifs. L'accès Premium en compte {premium_max}."
             )
 
         tabs = st.tabs([t("search", lang), t("browse", lang)])
@@ -2265,7 +2270,7 @@ def main():
             st.info(t("welcome", lang))
 
         # Show upgrade banner if near limit
-        if tier == 'free' and current_count >= max_assets - 1:
+        if not P.is_premium(tier) and current_count >= max_assets - 1:
             render_upgrade_prompt(lang)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -2275,13 +2280,13 @@ def main():
         title = t('models', lang)
         st.title(title)
 
-        if tier == 'free':
+        if not P.can(who, "portfolio.models"):
             preview_note = (
-                "Model portfolios are available on the **Pro** plan. "
+                "Model portfolios are part of **Premium** access. "
                 "Here is a preview: upgrade to use them."
                 if lang == 'en' else
-                "Les portefeuilles modèles sont disponibles sur le plan **Pro**. "
-                "Voici un aperçu : passez à Pro pour les utiliser."
+                "Les portefeuilles modèles font partie de l'accès **Premium**. "
+                "Voici un aperçu."
             )
             st.info(preview_note)
 
@@ -2291,7 +2296,7 @@ def main():
             desc_key = "description_fr" if lang == 'fr' else "description_en"
             description = model_data.get(desc_key, model_data.get("description_en", ""))
 
-            if tier == 'pro':
+            if P.can(who, "portfolio.models"):
                 alloc_html = "".join(
                     f"<span style='display:inline-block;background:rgba(31,74,114,0.15);border-radius:8px;"
                     f"padding:3px 10px;font-size:0.78rem;font-weight:600;color:#33414D;"
@@ -2305,7 +2310,7 @@ def main():
                     f"<span style='display:inline-block;background:rgba(31,74,114,0.08);border-radius:8px;"
                     f"padding:3px 14px;font-size:0.78rem;font-weight:600;color:#59636B;"
                     f"margin:3px;border:1px solid rgba(31,74,114,0.15);filter:blur(0px);'>"
-                    f"🔒 {n} {locked_label} · Pro</span>"
+                    f"🔒 {n} {locked_label} · Premium</span>"
                 )
             ret_label = t("expected_return", lang)
             vol_label = t("volatility", lang)
@@ -2330,7 +2335,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-            if tier == 'pro':
+            if P.can(who, "portfolio.models"):
                 use_label = t("use_model", lang)
                 if st.button(use_label, key=f"use_{model_name}", use_container_width=False):
                     st.session_state.selected_tickers = list(model_data['allocation'].keys())
@@ -2351,7 +2356,7 @@ def main():
                             st.session_state.page = "overview"
                             st.rerun()
             else:
-                locked_msg = "Pro plan required" if lang == 'en' else "Plan Pro requis"
+                locked_msg = "Premium access required" if lang == 'en' else "Accès Premium requis"
                 st.caption(f"🔒 {locked_msg}")
 
             st.markdown("")
@@ -2606,7 +2611,7 @@ def main():
 
             st.markdown("---")
 
-            if not limits['can_optimize']:
+            if not P.can(who, "portfolio.optimize"):
                 render_paywall(
                     "Portfolio Optimisation" if lang == 'en' else "Optimisation du Portefeuille",
                     lang

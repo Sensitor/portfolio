@@ -54,6 +54,27 @@ def guard(ctx, lang: str) -> bool:
     return True
 
 
+def allowed(capability: str) -> bool:
+    """
+    Whether the level held in session (`user_tier`, set server-side from the
+    member's entitlements by either app) has this capability.
+    """
+    from ..core import permissions as P
+    return P.can(P.for_level(st.session_state.get("user_tier")), capability)
+
+
+def locked(capability: str, lang: str) -> None:
+    """The card a page shows instead of a feature the level does not include."""
+    from ..core import permissions as P
+    label = P.CAPABILITIES[capability].label
+    if lang == "fr":
+        empty_state("Accès Premium", f"{label} fait partie de l'accès Premium, attribué par Sensitor. "
+                    "Il n'existe aujourd'hui aucun abonnement payant.", icon="◇")
+    else:
+        empty_state("Premium access", "This feature is part of Premium access, granted by Sensitor. "
+                    "There is no paid subscription today.", icon="◇")
+
+
 def period_selector(ctx, key: str) -> str:
     """
     Horizontal period pills.
@@ -190,7 +211,9 @@ def get_store():
     """
     try:
         return open_store()
-    except Exception:                                   # noqa: BLE001
+    except Exception as exc:                            # noqa: BLE001
+        from ..core import logs
+        logs.get(__name__).error("database unavailable: %s", type(exc).__name__)
         return None
 
 

@@ -3,15 +3,18 @@ Operator commands for accounts, for deployments without an e-mail server.
 
     python -m sensitor.core.admin reset-link someone@example.com
     python -m sensitor.core.admin verify-link someone@example.com
-    python -m sensitor.core.admin set-role someone@example.com coach|member
+    python -m sensitor.core.admin set-role someone@example.com coach|admin|member
     python -m sensitor.core.admin set-tier someone@example.com free|premium
     python -m sensitor.core.admin check
 
 reset-link and verify-link print a single-use link (reset: valid one hour;
 verification: 48 hours) that the operator sends to the account holder by
-another channel. set-role makes an account a coach, who answers the trade
-review requests, or a member again. set-tier sets the access level by hand:
-there is no billing. check lists what a deployment still lacks before it opens to
+another channel. set-role makes an account a coach (who answers the trade
+review requests and writes the trading room's sessions), an administrator (who
+manages members and their access from the platform's « Membres » page), or a
+member again, without either role. The first administrator is named here; the
+others can be named from that page. set-tier gives or ends the premium level
+(an entitlement recorded with the reference « cli »): there is no billing. check lists what a deployment still lacks before it opens to
 members (durable database, passwords, e-mails, public address, legal pages),
 and exits 1 while anything is missing. Uses the same database as the app (SENSITOR_DB_URL /
 SENSITOR_DB_PATH) and the same SENSITOR_PUBLIC_URL as the e-mails. Nothing is
@@ -24,11 +27,12 @@ import sys
 
 from ..database import Store
 from . import mailer
+from . import permissions as P
 from .auth import MULTI, Auth
 
 
-ROLES = {"coach": "coach", "member": ""}
-TIERS = ("free", "premium")
+ROLES = ("coach", "admin", "member")
+TIERS = (P.FREE, P.PREMIUM)
 
 
 def _set(argv: list[str]) -> int:
@@ -39,10 +43,14 @@ def _set(argv: list[str]) -> int:
         return 1
     if command == "set-role":
         if value not in ROLES:
-            print("Rôle attendu : coach ou member.")
+            print("Rôle attendu : coach, admin ou member.")
             return 2
-        store.set_role(email, ROLES[value])
-        print(f"{email} : rôle {value}.")
+        if value == "member":
+            for role in P.ROLES:
+                store.revoke_role(email, role)
+        else:
+            store.grant_role(email, value, granted_by="cli")
+        print(f"{email} : rôles {', '.join(sorted(store.roles(email))) or 'aucun'}.")
     else:
         if value not in TIERS:
             print("Niveau attendu : free ou premium.")
@@ -72,6 +80,12 @@ def checks() -> list[tuple[bool, str]]:
     except Exception as exc:                                     # noqa: BLE001
         reason = postgres.explain(exc, target) if durable else type(exc).__name__
         out.append((False, f"Base injoignable. {reason}"))
+    try:
+        named = Store().has_admin()
+    except Exception:                                            # noqa: BLE001
+        named = False
+    out.append((named, "Un administrateur nommé" if named else
+                "Aucun administrateur : python -m sensitor.core.admin set-role votre@adresse admin"))
     out.append((auth_mode() == MULTI, "Comptes avec mot de passe (SENSITOR_AUTH=multi)" if auth_mode() == MULTI
                 else "Mode sans mot de passe (SENSITOR_AUTH=single) : n'importe quelle adresse ouvre un compte"))
     out.append((mailer.configured(), "Envoi d'e-mails configuré (SENSITOR_SMTP_*)" if mailer.configured()

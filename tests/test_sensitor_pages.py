@@ -46,7 +46,12 @@ def _session_for(email: str) -> str:
     """
     from sensitor.core.auth import Auth
     from sensitor.database import Store
-    return Auth(Store(os.environ["SENSITOR_DB_PATH"])).sign_in(email).token
+    store = Store(os.environ["SENSITOR_DB_PATH"])
+    token = Auth(store).sign_in(email).token
+    # The analyzer reads the level from the database on every run, so the
+    # premium pages (optimisation, stress tests) need a real entitlement.
+    store.set_tier(email, "premium")
+    return token
 
 
 class FakeAnalyzer:

@@ -137,7 +137,8 @@ class Auth:
     def sign_up(self, email: str, password: str | None = None, *,
                 tier: str = "free") -> AuthResult:
         """
-        Create an account.
+        Create an account, always at the free level: `tier` is ignored and kept
+        for earlier callers. A level comes from an entitlement only.
 
         In multi mode a password is required and an existing account is a
         conflict. In single mode the email is a label, so this is idempotent:
@@ -150,7 +151,8 @@ class Auth:
         existing = self.store.credential(email)
 
         if not self.multi_user:
-            self.store.upsert_user(email, tier)
+            self.store.upsert_user(email)
+            self._grant_listed(email)
             return self._issue(email)
 
         # Any existing row is a conflict, with a password or without one. A row
@@ -167,7 +169,8 @@ class Auth:
             return AuthResult(False, email=email, reason="weak_password",
                               detail=str(exc))
 
-        self.store.upsert_user(email, tier)
+        self.store.upsert_user(email)
+        self._grant_listed(email)
         self.store.set_password_hash(email, hash_password(password))
         return self._issue(email)
 
@@ -188,10 +191,7 @@ class Auth:
 
         if not self.multi_user:
             self.store.upsert_user(email)
-            # `PRO_EMAILS` can raise an address, never lower one: a level set by
-            # an administrator (`admin set-tier`) is not undone by a sign-in.
-            if self._tier_for(email) != "free":
-                self.store.set_tier(email, self._tier_for(email))
+            self._grant_listed(email)
             return self._issue(email)
 
         credential = self.store.credential(email)
@@ -227,6 +227,8 @@ class Auth:
         lock = None
         if attempts >= MAX_FAILED_LOGINS:
             lock = _stamp(_now() + timedelta(minutes=LOCKOUT_MINUTES))
+            from . import logs
+            logs.get(__name__).warning("an account was locked after %d failed sign-ins", attempts)
         self.store.record_login_failure(email, locked_until=lock)
 
     def _locked_until(self, credential: dict | None) -> datetime | None:
@@ -313,6 +315,29 @@ class Auth:
         self.store.set_password_hash(email, hash_password(new))
         self.store.revoke_sessions(email)
         return self._issue(email)
+
+    def delete_account(self, email: str, password: str | None = None, *, typed: str | None = None) -> dict | None:
+        """
+        Delete an account and everything filed under it, once the holder has
+        proven who they are: the password in multi mode (a session left open on
+        a shared computer is not enough), the address typed again in single
+        mode, where there is no password. Returns what was deleted, or None.
+        """
+        email = _normalise(email)
+        if not email:
+            return None
+        if self.multi_user:
+            stored = (self.store.credential(email) or {}).get("password_hash")
+            if not stored or not verify_password(password or "", stored):
+                return None
+        elif _normalise(typed or "") != email:
+            return None
+        subscribed = (self.store.newsletter(email) or {}).get("status") == "confirmed"
+        counts = self.store.delete_user(email)
+        if subscribed:                       # the provider's copy goes too, when there is one
+            from ..integrations import brevo
+            brevo.unsubscribe(email)
+        return counts
 
     # ── E-mailed tokens: password reset, address verification ───────────────
     #
@@ -410,9 +435,16 @@ class Auth:
             return {"mode": MULTI, "verified": True, "key": "auth_mode_multi"}
         return {"mode": SINGLE, "verified": False, "key": "auth_mode_single"}
 
-    def _tier_for(self, email: str) -> str:
-        from .config import resolve_tier
-        return resolve_tier(email)
+    def _grant_listed(self, email: str) -> None:
+        """
+        An address listed in `PRO_EMAILS` gets a « config » entitlement, once:
+        the variable can raise a level, never lower one, so a level an
+        administrator set or revoked since is not undone by a sign-in.
+        """
+        from . import permissions as P
+        from .config import PRO_EMAILS
+        if email in PRO_EMAILS and not any(e["source"] == "config" for e in self.store.entitlements(email)):
+            self.store.set_tier(email, P.PREMIUM, source="config", reference="config", reason="PRO_EMAILS")
 
 
 def _normalise(email: str) -> str:

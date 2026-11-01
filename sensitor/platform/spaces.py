@@ -122,7 +122,8 @@ SPACES: tuple[Space, ...] = (
                    "Retours d'expérience authentiques, sans résultats mis en scène")),
 )
 
-PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach", "mentions", "conditions", "confidentialite")
+PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach", "admin", "mentions", "conditions",
+                  "confidentialite", "newsletter", "newsletter_confirm", "newsletter_stop")
 LEGACY_PAGES = {"paths": "academy",       # URLs from the first Academy release
                 "tools": "portfolio"}     # the link page of the analyzer, before it joined the space
 

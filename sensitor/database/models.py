@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 13
 
 TABLES: dict[str, str] = {
     "users": """
@@ -361,6 +361,67 @@ CREATE TABLE IF NOT EXISTS market_sessions (
     published_at  TEXT,
     reviewed_at   TEXT
 )""",
+
+    # ── Access ───────────────────────────────────────────────────────────────
+    # What gives a member the premium level: one row per grant, never updated
+    # but to revoke it, so the table is also the trace of who gave what, when
+    # and why. The effective level is computed from the active rows
+    # (`core.permissions.level_from`); `users.tier` is a cache of it, kept for
+    # the API and the mobile app. `reference` is the administrator who granted
+    # it (or `cli`, `migration`, `config`), later a payment's subscription id.
+    "entitlements": """
+CREATE TABLE IF NOT EXISTS entitlements (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    level        TEXT NOT NULL DEFAULT 'premium' CHECK (level IN ('premium')),
+    source       TEXT NOT NULL CHECK (source IN ('manual', 'payment', 'migration', 'config')),
+    reference    TEXT,
+    reason       TEXT NOT NULL DEFAULT '',
+    starts_at    TEXT NOT NULL,
+    ends_at      TEXT,
+    revoked_at   TEXT,
+    revoked_by   TEXT,
+    created_at   TEXT NOT NULL
+)""",
+
+    # Roles, orthogonal to the level: `coach` and `admin`. `users.role` is the
+    # earlier home of the coach role; it is copied here on every open and kept
+    # in step by `Store.set_role`, until it can be dropped.
+    "user_roles": """
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_email   TEXT NOT NULL REFERENCES users(email)
+                 ON DELETE CASCADE ON UPDATE CASCADE,
+    role         TEXT NOT NULL CHECK (role IN ('coach', 'admin')),
+    granted_by   TEXT,
+    created_at   TEXT NOT NULL,
+    PRIMARY KEY (user_email, role)
+)""",
+
+    # The newsletter. Keyed by address, not by account: a visitor can subscribe
+    # from the public site. A subscription is active only once confirmed by the
+    # link sent to the address (double opt-in). The exact wording accepted and
+    # its date are kept as the proof of consent. Tokens are stored as
+    # fingerprints, like sessions: the unsubscribe one does not expire, so every
+    # message can carry a one-click link.
+    "newsletter": """
+CREATE TABLE IF NOT EXISTS newsletter (
+    email                  TEXT PRIMARY KEY,
+    status                 TEXT NOT NULL DEFAULT 'pending'
+                           CHECK (status IN ('pending', 'confirmed', 'unsubscribed')),
+    source                 TEXT NOT NULL DEFAULT 'account',
+    consent_text           TEXT NOT NULL,
+    consent_at             TEXT NOT NULL,
+    confirm_fingerprint    TEXT,
+    confirm_expires_at     TEXT,
+    confirm_sent_at        TEXT,
+    confirmed_at           TEXT,
+    unsubscribe_fingerprint TEXT NOT NULL,
+    unsubscribed_at        TEXT,
+    provider_synced_at     TEXT,
+    created_at             TEXT NOT NULL,
+    updated_at             TEXT NOT NULL
+)""",
 }
 
 INDEXES = """
@@ -379,6 +440,9 @@ CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_email, creat
 CREATE INDEX IF NOT EXISTS idx_reviews_user ON trade_reviews(user_email, created_at);
 CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_market_published ON market_sessions(status, session_date);
+CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_email, revoked_at);
+CREATE INDEX IF NOT EXISTS idx_newsletter_confirm ON newsletter(confirm_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribe ON newsletter(unsubscribe_fingerprint);
 """
 
 SCHEMA = ";\n".join(TABLES.values()) + ";\n" + INDEXES

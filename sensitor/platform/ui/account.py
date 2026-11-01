@@ -2,8 +2,9 @@
 One account for every Sensitor space.
 
 Sign in and sign up; password reset and address verification by e-mailed
-single-use links; for a signed-in member: password change, sign-out on every
-device, export of everything stored, and deletion of the account.
+single-use links; for a signed-in member: the access level, a display name, the
+newsletter, password change, sign-out on every device, export of everything
+stored, and deletion of the account, confirmed by the password.
 
 Uses the existing `Auth` service: the same credentials work in the portfolio
 application. Error reasons are stable keys from `Auth`, translated here.
@@ -17,7 +18,11 @@ import json
 import streamlit as st
 
 from ...core import mailer
+from ...core import permissions as P
 from ...core.security import MIN_PASSWORD_LENGTH
+from ...database.connection import now as _now
+from .. import newsletter as N
+from . import newsletter_pages
 from . import runtime as rt
 from .components import crumbs, date_fr, esc, footer, html, note, notice, page_header, section
 
@@ -155,19 +160,35 @@ def _forgot() -> None:
                        "Le lien est valable une heure.")
 
 
+def _access_text(store, email: str, who) -> str:
+    """What the member's level opens, and until when, from their active entitlement."""
+    if who.level != P.PREMIUM:
+        return "Gratuit : toutes les leçons publiées hors Premium"
+    now = _now()
+    active = [e for e in store.entitlements(email) if not e["revoked_at"] and e["starts_at"] <= now
+              and not (e["ends_at"] and e["ends_at"] <= now)]
+    ends = [e["ends_at"] for e in active if e["ends_at"]]
+    if len(ends) == len(active) and ends:
+        return f"Premium, jusqu'au {date_fr(max(ends))}"
+    return "Premium, sans date de fin"
+
+
 def _member(email: str) -> None:
     store = rt.get_store()
     auth = rt.get_auth()
     user = store.get_user(email) if store else None
+    who = rt.member(email)
     verified = (user or {}).get("email_verified_at")
     page_header("Compte · Membre", "Votre <em>compte</em>",
                 "Un seul compte pour tous les espaces Sensitor.")
+    roles = ", ".join(P.ROLE_LABELS[r] for r in sorted(who.roles))
     html('<dl class="sx-facts" style="max-width:640px;margin-top:1.6rem">'
          f'<div><dt>Adresse</dt><dd>{esc(email)}</dd></div>'
          f'<div><dt>Adresse vérifiée</dt><dd>{"Oui, le " + esc(date_fr(verified)) if verified else "Pas encore"}</dd></div>'
          f'<div><dt>Membre depuis</dt><dd>{esc(date_fr((user or {}).get("created_at", "")))}</dd></div>'
-         '<div><dt>Accès</dt><dd>Toutes les leçons publiées</dd></div>'
-         '<div><dt>Abonnement</dt><dd>Aucun, accès membre gratuit</dd></div></dl>')
+         f'<div><dt>Accès</dt><dd>{esc(_access_text(store, email, who))}</dd></div>'
+         + (f'<div><dt>Rôles</dt><dd>{esc(roles)}</dd></div>' if roles else '')
+         + '<div><dt>Abonnement</dt><dd>Aucun : il n\'existe pas d\'abonnement payant</dd></div></dl>')
     if not rt.multi_user():
         st.warning("Cette installation fonctionne en mode local (SENSITOR_AUTH n'est pas réglé sur "
                    "« multi ») : l'adresse sert d'identifiant sans mot de passe. Ce mode convient à "
@@ -189,8 +210,29 @@ def _member(email: str) -> None:
             st.success("E-mail envoyé." if _send_verification(email)
                        else "L'e-mail n'a pas pu être envoyé. Réessayez plus tard.")
 
+    section(1, "Profil", "Le nom affiché sur vos pages. Il n'est montré à aucun autre membre.")
+    with st.form("profile_form"):
+        name = st.text_input("Nom affiché", value=(user or {}).get("display_name") or "", max_chars=60,
+                             key="pf_display_name")
+        if st.form_submit_button("Enregistrer"):
+            store.set_display_name(email, name)
+            st.success("Profil enregistré.")
+
+    section(2, "La lettre de Sensitor", "Articles, analyses pédagogiques et nouveautés, par e-mail, avec votre accord.")
+    letter = store.newsletter(email)
+    status = (letter or {}).get("status")
+    if status == "confirmed":
+        note(f"Inscrit depuis le {date_fr(letter['confirmed_at'])}.")
+        if st.button("Me désinscrire de la lettre", key="newsletter_off"):
+            N.unsubscribe(store, email)
+            st.rerun()
+    else:
+        if status == "pending":
+            note("Inscription en attente : ouvrez le lien de confirmation reçu par e-mail.")
+        newsletter_pages.form("account_newsletter", email=email, source="account")
+
     if rt.multi_user():
-        section(1, "Mot de passe", "Changer de mot de passe déconnecte tous vos autres appareils.")
+        section(3, "Mot de passe", "Changer de mot de passe déconnecte tous vos autres appareils.")
         with st.form("change_password_form"):
             current = st.text_input("Mot de passe actuel", type="password", key="cp_current")
             new = st.text_input(f"Nouveau mot de passe ({MIN_PASSWORD_LENGTH} caractères minimum)",
@@ -207,22 +249,30 @@ def _member(email: str) -> None:
                     else:
                         st.error(_message(result))
 
-    section(2, "Vos données", "Tout ce que Sensitor conserve à votre nom, dans un seul fichier.")
+    section(4, "Vos données", "Tout ce que Sensitor conserve à votre nom, dans un seul fichier : compte, accès, "
+            "sessions, progression, journaux, portefeuilles, lettre et, pour un coach, ce qu'il a rédigé.")
     export = json.dumps(store.export_user(email), ensure_ascii=False, indent=2, default=str)
     st.download_button("Exporter toutes mes données (JSON)", data=export.encode("utf-8"),
                        file_name="sensitor-mes-donnees.json", mime="application/json",
                        key="export_all")
 
-    section(3, "Supprimer le compte",
+    section(5, "Supprimer le compte",
             "La suppression efface définitivement le compte, la progression, les quiz, le journal "
-            "de réflexion et, le cas échéant, les portefeuilles et le journal de trading. Elle ne peut pas être annulée.")
+            "de réflexion, l'inscription à la lettre et, le cas échéant, les portefeuilles et le journal de trading. "
+            "Elle ne peut pas être annulée.")
+    multi = rt.multi_user()
     with st.form("delete_account_form"):
-        typed = st.text_input("Pour confirmer, saisissez votre adresse e-mail", key="del_email")
+        if multi:
+            secret = st.text_input("Pour confirmer, saisissez votre mot de passe", type="password", key="del_pw")
+        else:
+            secret = st.text_input("Pour confirmer, saisissez votre adresse e-mail", key="del_email")
         if st.form_submit_button("Supprimer définitivement mon compte"):
-            if typed.strip().lower() != email:
-                st.error("L'adresse saisie ne correspond pas à celle du compte.")
+            done = (auth.delete_account(email, secret) if multi
+                    else auth.delete_account(email, typed=secret)) if auth else None
+            if done is None:
+                st.error("Le mot de passe est incorrect." if multi
+                         else "L'adresse saisie ne correspond pas à celle du compte.")
             else:
-                store.delete_user(email)
                 rt.sign_out()
                 rt.go("home")
                 st.rerun()

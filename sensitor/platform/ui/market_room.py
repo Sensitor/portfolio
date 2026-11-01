@@ -15,6 +15,7 @@ import datetime as _dt
 import streamlit as st
 
 from ...academy import access as A
+from ...core import permissions as P
 from .. import brand, spaces
 from .. import market as M
 from . import runtime as rt
@@ -72,7 +73,7 @@ def room(catalog, email, route) -> None:
             "l'invalide. Après la clôture, ce que chaque scénario a fait et ce que la séance enseigne.")
     show_flash()
     store = rt.get_store()
-    coach = bool(email and store is not None and store.is_coach(email))
+    coach = store is not None and rt.can(email, "market.publish")
     sessions = store.market_sessions() if store is not None else []
     if coach:
         _coach_bar(store, email)
@@ -93,11 +94,12 @@ def room(catalog, email, route) -> None:
 
     latest, earlier = sessions[0], sessions[1:]
     section(1, "La dernière séance", "Publiée avant l'ouverture ; son bilan suit la clôture.")
-    _session_card(latest, email, rt.tier(email), key="latest")
+    who = rt.member(email)
+    _session_card(latest, who, key="latest")
     if earlier:
         section(2, "Les séances précédentes", "Une ligne par séance, et l'issue de chaque scénario.")
         for s in earlier:
-            _session_row(s, key="earlier")
+            _session_row(s, who, key="earlier")
     reviewed = [s["review"] for s in sessions if s.get("review")]
     if reviewed:
         t = M.tally(reviewed)
@@ -130,8 +132,11 @@ def _coach_bar(store, email: str) -> None:
                     f"Reprendre le brouillon {d['title']}", "market_edit", session=str(d["id"]))
 
 
-def _session_card(s: dict, email, tier, *, key: str) -> None:
-    locked = A.lock_reason(s["access"], email, tier)
+LOCKED_TEXT = "Séance réservée : son contenu s'affiche une fois connecté avec l'accès requis."
+
+
+def _session_card(s: dict, who, *, key: str) -> None:
+    locked = P.lock_reason(who, s["access"])
     scenarios = s["content"]["scenarios"]
     lines = "".join(f'<li><b>Scénario {LETTERS[i]} · {esc(x["instrument"])}</b>{esc(x["title"])}</li>'
                     for i, x in enumerate(scenarios))
@@ -139,20 +144,22 @@ def _session_card(s: dict, email, tier, *, key: str) -> None:
     tap(f"market_{key}_{s['id']}",
         f'<div class="sx-c-blank"><div class="rub">{esc(M.date_label(s["session_date"]))} · '
         f'{esc(M.ACCESS_LABELS[s["access"]])} · {state}</div><h3>{esc(s["title"])}</h3>'
-        f'<p>{esc(_excerpt(s["content"]["context"]))}</p>'
+        f'<p>{esc(LOCKED_TEXT if locked else _excerpt(s["content"]["context"]))}</p>'
         + ('' if locked else f'<ol>{lines}</ol>')
         + '</div>',
         f"Ouvrir la séance {s['title']}", "market_session", session=str(s["id"]))
 
 
-def _session_row(s: dict, *, key: str) -> None:
+def _session_row(s: dict, who, *, key: str) -> None:
+    """One earlier session. Locked, it shows its title and date only: no excerpt, no outcomes (S5)."""
     n = len(s["content"]["scenarios"])
+    locked = P.lock_reason(who, s["access"])
     tap(f"market_{key}_{s['id']}",
         f'<div class="sx-c-row"><div><div class="sym">{esc(s["title"])}</div>'
         f'<div class="when">{esc(s["session_date"])}</div></div>'
-        f'<div class="q">{esc(_excerpt(s["content"]["context"], 110))}'
-        f'<span class="wait">{"Bilan publié" if s.get("review") else "En attente du bilan"}</span></div>'
-        f'<div>{_print(s.get("review"), n)}</div><div class="r">{n} scén.</div>'
+        f'<div class="q">{esc(M.ACCESS_LABELS[s["access"]] if locked else _excerpt(s["content"]["context"], 110))}'
+        f'<span class="wait">{"Accès réservé" if locked else ("Bilan publié" if s.get("review") else "En attente du bilan")}</span></div>'
+        f'<div>{"" if locked else _print(s.get("review"), n)}</div><div class="r">{n} scén.</div>'
         f'<span class="go">{icon("arrow")}</span></div>',
         f"Ouvrir la séance {s['title']}", "market_session", session=str(s["id"]))
 
@@ -177,7 +184,7 @@ def _further(space, *, start: int) -> None:
 def session_page(catalog, email, route) -> None:
     space = _space()
     store = rt.get_store()
-    coach = bool(email and store is not None and store.is_coach(email))
+    coach = store is not None and rt.can(email, "market.publish")
     try:
         s = store.market_session(int(route.get("session", "")), coach=email if coach else None) if store else None
     except ValueError:
@@ -188,7 +195,7 @@ def session_page(catalog, email, route) -> None:
         rt.link("Revenir à la Salle des marchés", "market", key="market_back")
         footer()
         return
-    reason = A.lock_reason(s["access"], email, rt.tier(email))
+    reason = P.lock_reason(rt.member(email), s["access"])
     content, review = s["content"], s.get("review")
     n = len(content["scenarios"])
     lead = (f"{n} scénario{'s' if n > 1 else ''}, chacun avec son invalidation. "
@@ -269,7 +276,7 @@ def edit_page(catalog, email, route) -> None:
     space = _space()
     crumbs("Sensitor", space.label, "Préparer une séance")
     store = rt.get_store()
-    if not email or store is None or not store.is_coach(email):
+    if store is None or not rt.can(email, "market.publish"):
         _header("Préparer une séance.", "")
         notice("Accès réservé", "La préparation des séances est réservée à l'équipe Sensitor.", "lock")
         footer()

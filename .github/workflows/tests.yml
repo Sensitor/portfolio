@@ -36,6 +36,8 @@ jobs:
         run: pip install -r requirements.txt "fastapi>=0.110" httpx
       - name: Content
         run: python -m sensitor.academy.validate
+      - name: Build the public site
+        run: python scripts/build_site.py --base-url https://example.org --app-url https://app.example.org --out /tmp/site
       - name: Tests
         run: |
           status=0

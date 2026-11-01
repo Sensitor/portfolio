@@ -334,6 +334,22 @@ variables de production, liste ce qui manque encore.
 - L'application mobile fonctionne sans modification (tests d'intégration
   mobile verts).
 
+**Avancement P1 au 1er novembre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P1.1 | fait : `can()` et `limit()`, tables `entitlements` et `user_roles`, migration des valeurs `pro`, `premium`, du rôle coach et de `PRO_EMAILS` (droit « config » à la connexion) ; tous les contrôles passent par le module, un test le vérifie dans le code | `core/permissions.py`, `database/repositories.py`, `database/connection.py`, `tests/test_permissions.py` |
+| P1.2 | fait : rôle administrateur, page « Membres et accès » (recherche, attribution du Premium avec motif et date de fin, retrait, rôles), routes `/admin` de l'API ; refus côté serveur testé sur le `Store` et l'API | `platform/ui/admin.py`, `api/routers/admin.py` |
+| P1.3 | fait : optimisation, stress tests, allocations types et nombre de lignes rattachés aux capacités, dans la plateforme et l'analyseur (corrige A5) ; extrait des séances verrouillées masqué (corrige S5) | `pages/_shared.py`, `portfolio_space.py`, `portfolio_optimizer_saas.py`, `market_room.py` |
+| P1.4 | fait : niveau d'accès et rôles affichés, nom affiché, lettre dans la page Compte | `platform/ui/account.py` |
+| P1.5 | fait : consentement enregistré, double confirmation par bouton, désinscription en un clic, synchronisation Brevo facultative, export et suppression ; **à faire par vous** : SMTP, et une liste Brevo si vous voulez envoyer des campagnes | `platform/newsletter.py`, `integrations/brevo.py`, `tests/test_newsletter.py` |
+| P1.6 | fait : articles dans `content/media/articles` validés aux règles maison, générateur du site statique (accueil, à propos, Academy, articles, ressources, lettre, pages légales), sitemap, RSS, Open Graph ; **à faire par vous** : écrire les articles, choisir l'hébergeur statique et le domaine | `site/`, `scripts/build_site.py`, `tests/test_site.py`, `DEPLOY.md` §8 |
+| P1.7 | **à faire par vous** : choisir l'hébergeur et le domaine ; procédure écrite pour l'espace membre et l'API | `DEPLOY.md` §7 |
+| P1.8 | fait : export complet (accès, sessions, lettre, contenu écrit en tant que coach), suppression confirmée par le mot de passe, export et suppression dans l'API (corrige S6) | `repositories.py`, `core/auth.py`, `api/routers/auth.py` |
+| P1.9 | fait : journaux techniques sur la sortie d'erreur, nettoyés des adresses, jetons et adresses de base ; pages en erreur, base injoignable ou reconnectée, e-mails non envoyés, comptes verrouillés (corrige S7) | `core/logs.py` |
+| P1.10 | **décision à prendre par vous** : proposition écrite ; étiquette et invite Premium de la Bibliothèque corrigées | `docs/PREMIUM.md`, `academy/ui/library.py` |
+| P1.11 | fait : README, ARCHITECTURE, API, DEPLOY, CLAUDE.md | `docs/` |
+
 ### P2 · monétisation et accompagnement
 
 | # | Tâche | Complexité |
