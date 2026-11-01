@@ -41,4 +41,18 @@ PRO_EMAILS = frozenset(
     e.strip().lower() for e in os.getenv("PRO_EMAILS", "").split(",") if e.strip()
 )
 
+# Comma-separated addresses named administrators at sign-in (`core.auth`), for a
+# deployment with no command line (Streamlit Cloud): set it in the secrets.
+# SENSITOR_ADMIN_EMAILS=you@example.com
+
+
+def listed(variable: str) -> frozenset[str]:
+    """
+    The addresses a comma-separated variable lists, lowercase. Read on every
+    call, not at import: the platform copies its Streamlit secrets into the
+    environment after some modules are already loaded.
+    """
+    return frozenset(e.strip().lower() for e in os.getenv(variable, "").split(",") if e.strip())
+
+
 # Levels, capabilities and limits are in `core.permissions`.

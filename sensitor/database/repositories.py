@@ -73,6 +73,9 @@ class Store:
 
     def _read(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
         with self._lock:
+            fast = getattr(self._conn, "read", None)       # Postgres: one round trip
+            if fast is not None:
+                return fast(sql, params)
             try:
                 rows = self._conn.execute(sql, params).fetchall()
             except Exception:
@@ -173,12 +176,19 @@ class Store:
             "SELECT role FROM user_roles WHERE user_email = ?", (_email(email),)))
 
     def access(self, email: str) -> P.Member:
-        """The member as the permissions module sees them: level from active entitlements, and roles."""
+        """
+        The member as the permissions module sees them: level from active
+        entitlements, and roles. One query: it runs on every page.
+        """
         email = _email(email)
         if not email:
             return P.VISITOR_MEMBER
-        level = P.level_from(self.entitlements(email), _now())
-        return P.Member(email, level, self.roles(email))
+        rows = self._read(
+            "SELECT level, starts_at, ends_at, revoked_at, NULL AS role FROM entitlements WHERE user_email = ? "
+            "UNION ALL SELECT NULL, NULL, NULL, NULL, role FROM user_roles WHERE user_email = ?", (email, email))
+        grants = [dict(r) for r in rows if r["role"] is None]
+        roles = frozenset(r["role"] for r in rows if r["role"] is not None)
+        return P.Member(email, P.level_from(grants, _now()), roles)
 
     def has_admin(self) -> bool:
         """Whether anyone holds the administrator role (the pre-launch check asks)."""
@@ -727,6 +737,11 @@ class Store:
     def is_coach(self, email: str) -> bool:
         return P.COACH in self.roles(email)
 
+    def pending_reviews(self, email: str) -> int:
+        """How many requests wait for an answer, for a coach (the sidebar's count); 0 for anyone else."""
+        return self._count("SELECT COUNT(*) AS n FROM trade_reviews WHERE status = 'pending' AND EXISTS "
+                           "(SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')", _email(email))
+
     def coach_queue(self, email: str, status: str = "pending", *, limit: int = 200) -> list[dict]:
         """
         The requests members sent, for the coach `email`: oldest pending first, or the latest
@@ -1069,11 +1084,19 @@ class Store:
     # ── Sessions ─────────────────────────────────────────────────────────────
 
     def create_session(self, email: str, fingerprint: str, *,
-                       expires_at: str, label: str | None = None) -> None:
+                       expires_at: str, label: str | None = None, login: bool = False) -> None:
+        """
+        Record a new session. `login` also records a successful sign-in (last
+        login, failed attempts reset) in the same transaction: one commit
+        instead of two on the way in.
+        """
         email = _email(email)
         stamp = _now()
         with self._write() as conn:
             self._ensure_user(conn, email)
+            if login:
+                conn.execute("UPDATE users SET last_login_at = ?, failed_logins = 0, locked_until = NULL, "
+                             "updated_at = ? WHERE email = ?", (stamp, stamp, email))
             conn.execute(
                 """INSERT INTO sessions
                      (fingerprint, user_email, created_at, expires_at,
@@ -1095,7 +1118,9 @@ class Store:
         repeated at every call site.
         """
         rows = self._read(
-            "SELECT * FROM sessions WHERE fingerprint = ? AND expires_at > ?",
+            "SELECT s.*, CASE WHEN u.password_hash IS NULL THEN 0 ELSE 1 END AS has_password "
+            "FROM sessions s JOIN users u ON u.email = s.user_email "
+            "WHERE s.fingerprint = ? AND s.expires_at > ?",
             (fingerprint or "", _now()),
         )
         return dict(rows[0]) if rows else None

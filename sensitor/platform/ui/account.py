@@ -251,8 +251,12 @@ def _member(email: str) -> None:
 
     section(4, "Vos données", "Tout ce que Sensitor conserve à votre nom, dans un seul fichier : compte, accès, "
             "sessions, progression, journaux, portefeuilles, lettre et, pour un coach, ce qu'il a rédigé.")
-    export = json.dumps(store.export_user(email), ensure_ascii=False, indent=2, default=str)
-    st.download_button("Exporter toutes mes données (JSON)", data=export.encode("utf-8"),
+    def export() -> bytes:
+        # Built when the button is pressed, not on every view of the page: an
+        # export reads every table, a dozen queries the page does not need.
+        return json.dumps(store.export_user(email), ensure_ascii=False, indent=2, default=str).encode("utf-8")
+
+    st.download_button("Exporter toutes mes données (JSON)", data=export,
                        file_name="sensitor-mes-donnees.json", mime="application/json",
                        key="export_all")
 

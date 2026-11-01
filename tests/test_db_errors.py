@@ -80,6 +80,8 @@ def main() -> int:
     if TEST_PG:
         print("\nA connection the server drops (real PostgreSQL)")
         real_drops()
+        print("\nReads take one round trip (real PostgreSQL)")
+        one_trip_reads()
     else:
         print("\n(SENSITOR_TEST_PG not set: the real PostgreSQL checks are skipped)")
 
@@ -152,6 +154,29 @@ def simulated_drops() -> None:
     conn.execute("INSERT INTO t VALUES (3)")
     check("the next unit of work gets a fresh connection", len(opened) == 3
           and opened[-1].statements == ["INSERT INTO t VALUES (3)"])
+
+
+def one_trip_reads() -> None:
+    import psycopg2.extensions as ext
+    from sensitor.database import Store
+    store = Store(TEST_PG)
+    store.upsert_user("lecture@example.com")
+    conn = store._conn._conn                                     # noqa: SLF001
+    store.get_user("lecture@example.com")
+    check("a read leaves no transaction open, and autocommit off for the writes",
+          conn.get_transaction_status() == ext.TRANSACTION_STATUS_IDLE and conn.autocommit is False)
+    with store._write() as c:
+        c.execute("UPDATE users SET display_name = 'pendant' WHERE email = ?", ("lecture@example.com",))
+        inside = store._conn.read("SELECT display_name FROM users WHERE email = %s".replace("%s", "?"),
+                                  ("lecture@example.com",))                                # noqa: SLF001
+    check("a read inside a write sees the write's own change", inside[0][0] == "pendant")
+    check("and the write commits as before", store.get_user("lecture@example.com")["display_name"] == "pendant")
+    try:
+        store._read("SELECT * FROM table_qui_nexiste_pas")         # noqa: SLF001
+    except Exception:
+        pass
+    check("a failed read does not block the next one", store.get_user("lecture@example.com") is not None)
+    store.close()
 
 
 def real_drops() -> None:

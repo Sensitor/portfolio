@@ -39,8 +39,11 @@ SECRET_KEYS = (
     "SENSITOR_ACADEMY_PREVIEW", "SENSITOR_TOOLS_URL", "SENSITOR_PUBLIC_URL",
     "SENSITOR_SMTP_HOST", "SENSITOR_SMTP_PORT", "SENSITOR_SMTP_USER",
     "SENSITOR_SMTP_PASSWORD", "SENSITOR_MAIL_FROM",
+    "PRO_EMAILS", "SENSITOR_ADMIN_EMAILS", "SENSITOR_BREVO_API_KEY", "SENSITOR_BREVO_LIST_ID",
+    "SENSITOR_LOG_LEVEL",
 )
 COOKIE = "sensitor_session"
+RUN_KEY, MEMBER_MEMO = "ac_run", "ac_member_memo"
 COOKIE_OP = "ac_cookie_op"
 
 ROUTE_KEY = "ac_route"
@@ -123,7 +126,23 @@ def member(email: str | None):
     store = get_store()
     if not email or store is None:
         return P.VISITOR_MEMBER
-    return store.access(email)
+    # Asked several times a page (sidebar, page, locks): read once per run. The
+    # memo lives in this browser session's own state, so it is never shared
+    # with another member, and a new run reads afresh.
+    run = st.session_state.get(RUN_KEY)
+    memo = st.session_state.get(MEMBER_MEMO)
+    if run is not None and memo and memo[0] == run and memo[1] == email:
+        return memo[2]
+    who = store.access(email)
+    if run is not None:
+        st.session_state[MEMBER_MEMO] = (run, email, who)
+    return who
+
+
+def new_run() -> None:
+    """Called once at the top of every run of the platform: starts a fresh memo."""
+    st.session_state[RUN_KEY] = st.session_state.get(RUN_KEY, 0) + 1
+    st.session_state.pop(MEMBER_MEMO, None)
 
 
 def can(email: str | None, capability: str) -> bool:

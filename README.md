@@ -65,6 +65,7 @@ None of these is needed by the app, and the API process needs no Streamlit.
 | `SENSITOR_AUTH` | `single` | `multi` for real accounts |
 | `SENSITOR_API_TOKEN` | *(unset)* | single-user API key; without it the API issues no sessions |
 | `SENSITOR_CORS_ORIGINS` | *(unset)* | comma-separated; never defaults to `*` |
+| `SENSITOR_ADMIN_EMAILS` | *(unset)* | comma-separated addresses named administrators at sign-in (account with a password; verified address once e-mail is configured) |
 | `PRO_EMAILS` | *(unset)* | comma-separated addresses given Premium at sign-in (a « config » entitlement, once) |
 | `SENSITOR_PUBLIC_URL` | *(unset)* | the member area's address, for the links in e-mails |
 | `SENSITOR_SMTP_*`, `SENSITOR_MAIL_FROM` | *(unset)* | outgoing e-mail: verification, reset, newsletter confirmation |

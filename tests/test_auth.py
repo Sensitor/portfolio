@@ -459,8 +459,38 @@ def test_tier_is_not_overwritten():
     check("set_tier changes it", store.get_user("membre@example.com")["tier"] == "free")
 
 
+def test_round_trips():
+    """Each page resolves the session; it must not write to the database every time."""
+    print("\nA page costs as few database round trips as it can")
+    auth, store = fresh("trips.db")
+    token = auth.sign_up(ALICE, GOOD_PASSWORD).token
+    fp = token_fingerprint(token)
+    writes = []
+    original = store.touch_session
+    store.touch_session = lambda *a, **k: (writes.append(1), original(*a, **k))
+    for _ in range(5):
+        auth.resolve(token)
+    check("a fresh session is not rewritten on every page", writes == [])
+    with store._write() as conn:
+        conn.execute("UPDATE sessions SET last_seen_at = '2000-01-01T00:00:00+00:00' WHERE fingerprint = ?", (fp,))
+    auth.resolve(token)
+    check("one seen long ago is refreshed, once", len(writes) == 1
+          and store.session(fp)["last_seen_at"] > "2000-01-01T00:00:00+00:00")
+    auth.resolve(token)
+    check("and not again right after", len(writes) == 1)
+    before = store.get_user(ALICE)["last_login_at"]
+    time.sleep(1.1)
+    auth.sign_in(ALICE, GOOD_PASSWORD)
+    check("a sign-in still records the last login (in the session's own commit)",
+          store.get_user(ALICE)["last_login_at"] > (before or ""))
+    with store._write() as conn:
+        conn.execute("UPDATE users SET password_hash = NULL WHERE email = ?", (ALICE,))
+    check("a session whose account lost its password is refused, from the same read",
+          auth.resolve(token) is None)
+
+
 def main() -> int:
-    for test in (test_password_hashing, test_password_strength, test_tokens,
+    for test in (test_round_trips, test_password_hashing, test_password_strength, test_tokens,
                  test_mode_detection, test_single_user_mode, test_sign_up_and_in,
                  test_lockout, test_sessions, test_password_change,
                  test_rehash_on_sign_in, test_one_account_cannot_reach_another,

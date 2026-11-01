@@ -215,14 +215,28 @@ middle of a write is raised and rolled back, never replayed. Reads end their
 transaction, so the shared connection never sits « idle in transaction ».
 Tested against a real server (`tests/test_db_errors.py` with `SENSITOR_TEST_PG`).
 
+**Speed.** Each page waits on the database a few times, and each wait costs a
+network round trip between the app and the database. Reads run in autocommit
+(one round trip each, not three), the session's « last seen » is written at
+most every five minutes, and the member's level and roles are read once per
+page. Measured with 80 ms of round trip: about 0.45 s per page, down from 2 to
+2.5 s. Put the database in the region closest to the app (on Supabase, the
+region is chosen when the project is created): the round trip is the cost that
+remains.
+
 **Fonts and usage statistics.** `.streamlit/config.toml` turns on static file
 serving, so the fonts come from `static/fonts/` (built by
 `scripts/build_fonts.py`) instead of Google, and turns off Streamlit's usage
 statistics: no visitor data leaves for a third party.
 
 
-**Administrators.** Name the first one from a machine that reaches the
-database: `python -m sensitor.core.admin set-role you@example.com admin`. The
+**Administrators.** On Streamlit Cloud, with no command line, list them in the
+secrets: `SENSITOR_ADMIN_EMAILS = "you@example.com"` (comma-separated for
+several). The address becomes an administrator at its next sign-in, or at the
+next page if it is already signed in, provided it has an account with a
+password and, once e-mail is configured, a verified address. Elsewhere,
+`python -m sensitor.core.admin set-role you@example.com admin` does the same
+from a machine that reaches the database. The
 « Membres et accès » page then appears in the platform's sidebar for that
 account; it grants and revokes Premium (with a reason and an optional end) and
 names coaches and other administrators. `check` reports a deployment with no
@@ -265,15 +279,28 @@ accounts and the sessions of the platform.
 
 `scripts/build_site.py` writes a static site from `content/` (articles in
 `content/media/articles`, the Academy's programme, the free sheets, the legal
-pages, `sitemap.xml`, `feed.xml`, `robots.txt`). Any static host builds it:
+pages, `sitemap.xml`, `feed.xml`, `robots.txt`). It needs Python 3.11 and
+nothing else: no dependency to install.
+
+**GitHub Pages (built in).** `.github/workflows/site.yml` builds and publishes
+the site on every push to `main`. Once, in the repository's settings:
+
+1. *Settings > Pages > Build and deployment > Source*: « GitHub Actions ».
+2. *Settings > Secrets and variables > Actions > Variables*: add
+   `SENSITOR_APP_URL` with the member area's address (the Streamlit app), and,
+   once the site has its own domain, `SENSITOR_SITE_URL`.
+3. *Actions > Public site > Run workflow*, or push to `main`.
+
+GitHub Pages on a private repository needs a paid GitHub plan.
+
+**Any other static host** (Cloudflare Pages, Netlify), with the repository
+connected:
 
 | Setting | Value |
 |---|---|
-| Build command | `pip install -r requirements.txt && python scripts/build_site.py --base-url https://sensitor.fr --app-url https://app.sensitor.fr` |
+| Build command | `python scripts/build_site.py --base-url https://sensitor.fr --app-url https://app.sensitor.fr` |
 | Output folder | `site` |
-| Python | 3.11 |
-
-Cloudflare Pages, Netlify and GitHub Pages all accept this. The site has no
+| Environment | `PYTHON_VERSION=3.11` | The site has no
 script, no cookie and no third-party request; its fonts are the platform's own
 files. The newsletter button opens the platform's form
 (`?page=newsletter`). An article is published by setting `status = "published"`

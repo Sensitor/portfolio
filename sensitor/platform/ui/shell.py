@@ -99,7 +99,7 @@ def _sidebar(page: str, email: str | None, catalog) -> None:
         store = rt.get_store() if email else None
         who_am_i = rt.member(email)
         if store is not None and P.can(who_am_i, "review.answer"):
-            pending = len(store.coach_queue(email, "pending"))
+            pending = store.pending_reviews(email)
             html('<div class="sx-side-label">COACHING</div>')
             rt.link(f"File de revue · {pending}" if pending else "File de revue", "coach", key="nav_coach",
                     kind="primary" if page == "coach" else "secondary", width="stretch")
@@ -125,6 +125,7 @@ def _scroll_to_top() -> None:
 
 
 def main() -> None:
+    rt.new_run()
     theme.inject()
     route = rt.route()
     page = route["page"]

@@ -33,7 +33,7 @@ def _mirror_secrets() -> None:
     known = (
         "SENSITOR_DB_URL", "SENSITOR_DB_PATH", "SENSITOR_AUTH",
         "SENSITOR_API_TOKEN", "SENSITOR_CORS_ORIGINS",
-        "PRO_EMAILS",
+        "PRO_EMAILS", "SENSITOR_ADMIN_EMAILS",
     )
     try:
         available = st.secrets
