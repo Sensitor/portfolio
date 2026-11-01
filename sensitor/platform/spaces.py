@@ -123,7 +123,8 @@ SPACES: tuple[Space, ...] = (
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach", "admin", "mentions", "conditions",
-                  "confidentialite", "newsletter", "newsletter_confirm", "newsletter_stop")
+                  "confidentialite", "newsletter", "newsletter_confirm", "newsletter_stop",
+                  "accompagnement", "coach_support", "admin_cohorts", "admin_stats")
 LEGACY_PAGES = {"paths": "academy",       # URLs from the first Academy release
                 "tools": "portfolio"}     # the link page of the analyzer, before it joined the space
 

@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 
 TABLES: dict[str, str] = {
     "users": """
@@ -422,6 +422,88 @@ CREATE TABLE IF NOT EXISTS newsletter (
     created_at             TEXT NOT NULL,
     updated_at             TEXT NOT NULL
 )""",
+
+    # ── Accompaniment ────────────────────────────────────────────────────────
+    # A cohort is a group of accompanied members who follow workshops together.
+    # Members are added by an administrator (no payment). A workshop belongs to
+    # one cohort and is shown to its members only, checked in SQL.
+    "cohorts": """
+CREATE TABLE IF NOT EXISTS cohorts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT NOT NULL,
+    summary      TEXT NOT NULL DEFAULT '',
+    starts_on    TEXT NOT NULL,
+    ends_on      TEXT,
+    status       TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+    created_by   TEXT,
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+)""",
+
+    "cohort_members": """
+CREATE TABLE IF NOT EXISTS cohort_members (
+    cohort_id    INTEGER NOT NULL REFERENCES cohorts(id) ON DELETE CASCADE,
+    user_email   TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    added_by     TEXT,
+    created_at   TEXT NOT NULL,
+    PRIMARY KEY (cohort_id, user_email)
+)""",
+
+    "workshops": """
+CREATE TABLE IF NOT EXISTS workshops (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    cohort_id    INTEGER NOT NULL REFERENCES cohorts(id) ON DELETE CASCADE,
+    title        TEXT NOT NULL,
+    summary      TEXT NOT NULL DEFAULT '',
+    starts_at    TEXT NOT NULL,           -- ISO 8601, UTC
+    duration_minutes INTEGER NOT NULL DEFAULT 60,
+    place        TEXT NOT NULL DEFAULT '', -- a video call link or a place; shown to the cohort only
+    status       TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'cancelled')),
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+)""",
+
+    # A question an accompanied member asks the team about their method, plan
+    # or organisation. Pedagogical: never a recommendation on an asset or an
+    # amount (see platform.support). The coach sees a pseudonym.
+    "support_requests": """
+CREATE TABLE IF NOT EXISTS support_requests (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    topic        TEXT NOT NULL,
+    question     TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'answered')),
+    answer       TEXT,
+    answered_by  TEXT,
+    created_at   TEXT NOT NULL,
+    answered_at  TEXT,
+    seen_at      TEXT
+)""",
+
+    # ── Statistics ───────────────────────────────────────────────────────────
+    # Where an account came from: the campaign tags of the link that brought
+    # the visitor (utm_source, utm_medium, utm_campaign) and the page they
+    # landed on. Recorded once, at sign-up.
+    "signup_sources": """
+CREATE TABLE IF NOT EXISTS signup_sources (
+    user_email   TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    source       TEXT NOT NULL DEFAULT '',
+    medium       TEXT NOT NULL DEFAULT '',
+    campaign     TEXT NOT NULL DEFAULT '',
+    landing      TEXT NOT NULL DEFAULT '',
+    created_at   TEXT NOT NULL
+)""",
+
+    # Audience without cookies: one count per day, landing page and source,
+    # incremented once per browser session. No address, no identifier, no IP.
+    "visits": """
+CREATE TABLE IF NOT EXISTS visits (
+    day          TEXT NOT NULL,
+    landing      TEXT NOT NULL,
+    source       TEXT NOT NULL DEFAULT '',
+    n            INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, landing, source)
+)""",
 }
 
 INDEXES = """
@@ -442,6 +524,10 @@ CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_a
 CREATE INDEX IF NOT EXISTS idx_market_published ON market_sessions(status, session_date);
 CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_email, revoked_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_confirm ON newsletter(confirm_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_cohort_members_user ON cohort_members(user_email);
+CREATE INDEX IF NOT EXISTS idx_workshops_cohort ON workshops(cohort_id, starts_at);
+CREATE INDEX IF NOT EXISTS idx_support_user ON support_requests(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribe ON newsletter(unsubscribe_fingerprint);
 """
 

@@ -19,6 +19,8 @@ Sensitor ne conserve que ce que vous lui confiez pour utiliser le service. Rien 
 - **Vos portefeuilles** : les allocations enregistrées, leurs historiques, le portefeuille de travail, les quantités et les prix que vous saisissez à la main.
 - **Votre accès** : chaque attribution de l'accès Premium, avec sa date, sa durée, son motif et l'administrateur qui l'a décidée, ainsi que son éventuel retrait ; vos rôles s'il y a lieu (coach, administrateur).
 - **La lettre de Sensitor**, si vous vous y inscrivez, avec ou sans compte : votre adresse, le texte exact du consentement que vous avez accepté et sa date, la date de confirmation et, le cas échéant, celle de votre désinscription. Une inscription n'est active qu'après confirmation par le lien envoyé à votre adresse.
+- **L'accompagnement**, si un administrateur vous inscrit dans une cohorte : les cohortes dont vous êtes membre et la date de votre inscription ; les ateliers de ces cohortes vous sont présentés, sans donnée vous concernant. Vos demandes d'accompagnement : le thème, votre question, la réponse et leurs dates.
+- **L'origine de votre inscription** : les étiquettes de campagne du lien qui vous a amené (par exemple « site » ou le nom d'une lettre) et la page d'arrivée, enregistrées une fois à la création du compte.
 - **Vos demandes de revue** : quand vous envoyez un trade à un coach, une copie de ce trade, de sa revue automatique, de votre plan et de votre question.
 
 Sensitor ne demande jamais de phrase de récupération, de clé privée ni de mot de passe d'exchange, et n'en conserve pas.
@@ -33,7 +35,8 @@ Sensitor ne demande jamais de phrase de récupération, de clé privée ni de mo
 ## Qui y a accès
 
 - **Vous seul**, pour vos journaux, vos trades, vos portefeuilles et votre progression : un autre membre n'y a jamais accès.
-- **Un coach Sensitor**, pour les seuls trades que vous choisissez de lui envoyer, sous un pseudonyme : il ne voit pas votre adresse ni le reste de votre journal.
+- **Un coach Sensitor**, pour les seuls trades et les seules demandes d'accompagnement que vous choisissez de lui envoyer, sous un pseudonyme : il ne voit pas votre adresse ni le reste de votre journal.
+- **Un administrateur Sensitor**, pour gérer votre accès : votre adresse, votre nom affiché, votre niveau, vos rôles, vos cohortes et vos dates d'inscription et de dernière connexion, jamais vos journaux, vos trades ni vos portefeuilles. Les statistiques qu'il consulte sont des comptes, sans adresse.
 - **Nos hébergeurs**, qui stockent les données pour notre compte : {hebergement.application} pour l'application, {hebergement.base_de_donnees} pour la base de données, {hebergement.emails} pour l'envoi des e-mails, {hebergement.newsletter} pour l'envoi de la lettre.
 - Pour afficher les cours des actifs que vous analysez, nos serveurs interrogent un fournisseur de données de marché avec les seuls symboles des actifs (par exemple « SPY ») : aucune donnée vous concernant ne lui est transmise.
 
@@ -46,6 +49,10 @@ Si un hébergeur traite des données hors de l'Union européenne, ce transfert e
 - Quand vous supprimez votre compte, toutes vos données sont effacées immédiatement de la base. Elles peuvent subsister dans les sauvegardes jusqu'à leur rotation, au plus {sauvegardes_jours} jours.
 - Après une désinscription de la lettre, l'adresse, le consentement et la date de désinscription sont conservés pour prouver que votre choix a été respecté ; la suppression du compte, ou une demande écrite, les efface.
 - Les revues qu'un coach a rédigées et les séances de la salle des marchés restent publiées sans le nom de leur auteur si son compte est supprimé.
+
+## Mesure d'audience
+
+Sensitor compte les visites sans cookie et sans donnée vous concernant : un nombre de visites par jour, par page d'arrivée et par source de campagne, augmenté une fois par session de navigation. Ni adresse IP, ni identifiant, ni empreinte du navigateur ne sont enregistrés. Le site public ne contient aucun script de mesure.
 
 ## Cookies
 

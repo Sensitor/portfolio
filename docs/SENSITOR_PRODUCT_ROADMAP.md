@@ -371,6 +371,22 @@ variables de production, liste ce qui manque encore.
 - Les statistiques n'exposent aucune donnée personnelle hors de la page
   administrateur.
 
+**Avancement P2 au 1er novembre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P2.0 | **à faire par vous, avec un juriste** : dossier de questions prêt | `docs/REVUE_REGLEMENTAIRE.md` |
+| P2.1 | **bloqué** tant que P2.0 n'est pas fait (règle du projet) : aucun paiement dans le code | |
+| P2.2 | **à rédiger par vous** : contenu Premium (voir `docs/PREMIUM.md`) et parcours Investissement 2 | `content/academy/` |
+| P2.3 | fait : cohortes, inscription des membres par un administrateur, ateliers (date et heure de Paris, durée, lien de visio visible de la cohorte seule), fichier d'agenda `.ics`, page « Mon accompagnement » ; « Accompagné » = Premium + cohorte ouverte, contrôlé dans le SQL | `platform/cohorts.py`, `platform/ui/accompaniment.py`, `tests/test_accompaniment.py` |
+| P2.4 | fait : demandes d'accompagnement (thème, question, quota de 4 par mois), file des coachs sous pseudonyme, réponse unique, cadre « jamais une recommandation » sur les deux formulaires | `platform/support.py`, `platform/ui/accompaniment.py` |
+| P2.5 | fait : source d'inscription (étiquettes UTM du lien d'arrivée), visites comptées sans cookie ni identifiant, liens du site public étiquetés `utm_source=site`, page « Statistiques » (entonnoir, comptes par mois et par source, pages d'arrivée) sans aucune adresse | `platform/stats.py`, `platform/ui/stats_page.py` |
+
+Critères d'acceptation P2 tenus : un membre hors cohorte ne voit pas les ateliers
+de la cohorte (test côté serveur, SQLite et PostgreSQL) ; les statistiques
+n'exposent aucune donnée personnelle (test). Les critères de paiement attendent
+P2.0 et P2.1.
+
 ### P3 · communauté et extension
 
 | # | Tâche | Complexité |

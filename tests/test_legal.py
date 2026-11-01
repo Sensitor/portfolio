@@ -37,6 +37,9 @@ TABLE_WORDS = {
     "trade_reviews": "demandes de revue", "market_sessions": "salle des marchés",
     "entitlements": "attribution de l'accès Premium", "user_roles": "vos rôles",
     "newsletter": "texte exact du consentement",
+    "cohorts": "cohortes dont vous êtes membre", "cohort_members": "date de votre inscription",
+    "workshops": "les ateliers de ces cohortes", "support_requests": "demandes d'accompagnement",
+    "signup_sources": "origine de votre inscription", "visits": "nombre de visites par jour",
 }
 
 

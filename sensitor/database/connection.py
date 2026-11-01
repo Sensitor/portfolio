@@ -274,6 +274,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # Version 13 adds `newsletter`, the subscriptions with their proof of
     # consent. A new table only.
     #
+    # Version 14 adds the accompaniment (`cohorts`, `cohort_members`,
+    # `workshops`, `support_requests`) and the statistics (`signup_sources`,
+    # `visits`). New tables only.
+    #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
