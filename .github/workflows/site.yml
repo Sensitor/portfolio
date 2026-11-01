@@ -1,0 +1,59 @@
+# Publishes the public site (scripts/build_site.py) to GitHub Pages on every
+# push to main, and on demand from the Actions tab.
+#
+# One-time setup, in the repository's settings:
+#   1. Settings > Pages > Build and deployment > Source: « GitHub Actions ».
+#   2. Settings > Secrets and variables > Actions > Variables:
+#        SENSITOR_APP_URL   the member area, e.g. https://sensitor.streamlit.app
+#        SENSITOR_SITE_URL  optional: the site's own address when it has a domain
+#                           (without it, the GitHub Pages address is used)
+# The build needs Python only: no dependency is installed.
+name: Public site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Build
+        env:
+          APP_URL: ${{ vars.SENSITOR_APP_URL }}
+          SITE_URL: ${{ vars.SENSITOR_SITE_URL || steps.pages.outputs.base_url }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "::error::Set the repository variable SENSITOR_APP_URL (the member area's address)."
+            exit 1
+          fi
+          python -m sensitor.academy.validate
+          python scripts/build_site.py --base-url "$SITE_URL" --app-url "$APP_URL" --out site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

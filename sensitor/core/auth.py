@@ -53,6 +53,7 @@ VERIFY_HOURS = 48
 MAX_FAILED_LOGINS = 5
 MAX_TOKENS_PER_HOUR = 3        # reset or verification e-mails per address and purpose
 LOCKOUT_MINUTES = 15
+TOUCH_MINUTES = 5              # a session's « last seen » is refreshed at most this often
 
 
 def auth_mode() -> str:
@@ -213,9 +214,8 @@ class Auth:
         if needs_rehash(stored):
             self.store.set_password_hash(email, hash_password(password))
 
-        self.store.record_login_success(email)
         self._grant_listed(email)
-        return self._issue(email)
+        return self._issue(email, login=True)           # records the sign-in in the same commit
 
     def _count_failure(self, email: str, credential: dict) -> None:
         # A lock that has run out starts a fresh count. Otherwise every failure
@@ -248,11 +248,11 @@ class Auth:
 
     # ── Sessions ─────────────────────────────────────────────────────────────
 
-    def _issue(self, email: str, label: str | None = None) -> AuthResult:
+    def _issue(self, email: str, label: str | None = None, *, login: bool = False) -> AuthResult:
         token = new_token()
         expires = _stamp(_now() + timedelta(days=self.session_days))
         self.store.create_session(email, token_fingerprint(token),
-                                  expires_at=expires, label=label)
+                                  expires_at=expires, label=label, login=login)
         return AuthResult(True, email=email, token=token)
 
     def resolve(self, token: str | None) -> str | None:
@@ -268,14 +268,17 @@ class Auth:
         row = self.store.session(token_fingerprint(token))
         if not row:
             return None
-        if self.multi_user:
+        if self.multi_user and not row.get("has_password"):
             # A session issued in single-user mode, for an account that has no
             # password yet, is not proof of anything once passwords are required.
-            credential = self.store.credential(row["user_email"])
-            if not credential or not credential.get("password_hash"):
-                self.store.revoke_session(token_fingerprint(token))
-                return None
-        self.store.touch_session(token_fingerprint(token))
+            self.store.revoke_session(token_fingerprint(token))
+            return None
+        # « Last seen » is for the account page's list of devices, to the
+        # minute at best: writing it on every page would cost a database round
+        # trip per click. Once every few minutes is enough.
+        seen = row.get("last_seen_at") or ""
+        if seen < _stamp(_now() - timedelta(minutes=TOUCH_MINUTES)):
+            self.store.touch_session(token_fingerprint(token))
         from .config import listed
         if row["user_email"] in listed("PRO_EMAILS") | listed("SENSITOR_ADMIN_EMAILS"):
             self._grant_listed(row["user_email"])      # a session opened before the setting changed

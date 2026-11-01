@@ -669,6 +669,8 @@ def test_trade_reviews():
     check("an unknown address gets no role", store.set_role("personne@example.com", "coach") is False)
     store.set_role(coach, "coach")
     queue = store.coach_queue(coach)
+    check("the sidebar's count matches the queue, for a coach only",
+          store.pending_reviews(coach) == len(queue) == 2 and store.pending_reviews(ALICE) == 0)
     check("a coach sees every pending request, oldest first", [r["trade_id"] for r in queue] == ["t1", "b1"])
     check("Bob cannot withdraw Alice's request", store.withdraw_review_request(BOB, first) is False)
     check("the coach answers once", store.answer_review(coach, first, {"comment": "Bien."}) is True

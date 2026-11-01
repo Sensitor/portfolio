@@ -364,7 +364,8 @@ des marchés. <a href="{esc(self.app_link())}">Ouvrir la plateforme</a>.</p>
         (out / "robots.txt").write_text(self.robots(), encoding="utf-8")
         (out / "404.html").write_text(self.render(Page(
             "", "Page introuvable", "Cette page n'existe pas.",
-            '<h1>Page <em>introuvable</em>.</h1><p><a href="/">Revenir à l\'accueil</a></p>')), encoding="utf-8")
+            f'<h1>Page <em>introuvable</em>.</h1><p><a href="{esc(self.base)}">Revenir à l\'accueil</a></p>')),
+            encoding="utf-8")
         assets = out / "assets"
         shutil.copytree(FONTS, assets / "fonts")
         (assets / "site.css").write_text(STYLE, encoding="utf-8")

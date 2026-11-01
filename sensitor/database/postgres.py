@@ -339,6 +339,47 @@ class Connection:
         statement, values = to_pg_sql(sql), tuple(params)
         return Cursor(self._run(lambda cursor: cursor.execute(statement, values)))
 
+    def read(self, sql: str, params: tuple = ()) -> list:
+        """
+        Run one read in autocommit: a single round trip to the server. Without
+        it, psycopg2 sends BEGIN, then the query, then the ROLLBACK that ends
+        the read, three round trips; with the database on another continent,
+        each costs a tenth of a second, and a page makes a dozen reads.
+
+        Inside a write (a transaction already open) the read joins it, so it
+        sees the write's own changes. A read is always safe to retry on a fresh
+        connection.
+        """
+        if self._in_transaction:
+            return self.execute(sql, params).fetchall()
+        if _PRAGMA.match(sql):                          # answered as `execute` does, then the read is ended
+            rows = self.execute(sql, params).fetchall()
+            self.end_read()
+            return rows
+        statement, values = to_pg_sql(sql), tuple(params)
+        if self._conn.closed:
+            self._log_reconnect("closed")
+            self._open()
+            self.reconnects += 1
+        self._conn.autocommit = True
+        try:
+            try:
+                cursor = self._conn.cursor()
+                cursor.execute(statement, values)
+            except self._errors:
+                if not self._conn.closed:
+                    raise
+                self._log_reconnect("dropped during a read")
+                self._open()
+                self.reconnects += 1
+                self._conn.autocommit = True
+                cursor = self._conn.cursor()
+                cursor.execute(statement, values)
+            return Cursor(cursor).fetchall()
+        finally:
+            if not self._conn.closed:
+                self._conn.autocommit = False
+
     def end_read(self) -> None:
         """
         End the transaction a read opened. Without it, a connection that only
