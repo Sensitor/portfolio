@@ -628,12 +628,12 @@ def main() -> int:
     old = run({"page": "paths"})
     check("the old « paths » page opens the Academy home",
           'diversifier avec la <em class="cu">crypto</em>' in text(old))
-    for page in ("community",):
-        app = run({"page": page})
-        body = text(app)
-        check(f"{page}: says plainly it is not open", "pas encore ouvert" in body)
-        check(f"{page}: offers no input of any kind",
-              not app.text_input and not app.radio and not app.checkbox and not app.text_area)
+    community = run({"page": "community"})
+    body = text(community)
+    check("community: open, it shows a visitor the charter and asks them to sign in",
+          "La charte" in body and "Réservé aux membres" in body and not community.exception)
+    check("community: offers a visitor no input of any kind",
+          not community.text_input and not community.radio and not community.checkbox and not community.text_area)
     room = run({"page": "market"})
     check("market: the trading room is open, and offers a visitor no input",
           "Préparer la séance" in text(room) and not room.exception and not room.text_input)

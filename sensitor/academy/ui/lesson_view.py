@@ -14,7 +14,7 @@ import streamlit as st
 from ...platform.ui.components import diagram, esc, html, md
 from ..content import Catalog, Lesson
 from ..markup import CALLOUT_KINDS
-from . import chart_view, exercise_view, hash_view, prop_view, quiz_view, risk_view, savings_view
+from . import chart_view, exercise_view, hash_view, prop_view, quiz_view, risk_view, savings_view, video_view
 
 
 def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> None:
@@ -38,6 +38,10 @@ def render_blocks(lesson: Lesson, catalog: Catalog, *, email: str | None) -> Non
                 figure += 1
                 chart_view.render(chart, dataset, caption=block.text, number=figure,
                                   key=f"{lesson.id}_{index}", universe=universe)
+        elif block.kind == "video":
+            video = catalog.video(block.target)
+            if video:
+                video_view.render(video, block.text, key=f"{lesson.id}_{index}")
         elif block.kind == "formula":
             st.latex(block.text)
         elif block.kind == "exercise":

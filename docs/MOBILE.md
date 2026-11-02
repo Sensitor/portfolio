@@ -29,6 +29,7 @@ trading pages, one set of calculations.
 | **Analytics** | any of eight dimensions, each group with its sample size and `reliable` flag |
 | **Risk** | sizing, drift, stop discipline, concurrent exposure, activity, losing runs |
 | **Behaviour** | the findings, after-a-run comparisons, mistakes, discipline, emotions |
+| **Academy** | in French, like the lessons: the paths and courses with the member's progress, a course's lessons (done, free, members, Premium), a lesson to read (text, callouts, figures, formulas, videos opened on request with their transcript), « Marquer comme terminée ». Exercises, simulators and charts point to the platform |
 
 Every screen was rendered in a browser against a live API on a 900-trade book
 and looked at. That found six things no test did:

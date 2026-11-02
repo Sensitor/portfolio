@@ -69,6 +69,9 @@ CAPABILITIES: dict[str, Rule] = {
     "portfolio.models": Rule(level=PREMIUM, label="Charger une allocation type dans l'analyseur"),
     "cohort.read": Rule(level=PREMIUM, accompanied=True, label="Suivre les ateliers de sa cohorte"),
     "support.request": Rule(level=PREMIUM, accompanied=True, label="Demander un accompagnement"),
+    "community.read": Rule(level=FREE, label="Lire les discussions de la communauté"),
+    "community.post": Rule(level=FREE, label="Écrire dans la communauté"),
+    "community.moderate": Rule(role=ADMIN, label="Modérer la communauté"),
     "review.answer": Rule(role=COACH, label="Répondre aux revues de trades"),
     "support.answer": Rule(role=COACH, label="Répondre aux demandes d'accompagnement"),
     "cohort.manage": Rule(role=ADMIN, label="Gérer les cohortes et les ateliers"),
@@ -82,6 +85,7 @@ CAPABILITIES: dict[str, Rule] = {
 LIMITS: dict[str, dict[str, int]] = {
     "portfolio.max_assets": {VISITOR: 5, FREE: 5, PREMIUM: 50},
     "review.monthly_quota": {VISITOR: 0, FREE: 1, PREMIUM: 8},
+    "community.daily_posts": {VISITOR: 0, FREE: 20, PREMIUM: 40},
     # Asked only once `support.request` is granted, i.e. for an accompanied member.
     "support.monthly_quota": {VISITOR: 0, FREE: 0, PREMIUM: 4},
 }

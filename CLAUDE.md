@@ -83,6 +83,11 @@ status on failure. Run the whole `tests/` folder before committing.
   privacy policy (`content/legal/confidentialite.md`); the tests compare them.
 - **Accompaniment answers and trading-room sessions stay pedagogical**: never a
   recommendation on an asset, an amount or a moment (`platform/support.py`).
+- **The community follows its charter** (`platform/community.py`): no signals,
+  never a secret (a message that looks like a recovery phrase or a private key
+  is refused), no advertising; authors show by name or pseudonym, never by
+  address; every message can be reported and an administrator decides.
+- **Videos load on request** and always carry a transcript (`academy/videos.py`).
 - **Statistics are counts**: visits are counted without cookie or identifier,
   and no address appears on the statistics page.
 - **Logs carry no personal data**: use `core.logs`, which scrubs addresses,

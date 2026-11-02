@@ -322,7 +322,8 @@ def test_user_lifecycle():
                      "trades": 2, "sessions": 0, "workspace": 1,
                      "lesson_progress": 0, "quiz_attempts": 0, "journal_entries": 1,
                      "trading_plans": 1, "trade_reviews": 1, "entitlements": 0, "user_roles": 0,
-                     "newsletter": 0, "cohort_members": 0, "support_requests": 0, "signup_sources": 0},
+                     "newsletter": 0, "cohort_members": 0, "support_requests": 0, "signup_sources": 0,
+                     "community_posts": 0, "community_reports": 0, "notifications": 0},
           f"got {counts}")
     check("the plan and the requests are gone",
           store.get_trading_plan(ALICE) is None and store.review_requests(ALICE) == [])

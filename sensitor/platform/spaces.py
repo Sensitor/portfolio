@@ -114,17 +114,17 @@ SPACES: tuple[Space, ...] = (
                  "pf_risk", "pf_stress", "pf_optimize", "pf_simulator", "pf_copilot", "pf_reports", "pf_portfolios"),
           numeral="VIII",
           related=(("Investir dans la crypto avec méthode", "course:investir-avec-methode"),)),
-    Space("community", "Communauté", "echanger", PREPARING,
-          "Questions, analyses partagées et retours d'expérience entre membres.",
-          entry="community", pages=("community",), numeral="IX",
-          planned=("Discussions par thème et par parcours",
-                   "Partage d'analyses avec leur invalidation",
-                   "Retours d'expérience authentiques, sans résultats mis en scène")),
+    Space("community", "Communauté", "echanger", LIVE,
+          "Questions, analyses partagées et retours d'expérience entre membres, par thème et par cours, "
+          "sous une charte : pas de signaux, jamais de secret, pas de publicité.",
+          entry="community", pages=("community", "community_thread"), numeral="IX",
+          related=(("Décider sous incertitude", "course:decider-sous-incertitude"),)),
 )
 
 PLATFORM_PAGES = ("home", "account", "reset", "verify", "coach", "admin", "mentions", "conditions",
                   "confidentialite", "newsletter", "newsletter_confirm", "newsletter_stop",
-                  "accompagnement", "coach_support", "admin_cohorts", "admin_stats")
+                  "accompagnement", "coach_support", "admin_cohorts", "admin_stats", "admin_moderation",
+                  "notifications")
 LEGACY_PAGES = {"paths": "academy",       # URLs from the first Academy release
                 "tools": "portfolio"}     # the link page of the analyzer, before it joined the space
 

@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 14
+SCHEMA_VERSION = 15
 
 TABLES: dict[str, str] = {
     "users": """
@@ -504,6 +504,71 @@ CREATE TABLE IF NOT EXISTS visits (
     n            INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (day, landing, source)
 )""",
+
+    # ── Community ────────────────────────────────────────────────────────────
+    # Discussions between signed-in members, by theme and optionally attached
+    # to a course. Authors are shown by display name or pseudonym, never by
+    # address. A message hidden by moderation keeps the reason, for its author.
+    "community_threads": """
+CREATE TABLE IF NOT EXISTS community_threads (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    theme         TEXT NOT NULL,
+    course_id     TEXT,
+    title         TEXT NOT NULL,
+    author_email  TEXT REFERENCES users(email) ON DELETE SET NULL ON UPDATE CASCADE,
+    locked        INTEGER NOT NULL DEFAULT 0,
+    created_at    TEXT NOT NULL,
+    last_post_at  TEXT NOT NULL
+)""",
+
+    "community_posts": """
+CREATE TABLE IF NOT EXISTS community_posts (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread_id     INTEGER NOT NULL REFERENCES community_threads(id) ON DELETE CASCADE,
+    author_email  TEXT REFERENCES users(email) ON DELETE SET NULL ON UPDATE CASCADE,
+    body          TEXT NOT NULL,
+    created_at    TEXT NOT NULL,
+    edited_at     TEXT,
+    deleted_at    TEXT,
+    hidden_at     TEXT,
+    hidden_reason TEXT
+)""",
+
+    "community_reports": """
+CREATE TABLE IF NOT EXISTS community_reports (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id       INTEGER NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+    reporter_email TEXT REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    reason        TEXT NOT NULL,
+    details       TEXT NOT NULL DEFAULT '',
+    created_at    TEXT NOT NULL,
+    resolved_at   TEXT,
+    resolved_by   TEXT,
+    outcome       TEXT CHECK (outcome IN ('dismissed', 'hidden'))
+)""",
+
+    # ── Notifications ────────────────────────────────────────────────────────
+    # What happened for one member: a reply in a discussion they joined, an
+    # answer to their review or request, a moderation decision, a workshop of
+    # their cohort. Events for everyone (a published session) are read from
+    # their own tables against `notification_reads`.
+    "notifications": """
+CREATE TABLE IF NOT EXISTS notifications (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email    TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    kind          TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    page          TEXT NOT NULL DEFAULT '',
+    fields        TEXT NOT NULL DEFAULT '{}',
+    created_at    TEXT NOT NULL,
+    read_at       TEXT
+)""",
+
+    "notification_reads": """
+CREATE TABLE IF NOT EXISTS notification_reads (
+    user_email    TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    read_at       TEXT NOT NULL
+)""",
 }
 
 INDEXES = """
@@ -525,6 +590,11 @@ CREATE INDEX IF NOT EXISTS idx_market_published ON market_sessions(status, sessi
 CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_email, revoked_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_confirm ON newsletter(confirm_fingerprint);
 CREATE INDEX IF NOT EXISTS idx_cohort_members_user ON cohort_members(user_email);
+CREATE INDEX IF NOT EXISTS idx_threads_theme ON community_threads(theme, last_post_at);
+CREATE INDEX IF NOT EXISTS idx_posts_thread ON community_posts(thread_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_posts_author ON community_posts(author_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reports_open ON community_reports(resolved_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_email, read_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_workshops_cohort ON workshops(cohort_id, starts_at);
 CREATE INDEX IF NOT EXISTS idx_support_user ON support_requests(user_email, created_at);
 CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at);

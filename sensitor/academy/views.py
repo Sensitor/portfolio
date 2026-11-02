@@ -86,6 +86,15 @@ def lesson_view(catalog: Catalog, lesson: Lesson) -> dict:
                                for s in exercise.steps] if exercise else [])
         elif block.kind == "tool":
             item.update(tool=block.target)
+        elif block.kind == "video":
+            video = catalog.video(block.target)
+            item.update(video_id=block.target, title=video.title if video else "",
+                        url=video.url if video else "", host=video.host if video else "",
+                        duration_minutes=video.duration_minutes if video else None,
+                        transcript=video.transcript if video else "")
+        elif block.kind == "chart":
+            chart = catalog.chart(block.target)
+            item.update(chart_id=block.target, title=getattr(chart, "title", "") if chart else "")
         blocks.append(item)
     data = lesson_summary(lesson)
     data.update({

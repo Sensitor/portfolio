@@ -1905,7 +1905,10 @@ def test_markup():
     check("nesting is an error",
           raises(lambda: M.parse("::: callout note\n::: formula\n:::\n:::"), M.MarkupError))
     check("an unknown directive is an error",
-          raises(lambda: M.parse("::: video x\n:::"), M.MarkupError))
+          raises(lambda: M.parse("::: hologram x\n:::"), M.MarkupError))
+    check("a video is a directive, with exactly one id",
+          M.parse("::: video lire-une-bougie\nLégende.\n:::")[0].kind == "video"
+          and raises(lambda: M.parse("::: video\n:::"), M.MarkupError))
     check("an unknown callout kind is an error",
           raises(lambda: M.parse("::: callout shiny\nx\n:::"), M.MarkupError))
     check("an unknown tool is an error",

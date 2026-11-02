@@ -132,7 +132,16 @@ database stores only what members do with the content.
    ::: chart emission-bitcoin          id from content/academy/charts.toml
    Légende.
    :::
+   ::: video lire-une-bougie           id from content/academy/videos.toml
+   Légende.
+   :::
    ```
+
+   **Videos.** Declared in `content/academy/videos.toml` (id, title, an https
+   YouTube or Vimeo address, duration, transcript file). The transcript is
+   required and follows the lessons' rules. The lesson shows a card and loads the
+   player only when the reader presses its button, so a page view sends nothing
+   to the host. **Ebooks** are library resources of kind `ebook`, with their PDF.
 
    **Opinions and debates.** A founder's conviction goes in `::: callout opinion`,
    a contested theory in `::: callout debate`; facts stay in the body. The two

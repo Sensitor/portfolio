@@ -1,5 +1,7 @@
 /**
- * The five tabs, mirroring the five Streamlit trading pages.
+ * The tabs: the five trading pages of the analyzer, and the Academy (in French,
+ * like its lessons). A course and a lesson are screens of the Academy tab, kept
+ * out of the tab bar.
  *
  * Labels only, no icons: the five are Overview, Journal, Analytics, Risk and
  * Psychology, and there is no icon for "psychology" that a reader decodes
@@ -33,6 +35,9 @@ export default function TabLayout() {
       <Tabs.Screen name="analytics" options={{ title: 'Analytics' }} />
       <Tabs.Screen name="risk" options={{ title: 'Risk' }} />
       <Tabs.Screen name="psychology" options={{ title: 'Psychology' }} />
+      <Tabs.Screen name="academy" options={{ title: 'Academy' }} />
+      <Tabs.Screen name="course/[id]" options={{ href: null }} />
+      <Tabs.Screen name="lesson/[course]/[lesson]" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -16,10 +16,10 @@ from ...academy.ui import pages as academy
 from ...academy.ui import library as library_pages
 from ...core import permissions as P
 from .. import brand, spaces
-from . import (accompaniment, account, admin, home, journal_analysis, legal_pages, market_room, newsletter_pages, portfolio_space, psychology, spaces_view, theme,
+from . import (accompaniment, account, admin, community_pages, home, journal_analysis, legal_pages, market_room, newsletter_pages, portfolio_space, psychology, spaces_view, theme,
                trade_reviews, trading_journal)
 from . import runtime as rt
-from . import stats_page
+from . import notifications_page, stats_page
 from ...core import logs
 
 log = logs.get(__name__)
@@ -45,7 +45,10 @@ RENDERERS = {
     "market": market_room.room,
     "market_session": market_room.session_page,
     "market_edit": market_room.edit_page,
-    "community": spaces_view.preparing,
+    "community": community_pages.index,
+    "community_thread": community_pages.thread_page,
+    "admin_moderation": community_pages.moderation_page,
+    "notifications": notifications_page.render,
     "portfolio": portfolio_space.RENDERERS["portfolio"],
     "pf_models": portfolio_space.RENDERERS["pf_models"],
     "pf_assets": portfolio_space.RENDERERS["pf_assets"],
@@ -114,13 +117,17 @@ def _sidebar(page: str, email: str | None, catalog) -> None:
         if store is not None and P.can(who_am_i, "admin.members"):
             html('<div class="sx-side-label">GESTION</div>')
             for target, label in (("admin", "Membres et accès"), ("admin_cohorts", "Cohortes et ateliers"),
-                                  ("admin_stats", "Statistiques")):
+                                  ("admin_moderation", "Modération"), ("admin_stats", "Statistiques")):
                 rt.link(label, target, key=f"nav_{target}",
                         kind="primary" if page == target else "secondary", width="stretch")
         html('<div class="sx-side-label">COMPTE</div>')
         if who_am_i.cohorts:
             rt.link("Mon accompagnement", "accompagnement", key="nav_accompagnement",
                     kind="primary" if page == "accompagnement" else "secondary", width="stretch")
+        if store is not None:
+            count = 0 if page == "notifications" else notifications_page.unread(email)
+            rt.link(f"Notifications · {count}" if count else "Notifications", "notifications", key="nav_notifications",
+                    kind="primary" if page == "notifications" else "secondary", width="stretch")
         rt.link("Mon compte" if email else "Se connecter", "account", key="nav_account",
                 kind="primary" if page == "account" else "secondary", width="stretch")
         who = (f"<b>{esc(email)}</b>Membre · un compte pour tous les espaces" if email

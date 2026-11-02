@@ -40,6 +40,9 @@ TABLE_WORDS = {
     "cohorts": "cohortes dont vous êtes membre", "cohort_members": "date de votre inscription",
     "workshops": "les ateliers de ces cohortes", "support_requests": "demandes d'accompagnement",
     "signup_sources": "origine de votre inscription", "visits": "nombre de visites par jour",
+    "community_threads": "les discussions que vous lancez", "community_posts": "messages que vous publiez",
+    "community_reports": "vos signalements", "notifications": "Vos notifications",
+    "notification_reads": "date de votre dernière consultation",
 }
 
 

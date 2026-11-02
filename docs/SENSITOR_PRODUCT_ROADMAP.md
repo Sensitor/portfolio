@@ -397,6 +397,16 @@ P2.0 et P2.1.
 | P3.4 | Academy et progression dans l'application mobile (les routes `/academy` existent déjà) | L |
 | P3.5 | Fusion progressive de l'application d'analyse dans la plateforme, puis retrait de ses pages historiques non testées | L |
 
+**Avancement P3 au 2 novembre 2026**
+
+| # | État | Où |
+|---|---|---|
+| P3.1 | fait : espace Communauté ouvert aux membres, discussions par thème et liées à un cours, charte, refus des messages qui ressemblent à une phrase de récupération ou une clé privée, signalement par tout membre, file de modération (masquer avec un motif lu par l'auteur, classer, fermer une discussion), limite de messages par jour, conditions d'utilisation et politique de confidentialité complétées ; **à faire par vous** : faire relire la section Communauté par le juriste | `platform/community.py`, `platform/ui/community_pages.py`, `tests/test_community.py` |
+| P3.2 | fait : notifications dans la plateforme (réponse dans une discussion, réponse à une revue ou à une demande, décision de modération, nouvel atelier, séance publiée, article publié), compteur dans la barre latérale en une requête ; pas d'e-mail (il faudrait une tâche planifiée) | `platform/ui/notifications_page.py` |
+| P3.3 | fait : bloc `video` dans les leçons (chargé sur demande, transcription obligatoire), live de la salle des marchés chargé sur demande, ebooks déjà acceptés par la bibliothèque ; **à produire par vous** : les vidéos et les ebooks | `academy/videos.py`, `academy/ui/video_view.py`, `tests/test_media.py` |
+| P3.4 | fait : onglet Academy de l'application mobile (parcours, cours, leçon, progression), vérifié par TypeScript, par le test d'intégration contre un vrai serveur (48 vérifications) et à l'écran en version web | `mobile/app/(tabs)/academy.tsx`, `mobile/src/components/LessonBlocks.tsx` |
+| P3.5 | fait en partie : inventaire page par page, bouton de l'analyseur vers la plateforme ; **décision à prendre par vous** : valider les six pages historiques à retirer ; la page `advisor` attend la revue réglementaire | `docs/FUSION_ANALYSEUR.md` |
+
 ---
 
 ## 7. Dépendances

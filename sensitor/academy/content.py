@@ -323,6 +323,10 @@ class Catalog:
     tracks: tuple[Track, ...] = ()
     datasets: dict = field(default_factory=dict)
     charts: dict = field(default_factory=dict)
+    videos: dict = field(default_factory=dict)
+
+    def video(self, video_id: str):
+        return self.videos.get(video_id)
 
     def chart(self, chart_id: str):
         return self.charts.get(chart_id)
@@ -511,6 +515,8 @@ class _Loader:
     def load(self) -> Catalog:
         figures = self.load_figures()
         self.datasets, self.charts = D.load(self.root, self.problem)
+        from . import videos as Vd
+        self.videos = Vd.load(self.root, self.problem)
         exercises = self.load_exercises()
         quizzes = self.load_quizzes()
         courses = self.load_courses(figures, exercises, quizzes)
@@ -522,7 +528,7 @@ class _Loader:
         return Catalog(paths=paths, courses=courses, quizzes=quizzes,
                        exercises=exercises, resources=resources, figures=figures,
                        root=self.root, include_drafts=self.include_drafts, tracks=tracks,
-                       datasets=self.datasets, charts=self.charts)
+                       datasets=self.datasets, charts=self.charts, videos=self.videos)
 
     # ── figures ──────────────────────────────────────────────────────────────
 
@@ -775,6 +781,8 @@ class _Loader:
                 self.problem(where, f"exercice introuvable : {block.target}")
             if block.kind == "chart" and block.target not in self.charts:
                 self.problem(where, f"graphique introuvable : {block.target}")
+            if block.kind == "video" and block.target not in getattr(self, "videos", {}):
+                self.problem(where, f"vidéo introuvable : {block.target} (déclarez-la dans videos.toml)")
 
         quiz_id = meta.get("quiz")
         if quiz_id and quiz_id not in quizzes:

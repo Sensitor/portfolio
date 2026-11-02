@@ -428,6 +428,12 @@ class Store:
                 "SELECT COUNT(*) AS n FROM support_requests WHERE user_email = ?", email),
             "signup_sources": self._count(
                 "SELECT COUNT(*) AS n FROM signup_sources WHERE user_email = ?", email),
+            "community_posts": self._count(
+                "SELECT COUNT(*) AS n FROM community_posts WHERE author_email = ?", email),
+            "community_reports": self._count(
+                "SELECT COUNT(*) AS n FROM community_reports WHERE reporter_email = ?", email),
+            "notifications": self._count(
+                "SELECT COUNT(*) AS n FROM notifications WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -465,6 +471,16 @@ class Store:
             conn.execute("UPDATE support_requests SET answered_by = NULL WHERE answered_by = ?", (email,))
             conn.execute("UPDATE cohorts SET created_by = NULL WHERE created_by = ?", (email,))
             conn.execute("UPDATE cohort_members SET added_by = NULL WHERE added_by = ?", (email,))
+            # The community: the member's own messages go; a discussion they opened stays for the
+            # others' replies, without its author, and is removed when nothing else is left in it.
+            conn.execute("DELETE FROM community_reports WHERE reporter_email = ?", (email,))
+            conn.execute("DELETE FROM community_posts WHERE author_email = ?", (email,))
+            conn.execute("UPDATE community_threads SET author_email = NULL WHERE author_email = ?", (email,))
+            conn.execute("DELETE FROM community_threads WHERE author_email IS NULL AND NOT EXISTS "
+                         "(SELECT 1 FROM community_posts p WHERE p.thread_id = community_threads.id)")
+            conn.execute("UPDATE community_reports SET resolved_by = NULL WHERE resolved_by = ?", (email,))
+            conn.execute("DELETE FROM notifications WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM notification_reads WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -505,6 +521,8 @@ class Store:
             "cohorts": self.my_cohorts(email),
             "support_requests": self.support_requests(email),
             "signup_source": self.signup_source(email),
+            "community": self.my_community(email),
+            "notifications": self.notifications(email, limit=10_000),
             # Where and when the account is signed in; never the token or its fingerprint.
             "sessions": [{k: row.get(k) for k in ("created_at", "last_seen_at", "expires_at", "label")}
                          for row in self.list_sessions(email)],
@@ -792,6 +810,10 @@ class Store:
                 "AND EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')",
                 (coach_email, json.dumps(feedback, ensure_ascii=False), _now(), int(review_id),
                  coach_email))
+            if cursor.rowcount:
+                member = conn.execute("SELECT user_email FROM trade_reviews WHERE id = ?", (int(review_id),)).fetchall()
+                self._notify(conn, [member[0][0]] if member else [], "review",
+                             "Un coach a répondu à votre demande de revue", "journal_reviews", {})
             return cursor.rowcount > 0
 
     # ── Trading room ─────────────────────────────────────────────────────────
@@ -987,6 +1009,11 @@ class Store:
                     f"created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, 'scheduled', ?, ? WHERE {self._ADMIN} "
                     "AND EXISTS (SELECT 1 FROM cohorts c WHERE c.id = ?) RETURNING id",
                     (int(cohort_id), *values, stamp, stamp, admin, int(cohort_id))).fetchone()
+                if row:
+                    members = [r[0] for r in conn.execute("SELECT user_email FROM cohort_members WHERE cohort_id = ?",
+                                                          (int(cohort_id),)).fetchall()]
+                    self._notify(conn, members, "workshop", f"Nouvel atelier : {workshop['title']}",
+                                 "accompagnement", {})
                 return int(row[0]) if row else None
             cursor = conn.execute(
                 "UPDATE workshops SET title = ?, summary = ?, starts_at = ?, duration_minutes = ?, place = ?, "
@@ -1093,7 +1120,249 @@ class Store:
                 "UPDATE support_requests SET status = 'answered', answer = ?, answered_by = ?, answered_at = ? "
                 "WHERE id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM user_roles c "
                 "WHERE c.user_email = ? AND c.role = 'coach')", (answer, coach, _now(), int(request_id), coach))
+            if cursor.rowcount:
+                member = conn.execute("SELECT user_email FROM support_requests WHERE id = ?",
+                                      (int(request_id),)).fetchall()
+                self._notify(conn, [member[0][0]] if member else [], "support",
+                             "L'équipe a répondu à votre demande d'accompagnement", "accompagnement", {})
             return cursor.rowcount > 0
+
+    # ── Community ────────────────────────────────────────────────────────────
+    #
+    # Read by signed-in members, written by their authors; moderation by an
+    # administrator, checked in SQL. Authors leave as « Ancien membre »
+    # (`author_email` set to NULL by the foreign key) when their account goes;
+    # their own messages are deleted with it.
+
+    @staticmethod
+    def _label(row) -> str:
+        from ..platform.community import author_label
+        return author_label(row["display_name"], row["author_email"])
+
+    def community_threads(self, email: str, *, theme: str | None = None, course_id: str | None = None,
+                          limit: int = 100) -> list[dict]:
+        """Discussions, the most recently active first; with author label and message count. Members only."""
+        if not self.get_user(email):
+            return []
+        where, params = ["1 = 1"], []
+        if theme:
+            where.append("t.theme = ?")
+            params.append(theme)
+        if course_id:
+            where.append("t.course_id = ?")
+            params.append(course_id)
+        rows = self._read(
+            "SELECT t.id, t.theme, t.course_id, t.title, t.author_email, u.display_name, t.locked, t.created_at, "
+            "t.last_post_at, (SELECT COUNT(*) FROM community_posts p WHERE p.thread_id = t.id "
+            "AND p.deleted_at IS NULL AND p.hidden_at IS NULL) AS posts "
+            "FROM community_threads t LEFT JOIN users u ON u.email = t.author_email "
+            f"WHERE {' AND '.join(where)} ORDER BY t.last_post_at DESC, t.id DESC LIMIT ?", (*params, int(limit)))
+        out = []
+        for r in rows:
+            item = {k: r[k] for k in ("id", "theme", "course_id", "title", "locked", "created_at", "last_post_at",
+                                      "posts")}
+            item["author"] = self._label(r)
+            item["mine"] = r["author_email"] == _email(email)
+            out.append(item)
+        return out
+
+    def community_thread(self, email: str, thread_id: int) -> dict | None:
+        """One discussion and its messages, for a member. A hidden message shows its reason, not its text."""
+        viewer = _email(email)
+        if not self.get_user(viewer):
+            return None
+        head = self._read("SELECT t.*, u.display_name FROM community_threads t LEFT JOIN users u "
+                          "ON u.email = t.author_email WHERE t.id = ?", (int(thread_id),))
+        if not head:
+            return None
+        rows = self._read(
+            "SELECT p.id, p.author_email, u.display_name, p.body, p.created_at, p.edited_at, p.deleted_at, "
+            "p.hidden_at, p.hidden_reason FROM community_posts p LEFT JOIN users u ON u.email = p.author_email "
+            "WHERE p.thread_id = ? ORDER BY p.created_at, p.id", (int(thread_id),))
+        posts = []
+        for r in rows:
+            mine = r["author_email"] == viewer and viewer != ""
+            gone = bool(r["deleted_at"] or r["hidden_at"])
+            posts.append({"id": r["id"], "author": self._label(r), "mine": mine,
+                          "body": "" if gone and not (mine and r["hidden_at"]) else r["body"],
+                          "created_at": r["created_at"], "edited_at": r["edited_at"],
+                          "deleted": bool(r["deleted_at"]), "hidden": bool(r["hidden_at"]),
+                          "hidden_reason": r["hidden_reason"] if (mine or self.is_admin(viewer)) else None})
+        t = head[0]
+        return {"id": t["id"], "theme": t["theme"], "course_id": t["course_id"], "title": t["title"],
+                "locked": bool(t["locked"]), "author": self._label(t), "created_at": t["created_at"], "posts": posts}
+
+    def count_community_posts(self, email: str, since: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM community_posts WHERE author_email = ? AND created_at >= ?",
+                           _email(email), since)
+
+    def create_thread(self, email: str, thread: dict, *, course_id: str | None = None) -> int | None:
+        """From `platform.community.clean_thread`: the discussion and its first message, in one transaction."""
+        author, stamp = _email(email), _now()
+        with self._write() as conn:
+            if not conn.execute("SELECT 1 FROM users WHERE email = ?", (author,)).fetchall():
+                return None
+            row = conn.execute(
+                "INSERT INTO community_threads (theme, course_id, title, author_email, locked, created_at, "
+                "last_post_at) VALUES (?, ?, ?, ?, 0, ?, ?) RETURNING id",
+                (thread["theme"], course_id, thread["title"], author, stamp, stamp)).fetchone()
+            conn.execute("INSERT INTO community_posts (thread_id, author_email, body, created_at) VALUES (?, ?, ?, ?)",
+                         (int(row[0]), author, thread["body"], stamp))
+            return int(row[0])
+
+    def reply(self, email: str, thread_id: int, body: str) -> int | None:
+        """A reply, from `clean_post`. None when the discussion is locked or gone. Tells the other participants."""
+        author, stamp = _email(email), _now()
+        with self._write() as conn:
+            head = conn.execute("SELECT title FROM community_threads WHERE id = ? AND locked = 0",
+                                (int(thread_id),)).fetchall()
+            if not head or not conn.execute("SELECT 1 FROM users WHERE email = ?", (author,)).fetchall():
+                return None
+            row = conn.execute("INSERT INTO community_posts (thread_id, author_email, body, created_at) "
+                               "VALUES (?, ?, ?, ?) RETURNING id", (int(thread_id), author, body, stamp)).fetchone()
+            conn.execute("UPDATE community_threads SET last_post_at = ? WHERE id = ?", (stamp, int(thread_id)))
+            others = [r[0] for r in conn.execute(
+                "SELECT DISTINCT author_email FROM community_posts WHERE thread_id = ? AND author_email IS NOT NULL "
+                "AND author_email != ? AND deleted_at IS NULL", (int(thread_id), author)).fetchall()]
+            self._notify(conn, others[:200], "reply", f"Nouvelle réponse : {head[0][0]}", "community_thread",
+                         {"thread": str(int(thread_id))})
+            return int(row[0])
+
+    def edit_post(self, email: str, post_id: int, body: str) -> bool:
+        """The author edits their own message, unless it was hidden or deleted."""
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE community_posts SET body = ?, edited_at = ? WHERE id = ? AND author_email = ? "
+                                  "AND deleted_at IS NULL AND hidden_at IS NULL",
+                                  (body, _now(), int(post_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def delete_post(self, email: str, post_id: int) -> bool:
+        """The author deletes their own message: its text is erased, the place in the discussion stays."""
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE community_posts SET body = '', deleted_at = ? WHERE id = ? "
+                                  "AND author_email = ? AND deleted_at IS NULL", (_now(), int(post_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def report_post(self, email: str, post_id: int, report: dict) -> int | None:
+        """A member reports a message (`clean_report`). One open report per member and message."""
+        reporter, stamp = _email(email), _now()
+        with self._write() as conn:
+            if conn.execute("SELECT 1 FROM community_reports WHERE post_id = ? AND reporter_email = ? "
+                            "AND resolved_at IS NULL", (int(post_id), reporter)).fetchall():
+                return None
+            row = conn.execute(
+                "INSERT INTO community_reports (post_id, reporter_email, reason, details, created_at) "
+                "SELECT ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM community_posts p WHERE p.id = ? "
+                "AND p.deleted_at IS NULL AND p.hidden_at IS NULL) AND EXISTS (SELECT 1 FROM users u WHERE u.email = ?) "
+                "RETURNING id", (int(post_id), reporter, report["reason"], report["details"], stamp, int(post_id),
+                                 reporter)).fetchone()
+            return int(row[0]) if row else None
+
+    def moderation_queue(self, email: str) -> list[dict] | None:
+        """Open reports with the message they concern, for an administrator; None otherwise."""
+        if not self.is_admin(email):
+            return None
+        rows = self._read(
+            "SELECT r.id, r.post_id, r.reason, r.details, r.created_at, p.body, p.thread_id, p.author_email, "
+            "u.display_name, t.title FROM community_reports r JOIN community_posts p ON p.id = r.post_id "
+            "JOIN community_threads t ON t.id = p.thread_id LEFT JOIN users u ON u.email = p.author_email "
+            "WHERE r.resolved_at IS NULL ORDER BY r.created_at")
+        return [{"id": r["id"], "post_id": r["post_id"], "reason": r["reason"], "details": r["details"],
+                 "created_at": r["created_at"], "body": r["body"], "thread_id": r["thread_id"], "title": r["title"],
+                 "author": self._label(r)} for r in rows]
+
+    def moderate(self, email: str, report_id: int, *, hide: bool, note: str = "") -> bool:
+        """
+        An administrator decides on a report: dismiss it, or hide the message
+        with a reason its author reads (the statement of reasons). Every open
+        report on that message is closed with the same outcome.
+        """
+        from ..platform.community import REPORT_REASONS
+        admin, stamp = _email(email), _now()
+        with self._write() as conn:
+            rows = conn.execute(f"SELECT r.post_id, r.reason FROM community_reports r WHERE r.id = ? "
+                                f"AND r.resolved_at IS NULL AND {self._ADMIN}", (int(report_id), admin)).fetchall()
+            if not rows:
+                return False
+            post_id, reason = rows[0][0], rows[0][1]
+            outcome = "hidden" if hide else "dismissed"
+            if hide:
+                why = REPORT_REASONS.get(reason, "Charte de la communauté") + (f". {note.strip()}" if note.strip() else "")
+                conn.execute("UPDATE community_posts SET hidden_at = ?, hidden_reason = ? WHERE id = ?",
+                             (stamp, why[:400], post_id))
+                author = conn.execute("SELECT author_email, thread_id FROM community_posts WHERE id = ?",
+                                      (post_id,)).fetchall()
+                if author and author[0][0]:
+                    self._notify(conn, [author[0][0]], "moderation", "Un de vos messages a été masqué par la "
+                                 "modération", "community_thread", {"thread": str(author[0][1])})
+            conn.execute("UPDATE community_reports SET resolved_at = ?, resolved_by = ?, outcome = ? "
+                         "WHERE post_id = ? AND resolved_at IS NULL", (stamp, admin, outcome, post_id))
+            return True
+
+    def lock_thread(self, email: str, thread_id: int, locked: bool) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(f"UPDATE community_threads SET locked = ? WHERE id = ? AND {self._ADMIN}",
+                                  (1 if locked else 0, int(thread_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def my_community(self, email: str) -> dict:
+        """The member's own discussions, messages and reports, for the export."""
+        email = _email(email)
+        return {
+            "threads": [dict(r) for r in self._read(
+                "SELECT id, theme, course_id, title, created_at FROM community_threads WHERE author_email = ?",
+                (email,))],
+            "posts": [dict(r) for r in self._read(
+                "SELECT id, thread_id, body, created_at, edited_at, deleted_at, hidden_at, hidden_reason "
+                "FROM community_posts WHERE author_email = ? ORDER BY created_at", (email,))],
+            "reports": [dict(r) for r in self._read(
+                "SELECT id, post_id, reason, details, created_at, resolved_at, outcome FROM community_reports "
+                "WHERE reporter_email = ?", (email,))],
+        }
+
+    # ── Notifications ────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _notify(conn, emails, kind: str, title: str, page: str, fields: dict) -> None:
+        stamp = _now()
+        payload = json.dumps(fields, ensure_ascii=False)
+        for address in dict.fromkeys(e for e in emails if e):
+            conn.execute("INSERT INTO notifications (user_email, kind, title, page, fields, created_at) "
+                         "SELECT ?, ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM users u WHERE u.email = ?)",
+                         (address, kind, title[:200], page, payload, stamp, address))
+
+    def notifications(self, email: str, *, limit: int = 50) -> list[dict]:
+        rows = self._read("SELECT id, kind, title, page, fields, created_at, read_at FROM notifications "
+                          "WHERE user_email = ? ORDER BY created_at DESC, id DESC LIMIT ?", (_email(email), int(limit)))
+        return [{**dict(r), "fields": json.loads(r["fields"] or "{}")} for r in rows]
+
+    def notification_state(self, email: str, access: tuple[str, ...]) -> dict:
+        """
+        One query for the sidebar: unread personal notifications, published
+        trading-room sessions the member may read since they last looked, and
+        that moment (their sign-up for a member who never looked).
+        """
+        email = _email(email)
+        levels = tuple(access) or ("public",)
+        marks = ", ".join("?" for _ in levels)
+        rows = self._read(
+            "SELECT (SELECT COUNT(*) FROM notifications WHERE user_email = ? AND read_at IS NULL) AS mine, "
+            "COALESCE((SELECT read_at FROM notification_reads WHERE user_email = ?), "
+            "(SELECT created_at FROM users WHERE email = ?), '') AS since, "
+            "(SELECT COUNT(*) FROM market_sessions m WHERE m.status = 'published' AND m.access IN (" + marks + ") "
+            "AND m.published_at > COALESCE((SELECT read_at FROM notification_reads WHERE user_email = ?), "
+            "(SELECT created_at FROM users WHERE email = ?), '')) AS sessions",
+            (email, email, email, *levels, email, email))
+        r = rows[0]
+        return {"mine": int(r["mine"]), "sessions": int(r["sessions"]), "since": r["since"] or ""}
+
+    def mark_notifications_read(self, email: str) -> None:
+        email, stamp = _email(email), _now()
+        with self._write() as conn:
+            conn.execute("UPDATE notifications SET read_at = ? WHERE user_email = ? AND read_at IS NULL", (stamp, email))
+            conn.execute("INSERT INTO notification_reads (user_email, read_at) SELECT ?, ? WHERE EXISTS "
+                         "(SELECT 1 FROM users u WHERE u.email = ?) ON CONFLICT (user_email) DO UPDATE SET "
+                         "read_at = excluded.read_at", (email, stamp, email))
 
     # ── Statistics ───────────────────────────────────────────────────────────
 

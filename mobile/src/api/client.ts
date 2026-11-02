@@ -23,8 +23,8 @@
  */
 
 import type {
-  BreakdownRow, CurvePoint, DayPnL, Dimension, Finding, Me, Meta, Overview,
-  Period, Portfolio, PsychologySummary, RiskSummary, Session, TradeDelta,
+  AcademyCatalog, AcademyProgress, BreakdownRow, CourseView, CurvePoint, DayPnL, Dimension, Finding,
+  LessonView, Me, Meta, Overview, Period, Portfolio, PsychologySummary, RiskSummary, Session, TradeDelta,
   TradesPage, TradingAccount, TradingMetrics,
 } from './types';
 
@@ -313,6 +313,41 @@ export class SensitorClient {
 
   portfolio(id: number): Promise<Portfolio> {
     return this.request<Portfolio>(`/portfolios/${id}`);
+  }
+
+  // ── Academy ──────────────────────────────────────────────────────────────
+
+  /** Every path, with the courses of the open ones. The same for everyone. */
+  academyCatalog(): Promise<AcademyCatalog> {
+    return this.request<AcademyCatalog>('/academy/catalog');
+  }
+
+  /** A course, its modules and lessons, and the caller's progress when signed in. */
+  course(courseId: string): Promise<CourseView> {
+    return this.request<CourseView>(`/academy/courses/${encodeURIComponent(courseId)}`);
+  }
+
+  /** A lesson's blocks. 401 for a member lesson without a session, 403 for premium without the level. */
+  lesson(courseId: string, lessonId: string): Promise<LessonView> {
+    return this.request<LessonView>(
+      `/academy/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`);
+  }
+
+  completeLesson(courseId: string, lessonId: string): Promise<void> {
+    return this.request<void>(
+      `/academy/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/complete`,
+      { method: 'POST' });
+  }
+
+  uncompleteLesson(courseId: string, lessonId: string): Promise<void> {
+    return this.request<void>(
+      `/academy/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/complete`,
+      { method: 'DELETE' });
+  }
+
+  /** Per-course progress and the next step. */
+  academyProgress(): Promise<AcademyProgress> {
+    return this.request<AcademyProgress>('/academy/progress');
   }
 }
 

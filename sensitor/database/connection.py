@@ -278,6 +278,10 @@ def _migrate(conn: sqlite3.Connection, *, fresh: bool) -> None:
     # `workshops`, `support_requests`) and the statistics (`signup_sources`,
     # `visits`). New tables only.
     #
+    # Version 15 adds the community (`community_threads`, `community_posts`,
+    # `community_reports`) and the notifications (`notifications`,
+    # `notification_reads`). New tables only.
+    #
     # The version is still stamped, so a database that has been through this is
     # distinguishable from one that has not.
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
