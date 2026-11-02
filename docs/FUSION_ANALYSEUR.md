@@ -1,9 +1,10 @@
 # Fusion de l'analyseur dans la plateforme (P3.5)
 
 État au 2 novembre 2026. L'analyseur (`portfolio_optimizer_saas.py`) reste en
-ligne : aucune page n'en est retirée sans votre accord. Ce document dit, page
-par page, où se trouve l'équivalent dans la plateforme et ce qu'il reste à
-faire avant de retirer une page.
+ligne pour ses pages d'analyse et de trading ; ses six pages historiques ont été
+retirées le 2 novembre 2026, avec l'accord du fondateur (le fichier est passé
+d'environ 2 700 à 950 lignes). Ce document dit, page par page, où se trouve
+l'équivalent dans la plateforme.
 
 Quand `SENSITOR_PUBLIC_URL` est réglée, la barre latérale de l'analyseur
 indique que ses écrans sont dans la plateforme, avec un bouton pour l'ouvrir.
@@ -16,10 +17,12 @@ indique que ses écrans sont dans la plateforme, avec un bouton pour l'ouvrir.
 | `trading_overview`, `trading_journal`, `trading_analytics`, `trading_risk`, `trading_psychology` | espace Journal de trading : tableau de bord, performance, analyse, risque, comportement, import MT5 | `test_journal_analytics.py`, `test_trading_pages.py` |
 | `account` | page Compte (export, suppression, mot de passe, lettre) | `test_accounts.py`, `test_newsletter.py` |
 
-## Pages historiques, à retirer après votre validation
+## Pages historiques, retirées
 
-Elles précèdent la plateforme, ne sont pas couvertes par les tests de rendu et
-ont toutes un équivalent :
+Elles précédaient la plateforme et n'étaient pas couvertes par les tests de
+rendu. Un ancien lien, un état enregistré ou le bouton « Charger » des
+portefeuilles enregistrés mène désormais à une carte qui nomme la page de la
+plateforme et y renvoie (`MOVED_PAGES`, testé par `tests/test_sensitor_pages.py`) :
 
 | Page historique | Équivalent dans la plateforme |
 |---|---|
@@ -30,9 +33,9 @@ ont toutes un équivalent :
 | `improve` | Optimiser (`pf_optimize`) |
 | `library` | Bibliothèque d'actifs (`pf_assets`), avec les fiches réécrites |
 
-Critères avant de retirer une page : ses utilisateurs ont été prévenus, son
-équivalent a tourné un mois sans régression, et les liens qui pointent vers elle
-sont redirigés (`?page=` de l'analyseur vers la plateforme).
+Les fonctions qui ne servaient qu'à ces pages (cartes d'actifs, ancien score de
+santé, ancien écran de stress tests, invite d'abonnement, éditeur de prix
+manuels de l'ancienne page) ont été supprimées avec elles.
 
 ## Page à ne pas reprendre en l'état
 
@@ -42,7 +45,6 @@ sont redirigés (`?page=` de l'analyseur vers la plateforme).
 
 ## La suite
 
-1. Valider la liste des pages historiques à retirer.
-2. Rediriger les adresses de l'analyseur vers la plateforme, page par page.
-3. Retirer les pages validées, avec leurs chaînes de traduction devenues
-   inutiles, et ne garder de l'analyseur que ce que la plateforme n'a pas.
+1. Quand les membres ont pris l'habitude de la plateforme, faire de l'adresse
+   de l'analyseur une redirection vers l'espace Portefeuille et risque.
+2. Trancher le sort de la page `advisor` après la revue réglementaire.
