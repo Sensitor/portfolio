@@ -405,7 +405,7 @@ P2.0 et P2.1.
 | P3.2 | fait : notifications dans la plateforme (réponse dans une discussion, réponse à une revue ou à une demande, décision de modération, nouvel atelier, séance publiée, article publié), compteur dans la barre latérale en une requête ; pas d'e-mail (il faudrait une tâche planifiée) | `platform/ui/notifications_page.py` |
 | P3.3 | fait : bloc `video` dans les leçons (chargé sur demande, transcription obligatoire), live de la salle des marchés chargé sur demande, ebooks déjà acceptés par la bibliothèque ; **à produire par vous** : les vidéos et les ebooks | `academy/videos.py`, `academy/ui/video_view.py`, `tests/test_media.py` |
 | P3.4 | fait : onglet Academy de l'application mobile (parcours, cours, leçon, progression), vérifié par TypeScript, par le test d'intégration contre un vrai serveur (48 vérifications) et à l'écran en version web | `mobile/app/(tabs)/academy.tsx`, `mobile/src/components/LessonBlocks.tsx` |
-| P3.5 | fait en partie : inventaire page par page, bouton de l'analyseur vers la plateforme ; **décision à prendre par vous** : valider les six pages historiques à retirer ; la page `advisor` attend la revue réglementaire | `docs/FUSION_ANALYSEUR.md` |
+| P3.5 | fait : inventaire page par page, bouton de l'analyseur vers la plateforme, six pages historiques retirées (un ancien lien mène à la page de la plateforme) ; la page `advisor` attend la revue réglementaire | `docs/FUSION_ANALYSEUR.md` |
 
 ---
 

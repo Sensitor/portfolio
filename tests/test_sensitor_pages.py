@@ -204,7 +204,7 @@ def main() -> int:
     # `if st.button(...)` body is unexercised by the 159 above — which is where
     # the store's signatures are actually used.
     checks += _persistence_flow(failures)
-    checks += _simulation_flow(failures)
+    checks += _moved_flow(failures)
     checks += _deep_link_flow(failures)
     checks += _carnet_flow(failures)
     checks += _no_long_dash(failures)
@@ -215,62 +215,37 @@ def main() -> int:
     return 1 if failures else 0
 
 
-def _simulation_flow(failures) -> int:
+def _moved_flow(failures) -> int:
     """
-    Build a simulated portfolio from the sliders and press « Analyse ».
-
-    The render harness above injects a ready-made analyzer, so it never reaches
-    the button that builds one. That is how a NameError in this branch shipped:
-    every page rendered, and the one action that leads to them failed.
+    The analyzer's first screens moved to the platform (docs/FUSION_ANALYSEUR.md).
+    Each old page name, from a bookmark, a saved state or « Load » in the saved
+    portfolios, lands on a card that names the platform's page and links to it;
+    none of them is in the sidebar any more.
     """
-    import numpy as np
-    from sensitor.investment import portfolio as engine
-
-    class FakeTicker:
-        def __init__(self, symbol):
-            self.symbol = symbol
-
-        def history(self, start=None, **_):
-            rng = np.random.default_rng(abs(hash(self.symbol)) % 2**31)
-            index = pd.bdate_range("2024-01-02", periods=400)
-            return pd.DataFrame({"Close": 100 * (1 + rng.normal(0.0004, 0.011, 400)).cumprod()}, index=index)
-
-    original = engine.yf.Ticker
-    engine.yf.Ticker = FakeTicker
+    import os as _os
     checks = 0
+    _os.environ["SENSITOR_PUBLIC_URL"] = "https://app.example.org"
     try:
-        app = AppTest.from_file(APP, default_timeout=240)
-        app.session_state["authenticated"] = True
-        app.session_state["user_email"] = "builder@example.com"
-        app.session_state["session_token"] = _session_for("builder@example.com")
-        app.session_state["user_tier"] = "pro"
-        app.session_state["language"] = "en"
-        app.session_state["user_profile"] = "balanced"
-        app.session_state["analysis_mode"] = "simulation"
-        app.session_state["selected_tickers"] = ["SPY", "AGG"]
-        app.session_state["weights"] = {"SPY": 0.6, "AGG": 0.4}
-        app.session_state["unanalysed_holdings"] = {"OLD": 1.0}
-        app.session_state["page"] = "new_analysis"
-        app.run()
-        app.slider(key="ws_SPY").set_value(60.0)
-        app.slider(key="ws_AGG").set_value(40.0)
-        app.run()
-        next(b for b in app.button if b.label == "Analyse Portfolio").click().run()
-        state = {k: app.session_state[k] for k in ("page", "current_portfolio", "unanalysed_holdings")
-                 if k in app.session_state}
-        built = getattr(state.get("current_portfolio"), "tickers", [])
-        for label, ok, detail in (
-                ("simulation: « Analyse » runs without an exception", not app.exception,
-                 str(app.exception[0].value)[:200] if app.exception else ""),
-                ("simulation: it opens the overview", state.get("page") == "overview", str(state.get("page"))),
-                ("simulation: the analysed book is the one built", sorted(built) == ["AGG", "SPY"], str(built)),
-                ("simulation: no stale « not analysed » notice", state.get("unanalysed_holdings") == {}, "")):
-            checks += 1
-            print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
-            if not ok:
-                failures.append(f"{label}: {detail}")
+        for old, target in (("dashboard", "pf_overview"), ("new_analysis", "portfolio"), ("models", "pf_models"),
+                            ("real_portfolio", "portfolio"), ("improve", "pf_optimize"), ("library", "pf_assets")):
+            app = AppTest.from_file(APP, default_timeout=240)
+            app.session_state["language"] = "fr"
+            app.session_state["page"] = old
+            app.run()
+            links = [b for b in app.get("link_button")]
+            text = " ".join(str(i.value) for i in app.info)
+            ok = (not app.exception and "plateforme Sensitor" in text
+                  and any(getattr(b, "proto", None) is not None and f"?page={target}" in b.proto.url for b in links))
+            nav = {b.label for b in app.sidebar.button}
+            gone = not ({"Tableau de Bord", "Nouvelle Analyse", "Portefeuilles Modèles", "Portefeuille Réel"} & nav)
+            for label, passed in ((f"« {old} » points to the platform's « {target} »", ok),
+                                  (f"« {old} »: the retired pages are out of the sidebar", gone)):
+                checks += 1
+                print(f"  {'ok  ' if passed else 'FAIL'}  {label}")
+                if not passed:
+                    failures.append(f"{label}: {str(app.exception[0].value)[:200] if app.exception else text[:120]}")
     finally:
-        engine.yf.Ticker = original
+        _os.environ.pop("SENSITOR_PUBLIC_URL", None)
     return checks
 
 
