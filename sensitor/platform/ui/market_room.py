@@ -232,7 +232,11 @@ def session_page(catalog, email, route) -> None:
         _scenario(catalog, x, i, outcome, key=f"sc{s['id']}")
     if content.get("live_url"):
         section(4, "Le live", "La lecture en direct, pendant la séance.")
-        st.video(content["live_url"])
+        from ...academy.ui import video_view
+        from ...academy.videos import HOSTS
+        from urllib.parse import urlparse
+        video_view.player(content["live_url"], HOSTS.get((urlparse(content["live_url"]).hostname or "").lower(), ""),
+                          key=f"live_{s['id']}")
     _lessons(catalog, content.get("lessons", []), key=f"market_l{s['id']}", why="Academy · utilisé dans cette séance")
     if review:
         section(5, "Le bilan", "Après la clôture : ce que les scénarios ont fait, et ce que la séance enseigne.")

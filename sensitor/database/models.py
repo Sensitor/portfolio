@@ -22,7 +22,7 @@ from dataclasses import dataclass
 # CREATE TABLE drift, and the copy that drifts is always the one only old
 # databases ever see.
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 15
 
 TABLES: dict[str, str] = {
     "users": """
@@ -422,6 +422,153 @@ CREATE TABLE IF NOT EXISTS newsletter (
     created_at             TEXT NOT NULL,
     updated_at             TEXT NOT NULL
 )""",
+
+    # ── Accompaniment ────────────────────────────────────────────────────────
+    # A cohort is a group of accompanied members who follow workshops together.
+    # Members are added by an administrator (no payment). A workshop belongs to
+    # one cohort and is shown to its members only, checked in SQL.
+    "cohorts": """
+CREATE TABLE IF NOT EXISTS cohorts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT NOT NULL,
+    summary      TEXT NOT NULL DEFAULT '',
+    starts_on    TEXT NOT NULL,
+    ends_on      TEXT,
+    status       TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+    created_by   TEXT,
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+)""",
+
+    "cohort_members": """
+CREATE TABLE IF NOT EXISTS cohort_members (
+    cohort_id    INTEGER NOT NULL REFERENCES cohorts(id) ON DELETE CASCADE,
+    user_email   TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    added_by     TEXT,
+    created_at   TEXT NOT NULL,
+    PRIMARY KEY (cohort_id, user_email)
+)""",
+
+    "workshops": """
+CREATE TABLE IF NOT EXISTS workshops (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    cohort_id    INTEGER NOT NULL REFERENCES cohorts(id) ON DELETE CASCADE,
+    title        TEXT NOT NULL,
+    summary      TEXT NOT NULL DEFAULT '',
+    starts_at    TEXT NOT NULL,           -- ISO 8601, UTC
+    duration_minutes INTEGER NOT NULL DEFAULT 60,
+    place        TEXT NOT NULL DEFAULT '', -- a video call link or a place; shown to the cohort only
+    status       TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'cancelled')),
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+)""",
+
+    # A question an accompanied member asks the team about their method, plan
+    # or organisation. Pedagogical: never a recommendation on an asset or an
+    # amount (see platform.support). The coach sees a pseudonym.
+    "support_requests": """
+CREATE TABLE IF NOT EXISTS support_requests (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email   TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    topic        TEXT NOT NULL,
+    question     TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'answered')),
+    answer       TEXT,
+    answered_by  TEXT,
+    created_at   TEXT NOT NULL,
+    answered_at  TEXT,
+    seen_at      TEXT
+)""",
+
+    # ── Statistics ───────────────────────────────────────────────────────────
+    # Where an account came from: the campaign tags of the link that brought
+    # the visitor (utm_source, utm_medium, utm_campaign) and the page they
+    # landed on. Recorded once, at sign-up.
+    "signup_sources": """
+CREATE TABLE IF NOT EXISTS signup_sources (
+    user_email   TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    source       TEXT NOT NULL DEFAULT '',
+    medium       TEXT NOT NULL DEFAULT '',
+    campaign     TEXT NOT NULL DEFAULT '',
+    landing      TEXT NOT NULL DEFAULT '',
+    created_at   TEXT NOT NULL
+)""",
+
+    # Audience without cookies: one count per day, landing page and source,
+    # incremented once per browser session. No address, no identifier, no IP.
+    "visits": """
+CREATE TABLE IF NOT EXISTS visits (
+    day          TEXT NOT NULL,
+    landing      TEXT NOT NULL,
+    source       TEXT NOT NULL DEFAULT '',
+    n            INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, landing, source)
+)""",
+
+    # ── Community ────────────────────────────────────────────────────────────
+    # Discussions between signed-in members, by theme and optionally attached
+    # to a course. Authors are shown by display name or pseudonym, never by
+    # address. A message hidden by moderation keeps the reason, for its author.
+    "community_threads": """
+CREATE TABLE IF NOT EXISTS community_threads (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    theme         TEXT NOT NULL,
+    course_id     TEXT,
+    title         TEXT NOT NULL,
+    author_email  TEXT REFERENCES users(email) ON DELETE SET NULL ON UPDATE CASCADE,
+    locked        INTEGER NOT NULL DEFAULT 0,
+    created_at    TEXT NOT NULL,
+    last_post_at  TEXT NOT NULL
+)""",
+
+    "community_posts": """
+CREATE TABLE IF NOT EXISTS community_posts (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread_id     INTEGER NOT NULL REFERENCES community_threads(id) ON DELETE CASCADE,
+    author_email  TEXT REFERENCES users(email) ON DELETE SET NULL ON UPDATE CASCADE,
+    body          TEXT NOT NULL,
+    created_at    TEXT NOT NULL,
+    edited_at     TEXT,
+    deleted_at    TEXT,
+    hidden_at     TEXT,
+    hidden_reason TEXT
+)""",
+
+    "community_reports": """
+CREATE TABLE IF NOT EXISTS community_reports (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id       INTEGER NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+    reporter_email TEXT REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    reason        TEXT NOT NULL,
+    details       TEXT NOT NULL DEFAULT '',
+    created_at    TEXT NOT NULL,
+    resolved_at   TEXT,
+    resolved_by   TEXT,
+    outcome       TEXT CHECK (outcome IN ('dismissed', 'hidden'))
+)""",
+
+    # ── Notifications ────────────────────────────────────────────────────────
+    # What happened for one member: a reply in a discussion they joined, an
+    # answer to their review or request, a moderation decision, a workshop of
+    # their cohort. Events for everyone (a published session) are read from
+    # their own tables against `notification_reads`.
+    "notifications": """
+CREATE TABLE IF NOT EXISTS notifications (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email    TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    kind          TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    page          TEXT NOT NULL DEFAULT '',
+    fields        TEXT NOT NULL DEFAULT '{}',
+    created_at    TEXT NOT NULL,
+    read_at       TEXT
+)""",
+
+    "notification_reads": """
+CREATE TABLE IF NOT EXISTS notification_reads (
+    user_email    TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    read_at       TEXT NOT NULL
+)""",
 }
 
 INDEXES = """
@@ -442,6 +589,15 @@ CREATE INDEX IF NOT EXISTS idx_reviews_status ON trade_reviews(status, created_a
 CREATE INDEX IF NOT EXISTS idx_market_published ON market_sessions(status, session_date);
 CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_email, revoked_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_confirm ON newsletter(confirm_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_cohort_members_user ON cohort_members(user_email);
+CREATE INDEX IF NOT EXISTS idx_threads_theme ON community_threads(theme, last_post_at);
+CREATE INDEX IF NOT EXISTS idx_posts_thread ON community_posts(thread_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_posts_author ON community_posts(author_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_reports_open ON community_reports(resolved_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_email, read_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_workshops_cohort ON workshops(cohort_id, starts_at);
+CREATE INDEX IF NOT EXISTS idx_support_user ON support_requests(user_email, created_at);
+CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribe ON newsletter(unsubscribe_fingerprint);
 """
 

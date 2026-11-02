@@ -20,6 +20,10 @@ payment later), and any number of **roles**, which are orthogonal to the level:
 * role `admin`  manages members and their access. An administrator does not
   open premium content by being one: the role manages access, it is not access.
 
+**Accompagné** is not a level of its own: it is premium plus membership of an
+open cohort (`Member.cohorts`), given by an administrator. It opens the
+cohort's workshops and the accompaniment requests.
+
 The values written by earlier versions (`pro`, `premium` in `users.tier`, the
 `PRO_EMAILS` variable) are read here, by `level_of`, and nowhere else.
 
@@ -50,6 +54,7 @@ class Rule:
     level: str | None = None        # the least level that has it
     role: str | None = None         # or the role that has it
     label: str = ""
+    accompanied: bool = False       # and, on top of the level, membership of an open cohort
 
 
 # The capabilities. A new protected feature adds a line here and asks `can()`.
@@ -62,7 +67,15 @@ CAPABILITIES: dict[str, Rule] = {
     "portfolio.optimize": Rule(level=PREMIUM, label="Optimiser un portefeuille"),
     "portfolio.stress_test": Rule(level=PREMIUM, label="Lancer les stress tests"),
     "portfolio.models": Rule(level=PREMIUM, label="Charger une allocation type dans l'analyseur"),
+    "cohort.read": Rule(level=PREMIUM, accompanied=True, label="Suivre les ateliers de sa cohorte"),
+    "support.request": Rule(level=PREMIUM, accompanied=True, label="Demander un accompagnement"),
+    "community.read": Rule(level=FREE, label="Lire les discussions de la communauté"),
+    "community.post": Rule(level=FREE, label="Écrire dans la communauté"),
+    "community.moderate": Rule(role=ADMIN, label="Modérer la communauté"),
     "review.answer": Rule(role=COACH, label="Répondre aux revues de trades"),
+    "support.answer": Rule(role=COACH, label="Répondre aux demandes d'accompagnement"),
+    "cohort.manage": Rule(role=ADMIN, label="Gérer les cohortes et les ateliers"),
+    "admin.stats": Rule(role=ADMIN, label="Consulter les statistiques"),
     "market.publish": Rule(role=COACH, label="Rédiger et publier les séances"),
     "admin.members": Rule(role=ADMIN, label="Consulter les membres"),
     "admin.access": Rule(role=ADMIN, label="Attribuer et retirer les accès"),
@@ -72,6 +85,9 @@ CAPABILITIES: dict[str, Rule] = {
 LIMITS: dict[str, dict[str, int]] = {
     "portfolio.max_assets": {VISITOR: 5, FREE: 5, PREMIUM: 50},
     "review.monthly_quota": {VISITOR: 0, FREE: 1, PREMIUM: 8},
+    "community.daily_posts": {VISITOR: 0, FREE: 20, PREMIUM: 40},
+    # Asked only once `support.request` is granted, i.e. for an accompanied member.
+    "support.monthly_quota": {VISITOR: 0, FREE: 0, PREMIUM: 4},
 }
 
 
@@ -80,10 +96,20 @@ class Member:
     email: str | None = None
     level: str = VISITOR
     roles: frozenset = field(default_factory=frozenset)
+    cohorts: frozenset = field(default_factory=frozenset)   # ids of the open cohorts they belong to
 
     @property
     def signed_in(self) -> bool:
         return bool(self.email)
+
+    @property
+    def accompanied(self) -> bool:
+        return self.signed_in and self.level == PREMIUM and bool(self.cohorts)
+
+
+def status_label(who: Member) -> str:
+    """« Accompagné » for a premium member in an open cohort, else the level's label."""
+    return "Accompagné" if who.accompanied else LEVEL_LABELS.get(who.level, who.level)
 
 
 VISITOR_MEMBER = Member()
@@ -138,6 +164,8 @@ def can(who: Member, capability: str) -> bool:
         return who.signed_in and rule.role in who.roles
     if rule.level == VISITOR:
         return True
+    if rule.accompanied and not who.accompanied:
+        return False
     return who.signed_in and _rank(who.level) >= _rank(rule.level)
 
 

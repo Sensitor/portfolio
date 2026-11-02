@@ -325,3 +325,24 @@ host's log view): a page that raised, the database unreachable or reconnecting,
 an e-mail not sent, a provider that refused a call, an account locked. Every
 line is scrubbed of e-mail addresses, tokens, passwords and database URLs
 before it is written. `SENSITOR_LOG_LEVEL` sets the level (INFO by default).
+
+---
+
+## 10. Accompaniment and statistics (P2.3 to P2.5)
+
+**Cohorts.** In the platform, *Gestion > Cohortes et ateliers*: create a
+cohort, enrol members by the address of their account, schedule workshops
+(Paris time) with a video call link. A member sees the workshops and the link
+only while they are Premium and the cohort is open; « Mon accompagnement »
+appears in their sidebar. Closing a cohort hides its workshops and ends the
+accompaniment requests for its members.
+
+**Requests.** An accompanied member asks up to 4 questions a month
+(`support.monthly_quota` in `core/permissions.py`). Coaches answer from
+*Coaching > Demandes d'accompagnement*, under a pseudonym.
+
+**Statistics.** *Gestion > Statistiques*: the funnel over a window, accounts by
+month and by source, landing pages. To follow a campaign, add tags to its link:
+`https://your-app/?utm_source=instagram&utm_campaign=launch`. The public site's
+links carry `utm_source=site`. Visits are counted once per browser session,
+with no cookie and no identifier.

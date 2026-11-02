@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime, timezone
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -48,7 +49,8 @@ COOKIE_OP = "ac_cookie_op"
 
 ROUTE_KEY = "ac_route"
 TOKEN_KEY = "session_token"
-ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review", "session", "asset")
+ROUTE_FIELDS = ("course", "lesson", "quiz", "resource", "token", "trade", "review", "session", "asset", "thread",
+                "theme")
 
 
 def tools_url() -> str:
@@ -232,6 +234,11 @@ def sign_up(email: str, password: str | None):
     result = auth.sign_up(email, password) if auth else None
     if result:
         remember(result.token)
+        origin = st.session_state.get(UTM_KEY) or {}
+        store = get_store()
+        if store is not None:
+            store.set_signup_source(result.email, source=origin.get("source", ""), medium=origin.get("medium", ""),
+                                    campaign=origin.get("campaign", ""), landing=origin.get("landing", ""))
     return result
 
 
@@ -260,9 +267,32 @@ def route() -> dict:
             if params.get(field):
                 initial[field] = params.get(field)
         st.session_state[ROUTE_KEY] = initial
+        first_visit(params, initial["page"])
     current = st.session_state[ROUTE_KEY]
     current["page"] = spaces.resolve_page(current.get("page"))
     return current
+
+
+UTM_KEY = "ac_utm"
+
+
+def first_visit(params, page: str) -> None:
+    """
+    The first run of a browser session: keep the link's campaign tags for a
+    sign-up that may follow, and count one visit for this day, landing page
+    and source. Nothing that identifies the visitor is written anywhere.
+    """
+    from .. import stats
+    utm = stats.clean_utm(params)
+    st.session_state[UTM_KEY] = {**utm, "landing": page}
+    store = get_store()
+    if store is None:
+        return
+    try:
+        store.record_visit(datetime.now(timezone.utc).date().isoformat(), page, utm["source"])
+    except Exception:                                    # noqa: BLE001 - a count must never break a page
+        from ...core import logs
+        logs.get(__name__).warning("visit not counted")
 
 
 def go(page: str, **fields) -> None:

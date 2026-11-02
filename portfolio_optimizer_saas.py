@@ -1089,6 +1089,17 @@ def _sidebar(lang):
             unsafe_allow_html=True
         )
 
+        # The platform now carries these screens (docs/FUSION_ANALYSEUR.md): say so, with the link.
+        platform = os.getenv("SENSITOR_PUBLIC_URL", "").strip().rstrip("/")
+        if platform:
+            label = ("These screens now live in the Sensitor platform, with the Academy and the journal."
+                     if lang == "en" else
+                     "Ces écrans sont désormais dans la plateforme Sensitor, avec l'Academy et le journal.")
+            st.markdown(f"<div style='font-size:0.78rem;color:rgba(255,253,248,0.75);margin-bottom:6px;'>{label}</div>",
+                        unsafe_allow_html=True)
+            st.link_button("Open the platform" if lang == "en" else "Ouvrir la plateforme",
+                           f"{platform}/?page=portfolio", use_container_width=True)
+
         # Language toggle
         c1, c2 = st.columns(2)
         with c1:

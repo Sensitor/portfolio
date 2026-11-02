@@ -359,3 +359,97 @@ export interface Portfolio {
 }
 
 export type Period = '7D' | '30D' | '90D' | '6M' | '1Y' | 'ALL';
+
+// ── Academy ─────────────────────────────────────────────────────────────────
+// The lessons are French, like the platform; so are the Academy screens.
+
+export type Access = 'public' | 'member' | 'premium';
+
+export interface CourseSummary {
+  id: string;
+  title: string;
+  summary: string;
+  level: string;
+  level_label: string;
+  lessons: number;
+  duration_minutes: number | null;
+  final_quiz_id: string | null;
+}
+
+export interface LearningPath {
+  id: string;
+  number: number;
+  track: string;
+  label: string;
+  title: string;
+  summary: string;
+  status: string;
+  available: boolean;
+  topics: string[];
+  courses: CourseSummary[];
+}
+
+export interface AcademyCatalog {
+  paths: LearningPath[];
+}
+
+export interface LessonSummary {
+  id: string;
+  number: number;
+  title: string;
+  summary: string;
+  duration_minutes: number | null;
+  access: Access;
+  module_id: string;
+  quiz_id: string | null;
+  version: number;
+}
+
+export interface CourseProgress {
+  course_id: string;
+  done: number;
+  total: number;
+  fraction: number;
+  completed: string[];
+  next_lesson_id: string | null;
+  final_quiz_passed: boolean;
+}
+
+export interface CourseView extends CourseSummary {
+  path_id: string;
+  version: number;
+  objectives: string[];
+  prerequisites: string[];
+  modules: { id: string; number: number; title: string; summary: string; lessons: LessonSummary[] }[];
+  /** null for a visitor: no progress without an account. */
+  progress: CourseProgress | null;
+}
+
+/** A lesson block. The text ones are read here; the interactive ones open on the platform. */
+export interface LessonBlock {
+  kind: 'markdown' | 'callout' | 'figure' | 'formula' | 'exercise' | 'tool' | 'chart' | 'video';
+  text: string;
+  style?: string;
+  title?: string;
+  src?: string;
+  svg?: string;
+  tool?: string;
+  url?: string;
+  host?: string;
+  duration_minutes?: number | null;
+  transcript?: string;
+}
+
+export interface LessonView extends LessonSummary {
+  course_id: string;
+  objectives: string[];
+  sources: string[];
+  blocks: LessonBlock[];
+  previous_id: string | null;
+  next_id: string | null;
+}
+
+export interface AcademyProgress {
+  courses: CourseProgress[];
+  next: { kind: string; course_id: string | null; lesson_id: string | null };
+}

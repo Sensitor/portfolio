@@ -185,10 +185,15 @@ class Store:
             return P.VISITOR_MEMBER
         rows = self._read(
             "SELECT level, starts_at, ends_at, revoked_at, NULL AS role FROM entitlements WHERE user_email = ? "
-            "UNION ALL SELECT NULL, NULL, NULL, NULL, role FROM user_roles WHERE user_email = ?", (email, email))
+            "UNION ALL SELECT NULL, NULL, NULL, NULL, role FROM user_roles WHERE user_email = ? "
+            "UNION ALL SELECT NULL, NULL, NULL, NULL, 'cohort:' || m.cohort_id FROM cohort_members m "
+            "JOIN cohorts c ON c.id = m.cohort_id WHERE m.user_email = ? AND c.status = 'open'",
+            (email, email, email))
         grants = [dict(r) for r in rows if r["role"] is None]
-        roles = frozenset(r["role"] for r in rows if r["role"] is not None)
-        return P.Member(email, P.level_from(grants, _now()), roles)
+        tags = [r["role"] for r in rows if r["role"] is not None]
+        roles = frozenset(t for t in tags if not t.startswith("cohort:"))
+        cohorts = frozenset(int(t.split(":", 1)[1]) for t in tags if t.startswith("cohort:"))
+        return P.Member(email, P.level_from(grants, _now()), roles, cohorts)
 
     def has_admin(self) -> bool:
         """Whether anyone holds the administrator role (the pre-launch check asks)."""
@@ -417,6 +422,18 @@ class Store:
                 "SELECT COUNT(*) AS n FROM user_roles WHERE user_email = ?", email),
             "newsletter": self._count(
                 "SELECT COUNT(*) AS n FROM newsletter WHERE email = ?", email),
+            "cohort_members": self._count(
+                "SELECT COUNT(*) AS n FROM cohort_members WHERE user_email = ?", email),
+            "support_requests": self._count(
+                "SELECT COUNT(*) AS n FROM support_requests WHERE user_email = ?", email),
+            "signup_sources": self._count(
+                "SELECT COUNT(*) AS n FROM signup_sources WHERE user_email = ?", email),
+            "community_posts": self._count(
+                "SELECT COUNT(*) AS n FROM community_posts WHERE author_email = ?", email),
+            "community_reports": self._count(
+                "SELECT COUNT(*) AS n FROM community_reports WHERE reporter_email = ?", email),
+            "notifications": self._count(
+                "SELECT COUNT(*) AS n FROM notifications WHERE user_email = ?", email),
         }
 
         with self._write() as conn:
@@ -447,6 +464,23 @@ class Store:
             conn.execute("UPDATE user_roles SET granted_by = 'compte supprimé' WHERE granted_by = ?", (email,))
             conn.execute("DELETE FROM account_tokens WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM newsletter WHERE email = ?", (email,))
+            conn.execute("DELETE FROM cohort_members WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM support_requests WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM signup_sources WHERE user_email = ?", (email,))
+            # What a departing coach or administrator wrote or set up stays, without their address.
+            conn.execute("UPDATE support_requests SET answered_by = NULL WHERE answered_by = ?", (email,))
+            conn.execute("UPDATE cohorts SET created_by = NULL WHERE created_by = ?", (email,))
+            conn.execute("UPDATE cohort_members SET added_by = NULL WHERE added_by = ?", (email,))
+            # The community: the member's own messages go; a discussion they opened stays for the
+            # others' replies, without its author, and is removed when nothing else is left in it.
+            conn.execute("DELETE FROM community_reports WHERE reporter_email = ?", (email,))
+            conn.execute("DELETE FROM community_posts WHERE author_email = ?", (email,))
+            conn.execute("UPDATE community_threads SET author_email = NULL WHERE author_email = ?", (email,))
+            conn.execute("DELETE FROM community_threads WHERE author_email IS NULL AND NOT EXISTS "
+                         "(SELECT 1 FROM community_posts p WHERE p.thread_id = community_threads.id)")
+            conn.execute("UPDATE community_reports SET resolved_by = NULL WHERE resolved_by = ?", (email,))
+            conn.execute("DELETE FROM notifications WHERE user_email = ?", (email,))
+            conn.execute("DELETE FROM notification_reads WHERE user_email = ?", (email,))
             conn.execute("DELETE FROM users WHERE email = ?", (email,))
         return counts
 
@@ -484,6 +518,11 @@ class Store:
             "entitlements": self.entitlements(email),
             "roles": sorted(self.roles(email)),
             "newsletter": self.newsletter(email),
+            "cohorts": self.my_cohorts(email),
+            "support_requests": self.support_requests(email),
+            "signup_source": self.signup_source(email),
+            "community": self.my_community(email),
+            "notifications": self.notifications(email, limit=10_000),
             # Where and when the account is signed in; never the token or its fingerprint.
             "sessions": [{k: row.get(k) for k in ("created_at", "last_seen_at", "expires_at", "label")}
                          for row in self.list_sessions(email)],
@@ -507,7 +546,10 @@ class Store:
                     "feedback": None if r["feedback"] is None else json.loads(r["feedback"])}
                    for r in self._read("SELECT id, answered_at, feedback FROM trade_reviews WHERE coach_email = ? "
                                        "ORDER BY answered_at", (email,))]
-        return {"market_sessions": sessions, "review_answers": answers}
+        support = [{"id": r["id"], "answered_at": r["answered_at"], "answer": r["answer"]}
+                   for r in self._read("SELECT id, answered_at, answer FROM support_requests WHERE answered_by = ? "
+                                       "ORDER BY answered_at", (email,))]
+        return {"market_sessions": sessions, "review_answers": answers, "support_answers": support}
 
     # ── Academy ──────────────────────────────────────────────────────────────
     #
@@ -768,6 +810,10 @@ class Store:
                 "AND EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')",
                 (coach_email, json.dumps(feedback, ensure_ascii=False), _now(), int(review_id),
                  coach_email))
+            if cursor.rowcount:
+                member = conn.execute("SELECT user_email FROM trade_reviews WHERE id = ?", (int(review_id),)).fetchall()
+                self._notify(conn, [member[0][0]] if member else [], "review",
+                             "Un coach a répondu à votre demande de revue", "journal_reviews", {})
             return cursor.rowcount > 0
 
     # ── Trading room ─────────────────────────────────────────────────────────
@@ -881,6 +927,508 @@ class Store:
         status = "" if is_coach else " AND status = 'published'"
         rows = self._read(f"SELECT {columns} FROM market_sessions WHERE id = ?{status}", (int(session_id),))
         return self._market_row(rows[0]) if rows else None
+
+    # ── Accompaniment: cohorts, workshops, requests ──────────────────────────
+    #
+    # Administrators manage cohorts and workshops, coaches answer requests;
+    # each write checks the role in its own SQL. A member reads the workshops
+    # of the open cohorts they belong to only while their premium level is
+    # active, checked in the same query.
+
+    def _premium_sql(self, column: str) -> str:
+        return (f"EXISTS (SELECT 1 FROM entitlements e WHERE e.user_email = {column} AND e.revoked_at IS NULL "
+                "AND e.starts_at <= ? AND (e.ends_at IS NULL OR e.ends_at > ?))")
+
+    def admin_cohorts(self, email: str) -> list[dict] | None:
+        if not self.is_admin(email):
+            return None
+        return [dict(r) for r in self._read(
+            "SELECT c.id, c.title, c.summary, c.starts_on, c.ends_on, c.status, "
+            "(SELECT COUNT(*) FROM cohort_members m WHERE m.cohort_id = c.id) AS members, "
+            "(SELECT COUNT(*) FROM workshops w WHERE w.cohort_id = c.id AND w.status = 'scheduled') AS workshops "
+            "FROM cohorts c ORDER BY c.status, c.starts_on DESC, c.id DESC")]
+
+    def create_cohort(self, email: str, cohort: dict) -> int | None:
+        """From `platform.cohorts.clean_cohort`. None when `email` is not an administrator."""
+        admin, stamp = _email(email), _now()
+        with self._write() as conn:
+            row = conn.execute(
+                "INSERT INTO cohorts (title, summary, starts_on, ends_on, status, created_by, created_at, updated_at) "
+                f"SELECT ?, ?, ?, ?, 'open', ?, ?, ? WHERE {self._ADMIN} RETURNING id",
+                (cohort["title"], cohort["summary"], cohort["starts_on"], cohort["ends_on"], admin, stamp, stamp,
+                 admin)).fetchone()
+            return int(row[0]) if row else None
+
+    def update_cohort(self, email: str, cohort_id: int, cohort: dict, *, status: str = "open") -> bool:
+        if status not in ("open", "closed"):
+            raise ValueError("unknown status")
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE cohorts SET title = ?, summary = ?, starts_on = ?, ends_on = ?, status = ?, updated_at = ? "
+                f"WHERE id = ? AND {self._ADMIN}",
+                (cohort["title"], cohort["summary"], cohort["starts_on"], cohort["ends_on"], status, _now(),
+                 int(cohort_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def cohort_roster(self, email: str, cohort_id: int) -> list[dict] | None:
+        """The members of a cohort with their level, for an administrator."""
+        if not self.is_admin(email):
+            return None
+        stamp = _now()
+        return [dict(r) for r in self._read(
+            "SELECT m.user_email AS email, u.display_name, m.created_at, "
+            f"CASE WHEN {self._premium_sql('m.user_email')} THEN 1 ELSE 0 END AS premium "
+            "FROM cohort_members m JOIN users u ON u.email = m.user_email WHERE m.cohort_id = ? "
+            "ORDER BY m.created_at", (stamp, stamp, int(cohort_id)))]
+
+    def add_to_cohort(self, email: str, cohort_id: int, member: str) -> bool:
+        admin = _email(email)
+        with self._write() as conn:
+            cursor = conn.execute(
+                "INSERT INTO cohort_members (cohort_id, user_email, added_by, created_at) "
+                f"SELECT ?, ?, ?, ? WHERE {self._ADMIN} AND EXISTS (SELECT 1 FROM users u WHERE u.email = ?) "
+                "AND EXISTS (SELECT 1 FROM cohorts c WHERE c.id = ?) ON CONFLICT (cohort_id, user_email) DO NOTHING",
+                (int(cohort_id), _email(member), admin, _now(), admin, _email(member), int(cohort_id)))
+            return cursor.rowcount > 0
+
+    def remove_from_cohort(self, email: str, cohort_id: int, member: str) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(f"DELETE FROM cohort_members WHERE cohort_id = ? AND user_email = ? AND {self._ADMIN}",
+                                  (int(cohort_id), _email(member), _email(email)))
+            return cursor.rowcount > 0
+
+    def save_workshop(self, email: str, cohort_id: int, workshop: dict, workshop_id: int | None = None) -> int | None:
+        """From `platform.cohorts.clean_workshop`; creates or updates. None when not an administrator."""
+        admin, stamp = _email(email), _now()
+        values = (workshop["title"], workshop["summary"], workshop["starts_at"], workshop["duration_minutes"],
+                  workshop["place"])
+        with self._write() as conn:
+            if workshop_id is None:
+                row = conn.execute(
+                    "INSERT INTO workshops (cohort_id, title, summary, starts_at, duration_minutes, place, status, "
+                    f"created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, 'scheduled', ?, ? WHERE {self._ADMIN} "
+                    "AND EXISTS (SELECT 1 FROM cohorts c WHERE c.id = ?) RETURNING id",
+                    (int(cohort_id), *values, stamp, stamp, admin, int(cohort_id))).fetchone()
+                if row:
+                    members = [r[0] for r in conn.execute("SELECT user_email FROM cohort_members WHERE cohort_id = ?",
+                                                          (int(cohort_id),)).fetchall()]
+                    self._notify(conn, members, "workshop", f"Nouvel atelier : {workshop['title']}",
+                                 "accompagnement", {})
+                return int(row[0]) if row else None
+            cursor = conn.execute(
+                "UPDATE workshops SET title = ?, summary = ?, starts_at = ?, duration_minutes = ?, place = ?, "
+                f"updated_at = ? WHERE id = ? AND cohort_id = ? AND {self._ADMIN}",
+                (*values, stamp, int(workshop_id), int(cohort_id), admin))
+            return int(workshop_id) if cursor.rowcount else None
+
+    def set_workshop_status(self, email: str, workshop_id: int, status: str) -> bool:
+        if status not in ("scheduled", "cancelled"):
+            raise ValueError("unknown status")
+        with self._write() as conn:
+            cursor = conn.execute(f"UPDATE workshops SET status = ?, updated_at = ? WHERE id = ? AND {self._ADMIN}",
+                                  (status, _now(), int(workshop_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def admin_workshops(self, email: str, cohort_id: int) -> list[dict] | None:
+        if not self.is_admin(email):
+            return None
+        return [dict(r) for r in self._read(
+            "SELECT * FROM workshops WHERE cohort_id = ? ORDER BY starts_at", (int(cohort_id),))]
+
+    def my_cohorts(self, email: str) -> list[dict]:
+        """The open cohorts this member belongs to (title, dates), whatever their level."""
+        return [dict(r) for r in self._read(
+            "SELECT c.id, c.title, c.summary, c.starts_on, c.ends_on FROM cohorts c JOIN cohort_members m "
+            "ON m.cohort_id = c.id WHERE m.user_email = ? AND c.status = 'open' ORDER BY c.starts_on",
+            (_email(email),))]
+
+    def my_workshops(self, email: str) -> list[dict]:
+        """
+        The workshops of the member's open cohorts, place included; empty unless
+        the member belongs to the cohort and their premium level is active.
+        """
+        email, stamp = _email(email), _now()
+        return [dict(r) for r in self._read(
+            "SELECT w.id, w.cohort_id, c.title AS cohort, w.title, w.summary, w.starts_at, w.duration_minutes, "
+            "w.place, w.status FROM workshops w JOIN cohorts c ON c.id = w.cohort_id "
+            "JOIN cohort_members m ON m.cohort_id = w.cohort_id AND m.user_email = ? "
+            f"WHERE c.status = 'open' AND {self._premium_sql('m.user_email')} ORDER BY w.starts_at",
+            (email, stamp, stamp))]
+
+    def create_support_request(self, email: str, request: dict) -> int | None:
+        """
+        From `platform.support.clean_request`. None unless the member is
+        accompanied (premium active, in an open cohort), checked in SQL.
+        """
+        email, stamp = _email(email), _now()
+        with self._write() as conn:
+            row = conn.execute(
+                "INSERT INTO support_requests (user_email, topic, question, status, created_at) "
+                "SELECT ?, ?, ?, 'pending', ? WHERE EXISTS (SELECT 1 FROM cohort_members m JOIN cohorts c "
+                f"ON c.id = m.cohort_id WHERE m.user_email = ? AND c.status = 'open') AND {self._premium_sql('?')} "
+                "RETURNING id",
+                (email, request["topic"], request["question"], stamp, email, email, stamp, stamp)).fetchone()
+            return int(row[0]) if row else None
+
+    def support_requests(self, email: str) -> list[dict]:
+        """The member's own requests, the latest first; never who answered."""
+        return [dict(r) for r in self._read(
+            "SELECT id, topic, question, status, answer, created_at, answered_at, seen_at FROM support_requests "
+            "WHERE user_email = ? ORDER BY created_at DESC, id DESC", (_email(email),))]
+
+    def count_support_requests(self, email: str, since: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM support_requests WHERE user_email = ? AND created_at >= ?",
+                           _email(email), since)
+
+    def mark_support_seen(self, email: str, request_id: int) -> None:
+        with self._write() as conn:
+            conn.execute("UPDATE support_requests SET seen_at = ? WHERE id = ? AND user_email = ? "
+                         "AND status = 'answered' AND seen_at IS NULL", (_now(), int(request_id), _email(email)))
+
+    def unseen_support(self, email: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM support_requests WHERE user_email = ? "
+                           "AND status = 'answered' AND seen_at IS NULL", _email(email))
+
+    def support_queue(self, email: str, status: str = "pending", *, limit: int = 200) -> list[dict]:
+        """Requests for a coach, oldest pending first; the address only to derive a pseudonym. Empty otherwise."""
+        if status not in ("pending", "answered"):
+            raise ValueError("unknown status")
+        order = "r.created_at ASC, r.id ASC" if status == "pending" else "r.answered_at DESC, r.id DESC"
+        return [dict(r) for r in self._read(
+            "SELECT r.id, r.user_email, r.topic, r.question, r.status, r.answer, r.created_at, r.answered_at "
+            "FROM support_requests r WHERE r.status = ? AND EXISTS (SELECT 1 FROM user_roles c "
+            f"WHERE c.user_email = ? AND c.role = 'coach') ORDER BY {order} LIMIT ?",
+            (status, _email(email), int(limit)))]
+
+    def coach_counts(self, email: str) -> tuple[int, int]:
+        """(pending trade reviews, pending accompaniment requests) for a coach, in one query; (0, 0) otherwise."""
+        rows = self._read(
+            "SELECT (SELECT COUNT(*) FROM trade_reviews WHERE status = 'pending') AS reviews, "
+            "(SELECT COUNT(*) FROM support_requests WHERE status = 'pending') AS support "
+            "WHERE EXISTS (SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')", (_email(email),))
+        return (int(rows[0][0]), int(rows[0][1])) if rows else (0, 0)
+
+    def pending_support(self, email: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM support_requests WHERE status = 'pending' AND EXISTS "
+                           "(SELECT 1 FROM user_roles c WHERE c.user_email = ? AND c.role = 'coach')", _email(email))
+
+    def answer_support(self, email: str, request_id: int, answer: str) -> bool:
+        """A coach answers once. False when not a coach, or already answered."""
+        coach = _email(email)
+        with self._write() as conn:
+            cursor = conn.execute(
+                "UPDATE support_requests SET status = 'answered', answer = ?, answered_by = ?, answered_at = ? "
+                "WHERE id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM user_roles c "
+                "WHERE c.user_email = ? AND c.role = 'coach')", (answer, coach, _now(), int(request_id), coach))
+            if cursor.rowcount:
+                member = conn.execute("SELECT user_email FROM support_requests WHERE id = ?",
+                                      (int(request_id),)).fetchall()
+                self._notify(conn, [member[0][0]] if member else [], "support",
+                             "L'équipe a répondu à votre demande d'accompagnement", "accompagnement", {})
+            return cursor.rowcount > 0
+
+    # ── Community ────────────────────────────────────────────────────────────
+    #
+    # Read by signed-in members, written by their authors; moderation by an
+    # administrator, checked in SQL. Authors leave as « Ancien membre »
+    # (`author_email` set to NULL by the foreign key) when their account goes;
+    # their own messages are deleted with it.
+
+    @staticmethod
+    def _label(row) -> str:
+        from ..platform.community import author_label
+        return author_label(row["display_name"], row["author_email"])
+
+    def community_threads(self, email: str, *, theme: str | None = None, course_id: str | None = None,
+                          limit: int = 100) -> list[dict]:
+        """Discussions, the most recently active first; with author label and message count. Members only."""
+        if not self.get_user(email):
+            return []
+        where, params = ["1 = 1"], []
+        if theme:
+            where.append("t.theme = ?")
+            params.append(theme)
+        if course_id:
+            where.append("t.course_id = ?")
+            params.append(course_id)
+        rows = self._read(
+            "SELECT t.id, t.theme, t.course_id, t.title, t.author_email, u.display_name, t.locked, t.created_at, "
+            "t.last_post_at, (SELECT COUNT(*) FROM community_posts p WHERE p.thread_id = t.id "
+            "AND p.deleted_at IS NULL AND p.hidden_at IS NULL) AS posts "
+            "FROM community_threads t LEFT JOIN users u ON u.email = t.author_email "
+            f"WHERE {' AND '.join(where)} ORDER BY t.last_post_at DESC, t.id DESC LIMIT ?", (*params, int(limit)))
+        out = []
+        for r in rows:
+            item = {k: r[k] for k in ("id", "theme", "course_id", "title", "locked", "created_at", "last_post_at",
+                                      "posts")}
+            item["author"] = self._label(r)
+            item["mine"] = r["author_email"] == _email(email)
+            out.append(item)
+        return out
+
+    def community_thread(self, email: str, thread_id: int) -> dict | None:
+        """One discussion and its messages, for a member. A hidden message shows its reason, not its text."""
+        viewer = _email(email)
+        if not self.get_user(viewer):
+            return None
+        head = self._read("SELECT t.*, u.display_name FROM community_threads t LEFT JOIN users u "
+                          "ON u.email = t.author_email WHERE t.id = ?", (int(thread_id),))
+        if not head:
+            return None
+        rows = self._read(
+            "SELECT p.id, p.author_email, u.display_name, p.body, p.created_at, p.edited_at, p.deleted_at, "
+            "p.hidden_at, p.hidden_reason FROM community_posts p LEFT JOIN users u ON u.email = p.author_email "
+            "WHERE p.thread_id = ? ORDER BY p.created_at, p.id", (int(thread_id),))
+        posts = []
+        for r in rows:
+            mine = r["author_email"] == viewer and viewer != ""
+            gone = bool(r["deleted_at"] or r["hidden_at"])
+            posts.append({"id": r["id"], "author": self._label(r), "mine": mine,
+                          "body": "" if gone and not (mine and r["hidden_at"]) else r["body"],
+                          "created_at": r["created_at"], "edited_at": r["edited_at"],
+                          "deleted": bool(r["deleted_at"]), "hidden": bool(r["hidden_at"]),
+                          "hidden_reason": r["hidden_reason"] if (mine or self.is_admin(viewer)) else None})
+        t = head[0]
+        return {"id": t["id"], "theme": t["theme"], "course_id": t["course_id"], "title": t["title"],
+                "locked": bool(t["locked"]), "author": self._label(t), "created_at": t["created_at"], "posts": posts}
+
+    def count_community_posts(self, email: str, since: str) -> int:
+        return self._count("SELECT COUNT(*) AS n FROM community_posts WHERE author_email = ? AND created_at >= ?",
+                           _email(email), since)
+
+    def create_thread(self, email: str, thread: dict, *, course_id: str | None = None) -> int | None:
+        """From `platform.community.clean_thread`: the discussion and its first message, in one transaction."""
+        author, stamp = _email(email), _now()
+        with self._write() as conn:
+            if not conn.execute("SELECT 1 FROM users WHERE email = ?", (author,)).fetchall():
+                return None
+            row = conn.execute(
+                "INSERT INTO community_threads (theme, course_id, title, author_email, locked, created_at, "
+                "last_post_at) VALUES (?, ?, ?, ?, 0, ?, ?) RETURNING id",
+                (thread["theme"], course_id, thread["title"], author, stamp, stamp)).fetchone()
+            conn.execute("INSERT INTO community_posts (thread_id, author_email, body, created_at) VALUES (?, ?, ?, ?)",
+                         (int(row[0]), author, thread["body"], stamp))
+            return int(row[0])
+
+    def reply(self, email: str, thread_id: int, body: str) -> int | None:
+        """A reply, from `clean_post`. None when the discussion is locked or gone. Tells the other participants."""
+        author, stamp = _email(email), _now()
+        with self._write() as conn:
+            head = conn.execute("SELECT title FROM community_threads WHERE id = ? AND locked = 0",
+                                (int(thread_id),)).fetchall()
+            if not head or not conn.execute("SELECT 1 FROM users WHERE email = ?", (author,)).fetchall():
+                return None
+            row = conn.execute("INSERT INTO community_posts (thread_id, author_email, body, created_at) "
+                               "VALUES (?, ?, ?, ?) RETURNING id", (int(thread_id), author, body, stamp)).fetchone()
+            conn.execute("UPDATE community_threads SET last_post_at = ? WHERE id = ?", (stamp, int(thread_id)))
+            others = [r[0] for r in conn.execute(
+                "SELECT DISTINCT author_email FROM community_posts WHERE thread_id = ? AND author_email IS NOT NULL "
+                "AND author_email != ? AND deleted_at IS NULL", (int(thread_id), author)).fetchall()]
+            self._notify(conn, others[:200], "reply", f"Nouvelle réponse : {head[0][0]}", "community_thread",
+                         {"thread": str(int(thread_id))})
+            return int(row[0])
+
+    def edit_post(self, email: str, post_id: int, body: str) -> bool:
+        """The author edits their own message, unless it was hidden or deleted."""
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE community_posts SET body = ?, edited_at = ? WHERE id = ? AND author_email = ? "
+                                  "AND deleted_at IS NULL AND hidden_at IS NULL",
+                                  (body, _now(), int(post_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def delete_post(self, email: str, post_id: int) -> bool:
+        """The author deletes their own message: its text is erased, the place in the discussion stays."""
+        with self._write() as conn:
+            cursor = conn.execute("UPDATE community_posts SET body = '', deleted_at = ? WHERE id = ? "
+                                  "AND author_email = ? AND deleted_at IS NULL", (_now(), int(post_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def report_post(self, email: str, post_id: int, report: dict) -> int | None:
+        """A member reports a message (`clean_report`). One open report per member and message."""
+        reporter, stamp = _email(email), _now()
+        with self._write() as conn:
+            if conn.execute("SELECT 1 FROM community_reports WHERE post_id = ? AND reporter_email = ? "
+                            "AND resolved_at IS NULL", (int(post_id), reporter)).fetchall():
+                return None
+            row = conn.execute(
+                "INSERT INTO community_reports (post_id, reporter_email, reason, details, created_at) "
+                "SELECT ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM community_posts p WHERE p.id = ? "
+                "AND p.deleted_at IS NULL AND p.hidden_at IS NULL) AND EXISTS (SELECT 1 FROM users u WHERE u.email = ?) "
+                "RETURNING id", (int(post_id), reporter, report["reason"], report["details"], stamp, int(post_id),
+                                 reporter)).fetchone()
+            return int(row[0]) if row else None
+
+    def moderation_queue(self, email: str) -> list[dict] | None:
+        """Open reports with the message they concern, for an administrator; None otherwise."""
+        if not self.is_admin(email):
+            return None
+        rows = self._read(
+            "SELECT r.id, r.post_id, r.reason, r.details, r.created_at, p.body, p.thread_id, p.author_email, "
+            "u.display_name, t.title FROM community_reports r JOIN community_posts p ON p.id = r.post_id "
+            "JOIN community_threads t ON t.id = p.thread_id LEFT JOIN users u ON u.email = p.author_email "
+            "WHERE r.resolved_at IS NULL ORDER BY r.created_at")
+        return [{"id": r["id"], "post_id": r["post_id"], "reason": r["reason"], "details": r["details"],
+                 "created_at": r["created_at"], "body": r["body"], "thread_id": r["thread_id"], "title": r["title"],
+                 "author": self._label(r)} for r in rows]
+
+    def moderate(self, email: str, report_id: int, *, hide: bool, note: str = "") -> bool:
+        """
+        An administrator decides on a report: dismiss it, or hide the message
+        with a reason its author reads (the statement of reasons). Every open
+        report on that message is closed with the same outcome.
+        """
+        from ..platform.community import REPORT_REASONS
+        admin, stamp = _email(email), _now()
+        with self._write() as conn:
+            rows = conn.execute(f"SELECT r.post_id, r.reason FROM community_reports r WHERE r.id = ? "
+                                f"AND r.resolved_at IS NULL AND {self._ADMIN}", (int(report_id), admin)).fetchall()
+            if not rows:
+                return False
+            post_id, reason = rows[0][0], rows[0][1]
+            outcome = "hidden" if hide else "dismissed"
+            if hide:
+                why = REPORT_REASONS.get(reason, "Charte de la communauté") + (f". {note.strip()}" if note.strip() else "")
+                conn.execute("UPDATE community_posts SET hidden_at = ?, hidden_reason = ? WHERE id = ?",
+                             (stamp, why[:400], post_id))
+                author = conn.execute("SELECT author_email, thread_id FROM community_posts WHERE id = ?",
+                                      (post_id,)).fetchall()
+                if author and author[0][0]:
+                    self._notify(conn, [author[0][0]], "moderation", "Un de vos messages a été masqué par la "
+                                 "modération", "community_thread", {"thread": str(author[0][1])})
+            conn.execute("UPDATE community_reports SET resolved_at = ?, resolved_by = ?, outcome = ? "
+                         "WHERE post_id = ? AND resolved_at IS NULL", (stamp, admin, outcome, post_id))
+            return True
+
+    def lock_thread(self, email: str, thread_id: int, locked: bool) -> bool:
+        with self._write() as conn:
+            cursor = conn.execute(f"UPDATE community_threads SET locked = ? WHERE id = ? AND {self._ADMIN}",
+                                  (1 if locked else 0, int(thread_id), _email(email)))
+            return cursor.rowcount > 0
+
+    def my_community(self, email: str) -> dict:
+        """The member's own discussions, messages and reports, for the export."""
+        email = _email(email)
+        return {
+            "threads": [dict(r) for r in self._read(
+                "SELECT id, theme, course_id, title, created_at FROM community_threads WHERE author_email = ?",
+                (email,))],
+            "posts": [dict(r) for r in self._read(
+                "SELECT id, thread_id, body, created_at, edited_at, deleted_at, hidden_at, hidden_reason "
+                "FROM community_posts WHERE author_email = ? ORDER BY created_at", (email,))],
+            "reports": [dict(r) for r in self._read(
+                "SELECT id, post_id, reason, details, created_at, resolved_at, outcome FROM community_reports "
+                "WHERE reporter_email = ?", (email,))],
+        }
+
+    # ── Notifications ────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _notify(conn, emails, kind: str, title: str, page: str, fields: dict) -> None:
+        stamp = _now()
+        payload = json.dumps(fields, ensure_ascii=False)
+        for address in dict.fromkeys(e for e in emails if e):
+            conn.execute("INSERT INTO notifications (user_email, kind, title, page, fields, created_at) "
+                         "SELECT ?, ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM users u WHERE u.email = ?)",
+                         (address, kind, title[:200], page, payload, stamp, address))
+
+    def notifications(self, email: str, *, limit: int = 50) -> list[dict]:
+        rows = self._read("SELECT id, kind, title, page, fields, created_at, read_at FROM notifications "
+                          "WHERE user_email = ? ORDER BY created_at DESC, id DESC LIMIT ?", (_email(email), int(limit)))
+        return [{**dict(r), "fields": json.loads(r["fields"] or "{}")} for r in rows]
+
+    def notification_state(self, email: str, access: tuple[str, ...]) -> dict:
+        """
+        One query for the sidebar: unread personal notifications, published
+        trading-room sessions the member may read since they last looked, and
+        that moment (their sign-up for a member who never looked).
+        """
+        email = _email(email)
+        levels = tuple(access) or ("public",)
+        marks = ", ".join("?" for _ in levels)
+        rows = self._read(
+            "SELECT (SELECT COUNT(*) FROM notifications WHERE user_email = ? AND read_at IS NULL) AS mine, "
+            "COALESCE((SELECT read_at FROM notification_reads WHERE user_email = ?), "
+            "(SELECT created_at FROM users WHERE email = ?), '') AS since, "
+            "(SELECT COUNT(*) FROM market_sessions m WHERE m.status = 'published' AND m.access IN (" + marks + ") "
+            "AND m.published_at > COALESCE((SELECT read_at FROM notification_reads WHERE user_email = ?), "
+            "(SELECT created_at FROM users WHERE email = ?), '')) AS sessions",
+            (email, email, email, *levels, email, email))
+        r = rows[0]
+        return {"mine": int(r["mine"]), "sessions": int(r["sessions"]), "since": r["since"] or ""}
+
+    def mark_notifications_read(self, email: str) -> None:
+        email, stamp = _email(email), _now()
+        with self._write() as conn:
+            conn.execute("UPDATE notifications SET read_at = ? WHERE user_email = ? AND read_at IS NULL", (stamp, email))
+            conn.execute("INSERT INTO notification_reads (user_email, read_at) SELECT ?, ? WHERE EXISTS "
+                         "(SELECT 1 FROM users u WHERE u.email = ?) ON CONFLICT (user_email) DO UPDATE SET "
+                         "read_at = excluded.read_at", (email, stamp, email))
+
+    # ── Statistics ───────────────────────────────────────────────────────────
+
+    def record_visit(self, day: str, landing: str, source: str = "") -> None:
+        """One more visit for this day, landing page and source. No member data."""
+        with self._write() as conn:
+            conn.execute("INSERT INTO visits (day, landing, source, n) VALUES (?, ?, ?, 1) "
+                         "ON CONFLICT (day, landing, source) DO UPDATE SET n = visits.n + 1",
+                         (day, landing[:60], source[:40]))
+
+    def set_signup_source(self, email: str, *, source: str, medium: str, campaign: str, landing: str) -> None:
+        """Where the account came from, recorded once at sign-up; a later call changes nothing."""
+        with self._write() as conn:
+            self._ensure_user(conn, _email(email))
+            conn.execute("INSERT INTO signup_sources (user_email, source, medium, campaign, landing, created_at) "
+                         "VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (user_email) DO NOTHING",
+                         (_email(email), source, medium, campaign, landing[:60], _now()))
+
+    def signup_source(self, email: str) -> dict | None:
+        rows = self._read("SELECT source, medium, campaign, landing, created_at FROM signup_sources "
+                          "WHERE user_email = ?", (_email(email),))
+        return dict(rows[0]) if rows else None
+
+    def admin_stats(self, email: str, *, since: str) -> dict | None:
+        """
+        Counts for the administrator's statistics page, over the window from
+        `since` (an ISO date), and in total. Counts only: no address leaves here.
+        """
+        if not self.is_admin(email):
+            return None
+        stamp = _now()
+        premium = self._premium_sql("u.email")
+        accompanied = ("EXISTS (SELECT 1 FROM cohort_members m JOIN cohorts c ON c.id = m.cohort_id "
+                       "WHERE m.user_email = u.email AND c.status = 'open')")
+        window = "u.created_at >= ?"
+
+        def count(where: str, *params) -> int:
+            return self._count(f"SELECT COUNT(*) AS n FROM users u WHERE {where}", *params)
+
+        def grouped(sql: str, *params) -> list[dict]:
+            return [dict(r) for r in self._read(sql, params)]
+
+        return {
+            "visits": self._count("SELECT COALESCE(SUM(n), 0) AS n FROM visits WHERE day >= ?", since[:10]),
+            "signups": count(window, since),
+            "verified": count(f"{window} AND u.email_verified_at IS NOT NULL", since),
+            "premium": count(f"{window} AND {premium}", since, stamp, stamp),
+            "accompanied": count(f"{window} AND {premium} AND {accompanied}", since, stamp, stamp),
+            "total": {
+                "members": count("1 = 1"),
+                "premium": count(premium, stamp, stamp),
+                "accompanied": count(f"{premium} AND {accompanied}", stamp, stamp),
+                "active_30": count("u.last_login_at >= ?", since),
+                "newsletter": self._count("SELECT COUNT(*) AS n FROM newsletter WHERE status = 'confirmed'"),
+            },
+            "by_month": grouped("SELECT SUBSTR(created_at, 1, 7) AS month, COUNT(*) AS n FROM users "
+                                "GROUP BY SUBSTR(created_at, 1, 7) ORDER BY month DESC LIMIT 12"),
+            "by_source": grouped("SELECT COALESCE(NULLIF(s.source, ''), 'direct') AS source, COUNT(*) AS n "
+                                 "FROM users u LEFT JOIN signup_sources s ON s.user_email = u.email "
+                                 "WHERE u.created_at >= ? GROUP BY COALESCE(NULLIF(s.source, ''), 'direct') "
+                                 "ORDER BY n DESC", since),
+            "visits_by_day": grouped("SELECT day, SUM(n) AS n FROM visits WHERE day >= ? GROUP BY day ORDER BY day",
+                                     since[:10]),
+            "visits_by_landing": grouped("SELECT landing, SUM(n) AS n FROM visits WHERE day >= ? GROUP BY landing "
+                                         "ORDER BY n DESC LIMIT 10", since[:10]),
+        }
 
     # ── Newsletter ───────────────────────────────────────────────────────────
     #

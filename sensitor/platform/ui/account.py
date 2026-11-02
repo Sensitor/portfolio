@@ -164,13 +164,14 @@ def _access_text(store, email: str, who) -> str:
     """What the member's level opens, and until when, from their active entitlement."""
     if who.level != P.PREMIUM:
         return "Gratuit : toutes les leçons publiées hors Premium"
+    suffix = ", accompagné" if who.accompanied else ""
     now = _now()
     active = [e for e in store.entitlements(email) if not e["revoked_at"] and e["starts_at"] <= now
               and not (e["ends_at"] and e["ends_at"] <= now)]
     ends = [e["ends_at"] for e in active if e["ends_at"]]
     if len(ends) == len(active) and ends:
-        return f"Premium, jusqu'au {date_fr(max(ends))}"
-    return "Premium, sans date de fin"
+        return f"Premium{suffix}, jusqu'au {date_fr(max(ends))}"
+    return f"Premium{suffix}, sans date de fin"
 
 
 def _member(email: str) -> None:

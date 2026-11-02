@@ -38,6 +38,12 @@ jobs:
         run: python -m sensitor.academy.validate
       - name: Build the public site
         run: python scripts/build_site.py --base-url https://example.org --app-url https://app.example.org --out /tmp/site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Mobile app typecheck
+        working-directory: mobile
+        run: npm install --no-audit --no-fund && npm run typecheck
       - name: Tests
         run: |
           status=0

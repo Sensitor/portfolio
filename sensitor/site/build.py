@@ -81,8 +81,13 @@ class Site:
         return self.base + path
 
     def app_link(self, page: str = "", **fields) -> str:
-        query = "&".join(f"{k}={v}" for k, v in (("page", page), *fields.items()) if v)
-        return f"{self.app}/?{query}" if query else f"{self.app}/"
+        """
+        A link into the platform. It carries `utm_source=site`, so an account
+        the site brings is counted as such in the statistics: the site itself
+        measures nothing.
+        """
+        query = "&".join(f"{k}={v}" for k, v in (("page", page), *fields.items(), ("utm_source", "site")) if v)
+        return f"{self.app}/?{query}"
 
     @staticmethod
     def rel(page_path: str, target: str) -> str:

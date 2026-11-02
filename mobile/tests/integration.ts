@@ -127,6 +127,45 @@ async function main(): Promise<number> {
           finding.interpretation === 'correlation');
   }
 
+  console.log('\nAcademy');
+  const catalog = await client.academyCatalog();
+  const open = catalog.paths.filter((p) => p.available);
+  check('the catalogue lists paths, some open with their courses',
+        catalog.paths.length > 0 && open.length > 0 && open.every((p) => p.courses.length > 0));
+  const firstCourse = open[0]!.courses[0]!;
+  const course = await client.course(firstCourse.id);
+  const lessons = course.modules.flatMap((m) => m.lessons);
+  check('a course lists its modules and lessons', course.modules.length > 0 && lessons.length === course.lessons);
+  check('and, signed in, the progress', course.progress !== null && course.progress.total === lessons.length);
+  const target = lessons.find((l) => l.access === 'member') ?? lessons[0]!;
+  const lesson = await client.lesson(course.id, target.id);
+  const known = new Set(['markdown', 'callout', 'figure', 'formula', 'exercise', 'tool', 'chart', 'video']);
+  check('a lesson arrives as blocks the app knows', lesson.blocks.length > 0
+        && lesson.blocks.every((b) => known.has(b.kind)));
+  check('with its text in French, and no long dash',
+        lesson.blocks.filter((b) => b.kind === 'markdown').every((b) => !/[\u2013\u2014]/.test(b.text)));
+  const before = course.progress?.done ?? 0;
+  await client.completeLesson(course.id, target.id);
+  const after = await client.course(course.id);
+  check('marking a lesson done counts it', (after.progress?.completed ?? []).includes(target.id)
+        && (after.progress?.done ?? 0) >= before);
+  const progress = await client.academyProgress();
+  check('the progress lists the course', progress.courses.some((c) => c.course_id === course.id));
+  await client.uncompleteLesson(course.id, target.id);
+  check('and unmarking it removes it', !((await client.course(course.id)).progress?.completed ?? []).includes(target.id));
+  const visitor = new SensitorClient({ baseUrl: BASE });
+  const visitorCourse = await visitor.course(course.id);
+  check('a visitor reads the course, without progress', visitorCourse.progress === null);
+  const member = lessons.find((l) => l.access === 'member');
+  if (member) {
+    try {
+      await visitor.lesson(course.id, member.id);
+      check('a visitor is refused a member lesson', false);
+    } catch (error) {
+      check('a visitor is refused a member lesson: 401', (error as ApiError).status === 401);
+    }
+  }
+
   console.log('\nSign out');
   await client.signOut();
   check('the token is dropped', client.getToken() === null);

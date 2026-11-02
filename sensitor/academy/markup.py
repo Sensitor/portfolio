@@ -46,7 +46,7 @@ CALLOUT_KINDS = {
     "debate": "Débat",
 }
 
-DIRECTIVES = {"callout", "figure", "formula", "exercise", "tool", "chart"}
+DIRECTIVES = {"callout", "figure", "formula", "exercise", "tool", "chart", "video"}
 TOOLS = {"risk-calculator", "ruin-simulator", "savings-simulator", "hash-demo", "prop-simulator"}
 
 _OPEN = re.compile(r"^:::\s*([a-z-]+)\s*(.*)$")
@@ -133,7 +133,7 @@ def _check_args(kind: str, args: tuple[str, ...], number: int) -> None:
         if not args or args[0] not in CALLOUT_KINDS:
             raise MarkupError(f"ligne {number} : type d'encadré attendu parmi "
                               f"{', '.join(sorted(CALLOUT_KINDS))}")
-    elif kind in ("figure", "exercise", "tool", "chart"):
+    elif kind in ("figure", "exercise", "tool", "chart", "video"):
         if len(args) != 1:
             raise MarkupError(f"ligne {number} : « {kind} » attend exactement un argument")
         if kind == "tool" and args[0] not in TOOLS:
