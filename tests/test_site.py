@@ -174,8 +174,8 @@ def test_build() -> None:
           and f"{counts['monnaie'][0]} leçons publiées, dont {counts['monnaie'][1]} en accès libre" in home
           and counts["monnaie"][0] > 0)
     legal = (out / "mentions-legales" / "index.html").read_text(encoding="utf-8")
-    check("the legal pages carry the banner while details are missing", "Texte en cours de finalisation" in legal
-          and "[à compléter]" in legal)
+    check("the legal pages name Sensitor, with no gap, and keep the banner until the texts are reviewed",
+          "Texte en cours de finalisation" in legal and "[à compléter]" not in legal and "Sensitor" in legal)
     check("the newsletter button opens the member area's form", f'{APP}/?page=newsletter' in home)
     check("the template article is never published", not (out / "articles" / "_modele").exists())
 

@@ -42,7 +42,7 @@ L'espace Communauté permet aux membres d'échanger. En y publiant, vous vous en
 
 Vous restez responsable de ce que vous publiez. Sensitor héberge ces messages : il ne les relit pas avant leur publication.
 
-**Signaler un message.** Chaque message comporte un bouton « Signaler », ouvert à tout membre. Un signalement est examiné par un administrateur ; un message qui enfreint la charte ou la loi est masqué, et son auteur voit le motif de la décision. Pour signaler un contenu sans compte, ou pour toute notification relative à un contenu illicite, écrivez à {editeur.contact}.
+**Signaler un message.** Chaque message comporte un bouton « Signaler », ouvert à tout membre. Un signalement est examiné par un administrateur ; un message qui enfreint la charte ou la loi est masqué, et son auteur voit le motif de la décision. Pour toute autre notification relative à un contenu illicite, contactez {editeur.contact}.
 
 **Sanctions.** En cas de manquements répétés, l'éditeur peut fermer une discussion ou suspendre un compte, après vous en avoir informé sauf urgence.
 
