@@ -196,9 +196,7 @@ Tested on both backends (`tests/test_backup.py`).
   the files in encrypted storage, never in the repository (`.gitignore` covers
   `sensitor-backup-*`): they hold every member's personal and financial data.
 - Your provider's own backups (Supabase, Neon) come in addition; check what your
-  plan keeps and for how long, and write that duration in
-  `content/legal/editeur.toml` (`sauvegardes_jours`), which the privacy policy
-  quotes.
+  plan keeps and for how long.
 - Restore once into a scratch database to know the procedure works:
   `python -m sensitor.database.backup restore <file> --db /tmp/essai.db`.
 

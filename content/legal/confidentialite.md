@@ -5,7 +5,7 @@ summary = "Les données que Sensitor conserve, pourquoi, combien de temps, et vo
 
 ## Responsable du traitement
 
-{editeur.raison_sociale}, {editeur.siege}. Pour toute question sur vos données : {editeur.contact_donnees}.
+{editeur.raison_sociale}. Pour toute question sur vos données : {editeur.contact_donnees}.
 
 ## Ce que nous conservons
 
@@ -48,7 +48,7 @@ Si un hébergeur traite des données hors de l'Union européenne, ce transfert e
 
 - Vos données sont conservées tant que votre compte existe.
 - Une session expire au bout de 30 jours. Un lien de réinitialisation expire au bout d'une heure, un lien de vérification au bout de 48 heures.
-- Quand vous supprimez votre compte, toutes vos données sont effacées immédiatement de la base. Elles peuvent subsister dans les sauvegardes jusqu'à leur rotation, au plus {sauvegardes_jours} jours.
+- Quand vous supprimez votre compte, toutes vos données sont effacées immédiatement de la base. Elles peuvent subsister dans les sauvegardes de la base jusqu'à leur rotation.
 - Après une désinscription de la lettre, l'adresse, le consentement et la date de désinscription sont conservés pour prouver que votre choix a été respecté ; la suppression du compte, ou une demande écrite, les efface.
 - Quand vous supprimez votre compte, vos messages dans la communauté sont effacés ; une discussion que vous avez lancée reste pour les réponses des autres membres, sans votre nom.
 - Les revues qu'un coach a rédigées et les séances de la salle des marchés restent publiées sans le nom de leur auteur si son compte est supprimé.
@@ -68,7 +68,7 @@ Vous pouvez à tout moment :
 - **télécharger toutes vos données** dans un fichier, depuis la page « Compte » (droit d'accès et à la portabilité) ;
 - **supprimer votre compte** et tout ce qui s'y rattache, depuis la même page, en confirmant avec votre mot de passe (droit à l'effacement) ;
 - **vous désinscrire de la lettre** en un clic, depuis chaque message ou depuis la page « Compte » ;
-- corriger une donnée, vous opposer à un traitement ou en demander la limitation, en écrivant à {editeur.contact_donnees}.
+- corriger une donnée, vous opposer à un traitement ou en demander la limitation, en contactant {editeur.contact_donnees}.
 
 Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (www.cnil.fr).
 

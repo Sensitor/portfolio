@@ -66,11 +66,15 @@ def main() -> int:
         text = (legal.ROOT / filename).read_text(encoding="utf-8")
         check(f"{filename}: no long dash", not any(d in text for d in DASHES))
     data = legal.details()
-    check("the publisher's details are empty until the founder fills them in: nothing is invented",
-          not any(data["editeur"].values()) and not any(data["hebergement"].values()) and data["relu"] is False)
-    check("so the pre-launch list names every one of them", {"editeur.raison_sociale", "editeur.siege",
-          "editeur.directeur_publication", "hebergement.application"} <= set(legal.missing())
+    check("the publisher is « Sensitor », as the founder asked, and every host is named",
+          data["editeur"]["raison_sociale"] == "Sensitor" and all(data["hebergement"].values()))
+    check("no detail is left to complete in the texts", legal.missing() == [])
+    check("the texts are not marked reviewed: nobody has reviewed them yet", data["relu"] is False
           and not legal.ready())
+    texts = "".join((legal.ROOT / f).read_text(encoding="utf-8") for f, _ in legal.PAGES.values())
+    check("no company field is asked for any more (form, capital, seat, registration, VAT)",
+          not any(f"{{editeur.{k}}}" in texts for k in ("forme", "capital", "siege", "rcs", "tva",
+                                                          "directeur_publication")))
 
     policy = (legal.ROOT / "confidentialite.md").read_text(encoding="utf-8")
     check("the privacy policy names the one cookie the code sets", f"`{runtime.COOKIE}`" in policy)
@@ -91,9 +95,10 @@ def main() -> int:
         app.run()
         body = visible(app)
         doc = legal.document(page)
-        check(f"« {page} » renders for a visitor, with the banner and the details to complete",
+        check(f"« {page} » renders for a visitor, with the banner until the texts are reviewed, and no gap",
               not app.exception and doc.title in body and "Texte en cours de finalisation" in body
-              and legal.TO_COMPLETE in body, str(app.exception[0].value)[:200] if app.exception else "")
+              and legal.TO_COMPLETE not in body and "Sensitor" in body,
+              str(app.exception[0].value)[:200] if app.exception else "")
     home = AppTest.from_file(APP, default_timeout=120)
     home.session_state["ac_route"] = {"page": "home"}
     home.run()
@@ -110,7 +115,7 @@ def main() -> int:
     (root / "editeur.toml").write_text(filled, encoding="utf-8")
     doc = legal.document("mentions", root)
     check("no detail left to complete, the text reviewed: the pages are ready",
-          legal.ready(root) and not doc.missing and legal.TO_COMPLETE not in doc.body and "valeur de test" in doc.body)
+          legal.ready(root) and not doc.missing and legal.TO_COMPLETE not in doc.body and "Sensitor" in doc.body)
 
     failures = [c for c in CHECKS if not c[1]]
     print(f"\n{len(CHECKS)} checks, {len(failures)} failures")

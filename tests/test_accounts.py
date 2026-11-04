@@ -283,7 +283,9 @@ def test_check() -> None:
               and results.get("Envoi d'e-mails configuré (SENSITOR_SMTP_*)") is True
               and results.get("Adresse publique https://sensitor.example") is True)
         check("a local SQLite file is reported as not durable", any("SQLite" in w and not ok for w, ok in results.items()))
-        check("the legal pages left to complete are reported", any("Pages légales" in w and not ok for w, ok in results.items()))
+        check("the publisher's details are complete, the unreviewed texts are reported",
+              results.get("Informations de l'éditeur complètes") is True
+              and any("non relus" in w and not ok for w, ok in results.items()))
         with redirect_stdout(io.StringIO()):
             check("the command exits 1 while anything is missing", admin.main(["check"]) == 1)
     finally:

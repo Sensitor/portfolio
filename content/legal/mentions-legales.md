@@ -5,11 +5,7 @@ summary = "Qui édite Sensitor, qui l'héberge, et comment nous joindre."
 
 ## Éditeur
 
-Le site et l'application Sensitor sont édités par {editeur.raison_sociale}, {editeur.forme} au capital de {editeur.capital}, dont le siège est situé {editeur.siege}, immatriculée sous le numéro {editeur.rcs}.
-
-Numéro de TVA intracommunautaire : {editeur.tva}.
-
-Directeur de la publication : {editeur.directeur_publication}.
+Le site et l'application sont édités par {editeur.raison_sociale}.
 
 Contact : {editeur.contact}.
 
@@ -20,6 +16,8 @@ L'application est hébergée par {hebergement.application}.
 Les données des comptes sont hébergées par {hebergement.base_de_donnees}.
 
 Les e-mails transactionnels (vérification d'adresse, mot de passe oublié) sont envoyés par {hebergement.emails}.
+
+Le site public est hébergé par {hebergement.site}.
 
 ## Nature du service
 
