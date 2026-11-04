@@ -180,9 +180,29 @@ def test_build() -> None:
     check("the template article is never published", not (out / "articles" / "_modele").exists())
 
 
+def test_addresses() -> None:
+    print("\nThe addresses, written down once")
+    from sensitor.site.build import addresses
+    known = addresses()
+    check("content/site.toml names the member area and the public site",
+          known["app_url"] == "https://sensitor-academy.streamlit.app"
+          and known["site_url"] == "https://sensitor.github.io/portfolio")
+    out = Path(tempfile.mkdtemp(prefix="sensitor-site-defaults-")) / "site"
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("build_site", ROOT / "scripts" / "build_site.py")
+    script = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(script)
+    code = script.main(["--out", str(out)])
+    home = (out / "index.html").read_text(encoding="utf-8")
+    check("without arguments, the build links to that member area and that site",
+          code == 0 and 'href="https://sensitor-academy.streamlit.app/?page=account' in home
+          and '<link rel="canonical" href="https://sensitor.github.io/portfolio/">' in home)
+
+
 def main() -> int:
     test_validator()
     test_build()
+    test_addresses()
     failures = [c for c in CHECKS if not c[1]]
     print(f"\n{len(CHECKS)} checks, {len(failures)} failures")
     for name, _, detail in failures:

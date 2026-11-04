@@ -378,7 +378,7 @@ the optional ones for e-mail:
 ```toml
 SENSITOR_DB_URL = "postgresql://…"
 SENSITOR_AUTH = "multi"
-SENSITOR_PUBLIC_URL = "https://<your-app>.streamlit.app"   # base of e-mailed links
+SENSITOR_PUBLIC_URL = "https://sensitor-academy.streamlit.app"   # base of e-mailed links
 SENSITOR_TOOLS_URL = "https://<portfolio-app>.streamlit.app" # optional
 
 # E-mail (password reset, address verification). Any SMTP provider works:

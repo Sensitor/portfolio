@@ -4,8 +4,9 @@ Generate the public site from `content/`.
     python scripts/build_site.py --base-url https://sensitor.fr --app-url https://app.sensitor.fr [--out site]
 
 `--base-url` is where the site is served (canonical addresses, sitemap, RSS);
-`--app-url` is the member area (sign-in, lessons, newsletter form), read from
-SENSITOR_PUBLIC_URL when not given. The output folder is emptied first and is
+`--app-url` is the member area (sign-in, lessons, newsletter form). Without
+them, the addresses come from `content/site.toml`, the one place they are
+written down. The output folder is emptied first and is
 not kept in git: a static host runs this command as its build step.
 """
 
@@ -18,13 +19,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from sensitor.site.build import Site  # noqa: E402
+from sensitor.site.build import Site, addresses  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
-    parser.add_argument("--base-url", default=os.getenv("SENSITOR_SITE_URL", "http://localhost:8000"))
-    parser.add_argument("--app-url", default=os.getenv("SENSITOR_PUBLIC_URL", "http://localhost:8501"))
+    known = addresses()
+    parser.add_argument("--base-url", default=known["site_url"] or os.getenv("SENSITOR_SITE_URL", "http://localhost:8000"))
+    parser.add_argument("--app-url", default=known["app_url"] or os.getenv("SENSITOR_PUBLIC_URL", "http://localhost:8501"))
     parser.add_argument("--out", default="site")
     args = parser.parse_args(argv)
     try:

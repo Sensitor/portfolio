@@ -9,7 +9,7 @@ Plain SMTP, configured through the environment (or Streamlit secrets):
     SENSITOR_SMTP_USER       login
     SENSITOR_SMTP_PASSWORD   password or app token
     SENSITOR_MAIL_FROM       "Sensitor <no-reply@example.com>"
-    SENSITOR_PUBLIC_URL      https://sensitor.streamlit.app  (base of the links)
+    SENSITOR_PUBLIC_URL      https://sensitor-academy.streamlit.app  (base of the links)
 
 Any transactional provider that offers SMTP works (Brevo, Postmark, Resend,
 Mailgun, an OVH or Gmail mailbox). When the host is not set, `configured()` is
