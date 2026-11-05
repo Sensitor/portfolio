@@ -2,10 +2,12 @@
 The risk calculator, used on the lab page and inside the risk lesson.
 
 Every figure on screen comes from `academy.risk`. Position size is shown only
-when a contract specification is given; the one preset — EURUSD on a dollar
-account — rests on the standard-lot convention and says so, and the custom mode
-asks for the broker's own figures. Nothing is assumed about gold, indices or
-shares.
+when a contract specification is given. Two presets, each on a dollar account
+and each saying the convention it rests on: gold (XAUUSD, 1 lot = 100 ounces, so
+a 1 $ move is worth 100 $ per lot), the lab's example, and EURUSD (standard lot
+of 100 000 units, 1 pip = 0,0001 worth 10 $ per lot), the risk lesson's. The
+custom mode asks for the broker's own figures. Nothing is assumed about indices
+or shares.
 """
 
 from __future__ import annotations
@@ -17,11 +19,24 @@ from ...platform.ui.components import esc, html, money, number, percent
 
 CURRENCIES = ("USD", "EUR", "GBP", "CHF")
 SPEC_NONE = "Ne pas calculer la taille"
+SPEC_GOLD = "Or (XAUUSD) sur un compte en USD (1 lot = 100 onces)"
 SPEC_EURUSD = "EURUSD sur un compte en USD (lot standard)"
 SPEC_CUSTOM = "Saisir la spécification de mon courtier"
+MODES = (SPEC_NONE, SPEC_GOLD, SPEC_EURUSD, SPEC_CUSTOM)
+
+# The example each preset opens with: constructed figures, not quotes. Gold: a
+# 10 $ stop for a 1 % risk on 10 000 $, i.e. 0,10 lot; EURUSD: the risk
+# lesson's 30-pip stop, i.e. 0,33 lot.
+EXAMPLES = {
+    "gold": {"entry": 2400.00, "stop": 2390.00, "target": 2420.00, "step": 0.01, "format": "%.2f", "decimals": 2, "unit": " $"},
+    "eurusd": {"entry": 1.0850, "stop": 1.0820, "target": 1.0910, "step": 0.0001, "format": "%.5f", "decimals": 5, "unit": ""},
+}
+MODE_EXAMPLE = {SPEC_GOLD: "gold", SPEC_EURUSD: "eurusd"}
+DEFAULT_MODE = {"gold": SPEC_GOLD, "eurusd": SPEC_EURUSD}
 
 
-def render(*, scope: str, compact: bool = False) -> None:
+def render(*, scope: str, compact: bool = False, instrument: str = "eurusd") -> None:
+    """`instrument`: the preset the calculator opens on, « gold » (the lab) or « eurusd » (the lesson)."""
     k = f"risk_{scope}"
     with st.container(key=f"panel_{k}"):
         html('<div class="sx-kicker">Calculateur pédagogique</div>'
@@ -39,23 +54,29 @@ def render(*, scope: str, compact: bool = False) -> None:
             risk_pct = st.number_input("Risque par position (%)", min_value=0.0, max_value=100.0,
                                        value=1.0, step=0.25, format="%.2f", key=f"{k}_pct")
 
+        mode = st.radio("Instrument et taille de position", MODES,
+                        index=MODES.index(DEFAULT_MODE.get(instrument, SPEC_EURUSD)), key=f"{k}_mode")
+        # Prices keep their own fields per instrument, so gold opens on gold prices
+        # and EURUSD on EURUSD ones, each with its own number of decimals.
+        family = MODE_EXAMPLE.get(mode, instrument if instrument in EXAMPLES else "eurusd")
+        example = EXAMPLES[family]
         with st.container(key=f"inline_{k}_dir"):
             direction = st.radio("Sens", ["Achat", "Vente"], horizontal=True, key=f"{k}_dir")
         c1, c2, c3 = st.columns(3)
         with c1:
-            entry = st.number_input("Prix d'entrée", min_value=0.0, value=1.0850, step=0.0001,
-                                    format="%.5f", key=f"{k}_entry")
+            entry = st.number_input("Prix d'entrée", min_value=0.0, value=example["entry"], step=example["step"],
+                                    format=example["format"], key=f"{k}_entry_{family}")
         with c2:
-            stop = st.number_input("Stop-loss", min_value=0.0, value=1.0820, step=0.0001,
-                                   format="%.5f", key=f"{k}_stop")
+            stop = st.number_input("Stop-loss", min_value=0.0, value=example["stop"], step=example["step"],
+                                   format=example["format"], key=f"{k}_stop_{family}")
         with c3:
             target_raw = st.number_input("Objectif (facultatif, 0 = aucun)", min_value=0.0,
-                                         value=1.0910, step=0.0001, format="%.5f",
-                                         key=f"{k}_target")
+                                         value=example["target"], step=example["step"], format=example["format"],
+                                         key=f"{k}_target_{family}")
         target = target_raw or None
-
-        mode = st.radio("Taille de position", [SPEC_NONE, SPEC_EURUSD, SPEC_CUSTOM],
-                        index=1, key=f"{k}_mode")
+        if mode in MODE_EXAMPLE:
+            html('<p class="sx-note">Prix d\'exemple, construits pour le calcul : remplacez-les par ceux de '
+                 'votre trade.</p>')
         spec = _spec(mode, k, currency)
 
         try:
@@ -67,7 +88,8 @@ def render(*, scope: str, compact: bool = False) -> None:
                 st.error(message)
             return
 
-        _figures(plan, currency, spec)
+        _figures(plan, currency, spec, decimals=example["decimals"],
+                 unit=example["unit"] if mode in MODE_EXAMPLE else "")
         if not compact:
             _streaks(plan, currency, k)
 
@@ -75,6 +97,18 @@ def render(*, scope: str, compact: bool = False) -> None:
 def _spec(mode: str, k: str, currency: str) -> R.InstrumentSpec | None:
     if mode == SPEC_NONE:
         return None
+    if mode == SPEC_GOLD:
+        if currency != "USD":
+            st.warning("Ce préréglage suppose un compte en dollars : l'or est coté en dollars, et un "
+                       "mouvement de 1 $ ne vaut 100 $ par lot que sur un compte en USD. Choisissez « USD » "
+                       "ou saisissez la spécification de votre courtier.")
+            return None
+        html('<p class="sx-note">Convention la plus courante pour l\'or (XAUUSD) : 1 lot = 100 onces, '
+             'donc un mouvement de 1 $ du prix vaut 100 $ par lot (0,01 lot : 1 $). Pas de volume de '
+             '0,01 lot. Certains courtiers ont un autre contrat (10 onces, 1 once) : vérifiez la « taille '
+             'du contrat » dans la spécification de l\'instrument sur MetaTrader 5.</p>')
+        return R.InstrumentSpec(contract_size=100, quote_to_account=1.0, lot_step=0.01,
+                                min_lot=0.01, pip_size=None, label="XAUUSD · USD")
     if mode == SPEC_EURUSD:
         if currency != "USD":
             st.warning("Ce préréglage suppose un compte en dollars : la valeur d'un pip "
@@ -115,10 +149,11 @@ def _cell(label: str, value: str, detail: str = "", emph: bool = False) -> str:
             f'</div><div class="v">{value}</div>{detail_html}</div>')
 
 
-def _figures(plan: R.RiskPlan, currency: str, spec: R.InstrumentSpec | None) -> None:
+def _figures(plan: R.RiskPlan, currency: str, spec: R.InstrumentSpec | None, *, decimals: int = 5,
+             unit: str = "") -> None:
     cells = [_cell("Montant risqué", money(plan.risk_amount, currency),
                    f"{percent(plan.risk_pct, 2)} du capital", emph=True)]
-    distance = number(plan.stop_distance, 5)
+    distance = number(plan.stop_distance, decimals) + unit
     detail = percent(plan.stop_distance_pct, 2) + " du prix d'entrée"
     if plan.stop_distance_pips is not None:
         detail = f"{number(plan.stop_distance_pips, 1)} pips · " + detail
