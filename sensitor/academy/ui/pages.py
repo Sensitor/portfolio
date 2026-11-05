@@ -472,7 +472,7 @@ def lab(catalog: Catalog, email: str | None, route: dict) -> None:
     section(1, "Calculateur de risque",
             "Montant risqué, distance au stop, ratio gain / risque, taille de position et effet "
             "d'une série de pertes.")
-    risk_view.render(scope="lab")
+    risk_view.render(scope="lab", instrument="gold")
 
     section(2, "Espérance et risque de ruine",
             "Ce que rapporte une approche en moyenne, et la probabilité de traverser une baisse "
