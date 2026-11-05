@@ -421,10 +421,12 @@ def test_prop_simulator() -> None:
     check("the lab's risk calculator opens on gold, 100 oz a lot, with its example said to be constructed",
           visitor.radio(key="risk_lab_mode").value.startswith("Or (XAUUSD)")
           and "1 lot = 100 onces" in lab and "construits pour le calcul" in lab, error(visitor))
-    check("gold: 1 % of 10 000 $ with a 10 $ stop is 0,10 lot, 100 $ at risk, a 2.0 ratio",
-          "0,10 lot" in lab and "10,00 &#36;</div>" in lab and "2,00" in lab
-          and visitor.number_input(key="risk_lab_entry_gold").value == 2400.0
-          and visitor.number_input(key="risk_lab_stop_gold").value == 2390.0, error(visitor))
+    from sensitor.platform.ui.components import money as _money
+    check("gold: 4 000 to 3 990 is 10 $, 100 pips, 1 000 $ on 1 lot; 1 % of 10 000 $ is 0,10 lot, a 2.0 ratio",
+          "0,10 lot" in lab and "10,00 &#36;</div>" in lab and "100,0 pips" in lab and "2,00" in lab
+          and _money(1000.0, "USD").replace("$", "&#36;") in lab
+          and visitor.number_input(key="risk_lab_entry_gold").value == 4000.0
+          and visitor.number_input(key="risk_lab_stop_gold").value == 3990.0, error(visitor))
     visitor.radio(key="risk_lab_mode").set_value("EURUSD sur un compte en USD (lot standard)").run()
     check("switching to EURUSD brings EURUSD prices and its 30 pips, 0,33 lot",
           visitor.number_input(key="risk_lab_entry_eurusd").value == 1.0850

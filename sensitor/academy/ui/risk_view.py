@@ -4,8 +4,9 @@ The risk calculator, used on the lab page and inside the risk lesson.
 Every figure on screen comes from `academy.risk`. Position size is shown only
 when a contract specification is given. Two presets, each on a dollar account
 and each saying the convention it rests on: gold (XAUUSD, 1 lot = 100 ounces, so
-a 1 $ move is worth 100 $ per lot), the lab's example, and EURUSD (standard lot
-of 100 000 units, 1 pip = 0,0001 worth 10 $ per lot), the risk lesson's. The
+a 1 $ move is worth 100 $ per lot, and 1 pip = 0,10 $, the convention Sensitor
+teaches with), the lab's example, and EURUSD (standard lot of 100 000 units,
+1 pip = 0,0001 worth 10 $ per lot), the risk lesson's. The
 custom mode asks for the broker's own figures. Nothing is assumed about indices
 or shares.
 """
@@ -24,11 +25,12 @@ SPEC_EURUSD = "EURUSD sur un compte en USD (lot standard)"
 SPEC_CUSTOM = "Saisir la spécification de mon courtier"
 MODES = (SPEC_NONE, SPEC_GOLD, SPEC_EURUSD, SPEC_CUSTOM)
 
-# The example each preset opens with: constructed figures, not quotes. Gold: a
-# 10 $ stop for a 1 % risk on 10 000 $, i.e. 0,10 lot; EURUSD: the risk
-# lesson's 30-pip stop, i.e. 0,33 lot.
+# The example each preset opens with: constructed figures, not quotes. Gold:
+# entry 4 000, stop 3 990, a 10 $ move, i.e. 100 pips of 0,10 $, which costs
+# 1 000 $ on 1 lot; with 1 % of 10 000 $ (100 $) the size is 0,10 lot. EURUSD:
+# the risk lesson's 30-pip stop, i.e. 0,33 lot.
 EXAMPLES = {
-    "gold": {"entry": 2400.00, "stop": 2390.00, "target": 2420.00, "step": 0.01, "format": "%.2f", "decimals": 2, "unit": " $"},
+    "gold": {"entry": 4000.00, "stop": 3990.00, "target": 4020.00, "step": 0.01, "format": "%.2f", "decimals": 2, "unit": " $"},
     "eurusd": {"entry": 1.0850, "stop": 1.0820, "target": 1.0910, "step": 0.0001, "format": "%.5f", "decimals": 5, "unit": ""},
 }
 MODE_EXAMPLE = {SPEC_GOLD: "gold", SPEC_EURUSD: "eurusd"}
@@ -103,12 +105,13 @@ def _spec(mode: str, k: str, currency: str) -> R.InstrumentSpec | None:
                        "mouvement de 1 $ ne vaut 100 $ par lot que sur un compte en USD. Choisissez « USD » "
                        "ou saisissez la spécification de votre courtier.")
             return None
-        html('<p class="sx-note">Convention la plus courante pour l\'or (XAUUSD) : 1 lot = 100 onces, '
-             'donc un mouvement de 1 $ du prix vaut 100 $ par lot (0,01 lot : 1 $). Pas de volume de '
-             '0,01 lot. Certains courtiers ont un autre contrat (10 onces, 1 once) : vérifiez la « taille '
-             'du contrat » dans la spécification de l\'instrument sur MetaTrader 5.</p>')
+        html('<p class="sx-note">Or (XAUUSD) : 1 lot = 100 onces, donc un mouvement de 1 $ du prix vaut '
+             '100 $ par lot. 1 pip = 0,10 $ : de 4 000 à 3 990, 10 $, soit 100 pips, qui coûtent 1 000 $ sur '
+             '1 lot et 10 $ sur 0,01 lot. Pas de volume de 0,01 lot. Certains courtiers ont un autre contrat '
+             '(10 onces, 1 once) ou appellent pip 0,01 $ : vérifiez la « taille du contrat » dans la '
+             'spécification de l\'instrument sur MetaTrader 5.</p>')
         return R.InstrumentSpec(contract_size=100, quote_to_account=1.0, lot_step=0.01,
-                                min_lot=0.01, pip_size=None, label="XAUUSD · USD")
+                                min_lot=0.01, pip_size=0.1, label="XAUUSD · USD")
     if mode == SPEC_EURUSD:
         if currency != "USD":
             st.warning("Ce préréglage suppose un compte en dollars : la valeur d'un pip "
@@ -165,6 +168,8 @@ def _figures(plan: R.RiskPlan, currency: str, spec: R.InstrumentSpec | None, *, 
         position = plan.position
         cells.append(_cell("Taille de position", f"{number(position.lots, 2)} lot",
                            f"calcul brut : {number(position.raw_lots, 4)} lot"))
+        cells.append(_cell("Perte au stop pour 1 lot", money(plan.stop_distance * position.value_per_point, currency),
+                           "le repère pour lire la taille"))
         cells.append(_cell("Risque effectif", money(position.effective_risk, currency),
                            "après arrondi vers le bas"))
     html('<div class="sx-figures">' + "".join(cells) + "</div>")
