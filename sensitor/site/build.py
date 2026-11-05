@@ -36,6 +36,17 @@ from ..platform import brand, legal
 from . import articles as A
 
 REPO = Path(__file__).resolve().parents[2]
+ADDRESSES = REPO / "content" / "site.toml"
+
+
+def addresses(path: Path = ADDRESSES) -> dict[str, str]:
+    """The member area's and the public site's addresses, from `content/site.toml` (empty when absent)."""
+    import tomllib
+    data = {}
+    if path.is_file():
+        with path.open("rb") as handle:
+            data = tomllib.load(handle)
+    return {key: str(data.get(key, "")).strip().rstrip("/") for key in ("app_url", "site_url")}
 FONTS = REPO / "static" / "fonts"
 MONTHS = legal.MONTHS
 SITE_NAME = "Sensitor"

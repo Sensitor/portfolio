@@ -2,12 +2,10 @@
 # push to main, and on demand from the Actions tab.
 #
 # One-time setup, in the repository's settings:
-#   1. Settings > Pages > Build and deployment > Source: « GitHub Actions ».
-#   2. Settings > Secrets and variables > Actions > Variables:
-#        SENSITOR_APP_URL   the member area, e.g. https://sensitor.streamlit.app
-#        SENSITOR_SITE_URL  optional: the site's own address when it has a domain
-#                           (without it, the GitHub Pages address is used)
-# The build needs Python only: no dependency is installed.
+#   Settings > Pages > Build and deployment > Source: « GitHub Actions ».
+# The member area's address is in content/site.toml (app_url): change it there.
+# The site's own address is the GitHub Pages one, unless the repository variable
+# SENSITOR_SITE_URL names a domain. The build needs Python only.
 name: Public site
 
 on:
@@ -36,15 +34,10 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Build
         env:
-          APP_URL: ${{ vars.SENSITOR_APP_URL }}
           SITE_URL: ${{ vars.SENSITOR_SITE_URL || steps.pages.outputs.base_url }}
         run: |
-          if [ -z "$APP_URL" ]; then
-            echo "::error::Set the repository variable SENSITOR_APP_URL (the member area's address)."
-            exit 1
-          fi
           python -m sensitor.academy.validate
-          python scripts/build_site.py --base-url "$SITE_URL" --app-url "$APP_URL" --out site
+          python scripts/build_site.py --base-url "$SITE_URL" --out site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

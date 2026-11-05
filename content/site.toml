@@ -1,0 +1,12 @@
+# Les adresses publiques de Sensitor, lues par le site public
+# (`scripts/build_site.py`) : une seule source, dans le dépôt.
+#
+# Quand l'une change, modifiez-la ici. La plateforme lit aussi la sienne dans
+# le secret Streamlit SENSITOR_PUBLIC_URL (liens des e-mails) : gardez les deux
+# identiques.
+
+# L'espace membre : la plateforme Sensitor (connexion, leçons, lettre).
+app_url = "https://sensitor-academy.streamlit.app"
+
+# Le site public, publié par GitHub Pages.
+site_url = "https://sensitor.github.io/portfolio"

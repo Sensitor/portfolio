@@ -284,9 +284,11 @@ nothing else: no dependency to install.
 the site on every push to `main`. Once, in the repository's settings:
 
 1. *Settings > Pages > Build and deployment > Source*: « GitHub Actions ».
-2. *Settings > Secrets and variables > Actions > Variables*: add
-   `SENSITOR_APP_URL` with the member area's address (the Streamlit app), and,
-   once the site has its own domain, `SENSITOR_SITE_URL`.
+2. The member area's address is `app_url` in `content/site.toml`
+   (`https://sensitor-academy.streamlit.app`): when it changes, change it there
+   and in the `SENSITOR_PUBLIC_URL` secret of both Streamlit apps. Once the site
+   has its own domain, set the repository variable `SENSITOR_SITE_URL` and
+   `site_url` in the same file.
 3. *Actions > Public site > Run workflow*, or push to `main`.
 
 GitHub Pages on a private repository needs a paid GitHub plan.
@@ -296,7 +298,7 @@ connected:
 
 | Setting | Value |
 |---|---|
-| Build command | `python scripts/build_site.py --base-url https://sensitor.fr --app-url https://app.sensitor.fr` |
+| Build command | `python scripts/build_site.py` (addresses from `content/site.toml`) |
 | Output folder | `site` |
 | Environment | `PYTHON_VERSION=3.11` | The site has no
 script, no cookie and no third-party request; its fonts are the platform's own
